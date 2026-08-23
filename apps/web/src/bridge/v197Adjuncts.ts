@@ -115,7 +115,11 @@ function safeExternalUrl(value: string | null | undefined): URL | null {
 function openExternalUrl(value: string | null | undefined): boolean {
   const url = safeExternalUrl(value);
   if (!url) return false;
-  return window.open(url.toString(), "_blank", "noopener,noreferrer") !== null;
+  const popup = window.open("about:blank", "_blank");
+  if (!popup) return false;
+  popup.opener = null;
+  popup.location.replace(url.toString());
+  return true;
 }
 
 function selectOptions<T extends string>(document: Document, select: HTMLSelectElement, values: readonly T[]): void {

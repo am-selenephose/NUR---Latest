@@ -681,7 +681,10 @@ test("G04 reduced motion materially removes galaxy and decorative animation work
 
 test("G04 ten-minute runtime soak has bounded heap, listeners, observers, canvas, and DOM", async ({ page }, testInfo) => {
   test.skip(process.env.NUR_G04_SOAK !== "1", "Run explicitly with NUR_G04_SOAK=1 for the release performance gate.");
-  test.skip(testInfo.project.name !== "chromium-desktop-g04", "The ten-minute memory soak runs on the reference browser only.");
+  test.skip(
+    !["chromium-desktop", "chromium-desktop-g04"].includes(testInfo.project.name),
+    "The ten-minute memory soak runs on the reference browser only.",
+  );
   const soakMs = 600_000;
   test.setTimeout(soakMs + 180_000);
   await installRuntimeCounters(page);

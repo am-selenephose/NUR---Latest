@@ -48,6 +48,31 @@ test("Talk preview becomes exactly one approved, worker-verified durable Plan", 
     const approvals = await approvalResponse.json() as { count: number };
     return { workflows: workflows.count, approvals: approvals.count };
   }), { timeout: 30_000, intervals: [250, 500, 1_000] }).toEqual({ workflows: 1, approvals: 1 });
+  const proposedWorkflow = await page.evaluate(async () => {
+    const response = await fetch("/api/v1/agentic/workflows", { credentials: "include" });
+    if (!response.ok) throw new Error(`workflow list failed: ${response.status}`);
+    const body = await response.json() as {
+      workflows: Array<{ id: string; state: string }>;
+    };
+    if (body.workflows.length !== 1) {
+      throw new Error(`Expected one owner workflow, got ${body.workflows.length}`);
+    }
+    return body.workflows[0];
+  });
+  const preApprovalEvents = await page.evaluate(async workflowId => {
+    const response = await fetch(`/api/v1/agentic/workflows/${workflowId}/events`, {
+      credentials: "include",
+    });
+    if (!response.ok) throw new Error(`workflow events failed: ${response.status}`);
+    const body = await response.json() as { events: Array<{ event_type: string }> };
+    return body.events.map(row => row.event_type);
+  }, proposedWorkflow.id);
+  expect(preApprovalEvents).toEqual(expect.arrayContaining([
+    "WORKFLOW_CREATED",
+    "PLAN_COMPILED",
+    "STEP_AWAITING_APPROVAL",
+  ]));
+  expect(preApprovalEvents.some(value => /(?:DISPATCHED|EXECUTED|VERIFIED|SUCCEEDED)/.test(value))).toBe(false);
 
   await reviewInAgency.click();
   await expect(page).toHaveURL(/\/agents$/);
@@ -75,6 +100,16 @@ test("Talk preview becomes exactly one approved, worker-verified durable Plan", 
     "Run readiness gates",
     "Verify the exact commit",
   ]);
+
+  await page.goto(`/agents/${proposedWorkflow.id}`, { waitUntil: "load" });
+  const verifiedAgent = page.frameLocator("#nur-universe-stage");
+  await expect(verifiedAgent.getByRole("heading", { name: "SUCCEEDED", exact: true })).toBeVisible();
+  await expect(verifiedAgent.getByText("STEP_EXECUTED", { exact: true })).toBeVisible();
+  await expect(verifiedAgent.getByText("STEP_VERIFIED", { exact: true })).toBeVisible();
+  await page.reload({ waitUntil: "load" });
+  await expect(
+    page.frameLocator("#nur-universe-stage").getByRole("heading", { name: "SUCCEEDED", exact: true }),
+  ).toBeVisible();
 
   await page.goto("/plan", { waitUntil: "load" });
   const plan = page.frameLocator("#nur-universe-stage").locator("#page-plan");

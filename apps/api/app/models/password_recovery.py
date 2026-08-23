@@ -1,7 +1,7 @@
 import datetime as dt
 import uuid
 
-from sqlalchemy import CheckConstraint, ForeignKey, String, text
+from sqlalchemy import CheckConstraint, ForeignKey, Integer, String, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import DateTime
@@ -18,6 +18,10 @@ class PasswordResetChallenge(Base):
             name="ck_password_reset_delivery_status",
         ),
         CheckConstraint("expires_at > created_at", name="ck_password_reset_expiry"),
+        CheckConstraint(
+            "delivery_attempts >= 0 AND delivery_attempts <= 20",
+            name="ck_password_reset_delivery_attempts",
+        ),
     )
 
     id = uuid_pk()
@@ -32,6 +36,18 @@ class PasswordResetChallenge(Base):
     )
     expires_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
     delivered_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    delivery_claimed_at: Mapped[dt.datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    delivery_attempts: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default=text("0"),
+    )
+    delivery_failure_code: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    bounce_class: Mapped[str | None] = mapped_column(String(24), nullable=True)
     consumed_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     revoked_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[dt.datetime] = mapped_column(

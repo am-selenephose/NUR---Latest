@@ -1,83 +1,92 @@
 {
-  "schema_version": 1,
-  "generated_at": "2026-07-26T15:32:08Z",
-  "phase": "implementation_in_progress",
-  "repository": "am-selenephos/NUR",
-  "remote": "https://github.com/am-selenephos/NUR.git",
-  "base_branch": "integration/nur-ui-reconcile-20260726",
-  "base_sha": "2a4860aec319383c21844292821496532b48b0b5",
-  "completion_branch": "codex/nur-full-completion-20260726",
-  "evidence_sha": "5f14ef55014e5dde7775773bf824a2e35e7a0497",
+  "schema_version": 2,
+  "generated_at": "2026-08-23",
+  "phase": "final_closure_candidate",
+  "repository": "am-selenephos/NUR---Latest",
+  "remote": "https://github.com/am-selenephos/NUR---Latest.git",
+  "base_branch": "main",
+  "completion_branch": "codex/nur-final-closure-20260820",
+  "pre_closure_sha": "5ac83100a4cd4cc52cea9af81fc938d1b308003f",
+  "candidate_identity": "COMMIT_CONTAINING_THIS_STATE",
   "draft_pr": {
-    "number": 8,
-    "url": "https://github.com/am-selenephos/NUR/pull/8",
-    "api": "PASS",
-    "web_and_security": "PASS"
+    "number": 5,
+    "url": "https://github.com/am-selenephos/NUR---Latest/pull/5",
+    "state": "OPEN_DRAFT",
+    "pre_closure_exact_head_ci_run": 32608012219,
+    "pre_closure_exact_head_ci": "PASS",
+    "candidate_exact_head_ci": "VERIFY_LIVE_FOR_COMMIT"
   },
   "canonical_v197": {
     "path": "apps/web/public/v197/NUR_V197_CHECKBOX_TICK_RESTORED.html",
-    "sha256": "d4f7f2d3e4c8e36dfc0c6edd51a028f28a04afbc2afa434a319009cb2f122bc6",
-    "changed_by_completion_branch": false
+    "sha256": "397c302579472e60f5bd667546a96b6e3f262aa40bd932d10c1946e13b046dd2",
+    "redesigned_by_closure": false
   },
-  "repository_census": {
-    "tracked_files": 663,
-    "api_migrations": 31,
-    "api_test_modules": 40,
-    "web_e2e_specs": 38,
-    "migration_head": "0031_six_star_systems"
+  "dependency_authority": {
+    "package_lock_sha256": "d8cce9f3614d615e11c62976b203fb6b439bf9d50c8b17c469bf4d23f05c0baf",
+    "api_requirements_lock_sha256": "4b005c5d9499b06a2d58635df9f7e681843426936c12c46c5299c8b9b37ffc9a"
   },
-  "readiness_evidence": {
-    "npm_ci": "PASS: 95 packages, 0 vulnerabilities",
+  "repository_census_after_candidate_commit": {
+    "tracked_files": 991,
+    "api_migrations": 61,
+    "api_test_modules": 74,
+    "web_e2e_specs": 63,
+    "migration_head": "0061_pw_delivery_resilience"
+  },
+  "candidate_evidence": {
     "secret_scan": "PASS",
-    "release_naming_scan": "PASS",
+    "api_ruff": "PASS",
+    "api_pytest": "PASS: 1109 passed",
+    "openapi_drift": "PASS: 144 client operations; 420 OpenAPI operations; 0 missing",
     "web_typecheck": "PASS",
-    "web_unit": "PASS: 16 files, 65 tests",
-    "web_build": "PASS",
-    "web_e2e_mocked": "PASS: 19 passed, 1 intentional skipped, 0 failed",
+    "web_unit": "PASS: 26 files; 131 tests",
+    "web_build": "PASS: 51 modules; advisory chunk warning only",
+    "web_e2e_mocked": "PASS: 19 passed; 1 intentional skip; 0 failed",
     "mobile_typecheck": "PASS",
     "npm_audit_high": "PASS: 0 vulnerabilities",
-    "api_ruff": "PASS",
-    "api_pytest": "PASS: 187 passed",
-    "github_actions": "PASS on evidence_sha"
+    "talk_real_stack": "PASS: answer, replay, cancel and reload",
+    "agency_real_stack": "PASS: APPROVE, EDIT, REJECT, worker verification and reload",
+    "billing_real_stack": "PASS: real backend handoff; no premature entitlement",
+    "capsule_durability": "PASS: 10 consecutive cycles",
+    "webkit_mobile": "PASS: 2",
+    "crash_recovery": "PASS: API, worker, Beat and Redis",
+    "dr_restore": "PASS: 192 tables and 2 object digests",
+    "exact_commit_release_gate": "VERIFY_EXTERNAL_LOG_FOR_COMMIT",
+    "exact_head_github_actions": "VERIFY_LIVE_FOR_COMMIT"
   },
-  "runtime": {
-    "provider_mode": "disabled",
-    "local_stack_boot": "PASS",
-    "healthz": "PASS",
-    "readyz": "PASS",
-    "web": "PASS",
-    "worker": "PASS",
-    "omega_scheduler": "PASS",
-    "demo_seed": "PASS without fabricated assistant turn",
-    "full_browser_corpus": {
-      "chromium_desktop": {
-        "passed": 55,
-        "skipped": 12,
-        "failed": 27,
-        "did_not_run": 1,
-        "duration": "32.8m",
-        "status": "FAIL"
-      },
-      "chromium_mobile": "NOT YET RUN AS FULL CORPUS",
-      "webkit_mobile": "NOT YET RUN AS FULL CORPUS"
-    }
+  "completion_before_exact_head_ci": {
+    "total": 82,
+    "verified": 73,
+    "partial": 3,
+    "external_blocked": 2,
+    "founder_decision": 3,
+    "superseded": 1,
+    "strict_percent": 90.2,
+    "weighted_percent": 92.1
   },
-  "known_unresolved": [
-    "Authoritative completion and hygiene matrices are not final.",
-    "The complete browser corpus has not passed on all required engines.",
-    "Several browser specs still encode obsolete seven-System labels or old star counts.",
-    "The V197 control matrix is stale and still classifies seven honest-disabled controls as NOT_IMPLEMENTED_VISIBLE.",
-    "Account export/deletion and privacy lifecycle are not implemented in the current canonical tree.",
-    "Live OpenAI, production email/push, paid-provider, research-provider, and TRIBE evidence remain external or unproven.",
-    "Fresh release package, realistic-data migration, full accessibility, RTL, soak, DR, and bounded-load final evidence is not complete on one SHA."
+  "completion_after_green_exact_head_ci": {
+    "total": 82,
+    "verified": 74,
+    "partial": 2,
+    "external_blocked": 2,
+    "founder_decision": 3,
+    "superseded": 1,
+    "strict_percent": 91.5,
+    "weighted_percent": 92.7
+  },
+  "remaining_internal": [
+    "Integrate the later founder-approved replacement UI and resolve plan.direction, ritual.control and voice.composer without redesigning canonical V197 in this closure.",
+    "Enforce zero-raw-string localization extraction and obtain human locale review."
   ],
-  "completion_percentage": {
-    "strict_fully_proven_domains": 34,
-    "strict_fraction": "16/47",
-    "conservative_weighted_maturity": 66,
-    "weighted_formula": "PASS=1.0; PARTIAL=0.5; EXTERNAL_BLOCKED=0.5; MISSING=0.0"
-  },
-  "completion_percentage_reason": "The strict 34% is the completion claim. The 66% weighted value describes implemented maturity only and must not be presented as done.",
+  "remaining_external": [
+    "Approved live OpenAI credential and eligible model.",
+    "Deployed transactional email, merchant billing, notification, research and production-like storage receipts where intended.",
+    "Independent review."
+  ],
+  "remaining_founder": [
+    "Merge draft PR #5.",
+    "Verify merged-main CI.",
+    "Create an annotated release tag when approved."
+  ],
   "allowed_final_verdicts": [
     "NUR_FULL_PASS",
     "NUR_INTERNAL_COMPLETE_EXTERNAL_BLOCKED",

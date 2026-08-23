@@ -220,7 +220,7 @@ async def submit_workflow_proposal(
         kind="COGNITIVE_WORKFLOW",
         title=proposal.title,
         objective=proposal.rationale,
-        state=WorkflowState.PLAN_READY.value,
+        state=WorkflowState.DRAFT.value,
         plan_version=1,
         trigger_kind="MIND_COGNITIVE_RESULT",
         trigger_ref=proposal.task_id,
@@ -243,6 +243,17 @@ async def submit_workflow_proposal(
     )
     db.add(workflow)
     await db.flush()
+    await record_event(
+        db,
+        owner_user_id=owner_user_id,
+        workflow_id=workflow.id,
+        event_type="WORKFLOW_CREATED",
+        summary="owner accepted a cognitive workflow proposal",
+        to_state=WorkflowState.DRAFT.value,
+        actor="OWNER",
+        detail={"task_id": str(proposal.task_id)},
+    )
+    workflow.state = WorkflowState.PLANNING.value
 
     persisted_steps: list[tuple[AgentStep, ProposedStep]] = []
     proposed_by_key = {step.key: step for step in proposed_steps}
@@ -273,6 +284,21 @@ async def submit_workflow_proposal(
         persisted_steps.append((db_step, proposed_by_key[compiled_step.key]))
 
     await db.flush()
+    workflow.state = WorkflowState.PLAN_READY.value
+    await record_event(
+        db,
+        owner_user_id=owner_user_id,
+        workflow_id=workflow.id,
+        event_type="PLAN_COMPILED",
+        summary="cognitive proposal compiled and persisted atomically",
+        from_state=WorkflowState.PLANNING.value,
+        to_state=WorkflowState.PLAN_READY.value,
+        actor="OWNER",
+        detail={
+            "step_count": len(persisted_steps),
+            "approval_keys": list(compile_result.approval_keys),
+        },
+    )
     for db_step, proposed_step in persisted_steps:
         if db_step.state != StepState.WAITING_APPROVAL.value:
             continue

@@ -1,11 +1,12 @@
 """Durable password reset and authenticated password change flows."""
 
+import asyncio
 import datetime as dt
 import logging
 import uuid
 from urllib.parse import urlencode
 
-from sqlalchemy import select, update
+from sqlalchemy import or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
@@ -27,7 +28,11 @@ from app.models import PasswordResetChallenge, Session, User
 from app.models._mixins import now_utc
 from app.services import audit_service
 from app.services.auth_service import AuthError
-from app.services.password_delivery import PasswordResetDelivery, PasswordResetDispatch
+from app.services.password_delivery import (
+    PasswordResetDelivery,
+    PasswordResetDeliveryError,
+    PasswordResetDispatch,
+)
 
 logger = logging.getLogger("nur.password_recovery")
 
@@ -109,20 +114,76 @@ async def deliver_password_reset(
     dispatch: PasswordResetDispatch,
     delivery: PasswordResetDelivery,
 ) -> None:
+    settings = get_settings()
+    now = now_utc()
+    lease_before = now - dt.timedelta(
+        seconds=settings.password_reset_delivery_claim_lease_seconds
+    )
+    async with get_sessionmaker()() as db:
+        async with db.begin():
+            await set_user_context(db, dispatch.user_id)
+            claimed = await db.execute(
+                update(PasswordResetChallenge)
+                .where(
+                    PasswordResetChallenge.id == dispatch.challenge_id,
+                    PasswordResetChallenge.user_id == dispatch.user_id,
+                    PasswordResetChallenge.delivery_status == "PENDING",
+                    PasswordResetChallenge.consumed_at.is_(None),
+                    PasswordResetChallenge.revoked_at.is_(None),
+                    PasswordResetChallenge.expires_at > now,
+                    or_(
+                        PasswordResetChallenge.delivery_claimed_at.is_(None),
+                        PasswordResetChallenge.delivery_claimed_at < lease_before,
+                    ),
+                )
+                .values(delivery_claimed_at=now)
+                .returning(PasswordResetChallenge.id)
+            )
+            if claimed.scalar_one_or_none() is None:
+                return
+
     delivered = False
     failure_type = None
-    try:
-        await delivery.deliver(dispatch)
-        delivered = True
-    except Exception as exc:
-        failure_type = type(exc).__name__
-        log(
-            logger,
-            "password reset delivery failed",
-            challenge_id=dispatch.challenge_id,
-            adapter=delivery.name,
-            failure_type=failure_type,
-        )
+    failure_code = None
+    bounce_class = None
+    attempts = 0
+    for attempt in range(1, settings.password_reset_delivery_max_attempts + 1):
+        attempts = attempt
+        try:
+            await delivery.deliver(dispatch)
+            delivered = True
+            break
+        except Exception as exc:
+            failure_type = type(exc).__name__
+            retryable = (
+                exc.retryable if isinstance(exc, PasswordResetDeliveryError) else False
+            )
+            failure_code = (
+                exc.failure_code
+                if isinstance(exc, PasswordResetDeliveryError)
+                else "UNCLASSIFIED_DELIVERY_FAILURE"
+            )
+            bounce_class = (
+                exc.bounce_class
+                if isinstance(exc, PasswordResetDeliveryError)
+                else None
+            )
+            exhausted = attempt >= settings.password_reset_delivery_max_attempts
+            log(
+                logger,
+                "password reset delivery failed",
+                challenge_id=dispatch.challenge_id,
+                adapter=delivery.name,
+                failure_type=failure_type,
+                failure_code=failure_code,
+                attempt=attempt,
+                retryable=retryable,
+                exhausted=exhausted,
+            )
+            if not retryable or exhausted:
+                break
+            delay = settings.password_reset_delivery_retry_base_seconds * (2 ** (attempt - 1))
+            await asyncio.sleep(delay)
 
     async with get_sessionmaker()() as db:
         async with db.begin():
@@ -137,16 +198,28 @@ async def deliver_password_reset(
             if challenge is None or challenge.consumed_at is not None or challenge.revoked_at is not None:
                 return
             now = now_utc()
+            challenge.delivery_attempts += attempts
+            challenge.delivery_claimed_at = None
             if delivered and challenge.expires_at > now:
                 challenge.delivery_status = "DELIVERED"
                 challenge.delivered_at = now
+                challenge.delivery_failure_code = None
+                challenge.bounce_class = None
                 event_type = "PASSWORD_RESET_DELIVERED"
-                metadata = {"adapter": delivery.name}
+                metadata = {"adapter": delivery.name, "attempt_count": attempts}
             else:
                 challenge.delivery_status = "FAILED"
                 challenge.revoked_at = now
+                challenge.delivery_failure_code = failure_code or "EXPIRED"
+                challenge.bounce_class = bounce_class
                 event_type = "PASSWORD_RESET_DELIVERY_FAILED"
-                metadata = {"adapter": delivery.name, "failure_type": failure_type or "expired"}
+                metadata = {
+                    "adapter": delivery.name,
+                    "failure_type": failure_type or "expired",
+                    "failure_code": failure_code or "EXPIRED",
+                    "bounce_class": bounce_class,
+                    "attempt_count": attempts,
+                }
             await audit_service.record(
                 db,
                 event_type=event_type,

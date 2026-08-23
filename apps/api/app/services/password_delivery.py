@@ -20,7 +20,18 @@ from app.core.config import Settings
 
 
 class PasswordResetDeliveryError(RuntimeError):
-    pass
+    def __init__(
+        self,
+        message: str,
+        *,
+        retryable: bool = False,
+        failure_code: str = "DELIVERY_FAILED",
+        bounce_class: str | None = None,
+    ):
+        super().__init__(message)
+        self.retryable = retryable
+        self.failure_code = failure_code
+        self.bounce_class = bounce_class
 
 
 @dataclass(frozen=True, repr=False)
@@ -42,7 +53,10 @@ class DisabledPasswordResetDelivery:
     name = "disabled"
 
     async def deliver(self, message: PasswordResetDispatch) -> None:
-        raise PasswordResetDeliveryError("Password reset delivery is disabled.")
+        raise PasswordResetDeliveryError(
+            "Password reset delivery is disabled.",
+            failure_code="DELIVERY_DISABLED",
+        )
 
 
 class LocalCapturePasswordResetDelivery:
@@ -112,19 +126,50 @@ class SMTPPasswordResetDelivery:
         email["Subject"] = "Reset your NUR password"
         email["From"] = self.sender
         email["To"] = message.recipient
+        sender_domain = self.sender.rsplit("@", 1)[-1]
+        email["Message-ID"] = (
+            f"<nur-password-reset-{message.challenge_id}@{sender_domain}>"
+        )
         email.set_content(
             "A password reset was requested for your NUR account.\n\n"
             f"Open this one-time link: {message.reset_url}\n\n"
             "If you did not request this, you can ignore this message."
         )
-        with smtplib.SMTP(self.host, self.port, timeout=15) as client:
-            client.ehlo()
-            if self.starttls:
-                client.starttls(context=ssl.create_default_context())
+        try:
+            with smtplib.SMTP(self.host, self.port, timeout=15) as client:
                 client.ehlo()
-            if self.username:
-                client.login(self.username, self.password)
-            client.send_message(email)
+                if self.starttls:
+                    client.starttls(context=ssl.create_default_context())
+                    client.ehlo()
+                if self.username:
+                    client.login(self.username, self.password)
+                client.send_message(email)
+        except smtplib.SMTPRecipientsRefused as exc:
+            raise PasswordResetDeliveryError(
+                "The mail provider permanently rejected the recipient.",
+                failure_code="RECIPIENT_REJECTED",
+                bounce_class="PERMANENT",
+            ) from exc
+        except smtplib.SMTPAuthenticationError as exc:
+            raise PasswordResetDeliveryError(
+                "The mail provider rejected server credentials.",
+                failure_code="PROVIDER_AUTHENTICATION",
+            ) from exc
+        except smtplib.SMTPResponseException as exc:
+            retryable = 400 <= exc.smtp_code < 500
+            raise PasswordResetDeliveryError(
+                "The mail provider rejected password reset delivery.",
+                retryable=retryable,
+                failure_code=(
+                    "PROVIDER_TEMPORARY" if retryable else "PROVIDER_PERMANENT"
+                ),
+            ) from exc
+        except (smtplib.SMTPServerDisconnected, TimeoutError, OSError) as exc:
+            raise PasswordResetDeliveryError(
+                "The mail provider is temporarily unavailable.",
+                retryable=True,
+                failure_code="PROVIDER_UNAVAILABLE",
+            ) from exc
 
 
 def build_password_reset_delivery(settings: Settings) -> PasswordResetDelivery:

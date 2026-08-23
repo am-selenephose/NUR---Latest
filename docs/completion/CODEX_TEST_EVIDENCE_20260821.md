@@ -1,30 +1,68 @@
-# NUR Test Evidence - 2026-08-21
+# NUR Test Evidence - 2026-08-23 Closure Candidate
 
-Evidence is accumulated during closure and rebound to the final exact SHA
-before promotion.
+Candidate identity: the commit containing this file. Results below were first
+established on the reviewed working tree and must be replayed by the complete
+gate on the clean commit before push. GitHub Actions must then pass on that
+exact pushed SHA.
 
-| Command | Environment | SHA | Result | Count/runtime | Artifact or note |
-| --- | --- | --- | --- | --- | --- |
-| `.venv/bin/pytest -q app/tests/test_brain_semantic_addendum.py app/tests/test_addendum_dg_contracts.py app/tests/test_mind_brain_capability_closure.py app/tests/test_omega.py app/tests/test_intelligence_contracts.py app/tests/test_outcome_learning_loop.py app/tests/test_beliefs_attention_phase3.py` | local PostgreSQL; API venv | working tree on `633acc9` | PASS | 74 passed, 14.94s | cognitive authority/research/evaluation regression |
-| `.venv/bin/ruff check <changed Python files>` | API venv | working tree on `633acc9` | PASS | all checks passed | changed Python boundary |
-| `npm --workspace apps/web run test -- --run src/v197/phase1-host.test.ts` | local Node | working tree on `633acc9` | PASS | 4 passed, 0 failed | production host emits canonical `index.html` |
-| `bash infra/tests/production-web-serving.test.sh` | local shell | working tree on `633acc9` | PASS | contract passed | static Nginx topology and same-origin proxy contract |
-| `npm run web:build` | local Node/Vite | working tree on `633acc9` | PASS | 51 modules; `dist/index.html` 724.12 kB; bridge 1,198.71 kB | production static output |
-| `docker build --network host ... -t nur-web:closure .` | Docker  local-only DNS workaround | working tree on `633acc9` | PASS | image `2ac43eac5b2a` | host networking was not committed |
-| `docker run ... nur-web:closure` plus HTTP probes | isolated container at `127.0.0.1:15173` | working tree on `633acc9` | PASS | `/universe/map` 200 canonical V197; bridge 200 immutable; retired route 302 relative | production runtime proof |
-| `docker run ... nginx:1.30.4-alpine nginx -t` | isolated Nginx container | working tree on `633acc9` | PASS | syntax successful | `api` bound to loopback only for syntax resolution |
-| `bash infra/tests/cold-boot-compose.test.sh` | local shell | working tree on `633acc9` | PASS | contract passed | roles/database/health topology |
-| `docker compose --profile full config --quiet` | Docker Compose | working tree on `633acc9` | PASS | configuration valid | full topology parse |
-| isolated `nurclosure` Compose cold boot, HTTP probes, shutdown and restart | fresh named volume; ports 55432/56379/58000/55173 | working tree on `633acc9` | PASS | six services healthy; migration head `0060_narrow_auth_rls_boundary`; worker ping; Beat dispatch; four HTTP 200 probes; shutdown 3.316s; persisted-volume restart healthy | PostgreSQL 16.14, Redis 7.4.9, Python 3.12.13, Celery 5.6.3, Nginx 1.30.4 |
-| `npm run web:typecheck` | local Node | working tree on `633acc9` | PASS | `tsc --noEmit` | includes production and real-stack Playwright configuration |
-| real-stack B6 Chromium desktop | production Nginx, FastAPI, PostgreSQL, Redis | working tree on `633acc9` | PASS | 1 passed, 8.5s | genuine signup, Journal mutation, API read, reload and V197 rehydrate |
-| real-stack C1 + C5 Chromium desktop | production Nginx, FastAPI, PostgreSQL, Redis, Celery worker | working tree on `633acc9` | PASS | 2 passed, 18.2s | honest disabled-provider Talk persistence and worker-verified Agent result |
-| real-stack Phase-H route floor Chromium desktop | production Nginx, FastAPI and owner session | working tree on `633acc9` | PASS | 1 passed, 28.5s; 17 product surfaces | canonical V197 roots, route screenshots, zero observed 5xx responses and page errors |
+## Static And Contract Evidence
 
-The first B6 attempt correctly failed `403 Request origin is not allowed` because
-the isolated stack was launched with its default `localhost:5173` web origin
-while the browser used `127.0.0.1:55173`. The stack was restarted with the
-actual public origin and the unchanged assertion passed. The first Phase-H
-route-floor attempt also correctly exposed that Research is embedded in the
-canonical Systems owner ledger rather than owning `/research`; the test was
-corrected to assert `#universe-research` without changing product behavior.
+| Command or gate | Result |
+| --- | --- |
+| API Ruff, full tree | PASS |
+| API pytest | PASS: 1109 passed in 196.48s |
+| OpenAPI/client drift | PASS: 144 client operations, 420 OpenAPI operations, 0 missing |
+| Migration graph/head | PASS: single head `0061_pw_delivery_resilience` |
+| Secret scan | PASS |
+| Web TypeScript | PASS |
+| Web unit tests | PASS: 26 files, 131 tests |
+| Web production build | PASS: 51 modules; chunk-size advisory only |
+| Mocked Playwright readiness | PASS: 19 passed, 1 intentional skip, 0 failed |
+| Mobile TypeScript | PASS |
+| npm audit high | PASS: 0 vulnerabilities |
+| Mutation security matrix | PASS |
+| SBOM freshness and fresh-extract package | PASS |
+| `nur-gate` shell contracts | PASS: 17 gate contracts |
+| ShellCheck | PASS |
+
+## Real-Stack Evidence
+
+All rows use production Nginx, FastAPI, PostgreSQL and Redis; worker/Beat are
+included where the behavior requires them. HTTP behavior is not intercepted,
+except that the fictional external `billing.test` destination is held locally
+after the real backend checkout response.
+
+| Scenario | Result |
+| --- | --- |
+| Canonical Phase-H lifecycle | PASS: 4, with 2 project-intentional mobile lifecycle skips |
+| Deterministic Talk answer/replay/cancel | PASS: 1 |
+| Agency APPROVE/EDIT/REJECT and durable verified result | PASS: 3 |
+| Focused Plan/Agency append-only lifecycle after backend event fix | PASS: 1 in 14.2s |
+| Billing real checkout handoff and no premature entitlement | PASS: 1 in 9.6s |
+| Capsule durability | PASS: 10 consecutive create/reload/isolation cycles |
+| Runtime/performance/accessibility matrix | PASS: 7, with 5 intentional applicability skips |
+| WebKit mobile routes | PASS: 2 |
+| API, worker, Beat and Redis crash/restart drills | PASS |
+| DR backup/restore | PASS: 192 tables hashed, 2 object digests; backup about 173ms, restore about 1667ms |
+
+The diagnostic runs that exposed real defects were retained in the engineering
+log but are not counted as green evidence: popup success was initially
+misclassified as blocked, initial popup navigation raced `about:blank`, and the
+Mind-to-Agency bridge initially omitted the first two lifecycle events. Each
+root cause was fixed without weakening assertions, force-clicking, arbitrary
+sleeps or timeout inflation.
+
+## Exact Candidate Gate
+
+Run from repository root on a clean commit:
+
+```bash
+bash infra/scripts/nur-gate.sh G01_STATIC
+NUR_REAL_STACK_SOAK=1 bash infra/scripts/real-stack-release-gate.sh
+```
+
+Together these commands include static contracts, real-stack browser proof,
+production serving, performance/accessibility, crash recovery, DR and the exact
+10-minute soak. Push is prohibited if either command fails. After push,
+`.github/workflows/readiness.yml` must succeed on the same SHA before K2 is
+marked verified.

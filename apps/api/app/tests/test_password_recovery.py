@@ -1,7 +1,9 @@
 import asyncio
 import json
+import smtplib
 import stat
 import uuid
+from unittest.mock import AsyncMock
 from urllib.parse import parse_qs, urlparse
 
 import pytest
@@ -12,9 +14,12 @@ from sqlalchemy import text
 from app.core.config import Settings
 from app.services.password_delivery import (
     LocalCapturePasswordResetDelivery,
+    PasswordResetDeliveryError,
     PasswordResetDispatch,
     SMTPPasswordResetDelivery,
 )
+from app.services import password_recovery_service
+from app.db.session import get_sessionmaker
 from app.tests.conftest import register_user, unique_email
 
 
@@ -33,6 +38,37 @@ class FailingDelivery:
 
     async def deliver(self, message):
         raise RuntimeError("mail provider unavailable")
+
+
+class TransientDelivery:
+    name = "test_transient"
+
+    def __init__(self, failures: int):
+        self.failures = failures
+        self.attempts = 0
+
+    async def deliver(self, message):
+        self.attempts += 1
+        if self.attempts <= self.failures:
+            raise PasswordResetDeliveryError(
+                "temporary provider outage",
+                retryable=True,
+                failure_code="PROVIDER_TEMPORARY",
+            )
+
+
+class BlockingDelivery:
+    name = "test_blocking"
+
+    def __init__(self):
+        self.attempts = 0
+        self.started = asyncio.Event()
+        self.release = asyncio.Event()
+
+    async def deliver(self, message):
+        self.attempts += 1
+        self.started.set()
+        await self.release.wait()
 
 
 async def issue_reset(client, email: str) -> tuple[str, RecordingDelivery, object]:
@@ -314,6 +350,141 @@ async def test_delivery_failure_remains_generic_and_revokes_challenge(client, su
     assert row.revoked_at is not None
 
 
+async def test_transient_delivery_retries_boundedly_then_marks_delivered(
+    client,
+    super_engine,
+    monkeypatch,
+):
+    registered, email, _ = await register_user(client)
+    delivery = TransientDelivery(failures=2)
+    client.app.state.password_reset_delivery = delivery
+    sleep = AsyncMock()
+    monkeypatch.setattr(password_recovery_service.asyncio, "sleep", sleep)
+
+    response = await client.post("/api/v1/auth/password/forgot", json={"email": email})
+
+    assert response.status_code == 202
+    assert response.json()["accepted"] is True
+    assert delivery.attempts == 3
+    assert sleep.await_count == 2
+    async with super_engine.connect() as conn:
+        row = (
+            await conn.execute(
+                text(
+                    "SELECT delivery_status, delivered_at, revoked_at "
+                    "FROM password_reset_challenges WHERE user_id=:uid "
+                    "ORDER BY created_at DESC LIMIT 1"
+                ),
+                {"uid": registered.json()["id"]},
+            )
+        ).one()
+        audit = (
+            await conn.execute(
+                text(
+                    "SELECT metadata FROM audit_events WHERE actor_user_id=:uid "
+                    "AND event_type='PASSWORD_RESET_DELIVERED' "
+                    "ORDER BY created_at DESC LIMIT 1"
+                ),
+                {"uid": registered.json()["id"]},
+            )
+        ).scalar_one()
+    assert row.delivery_status == "DELIVERED"
+    assert row.delivered_at is not None
+    assert row.revoked_at is None
+    assert audit["attempt_count"] == 3
+
+
+async def test_permanent_recipient_rejection_is_not_retried(monkeypatch):
+    attempts = 0
+
+    class RejectingSMTP:
+        def __init__(self, host, port, timeout):
+            nonlocal attempts
+            attempts += 1
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, traceback):
+            return False
+
+        def ehlo(self):
+            return None
+
+        def send_message(self, message):
+            raise smtplib.SMTPRecipientsRefused({message["To"]: (550, b"rejected")})
+
+    monkeypatch.setattr("app.services.password_delivery.smtplib.SMTP", RejectingSMTP)
+    settings = Settings(
+        password_reset_delivery="smtp",
+        password_reset_from_email="security@nur.example",
+        password_reset_smtp_host="smtp.nur.example",
+        password_reset_smtp_starttls=False,
+    )
+    dispatch = PasswordResetDispatch(
+        challenge_id=uuid.uuid4(),
+        user_id=uuid.uuid4(),
+        recipient="owner@nur.example",
+        reset_url="http://localhost:5173/reset-password?token=one-time-secret",
+        expires_at_iso="2030-01-01T00:00:00+00:00",
+    )
+
+    with pytest.raises(PasswordResetDeliveryError) as raised:
+        await SMTPPasswordResetDelivery(settings).deliver(dispatch)
+
+    assert raised.value.retryable is False
+    assert raised.value.failure_code == "RECIPIENT_REJECTED"
+    assert raised.value.bounce_class == "PERMANENT"
+    assert attempts == 1
+
+
+async def test_concurrent_delivery_tasks_claim_one_challenge_once(client, super_engine):
+    registered, email, _ = await register_user(client)
+    user_id = uuid.UUID(registered.json()["id"])
+    async with get_sessionmaker()() as db:
+        dispatch = await password_recovery_service.request_password_reset(
+            db,
+            email=email,
+            request_ip="127.0.0.1",
+            delivery_name="test_blocking",
+        )
+    assert dispatch is not None
+    delivery = BlockingDelivery()
+
+    first = asyncio.create_task(
+        password_recovery_service.deliver_password_reset(
+            dispatch=dispatch,
+            delivery=delivery,
+        )
+    )
+    await asyncio.wait_for(delivery.started.wait(), timeout=1)
+    await asyncio.wait_for(
+        password_recovery_service.deliver_password_reset(
+            dispatch=dispatch,
+            delivery=delivery,
+        ),
+        timeout=1,
+    )
+    delivery.release.set()
+    await first
+
+    assert delivery.attempts == 1
+    async with super_engine.connect() as conn:
+        row = (
+            await conn.execute(
+                text(
+                    "SELECT delivery_status, delivery_attempts, delivery_claimed_at "
+                    "FROM password_reset_challenges WHERE id=:challenge_id"
+                ),
+                {"challenge_id": dispatch.challenge_id},
+            )
+        ).one()
+    assert row.delivery_status == "DELIVERED"
+    assert row.delivery_attempts == 1
+    assert row.delivery_claimed_at is None
+    assert user_id == dispatch.user_id
+
+
 async def test_local_capture_is_explicit_and_mode_0600(tmp_path):
     delivery = LocalCapturePasswordResetDelivery(str(tmp_path / "mail"))
     challenge_id = uuid.uuid4()
@@ -382,6 +553,9 @@ async def test_smtp_adapter_uses_tls_auth_and_sends_reset_link(monkeypatch):
     assert observed["login"] == ("mailer", "smtp-secret")
     assert observed["message"]["To"] == "owner@nur.example"
     assert dispatch.reset_url in observed["message"].get_content()
+    assert observed["message"]["Message-ID"] == (
+        f"<nur-password-reset-{dispatch.challenge_id}@nur.example>"
+    )
 
 
 def test_production_rejects_local_capture():

@@ -1,8 +1,11 @@
 import json
 import uuid
 
+import pytest
+
 from app.ai.errors import AIProviderRateLimited
 from app.ai.schemas import AIProviderResult, NURTalkOutput
+from app.core.config import Settings
 from app.tests.conftest import register_user
 
 
@@ -237,3 +240,49 @@ def test_direct_response_delta_extractor_handles_chunked_escapes_and_unicode():
         '\\ud83c\\udf0c", "observed":[]}',
     ]
     assert "".join(extractor.feed(chunk) for chunk in chunks) == "Line one\nA star ✨ and astral 🌌"
+
+
+async def test_deterministic_proof_provider_is_explicit_and_streams_real_adapter_events():
+    from app.ai.provider import DeterministicProofAIProvider
+    from app.ai.schemas import TalkProviderRequest
+
+    events: list[tuple[str, dict]] = []
+
+    async def sink(name: str, payload: dict) -> None:
+        events.append((name, payload))
+
+    provider = DeterministicProofAIProvider(
+        Settings(ai_provider="deterministic", ai_deterministic_delay_ms=0, _env_file=None)
+    )
+    result = await provider.complete_private_talk(
+        TalkProviderRequest(user_line="Prove the server-side stream."),
+        event_sink=sink,
+    )
+
+    assert provider.name == "deterministic"
+    assert result.available is True
+    assert result.provider == "deterministic"
+    assert result.model == "nur-deterministic-proof-v1"
+    assert result.output.direct_response == "NUR received this line through its server-side cognitive stream."
+    assert [name for name, _ in events] == [
+        "provider.created",
+        "response.text.delta",
+        "response.text.delta",
+        "provider.completed",
+    ]
+    assert "".join(
+        str(payload["delta"])
+        for name, payload in events
+        if name == "response.text.delta"
+    ) == result.output.direct_response
+
+
+def test_deterministic_proof_provider_is_forbidden_in_production():
+    with pytest.raises(ValueError, match="deterministic AI proof provider cannot run in production"):
+        Settings(
+            app_env="production",
+            session_secret="s" * 48,
+            csrf_secret="c" * 48,
+            ai_provider="deterministic",
+            _env_file=None,
+        )

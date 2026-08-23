@@ -1,15 +1,28 @@
-# NUR Final Closure Ledger - 2026-08-21
+# NUR Final Closure Ledger - 2026-08-23 Candidate
 
-Base SHA for work currently in progress:
-`633acc9d5567de92a802a691570afec253a39123`. Entries remain explicitly
-`UNCOMMITTED` until their exact candidate commit exists.
+The candidate identity is the commit containing this file. The pre-closure
+branch SHA is `5ac83100a4cd4cc52cea9af81fc938d1b308003f`.
 
-| Task ID | Old status | Root cause | Files changed | Tests/evidence | Exact SHA | New status | Remaining dependency |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| D3 | PARTIAL | An unused in-memory belief lifecycle competed conceptually with durable `SemanticClaim` and `ClaimEvidence`. | deleted `apps/api/app/mind/beliefs.py`; updated belief tests | related API suite: 74 passed; Ruff changed Python: pass | UNCOMMITTED on `633acc9` | VERIFIED-CANDIDATE | full API regression and final SHA |
-| G3 | PARTIAL | Omega generated a separate WhyChanged explanation instead of recording and querying the canonical append-only ledger. | `mind/why_changed.py`; `omega/claim_service.py`; `omega/why_changed_service.py`; Omega tests | owner-isolated create/confirm/correct/retire lineage tests; related API suite: 74 passed | UNCOMMITTED on `633acc9` | VERIFIED-CANDIDATE | full API regression and final SHA |
-| E6 | PARTIAL | Research sources lacked owner/class/adapter authority binding. | `brain/research.py`; `brain/cognition.py`; semantic tests | cross-owner, record-class, adapter-impersonation, citation and injection cases pass | UNCOMMITTED on `633acc9` | VERIFIED-CANDIDATE | full API regression; live external retrieval remains external |
-| E8/G6 | PARTIAL | Evaluation labels and observations were insufficiently separated and split inputs were duplicated. | `brain/evaluation.py`; frozen `brain/fixtures/evaluation-corpus-v2.json`; semantic tests | immutable digest, unique semantic fingerprints, negative held-out/shadow cases and oracle-free probes pass | UNCOMMITTED on `633acc9` | VERIFIED-CANDIDATE | full API regression and final SHA |
-| J1 / production web | PARTIAL | Vite middleware composed V197 only in dev/preview; the static build emitted no `index.html`, leaving Nginx's welcome page at production routes. | `apps/web/vite.config.ts`; `apps/web/Dockerfile`; `apps/web/nginx.conf`; `docker-compose.yml`; serving tests | RED host/unit and topology contracts; GREEN 4 unit tests, build, Nginx syntax, image build, `/universe/map` 200 canonical document, immutable bridge asset, relative retired-route redirect | UNCOMMITTED on `633acc9` | VERIFIED-CANDIDATE | final exact-SHA rerun |
-| J1 / fresh database | PARTIAL | Fresh stock Postgres did not provision the migration/runtime roles or `nur` database required before API migration startup. | `infra/postgres/001-nur-roles-and-database.sql`; `docker-compose.yml`; cold-boot contract | RED then GREEN contract; fresh named-volume boot started PostgreSQL, Redis, migration/API, worker, Beat and Nginx; all health checks passed; HTTP `/healthz`, `/readyz`, `/metrics` and `/universe/map` returned 200; Alembic reached `0060_narrow_auth_rls_boundary`; graceful shutdown and persisted-volume restart passed | UNCOMMITTED on `633acc9` | VERIFIED-CANDIDATE | clean-checkout and final exact-SHA rerun |
-| J7 / real-stack browser floor | PARTIAL | Existing Playwright configuration owned a Vite preview server, so real-stack specs were not bound to the production Compose web origin. | `apps/web/playwright.real-stack.config.ts`; `apps/web/e2e/phase-h-real-stack.spec.ts` | B6 durable Journal proof: 1 passed; Talk disabled-provider and worker-verified Agent proof: 2 passed; 17 canonical product surfaces with retained screenshots and zero 5xx/page errors: 1 passed on Chromium desktop | UNCOMMITTED on `633acc9` | PARTIAL-CANDIDATE | route lifecycle mutations, two-owner denial, mobile/WebKit and final exact-SHA run |
+| Closure area | Root cause | Implementation | Executable proof | Candidate status |
+| --- | --- | --- | --- | --- |
+| Password recovery delivery | A reset token could be claimed for delivery without a durable lease, bounded retry receipt, stable Message-ID, or bounce classification. | Challenge delivery claims/attempts/failure/bounce columns, migration `0061`, lease expiry, retry/backoff, deterministic Message-ID and SMTP classification. | Recovery regression tests plus migration/DR/full API gates. | VERIFIED-CANDIDATE |
+| Deterministic Talk provider | Browser E2E could prove only provider-disabled behavior or mock the network. | Server-only `deterministic` provider with production hard-fail, semantic event stream and optional deterministic delay. | Real browser -> Nginx -> FastAPI SSE -> provider -> PostgreSQL -> reload. | VERIFIED-CANDIDATE |
+| Talk replay/cancel | No exact browser proof covered request replay, duplicate suppression and durable cancellation. | Real-stack answer/replay/cancel scenario using canonical V197 controls and persisted model-run state. | `talk-answer-real-stack.spec.ts`. | VERIFIED-CANDIDATE |
+| Agency lifecycle | Mind created only `STEP_AWAITING_APPROVAL`, omitting the append-only workflow and compile events required by the UI contract. | Bridge emits `WORKFLOW_CREATED`, `PLAN_COMPILED`, then `STEP_AWAITING_APPROVAL`; EDIT invalidates old digest/call binding; REJECT is terminal. | Strict API regression plus Plan/Agency and EDIT/REJECT real-stack suites. | VERIFIED-CANDIDATE |
+| Billing handoff | A successful popup could be misclassified as blocked because `window.open(...noopener...)` returned `null`; browser proof also needed the real backend handoff. | Pre-opened `about:blank` with `opener=null`, exact checkout location replacement and truthful blocked fallback. | Real checkout API, exact handoff URL, no entitlement before signed webhook, reload proof. | VERIFIED-CANDIDATE |
+| Phase-H lifecycle | Route existence did not prove owner mutation, reload, denial and fail-closed state. | Two-owner real-stack fixtures across core lifecycle, adjuncts, Billing and Capsule durability. | Phase-H, core-product, Billing and ten-cycle Capsule specs. | VERIFIED-CANDIDATE except Plan/Localization rows in the 82-task ledger |
+| Runtime/release | The static gate did not orchestrate the full browser, process recovery, DR and soak evidence as one candidate. | Expanded `nur-gate.sh` and `real-stack-release-gate.sh`, including Chromium/WebKit mobile, performance, API/worker/Beat/Redis crash recovery, DR and optional 10-minute soak. | Shell contract tests plus full exact-candidate gate. | VERIFIED-CANDIDATE pending exact-head CI |
+
+## Deliberately Unchanged
+
+- Canonical V197 presentation, geometry, celestial assets, route assertions,
+  RLS ownership model and server-side OpenAI boundary.
+- Live provider success is not fabricated by deterministic mode.
+- No merge, tag, repository rename, secret rotation or production deployment is
+  performed by this candidate.
+
+## Final Promotion Rule
+
+The candidate may be pushed only after the full local gate succeeds with a
+clean tracked worktree. K2 becomes verified only when GitHub Actions succeeds
+on that exact pushed SHA.

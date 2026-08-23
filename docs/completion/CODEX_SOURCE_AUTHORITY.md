@@ -1,6 +1,6 @@
 # NUR Completion Source Authority
 
-Refreshed on 2026-08-21 during the final-closure pass. This file records
+Refreshed on 2026-08-23 during the final-closure pass. This file records
 provenance; it does not claim that every product requirement is complete.
 
 ## Repository Authority
@@ -9,13 +9,13 @@ provenance; it does not claim that every product requirement is complete.
 - Base branch: `main`
 - Verified base SHA: `1c6f5f1e9f3380204f6809d2a78364e046e4908e`
 - Completion branch: `codex/nur-final-closure-20260820`
-- Verified pushed baseline before the 2026-08-21 closure edits:
-  `633acc9d5567de92a802a691570afec253a39123`
+- Verified pushed baseline before the final 2026-08-23 closure candidate:
+  `5ac83100a4cd4cc52cea9af81fc938d1b308003f`
 - Draft completion PR: `#5`
 - PR URL: `https://github.com/am-selenephos/NUR---Latest/pull/5`
-- The final evidence SHA is intentionally not predeclared. It becomes
-  authoritative only after the complete gate sequence passes and that exact
-  commit is pushed.
+- The candidate identity is the commit containing this authority record. The
+  final evidence SHA becomes authoritative only after the complete gate
+  sequence passes and GitHub Actions succeeds on that exact pushed commit.
 
 ## Canonical Presentation
 
@@ -26,7 +26,9 @@ provenance; it does not claim that every product requirement is complete.
 - Presentation authority remains canonical V197.
 - `apps/web/src/bridge/` is the nonvisual behavior and hydration owner.
 - A generic replacement React interface is not an accepted source.
-- The six-System contract at migration `0031_six_star_systems` is current.
+- The six-System contract introduced at migration `0031_six_star_systems`
+  remains current; the linear migration head is
+  `0061_pw_delivery_resilience`.
   Older seven-System fixtures are superseded and must not be restored.
 
 ## Dependency Authority
@@ -34,7 +36,7 @@ provenance; it does not claim that every product requirement is complete.
 - Root `package-lock.json` SHA-256:
   `d8cce9f3614d615e11c62976b203fb6b439bf9d50c8b17c469bf4d23f05c0baf`
 - API `apps/api/requirements.lock` SHA-256:
-  `e228367862675103cb87bce3825a14ac89c490f16b76ec85f239e4b389c3f273`
+  `4b005c5d9499b06a2d58635df9f7e681843426936c12c46c5299c8b9b37ffc9a`
 - Root npm workspaces own web and mobile JavaScript dependency resolution.
 - API requirements are installed from the pinned lock in CI.
 

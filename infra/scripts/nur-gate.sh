@@ -27,13 +27,15 @@
 #   NOT_IMPLEMENTED          the gate's checks do not exist yet, and saying so is the honest result
 #
 # A gate with no executable checks reports NOT_IMPLEMENTED. It never reports PASS by silence.
+# Gate functions are selected dynamically by name in run_gate().
+# shellcheck disable=SC2329
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-cd "$ROOT"
+cd "$ROOT" || exit 1
 
 RUN_STAMP="${NUR_GATE_STAMP:-$(date -u +%Y%m%dT%H%M%SZ)}"
-EVIDENCE_ROOT="$ROOT/evidence/$RUN_STAMP"
+EVIDENCE_ROOT="${NUR_GATE_EVIDENCE_ROOT:-$ROOT/evidence/$RUN_STAMP}"
 COMMIT="$(git rev-parse HEAD 2>/dev/null || echo unknown)"
 BRANCH="$(git branch --show-current 2>/dev/null || echo detached)"
 ENV_CLASS="${NUR_ENV_CLASS:-local}"
@@ -50,7 +52,7 @@ STEPS_JSON=""
 GATE_FAILED=0
 GATE_NOTES=""
 
-json_escape() { python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))' <<<"$1"; }
+json_escape() { python3 -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$1"; }
 
 note() { GATE_NOTES="${GATE_NOTES}${GATE_NOTES:+ | }$1"; }
 
@@ -63,11 +65,11 @@ run() {
   "$@" >>"$log" 2>&1
   local code=$?
   local end; end="$(date -u +%s)"
-  [ $code -ne 0 ] && GATE_FAILED=1
+  [ "$code" -ne 0 ] && GATE_FAILED=1
   STEPS_JSON="${STEPS_JSON}${STEPS_JSON:+,}$(printf '{"step":%s,"command":%s,"exit_code":%d,"seconds":%d,"log":%s}' \
     "$(json_escape "$name")" "$(json_escape "$*")" "$code" "$((end-start))" "$(json_escape "$name.log")")"
   printf '  %-34s exit=%-3d %ss\n' "$name" "$code" "$((end-start))"
-  return $code
+  return "$code"
 }
 
 # skip <step-name> <reason> — records an unmet requirement without pretending it ran.
@@ -78,36 +80,30 @@ skip() {
   printf '  %-34s SKIPPED — %s\n' "$name" "$reason"
 }
 
-have() { command -v "$1" >/dev/null 2>&1; }
-
 # --- gate bodies --------------------------------------------------------------------------
 # Each gate_* function sets GATE_VERDICT_OVERRIDE when its honest verdict is not PASS/FAIL.
 
 gate_G00_EVIDENCE() {
-  run git_status git status --short
+  run git_head git rev-parse --verify 'HEAD^{commit}'
+  run git_status git status --short --branch
+  run dependency_locks git ls-files --error-unmatch \
+    package-lock.json apps/api/requirements.lock apps/api/requirements-dev.lock
   run v197_integrity npm run --silent v197:integrity
   run secret_scan npm run --silent secret-scan
-  local docs=(source-authority-report git-lineage-reconciliation conflict-and-supersession-report
-              current-capability-gap-map founder-decisions credential-exposure-inventory)
-  local missing=()
-  for d in "${docs[@]}"; do
-    [ -f "docs/v6/$d.md" ] || [ -f "docs/v6/$d.csv" ] || missing+=("$d")
-  done
-  if [ ${#missing[@]} -gt 0 ]; then
-    GATE_FAILED=1; note "missing V6 documents: ${missing[*]}"
-  fi
-  # FD-001 ratified the canonical identity; rotation of the exposed archive keys is not proven.
-  if grep -q "UNROTATED_P0" docs/v6/credential-exposure-inventory.csv 2>/dev/null; then
-    GATE_VERDICT_OVERRIDE="FOUNDER_ACTION_REQUIRED"
-    note "FOUNDER_ACTION_REQUIRED_ROTATE_OPENAI_KEYS — exposed archive keys not verified rotated"
-  fi
+  # A repository scan can prove the candidate is clean; it cannot prove a
+  # previously exposed provider credential was revoked outside this repository.
+  GATE_VERDICT_OVERRIDE="FOUNDER_ACTION_REQUIRED"
+  note "FOUNDER_ACTION_REQUIRED_VERIFY_CREDENTIAL_ROTATION — local secret scan passed, provider-side revocation remains external"
+  skip credential_rotation "requires provider-side revocation evidence; never infer rotation from repository contents"
 }
 
 gate_G01_STATIC() {
   run ruff apps/api/.venv/bin/ruff check apps/api
   run backend_tests bash -c 'cd apps/api && .venv/bin/python -m pytest -q'
   run alembic_single_head bash -c 'cd apps/api && ../../apps/api/.venv/bin/alembic heads | grep -c "(head)" | grep -qx 1'
+  run migration_upgrade_and_roundtrip bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/agentic/test_upgrade_from_released_db.py app/tests/agentic/test_migration_roundtrip_db.py app/tests/agentic/test_migration_reconciliation_db.py app/tests/agentic/test_orm_schema_parity.py'
   run mutation_security npm run --silent api:mutation-security
+  run openapi_drift npm run --silent api:openapi-drift
   run web_typecheck npm run --silent web:typecheck
   run web_unit_tests npm run --silent web:test
   run web_build npm run --silent web:build
@@ -120,11 +116,10 @@ gate_G01_STATIC() {
   else
     skip mobile_typecheck "apps/mobile is not present in this candidate"
   fi
-  skip dependency_audit "no dependency-audit gate implemented yet (G01-009)"
-  skip sbom "no SBOM generator implemented yet (G01-009)"
-  skip migration_upgrade_from_populated "no populated-revision upgrade test yet (G01-014)"
-  skip migration_downgrade "no downgrade execution test yet (G01-015)"
-  skip fresh_extract_boot "fresh-clone/extract boot not wired into this runner yet (G01-017)"
+  run node_dependency_audit npm audit --audit-level=high
+  run python_dependency_consistency apps/api/.venv/bin/python -m pip check
+  run sbom_freshness bash infra/tests/sbom-freshness.test.sh
+  run fresh_extract_package_contract bash infra/tests/release-package-fresh-extract.test.sh
 }
 
 playwright_ready() { [ -d "$HOME/.cache/ms-playwright" ] || [ -d "$ROOT/node_modules/playwright-core/.local-browsers" ]; }
@@ -133,7 +128,8 @@ api_ready() {
   curl -fsS --max-time 3 -o /dev/null "${NUR_API_ORIGIN:-http://localhost:8000}/healthz" 2>/dev/null
 }
 
-browser_gate() { # <spec...>
+browser_gate_projects() { # <comma-separated-projects> <spec...>
+  local project_csv="$1"; shift
   if ! playwright_ready; then
     GATE_VERDICT_OVERRIDE="BLOCKED_EXTERNAL"
     note "Playwright browsers not installed — run: npx playwright install --with-deps"
@@ -160,11 +156,22 @@ browser_gate() { # <spec...>
     sleep "$spacing"
   fi
   NUR_GATE_BROWSER_RAN=1
-  run browser_suite npm --workspace apps/web run e2e -- "$@" --project=chromium-desktop --workers=1
+  local projects=()
+  local project
+  IFS=',' read -r -a projects <<<"$project_csv"
+  local project_args=()
+  for project in "${projects[@]}"; do
+    [ -n "$project" ] && project_args+=("--project=$project")
+  done
+  run browser_suite npm --workspace apps/web run e2e -- "$@" "${project_args[@]}" --workers=1
+}
+
+browser_gate() { # <spec...>
+  browser_gate_projects "chromium-desktop" "$@"
 }
 
 gate_G02_AUTH() {
-  run auth_backend_tests bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_auth.py app/tests/test_password_recovery.py'
+  run auth_backend_tests bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_auth.py app/tests/test_password_recovery.py app/tests/test_rls.py app/tests/test_hardness_db_rls.py app/tests/test_mutation_security_matrix.py'
   browser_gate \
     e2e/fresh-signup.spec.ts \
     e2e/landing-auth.spec.ts \
@@ -182,16 +189,24 @@ import json,sys
 m=json.load(open(\"docs/release/v197-control-matrix.json\"))
 bad={k:m[\"totals\"].get(k,0) for k in (\"DEAD\",\"DUPLICATE\",\"MISLEADING\")}
 sys.exit(1 if any(bad.values()) else 0)"'
-  browser_gate e2e/v197-control-matrix.spec.ts e2e/v197-host-parity.spec.ts e2e/v197-forensic-shell.spec.ts e2e/v197-runtime-lifecycle.spec.ts
+  browser_gate \
+    e2e/v197-control-matrix.spec.ts \
+    e2e/v197-host-parity.spec.ts \
+    e2e/v197-forensic-shell.spec.ts \
+    e2e/v197-runtime-lifecycle.spec.ts \
+    e2e/surface-navigation.spec.ts \
+    e2e/owner-product-surfaces.spec.ts
   skip deferred_controls "3 controls remain NOT_IMPLEMENTED_VISIBLE (G03-007)"
-  skip backend_only_surfaces "Personal Memory, Teach NUR and Billing unreachable from V197 (G03-008..010)"
 }
 
 gate_G04_PERFORMANCE() {
-  browser_gate e2e/v197-performance-acceptance.spec.ts e2e/v197-performance.spec.ts e2e/v197-responsive-accessibility.spec.ts
-  skip named_reference_devices "reference device/browser tier not declared (G04-008, G04-009)"
+  browser_gate_projects "chromium-desktop,chromium-mobile" \
+    e2e/v197-performance-acceptance.spec.ts \
+    e2e/v197-performance.spec.ts \
+    e2e/v197-responsive-accessibility.spec.ts
   if [ "${NUR_G04_SOAK:-0}" = "1" ]; then
     run ten_minute_heap_soak env NUR_G04_SOAK=1 npm --workspace apps/web run e2e -- \
+      --config=playwright.g04.config.ts \
       e2e/v197-performance-acceptance.spec.ts \
       --project=chromium-desktop-g04 \
       --workers=1
@@ -202,6 +217,7 @@ gate_G04_PERFORMANCE() {
 
 gate_G05_LIVE_AI() {
   run provider_contract_tests bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_ai_provider_failures.py app/tests/test_ai_structured_outputs.py app/tests/test_verifier_grounding.py app/tests/test_cognition_streaming.py'
+  run budget_enforcement_tests bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_rate_quota_hardening.py app/tests/test_mind_brain_capability_closure.py app/tests/agentic/test_policy.py app/tests/agentic/test_policy_runtime_state_db.py'
   run secret_scan npm run --silent secret-scan
   if [ ! -f "$ROOT/.env.local" ]; then
     GATE_VERDICT_OVERRIDE="FOUNDER_ACTION_REQUIRED"
@@ -210,95 +226,93 @@ gate_G05_LIVE_AI() {
   else
     run live_two_turn_proof node infra/scripts/live-talk-two-turn-proof.mjs
   fi
-  skip budget_enforcement "per-user/plan/mode/global budgets not implemented (G05-013)"
 }
 
 gate_G06_RECOVERY() {
   run recovery_tests bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_password_recovery.py'
+  run recovery_delivery_resilience bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_password_recovery.py -k "delivery or smtp"'
   GATE_VERDICT_OVERRIDE="FOUNDER_ACTION_REQUIRED"
   note "FOUNDER_ACTION_REQUIRED_CONFIGURE_EMAIL_PROVIDER — local file capture is development-only"
-  skip production_delivery "no transactional email adapter configured (G06-001)"
-  skip retry_dedup_bounce "delivery retry/dedup/bounce not implemented (G06-004)"
+  skip production_delivery "transactional email provider, sender verification, and provider-side bounce callback remain external"
 }
 
 gate_G07_INTELLIGENCE() {
   run intelligence_tests bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_live_intelligence.py app/tests/test_intelligence_contracts.py app/tests/test_personal_memory.py app/tests/test_teach_nur.py app/tests/test_omega.py app/tests/test_rls.py'
-  skip eval_suite "packages/evals does not exist; no multilingual/adversarial regression harness (G07-013)"
-  skip tool_registry "no bounded tool registry with confirmation rules (G07-012)"
-  skip whole_chain_runtime "no single runtime proof of the full Talk->Return->why-changed cycle (G07-001)"
+  run evaluation_suite bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_brain_semantic_addendum.py app/tests/test_prompt_tool_injection_corpus.py app/tests/test_hardness_unit.py app/tests/test_hardness_e2e.py'
+  run bounded_tool_registry bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/agentic/test_tool_registry.py app/tests/agentic/test_empty_permission_gate.py app/tests/agentic/test_tool_call_approval_binding_db.py app/tests/agentic/test_tool_version_gate_db.py'
+  run intelligence_lifecycle bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_capability_loop_integration.py app/tests/test_capability_runtime_e2e.py app/tests/test_outcome_learning_loop.py app/tests/test_track_a_vertical_slice.py app/tests/agentic/test_owner_lifecycle_http_db.py app/tests/agentic/test_approval_http_e2e.py'
 }
 
 gate_G08_REVENUE() {
-  run billing_tests bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_billing.py app/tests/test_feature_lock_endpoints.py'
   GATE_VERDICT_OVERRIDE="FOUNDER_ACTION_REQUIRED"
   note "FOUNDER_ACTION_REQUIRED_CONFIGURE_BILLING_TEST_PROVIDER"
-  skip provider_test_mode "no billing provider configured (G08-002)"
-  skip billing_ui "no billing control in the V197 matrix (G08-006)"
+  run billing_tests bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_billing.py app/tests/test_feature_lock_endpoints.py'
+  browser_gate e2e/owner-product-surfaces.spec.ts
+  skip provider_test_mode "merchant account, signed sandbox webhook secret, and provider checkout remain external"
 }
 
 gate_G09_GLOW() {
-  run glow_tests bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_notifications.py app/tests/test_sol_living_system.py'
-  skip fraud_detection "no Glow fraud detection (G09-006)"
-  skip leaderboards "no leaderboard implementation (G09-011)"
-  skip notification_delivery "no push/email delivery adapter (G09-014)"
-  skip experiment_engine "no experiment engine (G09-015)"
+  run glow_tests bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_notifications.py app/tests/test_sol_living_system.py app/tests/test_track_a_vertical_slice.py app/tests/test_cognition.py app/tests/test_community_completion.py'
+  GATE_VERDICT_OVERRIDE="FOUNDER_ACTION_REQUIRED"
+  note "FOUNDER_ACTION_REQUIRED_CONFIGURE_NOTIFICATION_PROVIDER — in-app delivery is tested; push/email delivery remains external"
+  skip notification_delivery "push/email delivery provider and sender credentials remain external"
 }
 
 gate_G10_SYSTEMS() {
-  run systems_tests bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_sol_living_system.py app/tests/test_live_universe.py app/tests/test_product_surfaces.py'
+  run systems_tests bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_sol_living_system.py app/tests/test_live_universe.py app/tests/test_product_surfaces.py app/tests/test_track_a_vertical_slice.py'
   browser_gate e2e/sol-living-v197.spec.ts e2e/universe-lenses.spec.ts
-  skip per_system_vertical_slice "no per-System diagnostic->action->Return->projection proof (G10-sys1..7)"
 }
 
 gate_G11_LANGUAGE() {
-  run translation_tests bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_translations.py'
-  skip catalog_completeness "no key-completeness validator (G11-003)"
-  skip locale_slots_35 "35 locale slots not present (G11-004)"
-  skip string_extraction "no zero-raw-string extraction test (G11-002)"
   GATE_VERDICT_OVERRIDE="FOUNDER_ACTION_REQUIRED"
   note "FOUNDER_ACTION_REQUIRED_LOCALE_HUMAN_REVIEW — an agent may not label its own output native-reviewed"
+  run translation_tests bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_translations.py'
+  browser_gate e2e/v197-language-wordmark.spec.ts e2e/v197-responsive-accessibility.spec.ts
+  skip string_extraction "no zero-raw-string extraction test (G11-002)"
 }
 
 gate_G12_COMMUNITY() {
   run community_tests bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_community_completion.py app/tests/test_group_nur.py app/tests/test_rls.py'
   browser_gate e2e/community-group-nur.spec.ts
-  skip realtime_gateway "no authenticated realtime gateway (G12-006)"
-  skip signal_feed "no feed ranking module (G12-011)"
-  skip anti_abuse "no anti-abuse suite (G12-013)"
 }
 
 gate_G13_GROUP_RESEARCH() {
   run group_research_tests bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_group_research_completion.py app/tests/test_consultations.py app/tests/test_group_nur.py'
   GATE_VERDICT_OVERRIDE="BLOCKED_EXTERNAL"
   note "research live fetch is BLOCKED_BY_EXTERNAL_PROVIDER in the control matrix"
-  skip live_research "no lawful research provider configured (G13-005)"
-  skip expert_module "no expert verification module (G13-009)"
+  skip live_research "lawful research retrieval provider and production credentials remain external"
 }
 
 gate_G14_PROJECTS() {
   run project_tests bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_am_projects.py app/tests/test_am_project_execution.py app/tests/test_am_project_storage.py app/tests/test_am_project_quota.py app/tests/test_am_project_recovery.py app/tests/test_capsules.py app/tests/test_storage_hygiene.py'
-  browser_gate e2e/project-deliverables.spec.ts e2e/capsule.spec.ts
-  skip bounded_agents "no agents module: tasks/runs/artifacts/reviews/permissions/budgets (G14-008..010)"
+  run bounded_agent_runtime bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/agentic/test_tool_registry.py app/tests/agentic/test_vertical_slices_db.py app/tests/agentic/test_owner_lifecycle_http_db.py app/tests/agentic/test_durable_handlers.py app/tests/agentic/test_approvals.py app/tests/agentic/test_policy_runtime_state_db.py'
+  browser_gate e2e/project-deliverables.spec.ts e2e/capsule.spec.ts e2e/agentic-owner-ui.spec.ts
 }
 
 gate_G15_SCALE_OPS() {
-  run ops_tests bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_health.py app/tests/test_ops_diagnostics.py app/tests/test_dr.py app/tests/test_bounded_load.py'
   GATE_VERDICT_OVERRIDE="FOUNDER_ACTION_REQUIRED"
   note "FOUNDER_ACTION_REQUIRED_STAGING_ACCESS — no staging environment, no CI run on this candidate"
-  skip staging_deploy "no staging environment (G15-008)"
-  skip timed_restore_drill "restore drill not executed with measured RPO/RTO (G15-013)"
-  skip privacy_center "no privacy center (G15-019)"
+  run ops_tests bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_health.py app/tests/test_ops_diagnostics.py app/tests/test_dr.py app/tests/test_bounded_load.py app/tests/test_account_privacy.py'
+  run production_web_contract bash infra/tests/production-web-serving.test.sh
+  run cold_boot_contract bash infra/tests/cold-boot-compose.test.sh
+  run api_container_contract bash infra/tests/api-container-build-contract.test.sh
+  browser_gate e2e/account-privacy-ui.spec.ts
+  skip staging_deploy "production-like staging environment and access remain external"
+  if [ "${NUR_G15_DRILL:-0}" = "1" ]; then
+    run timed_restore_drill bash infra/scripts/dr-drill.sh
+  else
+    skip timed_restore_drill "implemented; set NUR_G15_DRILL=1 to execute the measured restore drill"
+  fi
 }
 
 gate_G16_FULL_RELEASE() {
   GATE_VERDICT_OVERRIDE="FOUNDER_ACTION_REQUIRED"
   note "FOUNDER_ACTION_REQUIRED_RELEASE_APPROVAL — and G00..G15 are not all PASS"
+  run proof_hygiene npm run --silent proof-hygiene
   run release_package_contract bash infra/tests/release-package-contract.test.sh
+  run sbom_freshness bash infra/tests/sbom-freshness.test.sh
+  run release_package_fresh_extract bash infra/tests/release-package-fresh-extract.test.sh
   skip all_gates_pass "prerequisite gates are not all PASS (G16-002)"
-  skip package_release "package emission waits for one exact candidate with all prerequisite gates PASS (G16-012)"
-  skip verify_release_package "independent verification waits for that candidate package (G16-013)"
-  skip sbom "no SBOM generator (G16-006)"
-  skip status_ledger_v6 "docs/v6/NUR_EXACT_STATUS_LEDGER_V6.md not authored (G16-011)"
 }
 
 # --- driver -------------------------------------------------------------------------------

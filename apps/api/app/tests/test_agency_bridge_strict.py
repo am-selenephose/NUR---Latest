@@ -11,7 +11,7 @@ from app.agentic.enums import WorkflowState
 from app.brain.schemas import WorkflowProposal, WorkflowStepProposal
 from app.db.rls import set_user_context
 from app.mind.agency_bridge import AgencyBridgeError, submit_workflow_proposal
-from app.models.agentic import AgentPolicy, AgentStep, AgentApproval
+from app.models.agentic import AgentApproval, AgentPolicy, AgentRunEvent, AgentStep
 from app.tests.conftest import register_user
 
 
@@ -261,6 +261,19 @@ async def test_agency_bridge_strict_arguments_and_approval(client: AsyncClient, 
         assert approval.call_version.startswith("cv:")
         assert len(approval.call_version) == 67
         assert approval.call_version != "1"
+
+        event_stmt = (
+            select(AgentRunEvent)
+            .where(AgentRunEvent.workflow_id == workflow.id)
+            .order_by(AgentRunEvent.sequence)
+        )
+        events = (await db.execute(event_stmt)).scalars().all()
+        assert [event.sequence for event in events] == [1, 2, 3]
+        assert [event.event_type for event in events] == [
+            "WORKFLOW_CREATED",
+            "PLAN_COMPILED",
+            "STEP_AWAITING_APPROVAL",
+        ]
 
 
 @pytest.mark.asyncio

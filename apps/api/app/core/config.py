@@ -109,6 +109,17 @@ class Settings(BaseSettings):
     password_reset_smtp_starttls: bool = True
     password_reset_smtp_username: str = ""
     password_reset_smtp_password: SecretStr | None = None
+    password_reset_delivery_max_attempts: int = Field(default=3, ge=1, le=5)
+    password_reset_delivery_retry_base_seconds: float = Field(
+        default=0.25,
+        ge=0.05,
+        le=5.0,
+    )
+    password_reset_delivery_claim_lease_seconds: int = Field(
+        default=120,
+        ge=60,
+        le=600,
+    )
 
     # AI gateway: server-side only. Keys never cross to the web client.
     ai_provider: str = Field(default="disabled", validation_alias=AliasChoices("NUR_AI_PROVIDER", "AI_PROVIDER"))
@@ -118,6 +129,12 @@ class Settings(BaseSettings):
     openai_reasoning_effort: str = Field(default="high", validation_alias="NUR_OPENAI_REASONING_EFFORT")
     openai_critical_reasoning_effort: str = Field(default="high", validation_alias="NUR_OPENAI_CRITICAL_REASONING_EFFORT")
     openai_request_timeout_seconds: int = Field(default=45, validation_alias="NUR_OPENAI_REQUEST_TIMEOUT_SECONDS")
+    ai_deterministic_delay_ms: int = Field(
+        default=0,
+        ge=0,
+        le=5000,
+        validation_alias="NUR_AI_DETERMINISTIC_DELAY_MS",
+    )
     ai_per_user_daily_limit: int = Field(
         default=50, ge=1, validation_alias="NUR_AI_PER_USER_DAILY_LIMIT"
     )
@@ -293,8 +310,10 @@ class Settings(BaseSettings):
     @classmethod
     def _known_provider(cls, value: str) -> str:
         v = value.lower().strip()
-        if v not in {"disabled", "openai"}:
-            raise ValueError("NUR_AI_PROVIDER must be 'disabled' or 'openai'.")
+        if v not in {"deterministic", "disabled", "openai"}:
+            raise ValueError(
+                "NUR_AI_PROVIDER must be 'deterministic', 'disabled', or 'openai'."
+            )
         return v
 
     @field_validator("billing_provider")
@@ -341,6 +360,8 @@ class Settings(BaseSettings):
                 raise ValueError("NUR_AI_PROVIDER=openai requires OPENAI_API_KEY in the server environment.")
             if not self.openai_model.strip():
                 raise ValueError("NUR_AI_PROVIDER=openai requires NUR_OPENAI_MODEL in the server environment.")
+        if self.ai_provider == "deterministic" and self.app_env == "production":
+            raise ValueError("The deterministic AI proof provider cannot run in production.")
         if self.ai_allow_external_web_research:
             raise ValueError("NUR_AI_ALLOW_EXTERNAL_WEB_RESEARCH must remain false for this readiness gate.")
         if self.billing_provider == "test":
