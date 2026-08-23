@@ -1,6 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const baseURL = process.env.NUR_REAL_STACK_BASE_URL ?? "http://127.0.0.1:55173";
+const baseURL = process.env.NUR_REAL_STACK_BASE_URL?.trim();
+if (!baseURL) throw new Error("NUR_REAL_STACK_BASE_URL is required for real-stack Playwright proofs.");
+const reportDir = process.env.NUR_REAL_STACK_REPORT_DIR ?? "playwright-report-real-stack";
+const outputDir = process.env.NUR_REAL_STACK_OUTPUT_DIR ?? "test-results-real-stack";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -10,8 +13,9 @@ export default defineConfig({
   workers: 1,
   reporter: [
     ["list"],
-    ["html", { open: "never", outputFolder: "playwright-report-real-stack" }],
+    ["html", { open: "never", outputFolder: reportDir }],
   ],
+  outputDir,
   use: {
     baseURL,
     serviceWorkers: "block",

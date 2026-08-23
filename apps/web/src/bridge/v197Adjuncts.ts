@@ -3116,6 +3116,7 @@ async function renderAgents(
       .map(input => input.dataset.agenticAuto ?? "").filter(key => key && permitted.includes(key));
     try {
       const next = await api.putAgenticPolicy({
+        seen_version: policy.version,
         initiative_level: initiative.value as V197AgenticPolicy["initiative_level"],
         max_risk_class: maxRisk.value as AgenticRiskClass,
         permitted_tools: permitted,
@@ -3128,6 +3129,7 @@ async function renderAgents(
       });
       policy.permitted_tools = next.permitted_tools;
       policy.auto_run_tools = next.auto_run_tools;
+      policy.version = next.version;
       policyState.textContent = "Owner policy persisted. No workflow was started.";
       policyState.className = "nur-adjunct-status is-good";
     } catch (error) {
@@ -3231,6 +3233,7 @@ async function renderAgents(
   for (const approval of approvals) {
     const card = buildApprovalCard(approval);
     const row = element(document, "div", "nur-adjunct-row");
+    row.dataset.agenticApprovalId = approval.id;
     const head = element(document, "div", "nur-adjunct-row-head");
     head.append(element(document, "strong", undefined, approval.workflow_title ?? `Workflow ${approval.workflow_id.slice(0, 8)}`), element(document, "span", "nur-adjunct-chip", approval.risk_class));
     const exactArguments = element(document, "pre", "nur-adjunct-json", JSON.stringify(approval.redacted_arguments, null, 2));
@@ -3306,6 +3309,8 @@ async function renderAgents(
       fact(document, "Scope", card.scope),
       fact(document, "Risk", card.risk),
       fact(document, "Expected", card.expected),
+      fact(document, "Cost", card.cost),
+      ...(approval.expires_at ? [fact(document, "Expires", date(approval.expires_at))] : []),
       exactArguments,
       decisions,
       decisionState,

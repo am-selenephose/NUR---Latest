@@ -53,9 +53,8 @@ test("real demo signin verifies identity, survives refresh, and logs out", async
   await entry.locator("#f4-signin-form button[type='submit']").click();
 
   await expect(page.locator("#nur-universe-stage")).toHaveClass(/is-visible/, { timeout: 30_000 });
-  await expect(page.locator("#nur-entry-stage")).toHaveCSS("display", "none");
-  await expect(page.locator("#nur-entry-stage")).toHaveAttribute("data-nur-stage-suspended", "true");
-  await expect(entry.locator("#nur-v197-auth-wait")).toBeHidden();
+  await expect(page.locator("#nur-entry-stage")).toHaveCount(0);
+  await expect(page.locator("html")).toHaveAttribute("data-nur-entry-retired", "true");
   await expect(page).toHaveURL(/\/today$/);
   const universe = page.frameLocator("#nur-universe-stage");
   await expect(universe.locator("#page-today")).toBeVisible({ timeout: 20_000 });
@@ -69,7 +68,8 @@ test("real demo signin verifies identity, survives refresh, and logs out", async
 
   await page.reload({ waitUntil: "load" });
   await expect(page.locator("#nur-universe-stage")).toHaveClass(/is-visible/, { timeout: 30_000 });
-  await expect(page.locator("#nur-entry-stage")).toHaveCSS("display", "none");
+  await expect(page.locator("#nur-entry-stage")).toHaveCount(0);
+  await expect(page.locator("html")).toHaveAttribute("data-nur-entry-retired", "true");
   const afterRefresh = await page.evaluate(async () =>
     (await fetch("/api/v1/auth/me", { credentials: "include" })).status);
   expect(afterRefresh).toBe(200);
@@ -86,6 +86,7 @@ test("real demo signin verifies identity, survives refresh, and logs out", async
   expect((await loggedOut).status()).toBe(204);
   await expect(page).toHaveURL(/\/$/);
   await expect(page.locator("#nur-entry-stage")).toBeVisible();
+  await expect(page.locator("html")).not.toHaveAttribute("data-nur-entry-retired", "true");
   await expect(page.locator("#nur-entry-stage")).not.toHaveAttribute("data-nur-stage-suspended", "true");
   await expect(page.locator("#nur-entry-stage")).not.toHaveAttribute("aria-hidden", "true");
   await expect(page.locator("#nur-entry-stage")).not.toHaveAttribute("inert", "");

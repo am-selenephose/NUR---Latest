@@ -14,7 +14,7 @@
     "viewport": "mobile-keyboard",
     "surface": "journal",
     "gesture": "click + Control+End + wheel ×30",
-    "scrollerDelta": 8424,
+    "scrollerDelta": 8388,
     "pageDelta": 0,
     "ancestorsThatMoved": [],
     "endReachable": true,

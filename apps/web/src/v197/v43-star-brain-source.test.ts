@@ -40,6 +40,16 @@ describe("V43 anatomical Three.js celestial runtime", () => {
     expect(runtime).not.toContain("requestAnimationFrame(frame)");
   });
 
+  it("renders the full galaxy directly instead of copying a hidden WebGL frame every tick", () => {
+    expect(runtime).toContain("const legacyGalaxyCanvas = document.querySelector<HTMLCanvasElement>(\"#space3d\");");
+    expect(runtime).toContain("const galaxyCanvas = legacyGalaxyCanvas.cloneNode(false) as HTMLCanvasElement;");
+    expect(runtime).toContain("legacyGalaxyCanvas.replaceWith(galaxyCanvas);");
+    expect(runtime).toContain("canvas: galaxyCanvas,");
+    expect(runtime).not.toContain("galaxyContext.drawImage");
+    expect(runtime).not.toContain('const renderCanvas = document.createElement("canvas");');
+    expect(runtime).toContain("brainContext.drawImage(\n      controller.galaxyCanvas,");
+  });
+
   it("publishes real interaction, diagnostics and deterministic disposal", () => {
     expect(runtime).toContain('bind(frameWindow, "pointerdown"');
     expect(runtime).toContain("galaxyAngularVelocityYaw");

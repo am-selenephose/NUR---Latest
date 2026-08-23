@@ -426,7 +426,9 @@ test("Track A persists across a fresh session and keeps the premium V197 map cle
 
   await page.setViewportSize({ width: 1600, height: 900 });
   await refreshed.locator('[data-page="systems"]:visible').first().click();
-  await expect(refreshed.locator("#universe-search, #deep-research-button, #universe-research")).toHaveCount(0);
+  await expect(refreshed.locator("#universe-search, #deep-research-button")).toHaveCount(0);
+  await expect(refreshed.locator("#universe-research")).toBeVisible();
+  await expect(refreshed.locator("#universe-research")).toContainText(/owner ledger|no external source|no external source is invented/i);
   await expect(refreshed.locator("#universe-community")).toBeVisible();
   await expect(refreshed.locator("#universe-community")).toContainText(/owner|local|persisted/i);
   await expect(refreshed.locator(".expert-card")).toHaveCount(0);

@@ -3,6 +3,8 @@ import { join } from "node:path";
 
 import { expect, test, type Frame, type Page } from "@playwright/test";
 
+import { canvasSignal } from "./helpers/canvasSignal";
+
 type Cadence = {
   durationMs: number;
   frames: number;
@@ -604,7 +606,8 @@ test("G04 reduced motion materially removes galaxy and decorative animation work
   await frame.locator("[data-world-tab='map']").click();
   await expect(page).toHaveURL(/\/universe\/map$/);
 
-  const reduced = await frame.evaluate(() => {
+  const canvasHasPaint = (await canvasSignal(frame.locator("#space3d"))).alpha > 0;
+  const reducedRuntime = await frame.evaluate(() => {
     const canvas = document.querySelector<HTMLCanvasElement>("#space3d");
     const galaxy = (window as typeof window & {
       nurGalaxy?: {
@@ -615,19 +618,6 @@ test("G04 reduced motion materially removes galaxy and decorative animation work
         };
       };
     }).nurGalaxy;
-    const context = canvas?.getContext("2d");
-    const pixels = context && canvas
-      ? context.getImageData(0, 0, canvas.width, canvas.height).data
-      : null;
-    let canvasHasPaint = false;
-    if (pixels) {
-      for (let alpha = 3; alpha < pixels.length; alpha += 4) {
-        if (pixels[alpha] > 0) {
-          canvasHasPaint = true;
-          break;
-        }
-      }
-    }
     const animations = document.getAnimations()
       .filter(animation => animation.playState === "running")
       .map(animation => {
@@ -660,7 +650,6 @@ test("G04 reduced motion materially removes galaxy and decorative animation work
       });
     return {
       canvasDisplay: canvas ? getComputedStyle(canvas).display : "missing",
-      canvasHasPaint,
       galaxy: galaxy?.getParticleDiagnostics?.() ?? null,
       runningAnimations: animations.length,
       // WebKit can retain the source keyframe duration in getComputedTiming()
@@ -670,6 +659,7 @@ test("G04 reduced motion materially removes galaxy and decorative animation work
       animations,
     };
   });
+  const reduced = { ...reducedRuntime, canvasHasPaint };
   const projectDir = join(proofRoot, testInfo.project.name);
   await mkdir(projectDir, { recursive: true });
   await writeFile(join(projectDir, "reduced-motion.json"), `${JSON.stringify(reduced, null, 2)}\n`, "utf8");

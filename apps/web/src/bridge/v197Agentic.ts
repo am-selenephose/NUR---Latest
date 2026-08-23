@@ -92,6 +92,7 @@ export interface V197AgenticPolicy {
   id?: string;
   scope: "ACCOUNT";
   persisted: boolean;
+  version: number;
   initiative_level: "OFF" | "SUGGEST" | "PREPARE" | "INTERNAL" | "CONNECTED" | "DELEGATED";
   max_risk_class: AgenticRiskClass;
   permitted_tools: string[];

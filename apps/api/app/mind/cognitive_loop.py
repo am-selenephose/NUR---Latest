@@ -590,6 +590,22 @@ async def run_mind_cognitive_loop(
             idempotency_key=f"talk-turn:{turn.id}:meaningful",
         )
 
+    is_plan_preview = (
+        resolution.selected_capability is not None
+        and resolution.selected_capability.capability_id == "capability:plan_from_conversation"
+        and cognitive_result.workflow_proposal is None
+        and talk_output.direct_response.startswith("### Plan Preview:")
+    )
+    if event_sink is not None and is_plan_preview:
+        await event_sink(
+            "talk.preview.ready",
+            {
+                "preview_id": str(response_event.id),
+                "writes": False,
+                "direct_response": talk_output.direct_response,
+            },
+        )
+
     if event_sink is not None:
         await event_sink(
             "talk.validated",

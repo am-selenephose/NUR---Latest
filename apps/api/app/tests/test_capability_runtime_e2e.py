@@ -189,6 +189,12 @@ async def test_capability_runtime_e2e_preview_mode_no_persistence(client, super_
         assert "conversational preview" in result.output.direct_response
         event_types = [e[0] for e in events]
         assert "workflow.proposed" not in event_types
+        preview_events = [payload for name, payload in events if name == "talk.preview.ready"]
+        assert preview_events == [{
+            "preview_id": str(result.response_event_id),
+            "writes": False,
+            "direct_response": result.output.direct_response,
+        }]
 
         # Verify NO AgentWorkflow was persisted
         workflows = (

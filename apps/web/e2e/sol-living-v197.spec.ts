@@ -94,6 +94,24 @@ test("SOL living backend hydrates and moves the exact V197 presentation", async 
   expect(today.next_move).not.toBeNull();
   const expectedMove = today.next_move?.title ?? "";
   const completedBefore = today.completed_today.length;
+  const ambition = await page.evaluate(async () => {
+    const response = await fetch("/api/v1/universe/live");
+    if (!response.ok) throw new Error(`Could not load the live Universe ledger: ${response.status}`);
+    const body = await response.json() as {
+      active_systems: Array<{
+        title: string;
+        progress_percent: number;
+        progress_sources: {
+          completed_actions: number;
+          total_actions: number;
+          glow_points: number;
+          formula: string;
+        };
+      }>;
+    };
+    return body.active_systems.find(system => system.title === "Ambition") ?? null;
+  });
+  expect(ambition, "The live owner ledger must include Ambition").not.toBeNull();
 
   await expect(page.locator("#root")).toHaveCount(0);
   const universe = page.frameLocator("#nur-universe-stage");
@@ -106,11 +124,23 @@ test("SOL living backend hydrates and moves the exact V197 presentation", async 
     "Ambition", "Rebuild", "Creation", "Growth", "Introspection", "Connection",
   ]);
   await universe.locator('.universe-system-node[data-system="Ambition"]').click();
-  await expect(universe.locator(".universe-system-node").first().locator("small")).toContainText(/% · \d+ Glow/);
+  await expect(universe.locator(".universe-system-node").first().locator("small")).toHaveText(
+    `${ambition?.progress_percent}% · ${ambition?.progress_sources.glow_points} Glow`,
+  );
   await expect(universe.locator(".universe-insight-title h2")).toHaveText("Ambition");
   await expect(universe.locator(".universe-insight-copy")).toContainText("Private hunger");
-  await expect(universe.locator(".universe-state-strip")).toContainText("calculated from owner evidence");
-  await expect(universe.locator(".universe-system-lane")).toContainText("persisted Glow");
+  await expect(universe.locator(".universe-insight-panel")).toContainText("OWNER LEDGER");
+  await expect(universe.locator(".insight-strength b")).toHaveText(`${ambition?.progress_percent}%`);
+  await expect(universe.locator(".insight-evidence b")).toHaveText(
+    `${ambition?.progress_sources.completed_actions}/${ambition?.progress_sources.total_actions} actions · ${ambition?.progress_sources.glow_points} Glow`,
+  );
+  await expect(universe.locator(".insight-evidence span")).toHaveText(ambition?.progress_sources.formula ?? "");
+  await expect(universe.locator(".universe-system-lane")).toContainText(
+    `${ambition?.progress_sources.glow_points} persisted Glow`,
+  );
+  // The clean canonical rebuild deliberately retired the duplicate state-strip;
+  // owner evidence remains fully represented in the selected System panel.
+  await expect(universe.locator(".universe-state-strip")).toHaveCount(0);
   await expect(universe.locator("#nur-v197-language-open")).toHaveText("English");
   await expect(universe.locator("#nur-v197-locale option")).toHaveCount(35);
   await expectSystemsInsideMap(page);

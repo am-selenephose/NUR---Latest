@@ -120,7 +120,16 @@ class WorkerDispatcher:
         lines = query.strip().splitlines()
         first_line = lines[0].strip() if lines else query.strip()
         raw_target = first_line
-        for prefix in [
+        title_prefixes = [
+            "draft a plan to save this reviewed preview:",
+            "show me a plan for ",
+            "show me a plan to ",
+            "show me a plan ",
+            "outline a plan for ",
+            "outline a plan to ",
+            "outline a plan ",
+            "plan this out for ",
+            "plan this out: ",
             "let's draft a plan to ",
             "draft a plan to ",
             "make a plan to ",
@@ -133,11 +142,27 @@ class WorkerDispatcher:
             "save draft plan ",
             "save plan ",
             "plan to ",
-        ]:
-            if raw_target.lower().startswith(prefix):
-                raw_target = raw_target[len(prefix):]
+        ]
+        for _ in range(3):
+            matched_prefix = next(
+                (prefix for prefix in title_prefixes if raw_target.lower().startswith(prefix)),
+                None,
+            )
+            if matched_prefix is None:
                 break
-        clean_target = raw_target.strip().capitalize() if raw_target.strip() else ""
+            raw_target = raw_target[len(matched_prefix):].lstrip(" :-")
+        stripped_target = raw_target.strip()
+        inline_parts = [
+            part.strip()
+            for part in stripped_target.split(" - ")
+            if part.strip()
+        ]
+        title_target = inline_parts[0] if len(inline_parts) > 1 else stripped_target
+        clean_target = (
+            f"{title_target[:1].upper()}{title_target[1:]}"
+            if title_target
+            else ""
+        )
         title = params.get("title") or (clean_target[:80] + "..." if len(clean_target) > 80 else clean_target)
 
         if not title:
@@ -155,7 +180,7 @@ class WorkerDispatcher:
         if params.get("steps") and isinstance(params["steps"], list):
             steps = [str(s) for s in params["steps"]]
         else:
-            extracted_steps: list[str] = []
+            extracted_steps = inline_parts[1:] if len(inline_parts) > 1 else []
             for line in query.splitlines():
                 line_clean = line.strip()
                 if line_clean.startswith(("-", "*", "1.", "2.", "3.", "4.", "5.", "6.", "7.", "8.", "9.")):

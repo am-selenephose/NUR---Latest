@@ -14,7 +14,7 @@ COPY apps/api/pyproject.toml ./pyproject.toml
 COPY apps/api/alembic.ini ./alembic.ini
 COPY apps/api/alembic ./alembic
 COPY apps/api/app ./app
-RUN pip install --no-cache-dir --no-deps .
+RUN pip install --no-cache-dir --no-deps --no-build-isolation .
 
 RUN useradd -m nur && chown -R nur /srv/api
 USER nur

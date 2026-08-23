@@ -14,7 +14,7 @@ test("owner policy compiles, starts and cancels a bounded workflow", async ({ pa
   await expect(adjunct.getByText("Owner policy persisted. No workflow was started.")).toBeVisible();
   expect(state.agenticWrites[0]).toMatchObject({
     path: "/api/v1/agentic/policy",
-    body: { permitted_tools: ["get_today_state"] },
+    body: { seen_version: 0, permitted_tools: ["get_today_state"] },
   });
 
   await adjunct.locator('[data-adjunct-control="agentic-title"]').fill("Read today's owner state");
@@ -58,8 +58,8 @@ test("approval action is bound to the displayed digest and plan versions", async
     risk_class: "R0_READ_ONLY",
     reversible: true,
     scope_summary: "This private Orbit only",
-    cost_ceiling_cents: 0,
-    expires_at: null,
+    cost_ceiling_cents: 275,
+    expires_at: "2099-01-01T00:00:00Z",
     argument_digest: "sha256:displayed-arguments",
     plan_version: 3,
     call_version: "call-version-displayed",
@@ -67,8 +67,12 @@ test("approval action is bound to the displayed digest and plan versions", async
 
   await page.goto("/agents", { waitUntil: "networkidle" });
   const adjunct = page.frameLocator("#nur-universe-stage").locator("#nur-v197-adjunct-root");
-  await expect(adjunct.getByText("Owner policy requires a visible decision.")).toBeVisible();
-  await adjunct.locator('[data-adjunct-action="agentic-approval-approve-abababab-abab-4bab-8bab-abababababab"]').click();
+  const approval = adjunct.locator('[data-agentic-approval-id="abababab-abab-4bab-8bab-abababababab"]');
+  await expect(approval).toHaveCount(1);
+  await expect(approval.getByText("Owner policy requires a visible decision.")).toBeVisible();
+  await expect(approval.locator(".nur-adjunct-fact").filter({ hasText: "Cost" })).toContainText("Up to 2.75");
+  await expect(approval.locator(".nur-adjunct-fact").filter({ hasText: "Expires" })).toContainText("2099");
+  await approval.locator('[data-adjunct-action="agentic-approval-approve-abababab-abab-4bab-8bab-abababababab"]').click();
   await expect(adjunct.getByText("No approval is waiting")).toBeVisible();
 
   expect(state.agenticWrites.at(-1)).toEqual({

@@ -1,39 +1,144 @@
 {
   "label": "baseline",
-  "generatedAt": "2026-08-12T07:39:18.613Z",
+  "generatedAt": "2026-08-22T17:35:08.284Z",
   "browser": "chromium-desktop",
   "canonicalV197Sha256": "c4699091db9f1ebc3a6e2076d483a3d41303d3e261ace0111c9411322f7ea3a5",
   "requestedSoakMs": 60000,
-  "actualSoakMs": 60073.341855999985,
+  "actualSoakMs": 60081.299788000004,
   "routeTimingsMs": {
-    "loginToUniverseMs": 1609.3148040000233,
-    "systemsNavigationMs": 385.04359599997406,
-    "mapNavigationMs": 364.9108299999789
+    "loginToUniverseMs": 2034.2419699999955,
+    "systemsNavigationMs": 876.3714369999943,
+    "mapNavigationMs": 535.2884339999873
   },
   "entry": {
     "cadence": {
-      "durationMs": 4999.8,
-      "frames": 155,
-      "fps": 30.8,
-      "p50DeltaMs": 33.3,
-      "p95DeltaMs": 66.6,
-      "maxDeltaMs": 83.4,
-      "droppedFrameIntervals": 119
+      "durationMs": 5016.5,
+      "frames": 71,
+      "fps": 13.95,
+      "p50DeltaMs": 66.7,
+      "p95DeltaMs": 133.3,
+      "maxDeltaMs": 216.6,
+      "droppedFrameIntervals": 70
     },
     "counters": {
-      "longTasks": [],
+      "longTasks": [
+        {
+          "startTime": 1356.6000000014901,
+          "duration": 74
+        },
+        {
+          "startTime": 1586.4000000059605,
+          "duration": 61
+        },
+        {
+          "startTime": 1851.8000000044703,
+          "duration": 180
+        },
+        {
+          "startTime": 2071.60000000149,
+          "duration": 50
+        },
+        {
+          "startTime": 2137.10000000149,
+          "duration": 53
+        },
+        {
+          "startTime": 2425.2000000029802,
+          "duration": 56
+        },
+        {
+          "startTime": 2942.5,
+          "duration": 58
+        },
+        {
+          "startTime": 3003.10000000149,
+          "duration": 61
+        },
+        {
+          "startTime": 3205,
+          "duration": 55
+        },
+        {
+          "startTime": 3349.60000000149,
+          "duration": 51
+        },
+        {
+          "startTime": 3599.4000000059605,
+          "duration": 51
+        },
+        {
+          "startTime": 3771.7000000029802,
+          "duration": 50
+        },
+        {
+          "startTime": 4250.20000000298,
+          "duration": 53
+        },
+        {
+          "startTime": 4318,
+          "duration": 52
+        },
+        {
+          "startTime": 4395.30000000447,
+          "duration": 51
+        },
+        {
+          "startTime": 4629.60000000149,
+          "duration": 51
+        },
+        {
+          "startTime": 4711.5,
+          "duration": 59
+        },
+        {
+          "startTime": 4848.20000000298,
+          "duration": 50
+        },
+        {
+          "startTime": 5139.5,
+          "duration": 51
+        },
+        {
+          "startTime": 5331.30000000447,
+          "duration": 59
+        },
+        {
+          "startTime": 5433.70000000298,
+          "duration": 51
+        },
+        {
+          "startTime": 6213.30000000447,
+          "duration": 56
+        },
+        {
+          "startTime": 6279.20000000298,
+          "duration": 60
+        },
+        {
+          "startTime": 6543.60000000149,
+          "duration": 57
+        },
+        {
+          "startTime": 6633.60000000149,
+          "duration": 53
+        },
+        {
+          "startTime": 6696.20000000298,
+          "duration": 50
+        }
+      ],
       "longAnimationFrames": [],
       "eventTimings": [],
       "layoutShift": 0,
-      "rafRequested": 487,
-      "rafCompleted": 485,
+      "rafRequested": 156,
+      "rafCompleted": 155,
       "rafCancelled": 0,
-      "activeRaf": 2,
-      "listenerAdds": 58,
+      "activeRaf": 1,
+      "listenerAdds": 66,
       "listenerRemoves": 0,
-      "mutationObservers": 9,
+      "mutationObservers": 7,
       "resizeObservers": 1,
-      "canvasContexts": 299,
+      "canvasContexts": 5,
       "canvasElements": 3,
       "canvasOwners": [
         "icv",
@@ -201,138 +306,148 @@
           "count": 10
         }
       ],
-      "elementCount": 654,
+      "elementCount": 653,
       "miniStarHosts": 0,
       "miniStarModules": 0,
       "starRays": 0,
       "adjunctRoots": 0,
       "bridgeStyleNodes": 1,
-      "particleCount": 1302,
-      "usedJSHeapSize": 19300000,
-      "totalJSHeapSize": 42100000,
+      "particleCount": 2400,
+      "usedJSHeapSize": 14300000,
+      "totalJSHeapSize": 21700000,
       "visibilityState": "visible"
     }
   },
   "universe": {
     "cadence": {
-      "durationMs": 5033.099999999999,
-      "frames": 164,
-      "fps": 32.39,
-      "p50DeltaMs": 33.3,
-      "p95DeltaMs": 50,
-      "maxDeltaMs": 50.1,
-      "droppedFrameIntervals": 128
+      "durationMs": 5016.5,
+      "frames": 94,
+      "fps": 18.54,
+      "p50DeltaMs": 50,
+      "p95DeltaMs": 83.2,
+      "maxDeltaMs": 83.4,
+      "droppedFrameIntervals": 90
     },
     "start": {
       "longTasks": [
         {
-          "startTime": 302.29999999981374,
-          "duration": 106
+          "startTime": 157.70000000298023,
+          "duration": 58
+        },
+        {
+          "startTime": 226,
+          "duration": 90
+        },
+        {
+          "startTime": 375.20000000298023,
+          "duration": 209
+        },
+        {
+          "startTime": 1268.1000000014901,
+          "duration": 100
+        },
+        {
+          "startTime": 4216.70000000298,
+          "duration": 54
+        },
+        {
+          "startTime": 4475.5,
+          "duration": 51
+        },
+        {
+          "startTime": 5131.30000000447,
+          "duration": 50
+        },
+        {
+          "startTime": 5283.10000000149,
+          "duration": 50
+        },
+        {
+          "startTime": 5828.5,
+          "duration": 54
+        },
+        {
+          "startTime": 5905.60000000149,
+          "duration": 81
+        },
+        {
+          "startTime": 6005.60000000149,
+          "duration": 54
         }
       ],
       "longAnimationFrames": [],
       "eventTimings": [
         {
           "name": "pointerover",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "mouseover",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         }
       ],
       "layoutShift": 0,
-      "rafRequested": 446,
-      "rafCompleted": 444,
+      "rafRequested": 190,
+      "rafCompleted": 189,
       "rafCancelled": 0,
-      "activeRaf": 2,
-      "listenerAdds": 120,
+      "activeRaf": 1,
+      "listenerAdds": 128,
       "listenerRemoves": 0,
-      "mutationObservers": 6,
+      "mutationObservers": 4,
       "resizeObservers": 1,
-      "canvasContexts": 284,
+      "canvasContexts": 5,
       "canvasElements": 2,
       "canvasOwners": [
         "space3d",
@@ -388,11 +503,11 @@
         },
         {
           "name": "nur-holo-control",
-          "count": 104
+          "count": 106
         },
         {
           "name": "nur-holo-film",
-          "count": 104
+          "count": 106
         },
         {
           "name": "g",
@@ -400,7 +515,7 @@
         },
         {
           "name": "nur-holo-anchor",
-          "count": 39
+          "count": 41
         },
         {
           "name": "h",
@@ -495,259 +610,251 @@
           "count": 11
         }
       ],
-      "elementCount": 1316,
+      "elementCount": 1336,
       "miniStarHosts": 0,
       "miniStarModules": 0,
       "starRays": 0,
       "adjunctRoots": 0,
       "bridgeStyleNodes": 1,
-      "particleCount": 1302,
-      "usedJSHeapSize": 19300000,
-      "totalJSHeapSize": 42100000,
+      "particleCount": 2400,
+      "usedJSHeapSize": 14300000,
+      "totalJSHeapSize": 21700000,
       "visibilityState": "visible"
     },
     "afterMap": {
       "longTasks": [
         {
-          "startTime": 302.29999999981374,
-          "duration": 106
+          "startTime": 157.70000000298023,
+          "duration": 58
+        },
+        {
+          "startTime": 226,
+          "duration": 90
+        },
+        {
+          "startTime": 375.20000000298023,
+          "duration": 209
+        },
+        {
+          "startTime": 1268.1000000014901,
+          "duration": 100
+        },
+        {
+          "startTime": 4216.70000000298,
+          "duration": 54
+        },
+        {
+          "startTime": 4475.5,
+          "duration": 51
+        },
+        {
+          "startTime": 5131.30000000447,
+          "duration": 50
+        },
+        {
+          "startTime": 5283.10000000149,
+          "duration": 50
+        },
+        {
+          "startTime": 5828.5,
+          "duration": 54
+        },
+        {
+          "startTime": 5905.60000000149,
+          "duration": 81
+        },
+        {
+          "startTime": 6005.60000000149,
+          "duration": 54
+        },
+        {
+          "startTime": 6125.39999999851,
+          "duration": 64
+        },
+        {
+          "startTime": 6329.39999999851,
+          "duration": 52
+        },
+        {
+          "startTime": 7103,
+          "duration": 53
         }
       ],
       "longAnimationFrames": [],
       "eventTimings": [
         {
           "name": "pointerover",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "mouseover",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerout",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerleave",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerleave",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerleave",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerleave",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerleave",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerleave",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerleave",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerleave",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerover",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "mouseout",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "mouseover",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerdown",
-          "startTime": 5984,
-          "duration": 64,
-          "interactionId": 4222
+          "startTime": 6880.5,
+          "duration": 112,
+          "interactionId": 5851
         },
         {
           "name": "mousedown",
-          "startTime": 5984,
-          "duration": 64,
+          "startTime": 6880.5,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerup",
-          "startTime": 5984,
-          "duration": 64,
-          "interactionId": 4222
+          "startTime": 6880.60000000149,
+          "duration": 112,
+          "interactionId": 5851
         },
         {
           "name": "mouseup",
-          "startTime": 5984,
-          "duration": 64,
+          "startTime": 6880.60000000149,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "click",
-          "startTime": 5984,
-          "duration": 64,
-          "interactionId": 4222
+          "startTime": 6880.60000000149,
+          "duration": 112,
+          "interactionId": 5851
         }
       ],
       "layoutShift": 0,
-      "rafRequested": 500,
-      "rafCompleted": 496,
+      "rafRequested": 227,
+      "rafCompleted": 224,
       "rafCancelled": 0,
-      "activeRaf": 4,
-      "listenerAdds": 141,
+      "activeRaf": 3,
+      "listenerAdds": 149,
       "listenerRemoves": 0,
-      "mutationObservers": 6,
+      "mutationObservers": 4,
       "resizeObservers": 1,
-      "canvasContexts": 289,
+      "canvasContexts": 5,
       "canvasElements": 2,
       "canvasOwners": [
         "space3d",
@@ -807,11 +914,11 @@
         },
         {
           "name": "nur-holo-control",
-          "count": 128
+          "count": 130
         },
         {
           "name": "nur-holo-film",
-          "count": 128
+          "count": 130
         },
         {
           "name": "g",
@@ -819,7 +926,7 @@
         },
         {
           "name": "nur-holo-anchor",
-          "count": 39
+          "count": 41
         },
         {
           "name": "h",
@@ -914,379 +1021,391 @@
           "count": 12
         }
       ],
-      "elementCount": 1468,
+      "elementCount": 1488,
       "miniStarHosts": 0,
       "miniStarModules": 0,
       "starRays": 0,
       "adjunctRoots": 0,
       "bridgeStyleNodes": 1,
-      "particleCount": 1367,
-      "usedJSHeapSize": 19300000,
-      "totalJSHeapSize": 42100000,
+      "particleCount": 2400,
+      "usedJSHeapSize": 14300000,
+      "totalJSHeapSize": 21700000,
       "visibilityState": "visible"
     },
     "end": {
       "longTasks": [
         {
-          "startTime": 302.29999999981374,
-          "duration": 106
+          "startTime": 157.70000000298023,
+          "duration": 58
+        },
+        {
+          "startTime": 226,
+          "duration": 90
+        },
+        {
+          "startTime": 375.20000000298023,
+          "duration": 209
+        },
+        {
+          "startTime": 1268.1000000014901,
+          "duration": 100
+        },
+        {
+          "startTime": 4216.70000000298,
+          "duration": 54
+        },
+        {
+          "startTime": 4475.5,
+          "duration": 51
+        },
+        {
+          "startTime": 5131.30000000447,
+          "duration": 50
+        },
+        {
+          "startTime": 5283.10000000149,
+          "duration": 50
+        },
+        {
+          "startTime": 5828.5,
+          "duration": 54
+        },
+        {
+          "startTime": 5905.60000000149,
+          "duration": 81
+        },
+        {
+          "startTime": 6005.60000000149,
+          "duration": 54
+        },
+        {
+          "startTime": 6125.39999999851,
+          "duration": 64
+        },
+        {
+          "startTime": 6329.39999999851,
+          "duration": 52
+        },
+        {
+          "startTime": 7103,
+          "duration": 53
+        },
+        {
+          "startTime": 7816.70000000298,
+          "duration": 65
+        },
+        {
+          "startTime": 8622.10000000149,
+          "duration": 60
+        },
+        {
+          "startTime": 21732.60000000149,
+          "duration": 51
+        },
+        {
+          "startTime": 39530.89999999851,
+          "duration": 60
+        },
+        {
+          "startTime": 53066.10000000149,
+          "duration": 55
         }
       ],
       "longAnimationFrames": [],
       "eventTimings": [
         {
           "name": "pointerover",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerenter",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "mouseover",
-          "startTime": 478.09999999962747,
-          "duration": 56,
+          "startTime": 669.2000000029802,
+          "duration": 224,
           "interactionId": 0
         },
         {
           "name": "pointerout",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerleave",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerleave",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerleave",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerleave",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerleave",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerleave",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerleave",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
-          "interactionId": 0
-        },
-        {
-          "name": "pointerleave",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerover",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "mouseout",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "mouseover",
-          "startTime": 5983.9000000003725,
-          "duration": 64,
+          "startTime": 6880.39999999851,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerdown",
-          "startTime": 5984,
-          "duration": 64,
-          "interactionId": 4222
+          "startTime": 6880.5,
+          "duration": 112,
+          "interactionId": 5851
         },
         {
           "name": "mousedown",
-          "startTime": 5984,
-          "duration": 64,
+          "startTime": 6880.5,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "pointerup",
-          "startTime": 5984,
-          "duration": 64,
-          "interactionId": 4222
+          "startTime": 6880.60000000149,
+          "duration": 112,
+          "interactionId": 5851
         },
         {
           "name": "mouseup",
-          "startTime": 5984,
-          "duration": 64,
+          "startTime": 6880.60000000149,
+          "duration": 112,
           "interactionId": 0
         },
         {
           "name": "click",
-          "startTime": 5984,
-          "duration": 64,
-          "interactionId": 4222
+          "startTime": 6880.60000000149,
+          "duration": 112,
+          "interactionId": 5851
         },
         {
           "name": "pointerout",
-          "startTime": 6454.0999999996275,
-          "duration": 192,
+          "startTime": 7562,
+          "duration": 256,
           "interactionId": 0
         },
         {
           "name": "pointerleave",
-          "startTime": 6454.0999999996275,
-          "duration": 192,
+          "startTime": 7562,
+          "duration": 256,
           "interactionId": 0
         },
         {
           "name": "pointerleave",
-          "startTime": 6454.0999999996275,
-          "duration": 192,
+          "startTime": 7562,
+          "duration": 256,
           "interactionId": 0
         },
         {
           "name": "pointerleave",
-          "startTime": 6454.0999999996275,
-          "duration": 192,
+          "startTime": 7562,
+          "duration": 256,
           "interactionId": 0
         },
         {
           "name": "pointerleave",
-          "startTime": 6454.0999999996275,
-          "duration": 192,
+          "startTime": 7562,
+          "duration": 256,
           "interactionId": 0
         },
         {
           "name": "pointerleave",
-          "startTime": 6454.0999999996275,
-          "duration": 192,
+          "startTime": 7562,
+          "duration": 256,
           "interactionId": 0
         },
         {
           "name": "pointerover",
-          "startTime": 6454.0999999996275,
-          "duration": 192,
+          "startTime": 7562,
+          "duration": 256,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 6454.0999999996275,
-          "duration": 192,
+          "startTime": 7562,
+          "duration": 256,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 6454.0999999996275,
-          "duration": 192,
+          "startTime": 7562,
+          "duration": 256,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 6454.0999999996275,
-          "duration": 192,
+          "startTime": 7562,
+          "duration": 256,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 6454.0999999996275,
-          "duration": 192,
+          "startTime": 7562,
+          "duration": 256,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 6454.0999999996275,
-          "duration": 192,
+          "startTime": 7562,
+          "duration": 256,
           "interactionId": 0
         },
         {
           "name": "pointerenter",
-          "startTime": 6454.0999999996275,
-          "duration": 192,
+          "startTime": 7562,
+          "duration": 256,
           "interactionId": 0
         },
         {
           "name": "mouseout",
-          "startTime": 6454.0999999996275,
-          "duration": 192,
+          "startTime": 7562,
+          "duration": 256,
           "interactionId": 0
         },
         {
           "name": "mouseover",
-          "startTime": 6454.0999999996275,
-          "duration": 192,
+          "startTime": 7562,
+          "duration": 256,
           "interactionId": 0
         },
         {
           "name": "pointerdown",
-          "startTime": 6454.200000000186,
-          "duration": 192,
-          "interactionId": 4229
+          "startTime": 7562.10000000149,
+          "duration": 256,
+          "interactionId": 5858
         },
         {
           "name": "mousedown",
-          "startTime": 6454.200000000186,
-          "duration": 192,
+          "startTime": 7562.10000000149,
+          "duration": 256,
           "interactionId": 0
         },
         {
           "name": "pointerup",
-          "startTime": 6454.200000000186,
-          "duration": 192,
-          "interactionId": 4229
+          "startTime": 7562.20000000298,
+          "duration": 256,
+          "interactionId": 5858
         },
         {
           "name": "mouseup",
-          "startTime": 6454.200000000186,
-          "duration": 192,
+          "startTime": 7562.20000000298,
+          "duration": 256,
           "interactionId": 0
         },
         {
           "name": "click",
-          "startTime": 6454.200000000186,
-          "duration": 192,
-          "interactionId": 4229
+          "startTime": 7562.20000000298,
+          "duration": 256,
+          "interactionId": 5858
         }
       ],
       "layoutShift": 0,
-      "rafRequested": 4845,
-      "rafCompleted": 4843,
+      "rafRequested": 2462,
+      "rafCompleted": 2461,
       "rafCancelled": 0,
-      "activeRaf": 2,
-      "listenerAdds": 730,
+      "activeRaf": 1,
+      "listenerAdds": 416,
       "listenerRemoves": 0,
-      "mutationObservers": 6,
+      "mutationObservers": 4,
       "resizeObservers": 1,
-      "canvasContexts": 289,
+      "canvasContexts": 5,
       "canvasElements": 2,
       "canvasOwners": [
         "space3d",
@@ -1314,11 +1433,11 @@
       "topClasses": [
         {
           "name": "nur-holo-control",
-          "count": 151
+          "count": 146
         },
         {
           "name": "nur-holo-film",
-          "count": 151
+          "count": 146
         },
         {
           "name": "ray",
@@ -1333,32 +1452,12 @@
           "count": 144
         },
         {
-          "name": "nur-map-node",
-          "count": 78
-        },
-        {
-          "name": "nur-map-node-body",
-          "count": 78
-        },
-        {
           "name": "g",
           "count": 72
         },
         {
-          "name": "nur-map-edge",
-          "count": 67
-        },
-        {
-          "name": "nur-map-edge-contains",
-          "count": 58
-        },
-        {
           "name": "nur-holo-anchor",
-          "count": 47
-        },
-        {
-          "name": "nur-map-capsule",
-          "count": 39
+          "count": 45
         },
         {
           "name": "h",
@@ -1373,8 +1472,28 @@
           "count": 36
         },
         {
+          "name": "nur-map-capsule",
+          "count": 36
+        },
+        {
+          "name": "nur-map-node",
+          "count": 33
+        },
+        {
+          "name": "nur-map-node-body",
+          "count": 33
+        },
+        {
           "name": "nur-map-capsule-sm",
-          "count": 32
+          "count": 29
+        },
+        {
+          "name": "nur-map-edge",
+          "count": 28
+        },
+        {
+          "name": "nur-map-edge-contains",
+          "count": 21
         },
         {
           "name": "spark",
@@ -1433,15 +1552,15 @@
           "count": 12
         }
       ],
-      "elementCount": 1970,
+      "elementCount": 1739,
       "miniStarHosts": 0,
       "miniStarModules": 0,
       "starRays": 0,
       "adjunctRoots": 0,
       "bridgeStyleNodes": 1,
-      "particleCount": 1302,
-      "usedJSHeapSize": 19300000,
-      "totalJSHeapSize": 42100000,
+      "particleCount": 2400,
+      "usedJSHeapSize": 14300000,
+      "totalJSHeapSize": 21700000,
       "visibilityState": "visible"
     },
     "centres": {
@@ -1468,56 +1587,56 @@
   },
   "cdp": {
     "navigation": {
-      "Timestamp": 7658.575057,
+      "Timestamp": 53911.24866,
       "AudioHandlers": 0,
       "AudioWorkletProcessors": 0,
       "Documents": 4,
       "Frames": 4,
-      "JSEventListeners": 107,
-      "LayoutObjects": 337,
+      "JSEventListeners": 115,
+      "LayoutObjects": 402,
       "MediaKeySessions": 0,
       "MediaKeys": 0,
-      "Nodes": 2078,
-      "Resources": 28,
-      "ContextLifecycleStateObservers": 35,
+      "Nodes": 1891,
+      "Resources": 30,
+      "ContextLifecycleStateObservers": 34,
       "V8PerContextDatas": 6,
       "WorkerGlobalScopes": 0,
       "UACSSResources": 0,
       "RTCPeerConnections": 0,
       "ResourceFetchers": 4,
       "AdSubframes": 0,
-      "DetachedScriptStates": 0,
-      "ArrayBufferContents": 0,
-      "LayoutCount": 43,
-      "RecalcStyleCount": 244,
-      "LayoutDuration": 0.019839,
-      "RecalcStyleDuration": 0.129803,
-      "DevToolsCommandDuration": 0.118999,
-      "ScriptDuration": 1.19835,
-      "V8CompileDuration": 0.003827,
-      "TaskDuration": 3.266896,
-      "TaskOtherDuration": 1.796078,
-      "ThreadTime": 3.115219,
-      "ProcessTime": 11.09,
-      "JSHeapUsedSize": 14294228,
-      "JSHeapTotalSize": 34934784,
+      "DetachedScriptStates": 4,
+      "ArrayBufferContents": 15,
+      "LayoutCount": 46,
+      "RecalcStyleCount": 163,
+      "LayoutDuration": 0.034082,
+      "RecalcStyleDuration": 0.145114,
+      "DevToolsCommandDuration": 0.301175,
+      "ScriptDuration": 2.92735,
+      "V8CompileDuration": 0.003825,
+      "TaskDuration": 4.149173,
+      "TaskOtherDuration": 0.737627,
+      "ThreadTime": 1.611088,
+      "ProcessTime": 5.97,
+      "JSHeapUsedSize": 7173920,
+      "JSHeapTotalSize": 17326080,
       "FirstMeaningfulPaint": 0,
-      "DomContentLoaded": 7651.95096,
-      "NavigationStart": 7651.847857
+      "DomContentLoaded": 53904.423038,
+      "NavigationStart": 53904.249017
     },
     "heapAtStart": {
-      "Timestamp": 7665.716717,
+      "Timestamp": 53919.713668,
       "AudioHandlers": 0,
       "AudioWorkletProcessors": 0,
       "Documents": 4,
       "Frames": 4,
-      "JSEventListeners": 163,
-      "LayoutObjects": 586,
+      "JSEventListeners": 174,
+      "LayoutObjects": 1353,
       "MediaKeySessions": 0,
       "MediaKeys": 0,
-      "Nodes": 6844,
-      "Resources": 33,
-      "ContextLifecycleStateObservers": 42,
+      "Nodes": 7380,
+      "Resources": 34,
+      "ContextLifecycleStateObservers": 40,
       "V8PerContextDatas": 5,
       "WorkerGlobalScopes": 0,
       "UACSSResources": 0,
@@ -1525,37 +1644,37 @@
       "ResourceFetchers": 4,
       "AdSubframes": 0,
       "DetachedScriptStates": 2,
-      "ArrayBufferContents": 0,
-      "LayoutCount": 105,
-      "RecalcStyleCount": 567,
-      "LayoutDuration": 0.05517,
-      "RecalcStyleDuration": 0.346893,
-      "DevToolsCommandDuration": 0.33435,
-      "ScriptDuration": 2.617432,
-      "V8CompileDuration": 0.005143,
-      "TaskDuration": 7.537147,
-      "TaskOtherDuration": 4.178159,
-      "ThreadTime": 7.344219,
-      "ProcessTime": 18.92,
-      "JSHeapUsedSize": 21317712,
-      "JSHeapTotalSize": 43315200,
+      "ArrayBufferContents": 29,
+      "LayoutCount": 108,
+      "RecalcStyleCount": 446,
+      "LayoutDuration": 0.121194,
+      "RecalcStyleDuration": 0.536536,
+      "DevToolsCommandDuration": 0.741444,
+      "ScriptDuration": 7.198285,
+      "V8CompileDuration": 0.0054,
+      "TaskDuration": 10.430688,
+      "TaskOtherDuration": 1.827829,
+      "ThreadTime": 4.137991,
+      "ProcessTime": 11.57,
+      "JSHeapUsedSize": 10145860,
+      "JSHeapTotalSize": 22089728,
       "FirstMeaningfulPaint": 0,
-      "DomContentLoaded": 7651.95096,
-      "NavigationStart": 7651.847857
+      "DomContentLoaded": 53904.423038,
+      "NavigationStart": 53904.249017
     },
     "heapAfterMap": {
-      "Timestamp": 7666.500615,
+      "Timestamp": 53921.18594,
       "AudioHandlers": 0,
       "AudioWorkletProcessors": 0,
       "Documents": 4,
       "Frames": 4,
-      "JSEventListeners": 184,
-      "LayoutObjects": 1314,
+      "JSEventListeners": 226,
+      "LayoutObjects": 1392,
       "MediaKeySessions": 0,
       "MediaKeys": 0,
-      "Nodes": 7843,
-      "Resources": 36,
-      "ContextLifecycleStateObservers": 42,
+      "Nodes": 7364,
+      "Resources": 37,
+      "ContextLifecycleStateObservers": 40,
       "V8PerContextDatas": 5,
       "WorkerGlobalScopes": 0,
       "UACSSResources": 0,
@@ -1563,37 +1682,37 @@
       "ResourceFetchers": 4,
       "AdSubframes": 0,
       "DetachedScriptStates": 2,
-      "ArrayBufferContents": 0,
-      "LayoutCount": 140,
-      "RecalcStyleCount": 627,
-      "LayoutDuration": 0.065522,
-      "RecalcStyleDuration": 0.384588,
-      "DevToolsCommandDuration": 0.534907,
-      "ScriptDuration": 2.755764,
-      "V8CompileDuration": 0.005143,
-      "TaskDuration": 8.138683,
-      "TaskOtherDuration": 4.392759,
-      "ThreadTime": 7.942076,
-      "ProcessTime": 19.92,
-      "JSHeapUsedSize": 28966340,
-      "JSHeapTotalSize": 43315200,
+      "ArrayBufferContents": 29,
+      "LayoutCount": 143,
+      "RecalcStyleCount": 507,
+      "LayoutDuration": 0.140912,
+      "RecalcStyleDuration": 0.614643,
+      "DevToolsCommandDuration": 1.067562,
+      "ScriptDuration": 7.85632,
+      "V8CompileDuration": 0.0054,
+      "TaskDuration": 11.641483,
+      "TaskOtherDuration": 1.956646,
+      "ThreadTime": 4.73202,
+      "ProcessTime": 12.55,
+      "JSHeapUsedSize": 23654888,
+      "JSHeapTotalSize": 32878592,
       "FirstMeaningfulPaint": 0,
-      "DomContentLoaded": 7651.95096,
-      "NavigationStart": 7651.847857
+      "DomContentLoaded": 53904.423038,
+      "NavigationStart": 53904.249017
     },
     "heapAtEnd": {
-      "Timestamp": 7726.625257,
+      "Timestamp": 53981.302558,
       "AudioHandlers": 0,
       "AudioWorkletProcessors": 0,
       "Documents": 4,
       "Frames": 4,
-      "JSEventListeners": 773,
-      "LayoutObjects": 1208,
+      "JSEventListeners": 441,
+      "LayoutObjects": 986,
       "MediaKeySessions": 0,
       "MediaKeys": 0,
-      "Nodes": 10148,
-      "Resources": 33,
-      "ContextLifecycleStateObservers": 42,
+      "Nodes": 8101,
+      "Resources": 34,
+      "ContextLifecycleStateObservers": 40,
       "V8PerContextDatas": 5,
       "WorkerGlobalScopes": 0,
       "UACSSResources": 0,
@@ -1601,37 +1720,37 @@
       "ResourceFetchers": 4,
       "AdSubframes": 0,
       "DetachedScriptStates": 2,
-      "ArrayBufferContents": 0,
-      "LayoutCount": 191,
-      "RecalcStyleCount": 2125,
-      "LayoutDuration": 0.081322,
-      "RecalcStyleDuration": 1.170998,
-      "DevToolsCommandDuration": 0.573014,
-      "ScriptDuration": 10.371894,
-      "V8CompileDuration": 0.005143,
-      "TaskDuration": 33.613357,
-      "TaskOtherDuration": 21.410986,
-      "ThreadTime": 33.65539,
-      "ProcessTime": 56.67,
-      "JSHeapUsedSize": 11953248,
-      "JSHeapTotalSize": 48033792,
+      "ArrayBufferContents": 29,
+      "LayoutCount": 187,
+      "RecalcStyleCount": 1667,
+      "LayoutDuration": 0.16684,
+      "RecalcStyleDuration": 1.544103,
+      "DevToolsCommandDuration": 1.10947,
+      "ScriptDuration": 24.337872,
+      "V8CompileDuration": 0.0054,
+      "TaskDuration": 33.316953,
+      "TaskOtherDuration": 6.153268,
+      "ThreadTime": 13.841244,
+      "ProcessTime": 29.2,
+      "JSHeapUsedSize": 9437932,
+      "JSHeapTotalSize": 12120064,
       "FirstMeaningfulPaint": 0,
-      "DomContentLoaded": 7651.95096,
-      "NavigationStart": 7651.847857
+      "DomContentLoaded": 53904.423038,
+      "NavigationStart": 53904.249017
     },
     "final": {
-      "Timestamp": 7726.627795,
+      "Timestamp": 53981.304657,
       "AudioHandlers": 0,
       "AudioWorkletProcessors": 0,
       "Documents": 4,
       "Frames": 4,
-      "JSEventListeners": 752,
-      "LayoutObjects": 1208,
+      "JSEventListeners": 441,
+      "LayoutObjects": 986,
       "MediaKeySessions": 0,
       "MediaKeys": 0,
-      "Nodes": 10148,
-      "Resources": 33,
-      "ContextLifecycleStateObservers": 42,
+      "Nodes": 8101,
+      "Resources": 34,
+      "ContextLifecycleStateObservers": 40,
       "V8PerContextDatas": 5,
       "WorkerGlobalScopes": 0,
       "UACSSResources": 0,
@@ -1639,23 +1758,23 @@
       "ResourceFetchers": 4,
       "AdSubframes": 0,
       "DetachedScriptStates": 2,
-      "ArrayBufferContents": 0,
-      "LayoutCount": 191,
-      "RecalcStyleCount": 2125,
-      "LayoutDuration": 0.081322,
-      "RecalcStyleDuration": 1.170998,
-      "DevToolsCommandDuration": 0.573135,
-      "ScriptDuration": 10.373566,
-      "V8CompileDuration": 0.005143,
-      "TaskDuration": 33.615721,
-      "TaskOtherDuration": 21.411557,
-      "ThreadTime": 33.657918,
-      "ProcessTime": 56.68,
-      "JSHeapUsedSize": 12531992,
-      "JSHeapTotalSize": 48033792,
+      "ArrayBufferContents": 29,
+      "LayoutCount": 187,
+      "RecalcStyleCount": 1667,
+      "LayoutDuration": 0.16684,
+      "RecalcStyleDuration": 1.544103,
+      "DevToolsCommandDuration": 1.109608,
+      "ScriptDuration": 24.338046,
+      "V8CompileDuration": 0.0054,
+      "TaskDuration": 33.319035,
+      "TaskOtherDuration": 6.155038,
+      "ThreadTime": 13.843333,
+      "ProcessTime": 29.21,
+      "JSHeapUsedSize": 9438044,
+      "JSHeapTotalSize": 12120064,
       "FirstMeaningfulPaint": 0,
-      "DomContentLoaded": 7651.95096,
-      "NavigationStart": 7651.847857
+      "DomContentLoaded": 53904.423038,
+      "NavigationStart": 53904.249017
     }
   }
 }

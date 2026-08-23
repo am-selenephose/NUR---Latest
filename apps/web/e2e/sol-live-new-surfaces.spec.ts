@@ -33,8 +33,20 @@ test("live seeded SOL surfaces stay V197-native and persisted", async ({ page },
   const universe = page.frameLocator("#nur-universe-stage");
 
   await page.goto("/settings");
-  await expect(universe.locator("#nur-v197-adjunct-root")).toContainText("OPENAI_CONFIGURED");
-  await shot(page, "live-settings-openai-configured.png");
+  const health = await page.evaluate(async () => {
+    const response = await fetch("/healthz");
+    if (!response.ok) throw new Error(`Health boundary returned ${response.status}.`);
+    return response.json() as Promise<{ ai_provider: string }>;
+  });
+  const settings = universe.locator("#nur-v197-adjunct-root");
+  if (health.ai_provider === "openai") {
+    await expect(settings).toContainText("OPENAI_CONFIGURED");
+  } else {
+    expect(health.ai_provider).toBe("disabled");
+    await expect(settings).toContainText("ProviderDISABLED");
+    await expect(settings).toContainText("AI is not connected");
+  }
+  await shot(page, "live-settings-provider-boundary.png");
 
   await page.goto("/community");
   await expect(universe.locator("#nur-v197-adjunct-root")).toContainText("NUR release room");

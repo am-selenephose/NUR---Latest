@@ -24,6 +24,7 @@ const SURFACES: Surface[] = [
   { name: "community", route: "/universe/community", selector: "#nur-v197-adjunct-root" },
   { name: "billing", route: "/billing", selector: "#nur-v197-adjunct-root" },
   { name: "notifications", route: "/notifications", selector: "#nur-v197-adjunct-root" },
+  { name: "settings", route: "/settings", selector: "#nur-v197-adjunct-root" },
 ];
 
 async function revealEntry(page: Page): Promise<FrameLocator> {

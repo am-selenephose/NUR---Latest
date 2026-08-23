@@ -1,5 +1,6 @@
 import { expect, test, type FrameLocator, type Locator, type Page } from "@playwright/test";
 
+import { canvasSignal } from "./helpers/canvasSignal";
 import { installNurMocks } from "./helpers/nurMocks";
 
 const SPECTRUM = ["red", "orange", "yellow", "green", "blue", "indigo", "violet"] as const;
@@ -41,33 +42,11 @@ async function brainDiagnostics(canvas: Locator): Promise<BrainDiagnostics> {
   });
 }
 
-async function canvasSignal(canvas: Locator): Promise<{ lit: number; alpha: number; checksum: number }> {
-  return canvas.evaluate((element: HTMLCanvasElement) => {
-    const context = element.getContext("2d");
-    if (!context || element.width < 2 || element.height < 2) return { lit: 0, alpha: 0, checksum: 0 };
-    const pixels = context.getImageData(0, 0, element.width, element.height).data;
-    const stride = Math.max(4, Math.floor(pixels.length / 32_000 / 4) * 4);
-    let lit = 0;
-    let alpha = 0;
-    let checksum = 0;
-    for (let index = 0; index < pixels.length; index += stride) {
-      const red = pixels[index] ?? 0;
-      const green = pixels[index + 1] ?? 0;
-      const blue = pixels[index + 2] ?? 0;
-      const opacity = pixels[index + 3] ?? 0;
-      if (opacity > 8) alpha += 1;
-      if (red + green + blue > 120 && opacity > 20) lit += 1;
-      checksum = (checksum + red * 3 + green * 5 + blue * 7 + opacity * 11) % 2_147_483_647;
-    }
-    return { lit, alpha, checksum };
-  });
-}
-
 async function proveMovingCanvas(canvas: Locator, minimumLit: number): Promise<void> {
-  await expect.poll(async () => (await canvasSignal(canvas)).lit, { timeout: 10_000 })
+  await expect.poll(async () => (await canvasSignal(canvas, 32_000)).lit, { timeout: 10_000 })
     .toBeGreaterThan(minimumLit);
-  const first = await canvasSignal(canvas);
-  await expect.poll(async () => (await canvasSignal(canvas)).checksum, { timeout: 5_000 })
+  const first = await canvasSignal(canvas, 32_000);
+  await expect.poll(async () => (await canvasSignal(canvas, 32_000)).checksum, { timeout: 5_000 })
     .not.toBe(first.checksum);
 }
 

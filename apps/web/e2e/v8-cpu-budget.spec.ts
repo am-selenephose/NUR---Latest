@@ -1,5 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { canvasSignal } from "./helpers/canvasSignal";
+
 type CpuSample = {
   wallSeconds: number;
   taskSeconds: number;
@@ -68,27 +70,11 @@ test("real CPU cost per surface", async ({ page }) => {
   const entry = await cpuSeries("ENTRY");
 
   await signIn(page);
-  const hiddenEntryMotion = await page.frameLocator("#nur-entry-stage").locator("body").evaluate(async () => {
-    const checksum = (canvas: HTMLCanvasElement | null) => {
-      if (!canvas || canvas.width < 2 || canvas.height < 2) return 0;
-      const context = canvas.getContext("2d");
-      if (!context) return 0;
-      const data = context.getImageData(0, 0, canvas.width, canvas.height).data;
-      const stride = Math.max(4, Math.floor(data.length / 20_000 / 4) * 4);
-      let value = 0;
-      for (let index = 0; index < data.length; index += stride) {
-        value = (value + (data[index] ?? 0) * 3 + (data[index + 1] ?? 0) * 5
-          + (data[index + 2] ?? 0) * 7 + (data[index + 3] ?? 0) * 11) % 2_147_483_647;
-      }
-      return value;
-    };
-    const canvases = ["#space3d", "#nur-brain-canvas"]
-      .map(selector => document.querySelector<HTMLCanvasElement>(selector));
-    const before = canvases.map(checksum);
-    await new Promise(resolve => setTimeout(resolve, 700));
-    return { before, after: canvases.map(checksum) };
-  });
-  expect(hiddenEntryMotion.after).toEqual(hiddenEntryMotion.before);
+  // Authenticated V197 retires the Entry stage rather than leaving a hidden
+  // animation owner alive. Physical absence is a stronger CPU/lifecycle law
+  // than comparing checksums in an invisible iframe.
+  await expect(page.locator("#nur-entry-stage")).toHaveCount(0);
+  await expect(page.locator("#nur-universe-stage.is-visible")).toHaveCount(1);
 
   await page.goto("/systems");
   await expect(page.locator("#nur-universe-stage")).toHaveClass(/is-visible/, { timeout: 25_000 });
@@ -119,26 +105,11 @@ test("real CPU cost per surface", async ({ page }) => {
       intervals: [250],
     },
   ).toBe(0);
-  const visibleUniverseMoves = await page.frameLocator("#nur-universe-stage").locator("body").evaluate(async () => {
-    const canvas = document.querySelector<HTMLCanvasElement>("#space3d");
-    if (!canvas) return false;
-    const context = canvas.getContext("2d");
-    if (!context) return false;
-    const checksum = () => {
-      const data = context.getImageData(0, 0, canvas.width, canvas.height).data;
-      const stride = Math.max(4, Math.floor(data.length / 20_000 / 4) * 4);
-      let value = 0;
-      for (let index = 0; index < data.length; index += stride) {
-        value = (value + (data[index] ?? 0) * 3 + (data[index + 1] ?? 0) * 5
-          + (data[index + 2] ?? 0) * 7 + (data[index + 3] ?? 0) * 11) % 2_147_483_647;
-      }
-      return value;
-    };
-    const before = checksum();
-    await new Promise(resolve => setTimeout(resolve, 700));
-    return checksum() !== before;
-  });
-  expect(visibleUniverseMoves).toBe(true);
+  const galaxyCanvas = universeStage.locator("#space3d");
+  const firstGalaxyFrame = await canvasSignal(galaxyCanvas, 20_000);
+  expect(firstGalaxyFrame.lit).toBeGreaterThan(110);
+  await page.waitForTimeout(700);
+  expect((await canvasSignal(galaxyCanvas, 20_000)).checksum).not.toBe(firstGalaxyFrame.checksum);
   const systems = await cpuSeries("SYSTEMS");
 
   /* Measured with CDP Performance.getMetrics, which reports real task time and

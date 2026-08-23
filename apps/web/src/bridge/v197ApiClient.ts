@@ -2017,7 +2017,7 @@ export class V197ApiClient {
     return this.get<V197AgenticPolicy>("/agentic/policy");
   }
 
-  putAgenticPolicy(payload: Omit<V197AgenticPolicy, "id" | "scope" | "persisted" | "granted_capabilities">): Promise<V197AgenticPolicy> {
+  putAgenticPolicy(payload: Omit<V197AgenticPolicy, "id" | "scope" | "persisted" | "version" | "granted_capabilities"> & { seen_version: number }): Promise<V197AgenticPolicy> {
     return this.put<V197AgenticPolicy>("/agentic/policy", payload);
   }
 

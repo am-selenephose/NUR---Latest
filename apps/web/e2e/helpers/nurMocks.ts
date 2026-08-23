@@ -258,18 +258,19 @@ export async function installBundledFontPolicy(page: Page) {
 
 export async function installNurMocks(page: Page) {
   await installBundledFontPolicy(page);
+  const cookieOrigin = process.env.NUR_REAL_STACK_BASE_URL?.trim() || "http://localhost:4173";
   await page.context().addCookies([
     {
       name: "nur_session",
       value: "mock-owner-session",
-      url: "http://localhost:4173",
+      url: cookieOrigin,
       httpOnly: true,
       sameSite: "Lax",
     },
     {
       name: "nur_csrf",
       value: "mock-owner-csrf",
-      url: "http://localhost:4173",
+      url: cookieOrigin,
       httpOnly: false,
       sameSite: "Lax",
     },
@@ -405,6 +406,7 @@ export async function installNurMocks(page: Page) {
     agenticPolicy: {
       scope: "ACCOUNT",
       persisted: false,
+      version: 0,
       initiative_level: "SUGGEST",
       max_risk_class: "R1_PRIVATE_DRAFT",
       permitted_tools: [],
@@ -507,10 +509,12 @@ export async function installNurMocks(page: Page) {
     if (path === "/api/v1/agentic/policy" && method === "PUT") {
       const body = JSON.parse(request.postData() || "{}") as Record<string, unknown>;
       state.agenticWrites.push({ path, body });
+      const { seen_version: seenVersion, ...policyBody } = body;
       state.agenticPolicy = {
         ...state.agenticPolicy,
-        ...body,
+        ...policyBody,
         persisted: true,
+        version: Number(seenVersion) + 1,
         granted_capabilities: (body.permitted_tools as string[] ?? []).map(key => key === "get_today_state" ? "read_today" : "read_timeline"),
       };
       return json(route, state.agenticPolicy);

@@ -10,16 +10,22 @@ import { expect, test, type BrowserContext, type FrameLocator, type Page } from 
  * owner's source selection is exercised through the same owner-scoped API the
  * product uses, and every visible step runs through exact V197 controls. */
 
-async function signIn(page: Page, email: string, password: string): Promise<FrameLocator> {
+async function registerOwner(page: Page, name: string, email: string, password: string): Promise<FrameLocator> {
   await page.goto("/", { waitUntil: "load" });
   const entry = page.frameLocator("#nur-entry-stage");
   await entry.locator("body").evaluate(() => {
     (window as unknown as { nurShowFront?: () => void }).nurShowFront?.();
   });
-  await entry.locator("#f4-signin").click();
-  await entry.locator("#f4-signin-email").fill(email);
-  await entry.locator("#f4-signin-password").fill(password);
-  await entry.locator("#f4-signin-form button[type='submit']").click();
+  await entry.locator("#f4-begin").click();
+  await entry.locator("#f4-name").fill(name);
+  await entry.locator("#f4-email").fill(email);
+  await entry.locator("#f4-password").fill(password);
+  await entry.locator("#f4-consent-check").check();
+  const registered = page.waitForResponse(response => (
+    response.url().includes("/api/v1/auth/register") && response.request().method() === "POST"
+  ));
+  await entry.locator("#f4-signup-form button[type='submit']").click();
+  expect((await registered).status()).toBe(201);
   await expect(page.locator("#nur-universe-stage")).toHaveClass(/is-visible/, { timeout: 20_000 });
   const universe = page.frameLocator("#nur-universe-stage");
   await expect(universe.locator("#page-today")).toBeVisible({ timeout: 20_000 });
@@ -34,14 +40,18 @@ test("capsule lifecycle across two accounts: share, scoped answer, revoke", asyn
   const recipientContext: BrowserContext = await browser.newContext({ viewport: { width: 1280, height: 720 } });
   const ownerPage = await ownerContext.newPage();
   const recipientPage = await recipientContext.newPage();
+  const ownerEmail = `capsule-owner-${stamp}@nurapp.dev`;
+  const recipientEmail = `capsule-recipient-${stamp}@nurapp.dev`;
+  const password = "capsule-orbit-pass-2026";
 
   // ── owner: real session through the exact V197 entry ──
-  await signIn(ownerPage, "owner@nur.app", "owner-demo-pass-123");
+  await registerOwner(ownerPage, "Capsule Owner", ownerEmail, password);
+  await registerOwner(recipientPage, "Capsule Recipient", recipientEmail, password);
 
   // ── owner: approve one Decision, withhold one Reference, mint the grant ──
   // (the persisted-source boundary itself — driven through the same
   // owner-scoped, CSRF-protected API the product uses)
-  const minted = await ownerPage.evaluate(async (nonce) => {
+  const minted = await ownerPage.evaluate(async ({ nonce, recipientEmail }) => {
     const csrf = decodeURIComponent(
       document.cookie.split("; ").find(row => row.startsWith("nur_csrf="))?.split("=")[1] ?? "");
     const call = async (path: string, body: Record<string, unknown>) => {
@@ -81,11 +91,11 @@ test("capsule lifecycle across two accounts: share, scoped answer, revoke", asyn
       representations: { [decisionSource.id]: "FULL" },
     });
     await call(`/capsules/${capsule.id}/grants`, {
-      recipient_email: "recipient@nur.app",
+      recipient_email: recipientEmail,
       capability: "ASK_SCOPED_QUESTIONS",
     });
     return { capsuleId: capsule.id as string };
-  }, stamp);
+  }, { nonce: stamp, recipientEmail });
 
   // ── owner: the lifecycle room shows ACTIVE state and a live revoke control ──
   const ownerUniverse = ownerPage.frameLocator("#nur-universe-stage");
@@ -96,7 +106,6 @@ test("capsule lifecycle across two accounts: share, scoped answer, revoke", asyn
   await expect(ownerRoot.locator('[data-adjunct-action="capsule-revoke"]')).toBeEnabled();
 
   // ── recipient: the room, the boundary, the scoped answer ──
-  await signIn(recipientPage, "recipient@nur.app", "recipient-demo-pass-123");
   const recipientUniverse = recipientPage.frameLocator("#nur-universe-stage");
   await recipientPage.goto(`/capsule/${minted.capsuleId}`, { waitUntil: "load" });
   const room = recipientUniverse.locator("#nur-v197-adjunct-root");

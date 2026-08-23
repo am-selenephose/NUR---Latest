@@ -565,6 +565,20 @@ export class V197ActionBindings {
           ? "Workflow proposed · awaiting approval details"
           : "Conversational preview · nothing has been saved";
     }
+    let reviewButton = panel.querySelector<HTMLButtonElement>("[data-f5-agent-review]");
+    if (hasWorkflow && !reviewButton) {
+      reviewButton = this.document.createElement("button");
+      reviewButton.type = "button";
+      reviewButton.className = "v172-inline-action";
+      reviewButton.dataset.f5AgentReview = "true";
+      reviewButton.dataset.ownerRoute = "/agents";
+      panel.append(reviewButton);
+    }
+    if (reviewButton) {
+      reviewButton.hidden = !hasWorkflow;
+      reviewButton.textContent = "Review in Agency";
+      reviewButton.setAttribute("aria-label", "Review this Plan proposal in Agency");
+    }
     const saveButton = this.document.querySelector<HTMLElement>('[data-thread-action="plan"]');
     if (saveButton) {
       saveButton.textContent = this.capabilityState.workflowId

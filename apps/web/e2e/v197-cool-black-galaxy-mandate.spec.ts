@@ -1,5 +1,6 @@
 import { expect, test, type FrameLocator, type Locator, type Page } from "@playwright/test";
 
+import { canvasSignal } from "./helpers/canvasSignal";
 import { installNurMocks, json } from "./helpers/nurMocks";
 
 const HOLOGRAPHIC_CONTROLS = [
@@ -27,28 +28,6 @@ async function material(locator: Locator): Promise<Material> {
       border: style.borderColor,
       shadow: style.boxShadow,
     };
-  });
-}
-
-async function canvasSignal(canvas: Locator): Promise<{ lit: number; alpha: number; checksum: number }> {
-  return canvas.evaluate((element: HTMLCanvasElement) => {
-    const context = element.getContext("2d");
-    if (!context || element.width < 2 || element.height < 2) return { lit: 0, alpha: 0, checksum: 0 };
-    const pixels = context.getImageData(0, 0, element.width, element.height).data;
-    const stride = Math.max(4, Math.floor(pixels.length / 28_000 / 4) * 4);
-    let lit = 0;
-    let alpha = 0;
-    let checksum = 0;
-    for (let index = 0; index < pixels.length; index += stride) {
-      const r = pixels[index] ?? 0;
-      const g = pixels[index + 1] ?? 0;
-      const b = pixels[index + 2] ?? 0;
-      const a = pixels[index + 3] ?? 0;
-      if (a > 8) alpha += 1;
-      if (r + g + b > 120 && a > 20) lit += 1;
-      checksum = (checksum + r * 3 + g * 5 + b * 7 + a * 11) % 2_147_483_647;
-    }
-    return { lit, alpha, checksum };
   });
 }
 
@@ -359,6 +338,10 @@ test("Today, Talk, and Systems share one brain paint and one calm composer propo
       });
     return {
       total: controls.length,
+      visible: controls.map(control => (
+        `${control.tagName.toLowerCase()}#${control.id}.${control.className}`
+        + `|${control.getAttribute("aria-label") ?? control.textContent?.trim() ?? ""}`
+      )),
       missing: controls
         .filter(control => !control.querySelector(":scope > .nur-holo-film"))
         .map(control => `${control.tagName.toLowerCase()}.${control.className}`),
@@ -438,10 +421,10 @@ test("Today, Talk, and Systems share one brain paint and one calm composer propo
         .map(control => `${control.tagName.toLowerCase()}.${control.className}`),
     };
   }, HOLOGRAPHIC_CONTROLS);
-  // The retired research/community/consultation/expert/composer controls are
-  // physically absent; every remaining visible control still carries the
-  // complete material contract.
-  expect(controlCoverage.total).toBe(28);
+  // Retired consultation/expert/composer controls remain absent. The 31
+  // current controls include the bounded Research and Community portals, and
+  // every visible control must still carry the complete material contract.
+  expect(controlCoverage.total, controlCoverage.visible.join("\n")).toBe(31);
   expect(controlCoverage.missing).toEqual([]);
   expect(controlCoverage.incompleteSpectrum).toEqual([]);
   expect(controlCoverage.badGlass).toEqual([]);
@@ -732,7 +715,7 @@ test("Today, Talk, and Systems share one brain paint and one calm composer propo
       .map((element, index) => {
         const style = getComputedStyle(element);
         return {
-          identity: `${element.tagName.toLowerCase()}.${Array.from(element.classList).join(".")}#${index}`,
+          identity: `${element.tagName.toLowerCase()}.${Array.from(element.classList).join(".")}#${element.id || index}`,
           backgroundColor: style.backgroundColor,
           backgroundImage: style.backgroundImage,
           shadow: style.boxShadow,
@@ -740,7 +723,12 @@ test("Today, Talk, and Systems share one brain paint and one calm composer propo
         };
       });
   });
-  expect(allPanelMaterials).toHaveLength(2);
+  expect(allPanelMaterials.map(panel => panel.identity)).toEqual([
+    "section.universe-map-panel.nur-panel#0",
+    "aside.universe-insight-panel.nur-panel#1",
+    "section.universe-card#universe-research",
+    "section.universe-card#universe-community",
+  ]);
   for (const panel of allPanelMaterials) {
     const channels = panel.backgroundColor.match(/[\d.]+/g)?.slice(0, 3).map(Number) ?? [];
     expect(channels, `${panel.identity} must expose an RGB black base`).toHaveLength(3);

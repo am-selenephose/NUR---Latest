@@ -277,12 +277,16 @@ test("F5 Talk preview requires explicit save, approval, and exactly one durable 
   await expect(universe.locator("[data-f5-workflow-state]")).toContainText("Owner approval required");
   expect(planPosts).toBe(0);
 
+  const reviewInAgency = universe.locator("[data-f5-agent-review]");
+  await expect(reviewInAgency).toHaveText("Review in Agency");
+
   // A repeated owner click is a replay, not a second workflow or direct Plan write.
   await universe.locator('[data-thread-action="plan"]').click();
   await expect.poll(() => saveStreamCalls).toBe(1);
   expect(planPosts).toBe(0);
 
-  await page.goto("/agents");
+  await reviewInAgency.click();
+  await expect(page).toHaveURL(/\/agents$/);
   const adjunct = page.frameLocator("#nur-universe-stage").locator("#nur-v197-adjunct-root");
   await expect(adjunct.getByText("The owner explicitly asked to save the reviewed conversational Plan preview.")).toBeVisible();
   await adjunct.locator(`[data-adjunct-action="agentic-approval-approve-${APPROVAL_ID}"]`).click();

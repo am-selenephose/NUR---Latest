@@ -188,3 +188,73 @@ async def test_worker_dispatcher_workflow_proposal_worker():
     assert "steps" in step.arguments
     assert "objective" not in step.arguments
 
+
+@pytest.mark.asyncio
+async def test_plan_worker_preserves_subject_across_preview_and_explicit_save():
+    owner_id = uuid.uuid4()
+    context = HydratedCapabilityContext(
+        capability_id="capability:plan_from_conversation",
+        scope_envelope=ScopeEnvelope(
+            owner_user_id=owner_id,
+            surface="talk",
+            sensitivity_ceiling="NORMAL",
+            sharing_boundary="PRIVATE",
+        ),
+        manifest=ContextManifest(scope_statement="Private", token_budget=2000),
+    )
+    capability = CapabilitySpec(
+        capability_id="capability:plan_from_conversation",
+        name="Plan from Conversation",
+        description="Structured plan proposals",
+        intent_signatures=["draft a plan", "plan"],
+        execution_mode=ExecutionMode.WORKFLOW_PROPOSAL,
+        required_tools=["create_draft_plan", "get_plan"],
+    )
+    source = "Show me a plan for release candidate\n- Run readiness gates\n- Verify the exact commit"
+
+    preview = await WorkerDispatcher.dispatch(
+        AsyncMock(),
+        owner_user_id=owner_id,
+        capability=capability,
+        hydrated_context=context,
+        query=source,
+        task_id=uuid.uuid4(),
+    )
+    assert preview is not None
+    assert preview.workflow_proposal is None
+    assert preview.direct_response.startswith("### Plan Preview: Release candidate")
+
+    saved = await WorkerDispatcher.dispatch(
+        AsyncMock(),
+        owner_user_id=owner_id,
+        capability=capability,
+        hydrated_context=context,
+        query=f"Draft a plan to save this reviewed preview: {source}",
+        task_id=uuid.uuid4(),
+    )
+    assert saved is not None
+    assert saved.workflow_proposal is not None
+    assert saved.workflow_proposal.title == "Plan: Release candidate"
+    assert saved.workflow_proposal.steps[0].arguments == {
+        "title": "Release candidate",
+        "steps": ["Run readiness gates", "Verify the exact commit"],
+    }
+
+    flattened_source = (
+        "Show me a plan for release candidate - Run readiness gates - Verify the exact commit"
+    )
+    flattened = await WorkerDispatcher.dispatch(
+        AsyncMock(),
+        owner_user_id=owner_id,
+        capability=capability,
+        hydrated_context=context,
+        query=f"Draft a plan to save this reviewed preview: {flattened_source}",
+        task_id=uuid.uuid4(),
+    )
+    assert flattened is not None
+    assert flattened.workflow_proposal is not None
+    assert flattened.workflow_proposal.title == "Plan: Release candidate"
+    assert flattened.workflow_proposal.steps[0].arguments == {
+        "title": "Release candidate",
+        "steps": ["Run readiness gates", "Verify the exact commit"],
+    }

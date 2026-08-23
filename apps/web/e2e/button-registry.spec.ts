@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -24,6 +25,9 @@ const here = dirname(fileURLToPath(import.meta.url));
 const registry = JSON.parse(
   readFileSync(resolve(here, "../../../docs/interaction-registry.json"), "utf8"),
 ) as Registry;
+const canonicalSourceSha256 = createHash("sha256")
+  .update(readFileSync(resolve(here, "../public/v197/NUR_V197_CHECKBOX_TICK_RESTORED.html")))
+  .digest("hex");
 const visibleSelectors = registry.controls.flatMap(control => control.selector ? [control.selector] : []);
 
 async function showEntry(page: Page): Promise<FrameLocator> {
@@ -38,10 +42,16 @@ async function showEntry(page: Page): Promise<FrameLocator> {
 
 async function signIn(page: Page): Promise<FrameLocator> {
   const entry = await showEntry(page);
-  await entry.locator("#f4-signin").click();
-  await entry.locator("#f4-signin-email").fill("owner@nur.app");
-  await entry.locator("#f4-signin-password").fill("owner-demo-pass-123");
-  await entry.locator("#f4-signin-form button[type='submit']").click();
+  await entry.locator("#f4-begin").click();
+  await entry.locator("#f4-name").fill("Registry Owner");
+  await entry.locator("#f4-email").fill(`registry-${Date.now()}-${Math.floor(Math.random() * 1e6)}@nurapp.dev`);
+  await entry.locator("#f4-password").fill("registry-orbit-pass-2026");
+  await entry.locator("#f4-consent-check").check();
+  const registered = page.waitForResponse(response => (
+    response.url().includes("/api/v1/auth/register") && response.request().method() === "POST"
+  ));
+  await entry.locator("#f4-signup-form button[type='submit']").click();
+  expect((await registered).status()).toBe(201);
   await expect(page.locator("#nur-universe-stage")).toHaveClass(/is-visible/, { timeout: 20_000 });
   const universe = page.frameLocator("#nur-universe-stage");
   await expect(page).toHaveURL(/\/today$/);
@@ -82,7 +92,7 @@ async function uncovered(frame: FrameLocator): Promise<string[]> {
 
 test("machine-readable Track A registry is internally complete", () => {
   expect(registry.architecture).toBe("track-a-v197-native-host");
-  expect(registry.source_sha256).toBe("c4699091db9f1ebc3a6e2076d483a3d41303d3e261ace0111c9411322f7ea3a5");
+  expect(registry.source_sha256).toBe(canonicalSourceSha256);
   expect(new Set(registry.controls.map(control => control.id)).size).toBe(registry.controls.length);
   for (const control of registry.controls) {
     expect(registry.statuses).toContain(control.status);

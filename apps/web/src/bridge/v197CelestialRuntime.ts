@@ -24,6 +24,7 @@ const V197_SPECTRUM = [
 const TAU = Math.PI * 2;
 const GOLD = new THREE.Color(0xffd35a);
 const IVORY = new THREE.Color(0xfffae8);
+const GALAXY_STAR_SCALE = 1.82;
 
 type PointSeed = {
   x: number;
@@ -129,10 +130,8 @@ type CelestialController = {
   frameWindow: CelestialWindow;
   brainHost: HTMLElement;
   galaxyCanvas: HTMLCanvasElement;
-  galaxyContext: CanvasRenderingContext2D;
   brainCanvas: HTMLCanvasElement;
   brainContext: CanvasRenderingContext2D;
-  renderCanvas: HTMLCanvasElement;
   renderer: THREE.WebGLRenderer;
   galaxyScene: THREE.Scene;
   galaxyCamera: THREE.PerspectiveCamera;
@@ -680,7 +679,7 @@ function updateSizes(controller: CelestialController): void {
     controller.galaxyCanvas.style.height = `${height}px`;
     controller.galaxyCamera.aspect = width / height;
     controller.galaxyCamera.updateProjectionMatrix();
-    controller.galaxyMaterial.uniforms.uPointScale.value = dpr;
+    controller.galaxyMaterial.uniforms.uPointScale.value = dpr * GALAXY_STAR_SCALE;
     controller.brainMaterial.uniforms.uPointScale.value = dpr * 1.12;
   }
 
@@ -799,29 +798,9 @@ function paint(controller: CelestialController, now: number): void {
   updateSizes(controller);
   updateAnimation(controller, now);
 
-  const renderWidth = controller.renderCanvas.width;
-  const renderHeight = controller.renderCanvas.height;
-  controller.renderer.setScissorTest(false);
-  controller.renderer.setViewport(0, 0, renderWidth, renderHeight);
-  controller.renderer.setClearColor(0x000000, 0);
-  controller.renderer.clear(true, true, true);
-  controller.renderer.render(controller.galaxyScene, controller.galaxyCamera);
-  controller.galaxyContext.setTransform(1, 0, 0, 1, 0, 0);
-  controller.galaxyContext.clearRect(0, 0, controller.galaxyCanvas.width, controller.galaxyCanvas.height);
-  controller.galaxyContext.drawImage(
-    controller.renderCanvas,
-    0,
-    0,
-    renderWidth,
-    renderHeight,
-    0,
-    0,
-    controller.galaxyCanvas.width,
-    controller.galaxyCanvas.height,
-  );
-
-  const hostRect = controller.brainHost.getBoundingClientRect();
-  if (hostRect.width > 2 && hostRect.height > 2) {
+  const renderWidth = controller.galaxyCanvas.width;
+  const renderHeight = controller.galaxyCanvas.height;
+  if (controller.brainWidth > 2 && controller.brainHeight > 2) {
     const brainWidth = Math.min(renderWidth, controller.brainWidth);
     const brainHeight = Math.min(renderHeight, controller.brainHeight);
     controller.renderer.setScissorTest(true);
@@ -833,7 +812,7 @@ function paint(controller: CelestialController, now: number): void {
     controller.brainContext.setTransform(1, 0, 0, 1, 0, 0);
     controller.brainContext.clearRect(0, 0, controller.brainCanvas.width, controller.brainCanvas.height);
     controller.brainContext.drawImage(
-      controller.renderCanvas,
+      controller.galaxyCanvas,
       0,
       0,
       brainWidth,
@@ -844,7 +823,12 @@ function paint(controller: CelestialController, now: number): void {
       controller.brainCanvas.height,
     );
   }
+
   controller.renderer.setScissorTest(false);
+  controller.renderer.setViewport(0, 0, renderWidth, renderHeight);
+  controller.renderer.setClearColor(0x000000, 0);
+  controller.renderer.clear(true, true, true);
+  controller.renderer.render(controller.galaxyScene, controller.galaxyCamera);
 
   controller.frameCount += 1;
   controller.fpsFrames += 1;
@@ -917,8 +901,6 @@ function disposeController(controller: CelestialController): void {
   disposeObject(controller.galaxyScene);
   disposeObject(controller.brainScene);
   controller.renderer.dispose();
-  controller.renderCanvas.width = 0;
-  controller.renderCanvas.height = 0;
   controller.brainCanvas.width = 0;
   controller.brainCanvas.height = 0;
   controller.brainCanvas.remove();
@@ -1126,14 +1108,18 @@ function createController(
   frameWindow: CelestialWindow,
   brainHost: HTMLElement,
 ): CelestialController | null {
-  const galaxyCanvas = document.querySelector<HTMLCanvasElement>("#space3d");
-  if (!galaxyCanvas) return null;
-  const galaxyContext = galaxyCanvas.getContext("2d", { alpha: true });
-  if (!galaxyContext) return null;
+  const legacyGalaxyCanvas = document.querySelector<HTMLCanvasElement>("#space3d");
+  if (!legacyGalaxyCanvas) return null;
 
   const legacyGalaxy = frameWindow.nurGalaxy;
   try { legacyGalaxy?.dispose?.(); } catch { /* the new owner still mounts */ }
   try { frameWindow.nurStarBrain?.dispose?.(); } catch { /* the new owner still mounts */ }
+
+  // Canvas context mode is immutable. The polish bridge may already have
+  // claimed the canonical node as 2D to attenuate the legacy sky, so hand
+  // Three.js an attribute-identical fresh node while preserving V197 geometry.
+  const galaxyCanvas = legacyGalaxyCanvas.cloneNode(false) as HTMLCanvasElement;
+  legacyGalaxyCanvas.replaceWith(galaxyCanvas);
 
   document.getElementById("nur-brain-canvas")?.remove();
   const brainCanvas = document.createElement("canvas");
@@ -1146,11 +1132,10 @@ function createController(
     return null;
   }
 
-  const renderCanvas = document.createElement("canvas");
   let renderer: THREE.WebGLRenderer;
   try {
     renderer = new THREE.WebGLRenderer({
-      canvas: renderCanvas,
+      canvas: galaxyCanvas,
       alpha: true,
       antialias: true,
       powerPreference: "high-performance",
@@ -1197,10 +1182,8 @@ function createController(
     frameWindow,
     brainHost,
     galaxyCanvas,
-    galaxyContext,
     brainCanvas,
     brainContext,
-    renderCanvas,
     renderer,
     galaxyScene,
     galaxyCamera,
@@ -1408,6 +1391,11 @@ function createController(
     });
     stageObserver.observe(stage, { attributes: true, attributeFilter: ["class", "aria-hidden"] });
     controller.teardown.push(() => stageObserver.disconnect());
+    const onStageTransitionEnd = (event: Event) => {
+      if (event.target === stage) syncStageAnimation(controller);
+    };
+    stage.addEventListener("transitionend", onStageTransitionEnd);
+    controller.teardown.push(() => stage.removeEventListener("transitionend", onStageTransitionEnd));
   }
   const wakeTimer = frameWindow.setInterval(() => {
     controller.stageVisibilityCheckedAt = 0;
@@ -1420,6 +1408,10 @@ function createController(
   controller.teardown.push(() => frameWindow.clearInterval(wakeTimer));
 
   updateSizes(controller);
+  // Paint once even while the host iframe is crossing its entry transition so
+  // the first visible compositor frame already contains the canonical sky.
+  // syncStageAnimation below still prevents a hidden stage owning a live RAF.
+  paint(controller, frameWindow.performance.now());
   syncStageAnimation(controller);
   return controller;
 }
