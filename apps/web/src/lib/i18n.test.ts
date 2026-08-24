@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CORE_COPY, CRITICAL_COPY, LOCALE_META, POLISHED_BETA_LOCALES, SUPPORTED_LOCALES, dirForLocale, resolveLocale, writingPreferenceForLocale } from "./i18n";
+import { CORE_COPY, CRITICAL_COPY, LANGUAGE_CONTROL_COPY, LOCALE_META, POLISHED_BETA_LOCALES, SUPPORTED_LOCALES, V197_NAV_COPY, criticalCopyFor, dirForLocale, resolveLocale, writingPreferenceForLocale } from "./i18n";
 
 function collectLeaves(value: unknown): string[] {
   if (typeof value === "string") return [value];
@@ -24,6 +24,8 @@ describe("i18n readiness", () => {
       expect(CRITICAL_COPY[locale].systems.mapSubtitle).toBeTruthy();
       expect(CRITICAL_COPY[locale].capsule.shareTitle).toBeTruthy();
       expect(CRITICAL_COPY[locale].capsule.createContextCapsule).toBeTruthy();
+      expect(collectLeaves(V197_NAV_COPY[locale]).every(text => text.trim().length > 0)).toBe(true);
+      expect(collectLeaves(LANGUAGE_CONTROL_COPY[locale]).every(text => text.trim().length > 0)).toBe(true);
     }
   });
 
@@ -36,6 +38,8 @@ describe("i18n readiness", () => {
     expect(dirForLocale("en")).toBe("ltr");
     expect(writingPreferenceForLocale("ur-PK")).toBe("roman");
     expect(writingPreferenceForLocale("ar")).toBe("script");
+    expect(criticalCopyFor("ur-PK").talk.kicker).toBe("NUR se baat");
+    expect(criticalCopyFor("not-a-locale")).toBe(CRITICAL_COPY.en);
   });
 
   it("labels polished beta locales separately from draft locales", () => {

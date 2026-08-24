@@ -94,6 +94,9 @@ test("machine-readable Track A registry is internally complete", () => {
   expect(registry.architecture).toBe("track-a-v197-native-host");
   expect(registry.source_sha256).toBe(canonicalSourceSha256);
   expect(new Set(registry.controls.map(control => control.id)).size).toBe(registry.controls.length);
+  expect(registry.controls.map(control => control.id)).not.toContain("plan.direction.disabled");
+  expect(registry.controls.map(control => control.id)).not.toContain("ritual.disabled");
+  expect(registry.controls.map(control => control.id)).not.toContain("voice.disabled");
   for (const control of registry.controls) {
     expect(registry.statuses).toContain(control.status);
     if (control.status === "DEFERRED") expect(control.route).toBeTruthy();
@@ -170,11 +173,15 @@ test("authenticated V197 pages and hidden scope chamber expose no unregistered c
   for (const control of registry.controls.filter(row => row.status === "HONEST_DISABLED" && row.selector)) {
     const matches = universe.locator(control.selector!);
     const count = await matches.count();
+    expect(count, `${control.id} must name a control that still exists`).toBeGreaterThan(0);
+    let visibleCount = 0;
     for (let index = 0; index < count; index += 1) {
       const node = matches.nth(index);
       if (!await node.isVisible()) continue;
+      visibleCount += 1;
       await expect(node, `${control.id} must be honestly disabled`).toBeDisabled();
     }
+    expect(visibleCount, `${control.id} must name a founder-visible control`).toBeGreaterThan(0);
   }
 });
 

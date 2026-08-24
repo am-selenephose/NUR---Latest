@@ -268,7 +268,7 @@ gate_G11_LANGUAGE() {
   note "FOUNDER_ACTION_REQUIRED_LOCALE_HUMAN_REVIEW — an agent may not label its own output native-reviewed"
   run translation_tests bash -c 'cd apps/api && .venv/bin/python -m pytest -q app/tests/test_translations.py'
   browser_gate e2e/v197-language-wordmark.spec.ts e2e/v197-responsive-accessibility.spec.ts
-  skip string_extraction "no zero-raw-string extraction test (G11-002)"
+  run string_extraction npm run --silent web:i18n-extraction
 }
 
 gate_G12_COMMUNITY() {

@@ -98,6 +98,137 @@ export const CORE_COPY: Record<string, { privateBoundary: string; askPlaceholder
   "zh-Hans": { privateBoundary: "私人轨道", askPlaceholder: "直接说..." },
 };
 
+export type NavigationCopy = {
+  today: string;
+  talk: string;
+  journal: string;
+  plan: string;
+  systems: string;
+  universe: string;
+  map: string;
+  orbits: string;
+  timeline: string;
+  insights: string;
+  research: string;
+  community: string;
+  send: string;
+};
+
+const enNavigation: NavigationCopy = {
+  today: "Today",
+  talk: "Talk",
+  journal: "Journal",
+  plan: "Plan",
+  systems: "Systems",
+  universe: "Universe",
+  map: "Map",
+  orbits: "Orbits",
+  timeline: "Timeline",
+  insights: "Insights",
+  research: "Research",
+  community: "Community",
+  send: "Send",
+};
+
+const navigationOverrides: Partial<Record<SupportedLocale, NavigationCopy>> = {
+  en: enNavigation,
+  ur: {
+    today: "Aaj",
+    talk: "Baat",
+    journal: "Journal",
+    plan: "Plan",
+    systems: "Systems",
+    universe: "Kainaat",
+    map: "Naqsha",
+    orbits: "Orbits",
+    timeline: "Waqt ki lakeer",
+    insights: "Samajh",
+    research: "Tehqeeq",
+    community: "Community",
+    send: "Bhej",
+  },
+  ko: {
+    today: "오늘",
+    talk: "대화",
+    journal: "저널",
+    plan: "계획",
+    systems: "시스템",
+    universe: "우주",
+    map: "지도",
+    orbits: "궤도",
+    timeline: "타임라인",
+    insights: "인사이트",
+    research: "리서치",
+    community: "커뮤니티",
+    send: "보내기",
+  },
+  hi: { ...enNavigation, today: "आज", talk: "बात", journal: "जर्नल", plan: "योजना", systems: "सिस्टम" },
+  ar: { ...enNavigation, today: "اليوم", talk: "تحدث", journal: "اليوميات", plan: "الخطة", systems: "الأنظمة" },
+  fa: { ...enNavigation, today: "امروز", talk: "گفتگو", journal: "یادداشت", plan: "برنامه", systems: "سامانه ها" },
+  es: { ...enNavigation, today: "Hoy", talk: "Hablar", journal: "Diario", plan: "Plan", systems: "Sistemas" },
+  fr: { ...enNavigation, today: "Aujourd'hui", talk: "Parler", journal: "Journal", plan: "Plan", systems: "Systemes" },
+  "zh-Hans": { ...enNavigation, today: "今天", talk: "对话", journal: "日志", plan: "计划", systems: "系统" },
+};
+
+export type LanguageControlCopy = {
+  chooseLanguage: string;
+  languageAndWriting: string;
+  settingsNote: string;
+  providerStatus: string;
+  providerConfigured: string;
+  providerDisabled: string;
+  providerConfiguredNote: string;
+  providerDisabledNote: string;
+  language: string;
+  languageAria: string;
+  reviewed: string;
+  draft: string;
+  writingPreference: string;
+  writingPreferenceAria: string;
+  writingRoman: string;
+  writingScript: string;
+  writingDefault: string;
+  saveLanguage: string;
+  savingPrivately: string;
+  saved: (label: string) => string;
+  saveError: string;
+};
+
+const enLanguageControls: LanguageControlCopy = {
+  chooseLanguage: "Choose NUR language",
+  languageAndWriting: "Language and writing",
+  settingsNote: "Saved privately. NUR uses this language for interface copy and Talk.",
+  providerStatus: "AI provider status",
+  providerConfigured: "OPENAI_CONFIGURED · server-side only",
+  providerDisabled: "DISABLED · AI not connected",
+  providerConfiguredNote: "Talk calls OpenAI through the NUR backend. No key is sent to this browser.",
+  providerDisabledNote: "Run the local OpenAI setup, then start NUR in openai mode.",
+  language: "Language",
+  languageAria: "NUR language",
+  reviewed: "beta reviewed",
+  draft: "draft",
+  writingPreference: "Writing preference",
+  writingPreferenceAria: "NUR writing preference",
+  writingRoman: "Roman / transliterated",
+  writingScript: "Native script",
+  writingDefault: "Locale default",
+  saveLanguage: "Save language",
+  savingPrivately: "Saving privately...",
+  saved: label => `Saved: ${label}.`,
+  saveError: "Language could not be saved.",
+};
+
+export const V197_NAV_COPY: Record<string, NavigationCopy> = {};
+export const LANGUAGE_CONTROL_COPY: Record<string, LanguageControlCopy> = {};
+
+export function navigationCopyFor(rawLocale: string | null | undefined): NavigationCopy {
+  return V197_NAV_COPY[resolveLocale(rawLocale)] ?? enNavigation;
+}
+
+export function languageControlCopyFor(rawLocale: string | null | undefined): LanguageControlCopy {
+  return LANGUAGE_CONTROL_COPY[resolveLocale(rawLocale)] ?? enLanguageControls;
+}
+
 export type CriticalCopy = {
   talk: {
     kicker: string;
@@ -404,7 +535,13 @@ export const CRITICAL_COPY: Record<string, CriticalCopy> = {
   },
 };
 
+export function criticalCopyFor(rawLocale: string | null | undefined): CriticalCopy {
+  return CRITICAL_COPY[resolveLocale(rawLocale)] ?? enCritical;
+}
+
 for (const locale of SUPPORTED_LOCALES) {
   CORE_COPY[locale] ??= CORE_COPY.en;
   CRITICAL_COPY[locale] ??= enCritical;
+  V197_NAV_COPY[locale] = navigationOverrides[locale] ?? enNavigation;
+  LANGUAGE_CONTROL_COPY[locale] = enLanguageControls;
 }

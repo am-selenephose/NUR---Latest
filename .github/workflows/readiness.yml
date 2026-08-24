@@ -26,6 +26,7 @@ jobs:
       - run: npm run secret-scan
       - run: npm run web:typecheck
       - run: npm run web:test
+      - run: npm run web:i18n-extraction
       - run: npm run web:build
       - name: Upload exact built NUR web bundle
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

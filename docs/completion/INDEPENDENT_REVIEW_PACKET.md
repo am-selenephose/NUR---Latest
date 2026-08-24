@@ -10,7 +10,7 @@
 | Candidate | The commit containing this packet |
 | Canonical presentation | V197 SHA-256 `397c302579472e60f5bd667546a96b6e3f262aa40bd932d10c1946e13b046dd2` |
 | Migration head | `0061_pw_delivery_resilience` |
-| Current verdict | `NUR_PARTIAL` |
+| Current verdict | `NUR_INTERNAL_COMPLETE_EXTERNAL_BLOCKED` |
 
 This packet requests independent review. It is not a self-approval and cannot
 close J10 by existing in the repository.
@@ -31,8 +31,11 @@ close J10 by existing in the repository.
 6. Do the expanded release scripts actually exercise browser, mobile,
    performance, crash recovery, DR and soak behavior rather than only inspect
    source?
-7. Are the two remaining internal partial rows, the external holds and the
-   founder-only promotion gates classified honestly?
+7. Does Plan omit the retired direction placeholder from both runtime and the
+   control registry while preserving its durable mutation lifecycle?
+8. Does G11 enforce catalog-backed locale-sensitive copy after hydration and
+   stop only at an independent native-language review boundary?
+9. Are all external holds and founder-only promotion gates classified honestly?
 
 ## Required Evidence
 

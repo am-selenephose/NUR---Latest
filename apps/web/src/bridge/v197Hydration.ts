@@ -1323,13 +1323,6 @@ function renderHonestDisabledSurfaces(document: Document): void {
     control.setAttribute("aria-disabled", "true");
     if (control.tagName === "BUTTON") (control as HTMLButtonElement).disabled = true;
   });
-  const ritual = document.querySelector<HTMLButtonElement>('[data-action="ritual"]');
-  if (ritual) {
-    ritual.textContent = "Rituals open in Track B";
-    ritual.disabled = true;
-    ritual.setAttribute("aria-disabled", "true");
-    ritual.setAttribute("title", "Ritual scheduling is not connected in this Track A build.");
-  }
   const editDirection = document.querySelector<HTMLButtonElement>("#page-plan .panel-top .tiny-link:not([data-page])");
   editDirection?.remove();
 }
@@ -1338,7 +1331,6 @@ export function hydrateTrackAV197(document: Document, snapshot: V197BridgeSnapsh
   hydrateReadOnlyV197(document, snapshot);
   const locale = snapshot.preferences?.locale ?? snapshot.session.profile.locale ?? "en";
   const writingPreference = snapshot.preferences?.writing_preference ?? snapshot.session.profile.writing_preference ?? "default";
-  applyV197Locale(document, locale, writingPreference);
   renderTalk(document, snapshot.talkThread);
   renderToday(document, snapshot);
   renderJournal(document, snapshot);
@@ -1358,12 +1350,7 @@ export function hydrateTrackAV197(document: Document, snapshot: V197BridgeSnapsh
   document.querySelectorAll<HTMLElement>(".quiet-chip").forEach(chip => {
     if (chip.textContent?.toLowerCase().includes("live feed")) ownText(chip, "local owner ledger");
   });
-  const voice = document.querySelector<HTMLElement>(".composer-action--voice");
-  if (voice) {
-    voice.setAttribute("aria-disabled", "true");
-    voice.setAttribute("title", "Voice is not connected in this Track A build.");
-  }
-
   const latestUserTalk = [...snapshot.talkThread].reverse().find(row => row.who === "user" && row.text);
   text(document.querySelector("#page-today .mini-thread"), latestUserTalk?.text ? `“${shorten(latestUserTalk.text, 170)}”` : "No persisted Talk signal yet.");
+  applyV197Locale(document, locale, writingPreference);
 }

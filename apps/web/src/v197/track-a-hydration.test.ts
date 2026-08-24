@@ -6,12 +6,11 @@ import { hydrateTrackAV197, renderInsightInspection, renderWorldLens } from "../
 function fixture(): Document {
   const document = window.document.implementation.createHTMLDocument("NUR universe");
   document.body.innerHTML = `
-    <section id="page-systems"><header class="universe-hero-copy"><p class="page-sub">static overview</p></header></section>
+    <section id="page-systems"><header class="universe-hero-copy"><p class="page-kicker">Systems universe <span class="live-dot"></span> live feed</p><h1 class="page-title" id="systems-title">A living universe for<br/><em>what you are becoming.</em></h1><p class="page-sub">static overview</p></header></section>
     <div class="universe-hero-stats"><span><b>07</b> active</span><span><b>19</b> outcomes</span><span><b>04</b> insights</span></div>
     <div class="universe-field-readout"><b>System field · <em>live</em></b><span>fake metrics</span></div>
     <h2 data-context-title>Context, held gently.</h2>
     <div class="v172-boundary-current"><b>Private Orbit</b></div>
-    <p class="page-kicker">Systems universe live feed</p>
     <div class="universe-system-lane"><article><small>active people</small><b>1,284</b><span>moving now</span></article><article><small>fake</small><b>2</b></article><article><small>fake</small><b>3</b></article></div>
     <aside class="universe-insight-panel">
       <div><span class="system-badge"><span class="nur-exact-mini-host"><span class="spark-core">BADGE_STAR</span></span>Candidate insight</span><span class="live-label">LIVE</span></div>
@@ -33,7 +32,7 @@ function fixture(): Document {
     <button class="universe-system-node relational" data-system="old"><span><b>old</b><small>old</small></span></button>
     <button class="universe-system-node social" data-system="old"><span><b>old</b><small>old</small></span></button>
     <button class="universe-system-node neural" data-system="old"><span><b>old</b><small>old</small></span></button>
-    <div id="talk-stream"><div class="talk-message">fake Talk</div></div>
+    <section id="page-talk"><p class="page-kicker">Ask NUR</p><h1 class="page-title" id="talk-title">Talk in a room<br/><em>that stays yours.</em></h1><p class="page-sub">static Talk subtitle</p><div id="talk-stream"><div class="talk-message">fake Talk</div></div></section>
     <section id="page-journal"><p class="page-sub">static journal</p><p class="journal-prompt">prompt</p></section>
     <section id="page-plan"><div class="panel-top"><h2 class="panel-title">fake plan</h2><p class="panel-sub">fake</p></div><div class="plan-list"><div>fake step</div></div></section>
     <section id="universe-community"><div class="universe-card-head"><h2>fake community</h2></div><div class="community-items"><article>142 fake replies</article></div><button data-community-tab="People">People</button></section>
@@ -167,6 +166,34 @@ function snapshot(): V197BridgeSnapshot {
 }
 
 describe("Track A V197 persisted hydration", () => {
+  it("applies catalog-backed Roman Urdu after durable hydration", () => {
+    const document = fixture();
+    const state = snapshot();
+    state.preferences = {
+      ...state.preferences,
+      locale: "ur",
+      writing_preference: "roman",
+    };
+    state.talkThread = [];
+
+    hydrateTrackAV197(document, state);
+
+    expect(document.documentElement.lang).toBe("ur");
+    expect(document.documentElement.dir).toBe("ltr");
+    expect(document.querySelector("#page-talk .page-kicker")?.textContent).toBe("NUR se baat");
+    expect(document.querySelector("#talk-title")?.childNodes[0]?.nodeValue).toBe("Apne kamray mein baat");
+    expect(document.querySelector("#talk-title em")?.textContent).toBe("jo tera rehta hai.");
+    expect(document.querySelector("#page-talk .page-sub")?.textContent).toBe(
+      "NUR isay kahin nahi le jata jab tak tu khud na chahay.",
+    );
+    expect(document.querySelector("[data-nur-talk-empty]")?.textContent).toContain(
+      "Abhi koi persisted Talk turn nahi.",
+    );
+    expect(document.querySelector("#page-systems .page-kicker")?.textContent).toContain("Systems universe");
+    expect(document.querySelector("#systems-title")?.childNodes[0]?.nodeValue).toBe("Zinda universe");
+    expect(document.querySelector("#systems-title em")?.textContent).toBe("jo tu ban rahi hai.");
+  });
+
   it("replaces fake V197 demo content with owner-scoped persisted state", () => {
     const document = fixture();
     hydrateTrackAV197(document, snapshot());

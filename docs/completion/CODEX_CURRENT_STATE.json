@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-08-23",
+  "generated_at": "2026-08-24",
   "phase": "final_closure_candidate",
   "repository": "am-selenephos/NUR---Latest",
   "remote": "https://github.com/am-selenephos/NUR---Latest.git",
@@ -12,9 +12,10 @@
     "number": 5,
     "url": "https://github.com/am-selenephos/NUR---Latest/pull/5",
     "state": "OPEN_DRAFT",
-    "pre_closure_exact_head_ci_run": 32608012219,
+    "pre_closure_exact_head_ci_run": 32644405657,
+    "pre_closure_exact_head_ci_sha": "34902deb90ff8bb07ba8a16ba50e8b4c4e27f06f",
     "pre_closure_exact_head_ci": "PASS",
-    "candidate_exact_head_ci": "VERIFY_LIVE_FOR_COMMIT"
+    "candidate_exact_head_ci": "AUTHORITY_IS_PR_5_STATUS_CHECK_ROLLUP; FINAL_REPORT_PROHIBITED_UNLESS_GREEN"
   },
   "canonical_v197": {
     "path": "apps/web/public/v197/NUR_V197_CHECKBOX_TICK_RESTORED.html",
@@ -26,9 +27,9 @@
     "api_requirements_lock_sha256": "4b005c5d9499b06a2d58635df9f7e681843426936c12c46c5299c8b9b37ffc9a"
   },
   "repository_census_after_candidate_commit": {
-    "tracked_files": 991,
+    "tracked_files": 993,
     "api_migrations": 61,
-    "api_test_modules": 74,
+    "api_test_modules": 117,
     "web_e2e_specs": 63,
     "migration_head": "0061_pw_delivery_resilience"
   },
@@ -38,7 +39,7 @@
     "api_pytest": "PASS: 1109 passed",
     "openapi_drift": "PASS: 144 client operations; 420 OpenAPI operations; 0 missing",
     "web_typecheck": "PASS",
-    "web_unit": "PASS: 26 files; 131 tests",
+    "web_unit": "PASS: 26 files; 132 tests",
     "web_build": "PASS: 51 modules; advisory chunk warning only",
     "web_e2e_mocked": "PASS: 19 passed; 1 intentional skip; 0 failed",
     "mobile_typecheck": "PASS",
@@ -50,37 +51,29 @@
     "webkit_mobile": "PASS: 2",
     "crash_recovery": "PASS: API, worker, Beat and Redis",
     "dr_restore": "PASS: 192 tables and 2 object digests",
-    "exact_commit_release_gate": "VERIFY_EXTERNAL_LOG_FOR_COMMIT",
-    "exact_head_github_actions": "VERIFY_LIVE_FOR_COMMIT"
+    "localization_behavior": "PASS: 35 complete locale slots; Roman Urdu post-hydration; fallback and RTL",
+    "localization_extraction": "PASS: TypeScript AST scan; zero direct locale-sensitive DOM copy literals",
+    "g11_internal_steps": "PASS: API translations, V197 language/accessibility browser suite, extraction",
+    "g11_final_boundary": "FOUNDER_ACTION_REQUIRED: independent native-language review",
+    "exact_commit_release_gate": "FINAL_REPORT_PROHIBITED_UNLESS_GREEN",
+    "exact_head_github_actions": "AUTHORITY_IS_PR_5_STATUS_CHECK_ROLLUP"
   },
-  "completion_before_exact_head_ci": {
+  "completion": {
     "total": 82,
-    "verified": 73,
-    "partial": 3,
-    "external_blocked": 2,
+    "verified": 75,
+    "partial": 0,
+    "external_blocked": 3,
     "founder_decision": 3,
     "superseded": 1,
-    "strict_percent": 90.2,
-    "weighted_percent": 92.1
+    "strict_percent": 92.7,
+    "weighted_percent": 92.7,
+    "internally_solvable_partials": 0
   },
-  "completion_after_green_exact_head_ci": {
-    "total": 82,
-    "verified": 74,
-    "partial": 2,
-    "external_blocked": 2,
-    "founder_decision": 3,
-    "superseded": 1,
-    "strict_percent": 91.5,
-    "weighted_percent": 92.7
-  },
-  "remaining_internal": [
-    "Integrate the later founder-approved replacement UI and resolve plan.direction, ritual.control and voice.composer without redesigning canonical V197 in this closure.",
-    "Enforce zero-raw-string localization extraction and obtain human locale review."
-  ],
+  "remaining_internal": [],
   "remaining_external": [
-    "Approved live OpenAI credential and eligible model.",
-    "Deployed transactional email, merchant billing, notification, research and production-like storage receipts where intended.",
-    "Independent review."
+    "H Localization: independent native-language review for the polished locale tier.",
+    "J6 Live provider gate: approved OpenAI credential and eligible model plus deployed transactional email, merchant billing, notification, research and production-like storage receipts where those providers are intended.",
+    "J10 Independent final review."
   ],
   "remaining_founder": [
     "Merge draft PR #5.",
@@ -92,5 +85,5 @@
     "NUR_INTERNAL_COMPLETE_EXTERNAL_BLOCKED",
     "NUR_PARTIAL"
   ],
-  "current_verdict": "NUR_PARTIAL"
+  "current_verdict": "NUR_INTERNAL_COMPLETE_EXTERNAL_BLOCKED"
 }

@@ -1,6 +1,6 @@
 # NUR Completion Source Authority
 
-Refreshed on 2026-08-23 during the final-closure pass. This file records
+Refreshed on 2026-08-24 during the internal-closure pass. This file records
 provenance; it does not claim that every product requirement is complete.
 
 ## Repository Authority
@@ -11,6 +11,8 @@ provenance; it does not claim that every product requirement is complete.
 - Completion branch: `codex/nur-final-closure-20260820`
 - Verified pushed baseline before the final 2026-08-23 closure candidate:
   `5ac83100a4cd4cc52cea9af81fc938d1b308003f`
+- Last exact branch head proven green before this commit:
+  `34902deb90ff8bb07ba8a16ba50e8b4c4e27f06f` (Actions run `32644405657`)
 - Draft completion PR: `#5`
 - PR URL: `https://github.com/am-selenephos/NUR---Latest/pull/5`
 - The candidate identity is the commit containing this authority record. The

@@ -1372,8 +1372,7 @@ body.universe-edition #nur-front-v61 :is(
 body.universe-edition #nur-front-v61 :is(
   .voice-button,
   .nur-user,
-  #scope-open,
-  .composer-action--voice
+  #scope-open
 ) {
   width: var(--nur-control-h) !important;
   min-width: var(--nur-control-h) !important;
@@ -3377,7 +3376,6 @@ body.universe-edition #nur-front-v61 .universe-system-node > span > :is(b, small
     .nur-user,
     #scope-open,
     .voice-button,
-    .composer-action--voice,
     .send-button,
     .universe-nav-tabs button
   ) {
