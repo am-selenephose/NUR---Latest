@@ -9,6 +9,7 @@ from sqlalchemy import select
 from app.api.deps import Identity, Scoped, require_csrf
 from app.models import Orbit, Profile
 from app.models._mixins import now_utc
+from app.i18n.catalog import normalize_locale, resolve_variant
 
 router = APIRouter(prefix="/profile", tags=["profile"])
 
@@ -59,12 +60,17 @@ async def patch_preferences(payload: PreferencesPatch, db: Scoped, identity: Ide
             except ZoneInfoNotFoundError as exc:
                 raise HTTPException(422, "Unknown IANA timezone.") from exc
         profile.timezone = payload.timezone
-    if payload.locale is not None:
-        profile.locale = payload.locale
-    if payload.writing_preference is not None:
-        if payload.writing_preference not in {"default", "roman", "script"}:
-            raise HTTPException(422, "writing_preference must be default, roman, or script.")
-        profile.writing_preference = payload.writing_preference
+    if payload.locale is not None or payload.writing_preference is not None:
+        try:
+            next_locale = normalize_locale(payload.locale if payload.locale is not None else profile.locale)
+            next_variant = resolve_variant(
+                next_locale,
+                payload.writing_preference if payload.writing_preference is not None else profile.writing_preference,
+            )
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+        profile.locale = next_locale
+        profile.writing_preference = next_variant.preference
     if payload.sound_enabled is not None:
         profile.sound_enabled = payload.sound_enabled
     if payload.reduced_effects is not None:

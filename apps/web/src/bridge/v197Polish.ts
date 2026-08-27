@@ -1,3 +1,4 @@
+import { v197Copy } from "./v197I18n";
 import V197_FUNCTIONAL_CSS from "../styles/v197-functional.css?raw";
 import V197_COSMIC_SKIN_CSS from "../styles/v197-cosmic-skin.css?raw";
 import V197_STAR_SEAL_CSS from "../styles/v197-star-seal.css?raw";
@@ -72,7 +73,7 @@ function labelOwnerSignOutControl(document: Document): void {
   if (!control || control.dataset.nurSignOutLabelled === "true") return;
   control.dataset.nurSignOutLabelled = "true";
   control.setAttribute("role", "button");
-  control.setAttribute("aria-label", "Sign out of NUR");
+  control.setAttribute("aria-label", v197Copy("Sign out of NUR"));
   control.tabIndex = 0;
 
   // A real text node rather than a ::after. The pseudo-element resolved its
@@ -81,7 +82,7 @@ function labelOwnerSignOutControl(document: Document): void {
   if (!control.querySelector(".nur-signout-label")) {
     const label = control.ownerDocument.createElement("span");
     label.className = "nur-signout-label";
-    label.textContent = "\u23FB Sign out";
+    label.textContent = v197Copy("⏻ Sign out");
     label.style.setProperty("font", '500 12.5px/1 "Crimson Pro", serif', "important");
     label.style.setProperty("letter-spacing", "0.06em", "important");
     label.style.setProperty("color", "rgba(255, 240, 212, 0.92)", "important");
@@ -116,8 +117,8 @@ function labelCompactTopbarControls(document: Document): void {
 
   const scope = document.querySelector<HTMLButtonElement>("#scope-open");
   if (scope) {
-    scope.setAttribute("aria-label", "Privacy boundary");
-    scope.title = "Privacy boundary";
+    scope.setAttribute("aria-label", v197Copy("Privacy boundary"));
+    scope.title = v197Copy("Privacy boundary");
   }
 }
 

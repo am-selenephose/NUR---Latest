@@ -1,7 +1,7 @@
 #nur-v197-adjunct-root {
-  /* Keep dedicated chambers above the canonical shell (260) and below the
-     untouched V197 galaxy canvas (280). */
-  --nur-layer-modal: 270;
+  /* Keep dedicated chambers above the canonical shell and untouched V197
+     galaxy canvas while preserving the canonical content below the chamber. */
+  --nur-layer-modal: 300;
   --adj-black: #000;
   --adj-ink: #010204;
   --adj-ivory: #fff8df;
@@ -116,10 +116,15 @@
     var(--adj-film) padding-box,
     rgba(0, 0, 0, .62) padding-box,
     var(--adj-gold-rim) border-box;
+  min-width: 0;
+  max-width: 100%;
   color: rgba(255, 248, 223, .82);
   box-shadow: inset 0 1px 0 rgba(255, 248, 223, .055), 0 8px 22px rgba(0, 0, 0, .22), var(--adj-holo-glow);
-  font: 600 13px/1 "Crimson Pro", serif;
+  font: 600 13px/1.25 "Crimson Pro", serif;
   letter-spacing: .04em;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   cursor: pointer;
   transition: border-color .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease;
 }

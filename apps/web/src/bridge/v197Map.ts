@@ -1,3 +1,4 @@
+import { v197Copy } from "./v197I18n";
 /**
  * Map — systems, paths and possible futures, rendered V197-native.
  *
@@ -391,7 +392,7 @@ function edgeWhy(edge: GraphEdge, labelOf: (id: string) => string): string {
   const meaning = EDGE_MEANING[edge.kind] ?? "is connected to";
   const base = `${labelOf(edge.source)} ${meaning} ${labelOf(edge.target)}`;
   if (edge.semantic && !edge.user_confirmed) {
-    return `${base}. NUR proposed this from ${text(edge.inference_source, "an unnamed source")} — it is not part of your Map until you accept it.`;
+    return `${base}. NUR proposed this from ${text(edge.inference_source, v197Copy("an unnamed source"))} — it is not part of your Map until you accept it.`;
   }
   if (edge.note) return `${base}. You noted: ${edge.note}`;
   return `${base}.`;
@@ -656,15 +657,15 @@ export async function renderV197Map(
     const header = el(doc, "header", "nur-map-header");
 
     const title = el(doc, "div", "nur-map-title");
-    const heading = el(doc, "h1", undefined, "Map");
+    const heading = el(doc, "h1", undefined, v197Copy("Map"));
     markV197HolographicWordmark(heading);
     title.append(heading);
-    title.append(el(doc, "p", "nur-map-subtitle", "Systems, paths and possible futures"));
+    title.append(el(doc, "p", "nur-map-subtitle", v197Copy("Systems, paths and possible futures")));
     header.append(title);
 
     const modes = el(doc, "div", "nur-map-header-actions");
     modes.setAttribute("role", "tablist");
-    modes.setAttribute("aria-label", "Map view mode");
+    modes.setAttribute("aria-label", v197Copy("Map view mode"));
     ([
       ["universe", "Universe"], ["focus", "Focus"],
       ["paths", "Paths"], ["decisions", "Decisions"],
@@ -681,9 +682,9 @@ export async function renderV197Map(
     const tools = el(doc, "div", "nur-map-header-actions");
     const search = el(doc, "input", "nur-map-search");
     search.type = "search";
-    search.placeholder = "Search Systems, goals, plans, decisions or signals";
+    search.placeholder = v197Copy("Search Systems, goals, plans, decisions or signals");
     search.value = state.query;
-    search.setAttribute("aria-label", "Search the Map");
+    search.setAttribute("aria-label", v197Copy("Search the Map"));
     search.addEventListener("input", () => {
       scheduleV197SearchCommit(doc, SEARCH_KEY, search.value, actions.setQuery);
     });
@@ -713,19 +714,19 @@ export async function renderV197Map(
 
   function mapNavigator(): HTMLElement {
     const pane = el(doc, "aside", "nur-map-pane nur-map-nav");
-    pane.setAttribute("aria-label", "Map navigator");
+    pane.setAttribute("aria-label", v197Copy("Map navigator"));
     const scroll = el(doc, "div", "nur-map-pane-scroll");
 
     // Systems, driven from what the server returned — never a hardcoded list.
     const systems = el(doc, "div", "nur-map-nav-group");
-    systems.append(el(doc, "p", "nur-map-nav-label", "Systems"));
+    systems.append(el(doc, "p", "nur-map-nav-label", v197Copy("Systems")));
     const systemChips = el(doc, "div", "nur-map-chips");
     const all = chip(doc, "All Systems", state.systemFilter === "ALL");
     all.addEventListener("click", () => actions.setSystemFilter("ALL"));
     systemChips.append(all);
     for (const region of state.graph.system_regions) {
       const button = chip(doc, region.title, state.systemFilter === region.slug);
-      button.title = `${STATE_WORD[region.state] ?? region.state} — ${region.state_reason}`;
+      button.title = v197Copy("{{0}} — {{1}}", { 0: STATE_WORD[region.state] ?? region.state, 1: region.state_reason });
       button.dataset.mapSystem = region.slug;
       button.addEventListener("click", () => actions.setSystemFilter(region.slug));
       systemChips.append(button);
@@ -734,7 +735,7 @@ export async function renderV197Map(
     scroll.append(systems);
 
     const objects = el(doc, "div", "nur-map-nav-group");
-    objects.append(el(doc, "p", "nur-map-nav-label", "Objects"));
+    objects.append(el(doc, "p", "nur-map-nav-label", v197Copy("Objects")));
     const objectChips = el(doc, "div", "nur-map-chips");
     for (const row of OBJECT_FILTERS) {
       const button = chip(doc, row.label, state.objectFilter === row.key);
@@ -746,7 +747,7 @@ export async function renderV197Map(
     scroll.append(objects);
 
     const horizon = el(doc, "div", "nur-map-nav-group");
-    horizon.append(el(doc, "p", "nur-map-nav-label", "Time horizon"));
+    horizon.append(el(doc, "p", "nur-map-nav-label", v197Copy("Time horizon")));
     const horizonChips = el(doc, "div", "nur-map-chips");
     for (const row of HORIZONS) {
       const button = chip(doc, row.label, state.horizon === row.key);
@@ -757,7 +758,7 @@ export async function renderV197Map(
     // This filters the Map; it is not the Timeline, and says so.
     horizon.append(el(
       doc, "p", "nur-map-empty",
-      "Filters what the Map shows. The full chronology lives on Timeline.",
+      v197Copy("Filters what the Map shows. The full chronology lives on Timeline."),
     ));
     scroll.append(horizon);
 
@@ -776,7 +777,7 @@ export async function renderV197Map(
       group.dataset.mapSection = key;
       group.append(el(doc, "p", "nur-map-nav-label", label));
       if (!rows.length) {
-        group.append(el(doc, "p", "nur-map-empty", "Nothing here yet."));
+        group.append(el(doc, "p", "nur-map-empty", v197Copy("Nothing here yet.")));
       } else {
         const list = el(doc, "ul", "nur-map-nav-list");
         for (const row of rows.slice(0, 6)) {
@@ -798,7 +799,7 @@ export async function renderV197Map(
     }
 
     const create = el(doc, "div", "nur-map-nav-group");
-    create.append(el(doc, "p", "nur-map-nav-label", "Create"));
+    create.append(el(doc, "p", "nur-map-nav-label", v197Copy("Create")));
     const createChips = el(doc, "div", "nur-map-chips");
     createChips.append(capsule(
       doc, "Map a Problem",
@@ -821,7 +822,7 @@ export async function renderV197Map(
 
   function mapCanvas(): HTMLElement {
     const pane = el(doc, "section", "nur-map-pane nur-map-workspace");
-    pane.setAttribute("aria-label", "Living Map");
+    pane.setAttribute("aria-label", v197Copy("Living Map"));
     const wrap = el(doc, "div", "nur-map-canvas-wrap");
 
     const nodes = visibleNodes();
@@ -833,8 +834,8 @@ export async function renderV197Map(
       // records that happens to be false.
       const loading = el(doc, "div", "nur-map-pane-scroll");
       loading.dataset.mapLoading = "true";
-      loading.append(el(doc, "p", "nur-map-detail-kind", "Map"));
-      loading.append(el(doc, "p", "nur-map-empty", "Assembling your Systems and routes…"));
+      loading.append(el(doc, "p", "nur-map-detail-kind", v197Copy("Map")));
+      loading.append(el(doc, "p", "nur-map-empty", v197Copy("Assembling your Systems and routes…")));
       wrap.append(loading);
       pane.append(wrap);
       return pane;
@@ -843,10 +844,10 @@ export async function renderV197Map(
     if (!nodes.some((row) => row.kind !== "MASTER_STAR" && row.kind !== "SYSTEM")) {
       // §31: the empty Map is beautiful and useful, never "no data available".
       const empty = el(doc, "div", "nur-map-pane-scroll");
-      empty.append(el(doc, "p", "nur-map-detail-kind", "Your Map"));
+      empty.append(el(doc, "p", "nur-map-detail-kind", v197Copy("Your Map")));
       empty.append(el(
         doc, "h2", "nur-map-detail-title",
-        "Your Map begins with where you are and where you want to move.",
+        v197Copy("Your Map begins with where you are and where you want to move."),
       ));
       empty.append(el(
         doc, "p", "nur-map-field-value",
@@ -1090,7 +1091,7 @@ export async function renderV197Map(
 
       const tip = svg(doc, "title");
       const kindWord = KIND_WORD[node.kind] ?? node.kind;
-      tip.textContent = `${node.label} — ${kindWord}, ${node.status.toLowerCase()}`;
+      tip.textContent = v197Copy("{{0}} — {{1}}, {{2}}", { 0: node.label, 1: kindWord, 2: node.status.toLowerCase() });
       group.append(tip);
 
       // §39: reduce labels while zoomed out. Every node keeps its name in the
@@ -1248,7 +1249,7 @@ export async function renderV197Map(
     wrap.style.position = "absolute";
     wrap.style.inset = "0";
     wrap.style.background = "rgba(0,0,0,0.94)";
-    wrap.append(el(doc, "p", "nur-map-nav-label", "Map outline"));
+    wrap.append(el(doc, "p", "nur-map-nav-label", v197Copy("Map outline")));
     const root = el(doc, "ul", "nur-map-outline");
     const childrenOf = (parentId: string | null): GraphNode[] =>
       visibleNodes().filter((row) => row.parent_id === parentId);
@@ -1295,7 +1296,7 @@ export async function renderV197Map(
    */
   function mapMobileFocusList(): HTMLElement {
     const pane = el(doc, "section", "nur-map-pane nur-map-workspace");
-    pane.setAttribute("aria-label", "Focus list");
+    pane.setAttribute("aria-label", v197Copy("Focus list"));
     const scroll = el(doc, "div", "nur-map-pane-scroll");
     scroll.dataset.mapFocusList = "true";
 
@@ -1303,7 +1304,7 @@ export async function renderV197Map(
       const group = el(doc, "div", "nur-map-nav-group");
       group.append(el(doc, "p", "nur-map-nav-label", label));
       if (!rows.length) {
-        group.append(el(doc, "p", "nur-map-empty", "Nothing here yet."));
+        group.append(el(doc, "p", "nur-map-empty", v197Copy("Nothing here yet.")));
       } else {
         const list = el(doc, "ul", "nur-map-nav-list");
         for (const row of rows) {
@@ -1335,7 +1336,7 @@ export async function renderV197Map(
 
     // Systems stay reachable on a phone, with their state and its reason.
     const systems = el(doc, "div", "nur-map-nav-group");
-    systems.append(el(doc, "p", "nur-map-nav-label", "Systems"));
+    systems.append(el(doc, "p", "nur-map-nav-label", v197Copy("Systems")));
     const list = el(doc, "ul", "nur-map-nav-list");
     for (const region of state.graph.system_regions) {
       const item = el(doc, "li");
@@ -1357,7 +1358,7 @@ export async function renderV197Map(
     // The candidate strip, on the surface rather than behind a hidden panel.
     const pending = state.graph.suggested_changes.suggestions;
     if (pending.length) {
-      scroll.append(el(doc, "p", "nur-map-nav-label", "NUR suggests"));
+      scroll.append(el(doc, "p", "nur-map-nav-label", v197Copy("NUR suggests")));
       for (const suggestion of pending) scroll.append(candidateCard(suggestion));
     }
 
@@ -1369,21 +1370,21 @@ export async function renderV197Map(
     const pane = el(doc, "section", "nur-map-pane nur-map-workspace");
     const scroll = el(doc, "div", "nur-map-pane-scroll");
     scroll.dataset.mapPaths = "true";
-    scroll.append(el(doc, "p", "nur-map-detail-kind", "Paths"));
+    scroll.append(el(doc, "p", "nur-map-detail-kind", v197Copy("Paths")));
 
     const comparison = state.comparison;
     if (!comparison) {
-      scroll.append(el(doc, "h2", "nur-map-detail-title", "Nothing to compare yet"));
+      scroll.append(el(doc, "h2", "nur-map-detail-title", v197Copy("Nothing to compare yet")));
       scroll.append(el(
         doc, "p", "nur-map-empty",
-        "Select a goal, then Paths compares the routes that actually exist toward it.",
+        v197Copy("Select a goal, then Paths compares the routes that actually exist toward it."),
       ));
       pane.append(scroll);
       return pane;
     }
 
     const goal = comparison.goal as { title: string } | undefined;
-    scroll.append(el(doc, "h2", "nur-map-detail-title", text(goal?.title, "This goal")));
+    scroll.append(el(doc, "h2", "nur-map-detail-title", text(goal?.title, v197Copy("This goal"))));
     scroll.append(el(doc, "p", "nur-map-lane-strategy", text(comparison.association_basis, "")));
 
     const lanes = (comparison.paths as Record<string, unknown>[] | undefined) ?? [];
@@ -1396,14 +1397,14 @@ export async function renderV197Map(
     const holder = el(doc, "div", "nur-map-lanes");
     for (const lane of lanes) {
       const card = el(doc, "article", "nur-map-lane");
-      card.append(el(doc, "h3", "nur-map-lane-name", text(lane.name, "Route")));
+      card.append(el(doc, "h3", "nur-map-lane-name", text(lane.name, v197Copy("Route"))));
       card.append(el(doc, "p", "nur-map-lane-strategy", text(lane.strategy, "")));
 
       const dims = el(doc, "div", "nur-map-lane-dims");
       const add = (label: string, value: unknown) => {
         const cell = el(doc, "div");
         cell.append(el(doc, "div", "nur-map-dim-label", label));
-        const shown = text(value, "Not assessed");
+        const shown = text(value, v197Copy("Not assessed"));
         const body = el(doc, "div", "nur-map-dim-value", shown);
         // §19: an unmeasured dimension is styled as absent, not as a value.
         if (shown === "Not assessed" || shown === "Not recorded") {
@@ -1454,11 +1455,11 @@ export async function renderV197Map(
     const pane = el(doc, "section", "nur-map-pane nur-map-workspace");
     const scroll = el(doc, "div", "nur-map-pane-scroll");
     scroll.dataset.mapDecisions = "true";
-    scroll.append(el(doc, "p", "nur-map-detail-kind", "Decisions"));
+    scroll.append(el(doc, "p", "nur-map-detail-kind", v197Copy("Decisions")));
 
     const analysis = state.analysis;
     if (!analysis) {
-      scroll.append(el(doc, "h2", "nur-map-detail-title", "No open decision"));
+      scroll.append(el(doc, "h2", "nur-map-detail-title", v197Copy("No open decision")));
       scroll.append(el(
         doc, "p", "nur-map-empty",
         "Unresolved forks appear here with their options, trade-offs and what each "
@@ -1469,7 +1470,7 @@ export async function renderV197Map(
     }
 
     const decision = analysis.decision as { statement: string } | undefined;
-    scroll.append(el(doc, "h2", "nur-map-detail-title", text(decision?.statement, "Decision")));
+    scroll.append(el(doc, "h2", "nur-map-detail-title", text(decision?.statement, v197Copy("Decision"))));
 
     const options = (analysis.options as Record<string, unknown>[] | undefined) ?? [];
     const matrix = (analysis.comparison_matrix as {
@@ -1481,9 +1482,9 @@ export async function renderV197Map(
       const table = el(doc, "table", "nur-map-matrix");
       const head = el(doc, "thead");
       const headRow = el(doc, "tr");
-      headRow.append(el(doc, "th", undefined, "Dimension"));
+      headRow.append(el(doc, "th", undefined, v197Copy("Dimension")));
       for (const option of options) {
-        headRow.append(el(doc, "th", undefined, text(option.label, "Option")));
+        headRow.append(el(doc, "th", undefined, text(option.label, v197Copy("Option"))));
       }
       head.append(headRow);
       table.append(head);
@@ -1506,7 +1507,7 @@ export async function renderV197Map(
     } | null;
     if (recommendation) {
       const card = el(doc, "div", "nur-map-doubt");
-      card.append(el(doc, "p", "nur-map-doubt-label", "NUR's reading"));
+      card.append(el(doc, "p", "nur-map-doubt-label", v197Copy("NUR's reading")));
       card.append(el(doc, "p", "nur-map-field-value", recommendation.because));
       // The assumption is always visible next to the recommendation.
       card.append(el(doc, "p", "nur-map-field-value", recommendation.changes_if));
@@ -1537,21 +1538,21 @@ export async function renderV197Map(
 
   function mapDetailPanel(): HTMLElement {
     const pane = el(doc, "aside", "nur-map-pane nur-map-detail");
-    pane.setAttribute("aria-label", "Selection detail");
+    pane.setAttribute("aria-label", v197Copy("Selection detail"));
     const scroll = el(doc, "div", "nur-map-pane-scroll");
 
     const node = state.graph.nodes.find((row) => row.id === state.selected);
     if (!node) {
-      scroll.append(el(doc, "p", "nur-map-detail-kind", "Nothing selected"));
+      scroll.append(el(doc, "p", "nur-map-detail-kind", v197Copy("Nothing selected")));
       scroll.append(el(
         doc, "p", "nur-map-empty",
-        "Select something on the Map to understand its role, evidence and possible movement.",
+        v197Copy("Select something on the Map to understand its role, evidence and possible movement."),
       ));
       // Candidates remain reachable with nothing selected: they are the one thing
       // waiting on the owner rather than on work.
       const pending = state.graph.suggested_changes.suggestions;
       if (pending.length) {
-        scroll.append(el(doc, "p", "nur-map-nav-label", "NUR suggests"));
+        scroll.append(el(doc, "p", "nur-map-nav-label", v197Copy("NUR suggests")));
         for (const suggestion of pending) scroll.append(candidateCard(suggestion));
       }
       pane.append(scroll);
@@ -1687,10 +1688,10 @@ export async function renderV197Map(
       // A blocker NUR only proposed is never presented as established.
       if (data.confirmed_by_owner === false) {
         const notice = el(doc, "div", "nur-map-doubt");
-        notice.append(el(doc, "p", "nur-map-doubt-label", "Not confirmed"));
+        notice.append(el(doc, "p", "nur-map-doubt-label", v197Copy("Not confirmed")));
         notice.append(el(
           doc, "p", "nur-map-field-value",
-          "NUR proposed this. It is not treated as a real blocker until you say it is.",
+          v197Copy("NUR proposed this. It is not treated as a real blocker until you say it is."),
         ));
         into.append(notice);
       }
@@ -1711,16 +1712,16 @@ export async function renderV197Map(
         data.chosen_option_id ? labelOf(`decision-option:${data.chosen_option_id}`) : "Not yet",
         !data.chosen_option_id,
       ));
-      into.append(field(doc, "Rationale", text(data.rationale, "None recorded")));
+      into.append(field(doc, "Rationale", text(data.rationale, v197Copy("None recorded"))));
     }
     if (node.kind === "GOAL") {
       into.append(field(doc, "Progress", `${text(data.progress_percent, "0")}% verified`));
-      into.append(field(doc, "Target date", text(data.target_date, "No target date")));
-      into.append(field(doc, "Why it matters", text(data.why, "Not recorded")));
+      into.append(field(doc, "Target date", text(data.target_date, v197Copy("No target date"))));
+      into.append(field(doc, "Why it matters", text(data.why, v197Copy("Not recorded"))));
     }
     if (node.kind === "DECISION_OPTION") {
       into.append(field(doc, "Reversibility", text(data.reversibility)));
-      into.append(field(doc, "Time horizon", text(data.time_horizon, "Not stated"), !data.time_horizon));
+      into.append(field(doc, "Time horizon", text(data.time_horizon, v197Copy("Not stated")), !data.time_horizon));
       into.append(field(doc, "Risks recorded", String(data.risk_count ?? 0)));
     }
     if (typeof data.annotation_count === "number") {
@@ -1729,7 +1730,7 @@ export async function renderV197Map(
     if (!into.childElementCount) {
       into.append(el(
         doc, "p", "nur-map-empty",
-        "This object carries no recorded detail beyond its name and place.",
+        v197Copy("This object carries no recorded detail beyond its name and place."),
       ));
     }
   }
@@ -1784,7 +1785,7 @@ export async function renderV197Map(
   function evidenceTab(into: HTMLElement): void {
     const evidence = state.evidence;
     if (!evidence) {
-      into.append(el(doc, "p", "nur-map-empty", "Loading the evidence for this object…"));
+      into.append(el(doc, "p", "nur-map-empty", v197Copy("Loading the evidence for this object…")));
       return;
     }
     const supporting = (evidence.supporting as Record<string, unknown>[] | undefined) ?? [];
@@ -1802,22 +1803,22 @@ export async function renderV197Map(
         badge.textContent = `${presentation.glyph} ${presentation.word}`;
         card.append(badge);
         card.append(el(doc, "p", "nur-map-field-value", text(row.body, "")));
-        card.append(el(doc, "p", "nur-map-row-meta", `Source: ${text(row.source, "unknown")}`));
+        card.append(el(doc, "p", "nur-map-row-meta", v197Copy("Source: {{0}}", { 0: text(row.source, v197Copy("unknown")) })));
         into.append(card);
       }
     };
 
-    into.append(el(doc, "p", "nur-map-nav-label", "Supporting"));
+    into.append(el(doc, "p", "nur-map-nav-label", v197Copy("Supporting")));
     if (supporting.length) render(supporting, false);
-    else into.append(el(doc, "p", "nur-map-empty", "Nothing supports this yet."));
+    else into.append(el(doc, "p", "nur-map-empty", v197Copy("Nothing supports this yet.")));
 
-    into.append(el(doc, "p", "nur-map-nav-label", "Contradicting"));
+    into.append(el(doc, "p", "nur-map-nav-label", v197Copy("Contradicting")));
     if (contradicting.length) render(contradicting, true);
-    else into.append(el(doc, "p", "nur-map-empty", "Nothing argues against this yet."));
+    else into.append(el(doc, "p", "nur-map-empty", v197Copy("Nothing argues against this yet.")));
 
     // Naming what is absent is part of the evidence picture.
     if (missing.length) {
-      into.append(el(doc, "p", "nur-map-nav-label", "Missing information"));
+      into.append(el(doc, "p", "nur-map-nav-label", v197Copy("Missing information")));
       for (const line of missing) {
         into.append(el(doc, "p", "nur-map-empty", line));
       }
@@ -1828,13 +1829,13 @@ export async function renderV197Map(
     const activity = state.activity;
     const items = (activity?.items as Record<string, unknown>[] | undefined) ?? [];
     if (!items.length) {
-      into.append(el(doc, "p", "nur-map-empty", "Nothing has happened to this object yet."));
+      into.append(el(doc, "p", "nur-map-empty", v197Copy("Nothing has happened to this object yet.")));
       return;
     }
     const list = el(doc, "ul", "nur-map-nav-list");
     for (const row of items) {
       const item = el(doc, "li", "nur-map-card");
-      item.append(el(doc, "p", "nur-map-card-basis", text(row.kind, "event")));
+      item.append(el(doc, "p", "nur-map-card-basis", text(row.kind, v197Copy("event"))));
       item.append(el(doc, "p", "nur-map-field-value", text(row.title, "")));
       item.append(el(doc, "p", "nur-map-row-meta", text(row.at, "")));
       list.append(item);
@@ -1845,11 +1846,11 @@ export async function renderV197Map(
   function nurViewTab(into: HTMLElement, node: GraphNode): void {
     const predictions = (state.predictions?.items as Record<string, unknown>[] | undefined) ?? [];
     if (predictions.length) {
-      into.append(el(doc, "p", "nur-map-nav-label", "Predictions"));
+      into.append(el(doc, "p", "nur-map-nav-label", v197Copy("Predictions")));
       for (const row of predictions) {
         const card = el(doc, "div", "nur-map-card");
         const badge = el(doc, "p", "nur-map-card-basis nur-map-basis-prediction");
-        badge.textContent = "◇ Prediction";
+        badge.textContent = v197Copy("◇ Prediction");
         card.append(badge);
         card.append(el(doc, "p", "nur-map-field-value", text(row.statement, "")));
         // Confidence is shown as a range word, and certainty is impossible.
@@ -1861,27 +1862,27 @@ export async function renderV197Map(
         ));
         const assumptions = (row.assumptions as string[] | undefined) ?? [];
         if (assumptions.length) {
-          card.append(el(doc, "p", "nur-map-row-meta", `Rests on: ${assumptions.join("; ")}`));
+          card.append(el(doc, "p", "nur-map-row-meta", v197Copy("Rests on: {{0}}", { 0: assumptions.join("; ") })));
         }
         if (row.overdue_for_review) {
           card.append(el(
             doc, "p", "nur-map-row-meta",
-            "Past its review date — anything resting on this rests on an unchecked assumption.",
+            v197Copy("Past its review date — anything resting on this rests on an unchecked assumption."),
           ));
         }
         if (row.resolution) {
-          card.append(el(doc, "p", "nur-map-row-meta", `Outcome: ${String(row.resolution)}`));
+          card.append(el(doc, "p", "nur-map-row-meta", v197Copy("Outcome: {{0}}", { 0: String(row.resolution) })));
         }
         into.append(card);
       }
     } else {
-      into.append(el(doc, "p", "nur-map-empty", "NUR has made no prediction about this."));
+      into.append(el(doc, "p", "nur-map-empty", v197Copy("NUR has made no prediction about this.")));
     }
 
     // §17: this section is required and is never omitted.
     const doubt = el(doc, "div", "nur-map-doubt");
     doubt.dataset.mapDoubt = "true";
-    doubt.append(el(doc, "p", "nur-map-doubt-label", "What NUR may be wrong about"));
+    doubt.append(el(doc, "p", "nur-map-doubt-label", v197Copy("What NUR may be wrong about")));
     const kindWord = (KIND_WORD[node.kind] ?? node.kind).toLowerCase();
     doubt.append(el(
       doc, "p", "nur-map-field-value",
@@ -1900,12 +1901,12 @@ export async function renderV197Map(
     card.dataset.mapCandidate = suggestion.id;
     const mark = el(doc, "p", "nur-map-candidate-mark");
     // A candidate is marked as a candidate, in words as well as by its dashes.
-    mark.textContent = `◈ NUR suggests · ${suggestion.suggestion_type.replace(/_/g, " ").toLowerCase()}`;
+    mark.textContent = v197Copy("◈ NUR suggests · {{0}}", { 0: suggestion.suggestion_type.replace(/_/g, " ").toLowerCase() });
     card.append(mark);
     card.append(el(doc, "p", "nur-map-field-value", suggestion.explanation));
 
     const doubt = el(doc, "div", "nur-map-doubt");
-    doubt.append(el(doc, "p", "nur-map-doubt-label", "May be wrong about"));
+    doubt.append(el(doc, "p", "nur-map-doubt-label", v197Copy("May be wrong about")));
     doubt.append(el(doc, "p", "nur-map-field-value", suggestion.may_be_wrong_about));
     card.append(doubt);
 

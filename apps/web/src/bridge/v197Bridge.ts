@@ -14,6 +14,7 @@ import {
   type V197NativeRoute,
 } from "./v197Events";
 import { hydrateTrackAV197, renderInsightInspection, renderWorldLens } from "./v197Hydration";
+import { setActiveV197Catalog } from "./v197I18n";
 import {
   compactV197MiniStars,
   ensureV197EntryPolish,
@@ -278,6 +279,9 @@ export class V197Bridge {
       "/universe/insights/candidates": "insights",
     };
     const routeSurface = worldByRoute[canonicalRoute] ?? pageByRoute[canonicalRoute] ?? "today";
+    const activeLocale = this.snapshot?.preferences?.locale ?? this.session.profile.locale ?? "en";
+    const activeWritingPreference = this.snapshot?.preferences?.writing_preference ?? this.session.profile.writing_preference ?? "default";
+    setActiveV197Catalog(activeLocale, activeWritingPreference);
     this.universeDocument.body.dataset.nurWorldSurface = routeSurface;
 
     this.applyingRoute = true;

@@ -1,3 +1,4 @@
+import { v197Copy } from "./v197I18n";
 /**
  * On-screen galaxy diagnostic, opt-in via `?nur-diagnose=1`.
  *
@@ -137,11 +138,11 @@ export function installV197Diagnostics(): void {
   if (!new URLSearchParams(location.search).has(PARAM)) return;
   if (document.getElementById(PANEL_ID)) return;
 
-  document.title = `NUR DIAG RM:${matchMedia("(prefers-reduced-motion: reduce)").matches ? "1" : "0"}`;
+  document.title = v197Copy("NUR DIAG RM:{{0}}", { 0: matchMedia("(prefers-reduced-motion: reduce)").matches ? "1" : "0" });
   const panel = document.createElement("div");
   panel.id = PANEL_ID;
   panel.setAttribute("role", "region");
-  panel.setAttribute("aria-label", "NUR galaxy diagnostics");
+  panel.setAttribute("aria-label", v197Copy("NUR galaxy diagnostics"));
   panel.style.cssText = [
     "position:fixed", "inset:auto 12px 12px auto", "width:min(560px,92vw)",
     "max-height:76vh", "overflow:auto", "z-index:2147483647",
@@ -171,7 +172,7 @@ export function installV197Diagnostics(): void {
     const bar = document.createElement("div");
     bar.style.cssText = "display:flex;gap:8px;margin-bottom:8px";
     const copy = document.createElement("button");
-    copy.textContent = "Copy report";
+    copy.textContent = v197Copy("Copy report");
     const again = document.createElement("button");
     again.textContent = "Re-read";
     for (const button of [copy, again]) {
@@ -180,8 +181,8 @@ export function installV197Diagnostics(): void {
     }
     copy.addEventListener("click", () => {
       void navigator.clipboard.writeText(text)
-        .then(() => { copy.textContent = "Copied"; })
-        .catch(() => { copy.textContent = "Select and copy manually"; });
+        .then(() => { copy.textContent = v197Copy("Copied"); })
+        .catch(() => { copy.textContent = v197Copy("Select and copy manually"); });
     });
     again.addEventListener("click", render);
     bar.append(copy, again);

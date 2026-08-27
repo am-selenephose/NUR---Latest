@@ -17,7 +17,7 @@ import {
   type V197TeachNURContribution,
   type V197TeachNURContributionKind,
 } from "./v197ApiClient";
-import { applyV197Locale, directionForPreference, V197_LOCALE_META, type WritingPreference } from "./v197I18n";
+import { applyV197Locale, directionForPreference, V197_LOCALE_META, v197Copy, writingOptionsForLocale, type WritingPreference } from "./v197I18n";
 import V197_ADJUNCT_FORENSIC_CSS from "../styles/v197-adjunct-forensic.css?raw";
 import { markV197HolographicWordmark } from "./v197Brand";
 import { createV197StarSeal } from "./v197StarSeal";
@@ -235,7 +235,7 @@ function restoreAdjunctBackground(document: Document): void {
 function universeChamberNav(document: Document): HTMLElement {
   const current = window.location.pathname;
   const nav = element(document, "nav", "nur-adjunct-universe-nav");
-  nav.setAttribute("aria-label", "Universe chambers");
+  nav.setAttribute("aria-label", v197Copy("Universe chambers"));
   for (const chamber of UNIVERSE_CHAMBERS) {
     const control = button(document, `${chamber.glyph} ${chamber.label}`, `universe-chamber-${chamber.label.toLowerCase()}`);
     const selected = chamber.route === "/universe"
@@ -269,9 +269,9 @@ function mount(document: Document, title: string, subtitle: string, backRoute = 
   const brandSeal = createV197StarSeal(document, 24, true);
   brandSeal.classList.add("nur-adjunct-brand-seal");
   brand.prepend(brandSeal);
-  topbar.append(back, brand, element(document, "span", "nur-adjunct-privacy", "Private by default. Shared only by choice."));
+  topbar.append(back, brand, element(document, "span", "nur-adjunct-privacy", v197Copy("Private by default. Shared only by choice.")));
   const hero = element(document, "section", "nur-adjunct-hero");
-  hero.append(element(document, "p", "nur-adjunct-eyebrow", "Neural Upgrade Rewiring"));
+  hero.append(element(document, "p", "nur-adjunct-eyebrow", v197Copy("Neural Upgrade Rewiring")));
   hero.append(element(document, "h1", undefined, title));
   hero.append(element(document, "p", "nur-adjunct-subtitle", subtitle));
   shell.append(topbar);
@@ -294,49 +294,71 @@ async function renderSettings(
   snapshot: V197BridgeSnapshot,
   refreshSnapshot: RefreshSnapshot,
 ): Promise<void> {
-  const shell = mount(document, "Your NUR, held on your terms.", "Language, model access, motion and learning preferences stay in your owner-scoped ledger.");
+  const shell = mount(document, v197Copy("Your NUR, held on your terms."), v197Copy("Language, model access, motion and learning preferences stay in your owner-scoped ledger."));
   const grid = element(document, "div", "nur-adjunct-grid");
   shell.append(grid);
 
-  const provider = panel(document, "Provider boundary", "Intelligence connection");
+  const provider = panel(document, v197Copy("Provider boundary"), v197Copy("Intelligence connection"));
   const providerState = snapshot.health?.ai_provider === "openai" ? "OPENAI_CONFIGURED" : "DISABLED";
   provider.append(element(document, "div", "nur-adjunct-facts"));
   provider.querySelector(".nur-adjunct-facts")?.append(
-    fact(document, "Provider", providerState),
-    fact(document, "Execution", "Server-side only"),
-    fact(document, "Prompt logging", "Off by default"),
+    fact(document, v197Copy("Provider"), providerState),
+    fact(document, v197Copy("Execution"), v197Copy("Server-side only")),
+    fact(document, v197Copy("Prompt logging"), v197Copy("Off by default")),
   );
   provider.append(status(document, providerState === "OPENAI_CONFIGURED"
     ? "The backend can answer Talk requests. No key is exposed to this document."
     : "AI is not connected. Run the local configuration script, then start NUR in OpenAI mode.", providerState === "OPENAI_CONFIGURED" ? "good" : "warn"));
 
-  const language = panel(document, "Language and voice", "How NUR speaks with you");
+  const language = panel(document, v197Copy("Language and voice"), v197Copy("How NUR speaks with you"));
   const localeLabel = element(document, "label", "nur-adjunct-field");
-  localeLabel.append(element(document, "span", undefined, "Interface language"));
+  localeLabel.append(element(document, "span", undefined, v197Copy("Interface language")));
   const locale = element(document, "select", "nur-adjunct-select") as HTMLSelectElement;
   locale.dataset.adjunctControl = "locale";
   for (const row of V197_LOCALE_META) {
-    const option = element(document, "option", undefined, `${row.label} · ${row.status === "polished_beta" ? "polished beta" : "draft"}`) as HTMLOptionElement;
+    const option = element(document, "option", undefined, v197Copy("{{0}} · {{1}}", { 0: row.label, 1: row.status === "polished_beta" ? "polished beta" : "draft" })) as HTMLOptionElement;
     option.value = row.locale;
     option.selected = row.locale === (snapshot.preferences?.locale ?? snapshot.session.profile.locale ?? "en");
     locale.append(option);
   }
   localeLabel.append(locale);
   const writingLabel = element(document, "label", "nur-adjunct-field");
-  writingLabel.append(element(document, "span", undefined, "Writing preference"));
+  writingLabel.append(element(document, "span", undefined, v197Copy("Writing preference")));
   const writing = element(document, "select", "nur-adjunct-select") as HTMLSelectElement;
   writing.dataset.adjunctControl = "writing-preference";
-  for (const [value, label] of [["default", "Language default"], ["roman", "Roman writing"], ["script", "Native script"]]) {
-    const option = element(document, "option", undefined, label) as HTMLOptionElement;
-    option.value = value;
-    option.selected = value === (snapshot.preferences?.writing_preference ?? "default");
-    writing.append(option);
-  }
+  const writingLabels: Record<WritingPreference, string> = {
+    default: v197Copy("Locale default"),
+    roman: v197Copy("Roman writing"),
+    script: v197Copy("Native script"),
+  };
+  let requestedWriting = snapshot.preferences?.writing_preference ?? "default";
+  const renderWritingOptions = (): void => {
+    const currentWriting = writing.value as WritingPreference;
+    const preferred = writingOptionsForLocale(locale.value).includes(currentWriting)
+      ? currentWriting
+      : requestedWriting;
+    const allowed = writingOptionsForLocale(locale.value);
+    const selected = allowed.includes(preferred as WritingPreference)
+      ? preferred as WritingPreference
+      : allowed[0]!;
+    requestedWriting = selected;
+    writing.replaceChildren(...allowed.map(value => {
+      const option = element(document, "option", undefined, writingLabels[value]) as HTMLOptionElement;
+      option.value = value;
+      option.selected = value === selected;
+      return option;
+    }));
+  };
+  renderWritingOptions();
+  locale.addEventListener("change", renderWritingOptions);
+  writing.addEventListener("change", () => {
+    requestedWriting = writing.value as WritingPreference;
+  });
   writingLabel.append(writing);
   language.append(localeLabel, writingLabel);
-  language.append(status(document, "Roman Urdu is stored as locale=ur with writing_preference=roman. Draft locales are labelled honestly."));
+  language.append(status(document, v197Copy("Roman Urdu is stored as locale=ur with writing_preference=roman. Draft locales are labelled honestly.")));
 
-  const experience = panel(document, "Presence", "Motion, sound and Omega");
+  const experience = panel(document, v197Copy("Presence"), v197Copy("Motion, sound and Omega"));
   const toggle = (label: string, key: string, checked: boolean) => {
     const row = element(document, "label", "nur-adjunct-toggle");
     row.append(element(document, "span", undefined, label));
@@ -353,16 +375,16 @@ async function renderSettings(
     toggle("Omega research memory", "omega", snapshot.preferences?.omega_enabled ?? true),
   );
 
-  const ownership = panel(document, "Owner data", "Export the complete owner-scoped ledger");
-  ownership.append(element(document, "p", "nur-adjunct-boundary", "The download includes deterministic JSON, a SHA-256 manifest checksum, and explicit status for any unavailable stored object. Secret hashes are excluded."));
+  const ownership = panel(document, v197Copy("Owner data"), v197Copy("Export the complete owner-scoped ledger"));
+  ownership.append(element(document, "p", "nur-adjunct-boundary", v197Copy("The download includes deterministic JSON, a SHA-256 manifest checksum, and explicit status for any unavailable stored object. Secret hashes are excluded.")));
   const ownershipActions = element(document, "div", "nur-adjunct-actions");
-  const exportButton = button(document, "Export my NUR", "settings-export");
-  const exportState = status(document, "Nothing is marked exported until the API returns the real owner manifest.");
+  const exportButton = button(document, v197Copy("Export my NUR"), "settings-export");
+  const exportState = status(document, v197Copy("Nothing is marked exported until the API returns the real owner manifest."));
   ownershipActions.append(exportButton);
   ownership.append(ownershipActions, exportState);
   exportButton.addEventListener("click", async () => {
     exportButton.disabled = true;
-    exportState.textContent = "Preparing the owner-scoped export…";
+    exportState.textContent = v197Copy("Preparing the owner-scoped export…");
     try {
       const exported = await api.downloadOwnerExport();
       const href = URL.createObjectURL(exported.blob);
@@ -373,7 +395,7 @@ async function renderSettings(
       anchor.click();
       anchor.remove();
       window.setTimeout(() => URL.revokeObjectURL(href), 0);
-      exportState.textContent = `Export downloaded. SHA-256 ${exported.checksum}.`;
+      exportState.textContent = v197Copy("Export downloaded. SHA-256 {{0}}.", { 0: exported.checksum });
       exportState.className = "nur-adjunct-status is-good";
     } catch (error) {
       exportState.textContent = error instanceof Error ? error.message : "Owner export could not be prepared.";
@@ -383,7 +405,7 @@ async function renderSettings(
     }
   });
 
-  const security = panel(document, "Password", "Change it and revoke every active session");
+  const security = panel(document, v197Copy("Password"), v197Copy("Change it and revoke every active session"));
   const passwordField = (label: string, control: string) => {
     const field = element(document, "label", "nur-adjunct-field");
     field.append(element(document, "span", undefined, label));
@@ -404,8 +426,8 @@ async function renderSettings(
     passwordField("Confirm new password", "confirm-password"),
   );
   const securityActions = element(document, "div", "nur-adjunct-actions");
-  const changePassword = button(document, "Change password", "settings-change-password", true);
-  const securityState = status(document, "A successful change signs every device out, including this one.");
+  const changePassword = button(document, v197Copy("Change password"), "settings-change-password", true);
+  const securityState = status(document, v197Copy("A successful change signs every device out, including this one."));
   securityActions.append(changePassword);
   security.append(securityActions, securityState);
   changePassword.addEventListener("click", async () => {
@@ -413,20 +435,20 @@ async function renderSettings(
     const next = (security.querySelector('[data-adjunct-control="new-password"]') as HTMLInputElement).value;
     const confirmation = (security.querySelector('[data-adjunct-control="confirm-password"]') as HTMLInputElement).value;
     if (current.length < 1 || next.length < 8) {
-      securityState.textContent = "Enter the current password and a new password of at least 8 characters.";
+      securityState.textContent = v197Copy("Enter the current password and a new password of at least 8 characters.");
       securityState.className = "nur-adjunct-status is-warn";
       return;
     }
     if (next !== confirmation) {
-      securityState.textContent = "The two new passwords do not match.";
+      securityState.textContent = v197Copy("The two new passwords do not match.");
       securityState.className = "nur-adjunct-status is-warn";
       return;
     }
     changePassword.disabled = true;
-    securityState.textContent = "Changing password and revoking sessions…";
+    securityState.textContent = v197Copy("Changing password and revoking sessions…");
     try {
       await api.changePassword(current, next);
-      securityState.textContent = "Password changed. Returning to Sign in…";
+      securityState.textContent = v197Copy("Password changed. Returning to Sign in…");
       securityState.className = "nur-adjunct-status is-good";
       window.setTimeout(() => window.location.replace("/auth"), 400);
     } catch (error) {
@@ -436,11 +458,11 @@ async function renderSettings(
     }
   });
 
-  const sessionsPanel = panel(document, "Sessions", "Devices with access to this Orbit");
+  const sessionsPanel = panel(document, v197Copy("Sessions"), v197Copy("Devices with access to this Orbit"));
   const sessionList = element(document, "div", "nur-adjunct-list");
   const sessionActions = element(document, "div", "nur-adjunct-actions");
-  const revokeOthers = button(document, "Sign out other devices", "settings-revoke-other-sessions");
-  const sessionState = status(document, "Loading the real session ledger…");
+  const revokeOthers = button(document, v197Copy("Sign out other devices"), "settings-revoke-other-sessions");
+  const sessionState = status(document, v197Copy("Loading the real session ledger…"));
   sessionActions.append(revokeOthers);
   sessionsPanel.append(sessionList, sessionActions, sessionState);
   const loadSessions = async () => {
@@ -454,15 +476,15 @@ async function renderSettings(
           element(document, "strong", undefined, ownerSession.current ? "This device" : "Signed-in device"),
           element(document, "span", "nur-adjunct-chip", ownerSession.state),
         );
-        row.append(heading, element(document, "p", undefined, `Started ${date(ownerSession.created_at)} · Expires ${date(ownerSession.expires_at)}`));
+        row.append(heading, element(document, "p", undefined, v197Copy("Started {{0}} · Expires {{1}}", { 0: date(ownerSession.created_at), 1: date(ownerSession.expires_at) })));
         if (!ownerSession.current && ownerSession.state === "active") {
-          const revoke = button(document, "Revoke session", `settings-revoke-session-${ownerSession.id}`);
+          const revoke = button(document, v197Copy("Revoke session"), `settings-revoke-session-${ownerSession.id}`);
           revoke.addEventListener("click", async () => {
             revoke.disabled = true;
             try {
               await api.revokeSession(ownerSession.id);
               await loadSessions();
-              sessionState.textContent = "Session revoked.";
+              sessionState.textContent = v197Copy("Session revoked.");
               sessionState.className = "nur-adjunct-status is-good";
             } catch (error) {
               sessionState.textContent = error instanceof Error ? error.message : "Session could not be revoked.";
@@ -475,10 +497,10 @@ async function renderSettings(
         }
         sessionList.append(row);
       }
-      if (!sessions.length) sessionList.append(empty(document, "No session row returned", "The API did not report an active browser session."));
-      sessionState.textContent = `${sessions.length} owner-scoped session${sessions.length === 1 ? "" : "s"}.`;
+      if (!sessions.length) sessionList.append(empty(document, v197Copy("No session row returned"), v197Copy("The API did not report an active browser session.")));
+      sessionState.textContent = v197Copy("{{0}} owner-scoped session{{1}}.", { 0: sessions.length, 1: sessions.length === 1 ? "" : "s" });
     } catch (error) {
-      sessionList.append(empty(document, "Session ledger unavailable", "No device is shown without an API response."));
+      sessionList.append(empty(document, v197Copy("Session ledger unavailable"), v197Copy("No device is shown without an API response.")));
       sessionState.textContent = error instanceof Error ? error.message : "Sessions could not be loaded.";
       sessionState.className = "nur-adjunct-status is-warn";
     }
@@ -488,7 +510,7 @@ async function renderSettings(
     try {
       const result = await api.revokeOtherSessions();
       await loadSessions();
-      sessionState.textContent = `${result.revoked_session_count} other session${result.revoked_session_count === 1 ? "" : "s"} revoked.`;
+      sessionState.textContent = v197Copy("{{0}} other session{{1}} revoked.", { 0: result.revoked_session_count, 1: result.revoked_session_count === 1 ? "" : "s" });
       sessionState.className = "nur-adjunct-status is-good";
     } catch (error) {
       sessionState.textContent = error instanceof Error ? error.message : "Other sessions could not be revoked.";
@@ -497,33 +519,31 @@ async function renderSettings(
       revokeOthers.disabled = false;
     }
   });
-  await loadSessions();
-
-  const deletion = panel(document, "Danger zone", "Permanently delete this NUR account");
+  const deletion = panel(document, v197Copy("Danger zone"), v197Copy("Permanently delete this NUR account"));
   deletion.classList.add("is-danger");
   const deletionPassword = passwordField("Current password", "delete-password");
   const deletionConfirmationField = element(document, "label", "nur-adjunct-field");
-  deletionConfirmationField.append(element(document, "span", undefined, "Type DELETE MY NUR ACCOUNT"));
+  deletionConfirmationField.append(element(document, "span", undefined, v197Copy("Type DELETE MY NUR ACCOUNT")));
   const deletionConfirmation = element(document, "input", "nur-adjunct-input") as HTMLInputElement;
   deletionConfirmation.autocomplete = "off";
   deletionConfirmation.dataset.adjunctControl = "delete-confirmation";
   deletionConfirmation.maxLength = 64;
   deletionConfirmationField.append(deletionConfirmation);
   const deletionActions = element(document, "div", "nur-adjunct-actions");
-  const deleteButton = button(document, "Delete account permanently", "settings-delete");
-  const deletionState = status(document, "Local files must be removed before the database account can be deleted. External provider erasure is never claimed unless a provider adapter performs it.");
+  const deleteButton = button(document, v197Copy("Delete account permanently"), "settings-delete");
+  const deletionState = status(document, v197Copy("Local files must be removed before the database account can be deleted. External provider erasure is never claimed unless a provider adapter performs it."));
   deletionActions.append(deleteButton);
   deletion.append(deletionPassword, deletionConfirmationField, deletionActions, deletionState);
   deleteButton.addEventListener("click", async () => {
     const password = (deletion.querySelector('[data-adjunct-control="delete-password"]') as HTMLInputElement).value;
     if (!password || deletionConfirmation.value !== "DELETE MY NUR ACCOUNT") {
-      deletionState.textContent = 'Enter the current password and type "DELETE MY NUR ACCOUNT" exactly.';
+      deletionState.textContent = v197Copy("Enter the current password and type \"DELETE MY NUR ACCOUNT\" exactly.");
       deletionState.className = "nur-adjunct-status is-warn";
       return;
     }
     if (!window.confirm("Permanently delete this NUR account and all owner-scoped data? This cannot be undone.")) return;
     deleteButton.disabled = true;
-    deletionState.textContent = "Deleting owner data and revoking sessions…";
+    deletionState.textContent = v197Copy("Deleting owner data and revoking sessions…");
     try {
       const result = await api.deleteAccount(password, deletionConfirmation.value);
       deletionState.textContent = result.external_provider_deletion.detail;
@@ -536,16 +556,16 @@ async function renderSettings(
     }
   });
 
-  const savePanel = panel(document, "Persisted owner preference", "Return with the same language");
+  const savePanel = panel(document, v197Copy("Persisted owner preference"), v197Copy("Return with the same language"));
   savePanel.classList.add("is-wide");
   const actions = element(document, "div", "nur-adjunct-actions");
-  const save = button(document, "Save preferences", "settings-save", true);
+  const save = button(document, v197Copy("Save preferences"), "settings-save", true);
   actions.append(save);
-  const saveState = status(document, "Changes are stored only in your owner-scoped preference row.");
+  const saveState = status(document, v197Copy("Changes are stored only in your owner-scoped preference row."));
   savePanel.append(actions, saveState);
   save.addEventListener("click", async () => {
     save.disabled = true;
-    saveState.textContent = "Saving…";
+    saveState.textContent = v197Copy("Saving…");
     try {
       const selectedLocale = locale.value;
       const selectedWriting = writing.value as WritingPreference;
@@ -559,7 +579,7 @@ async function renderSettings(
       const next = await refreshSnapshot();
       applyV197Locale(document, selectedLocale, selectedWriting);
       document.documentElement.dir = directionForPreference(selectedLocale, selectedWriting);
-      saveState.textContent = "Saved. NUR will return in this language and writing style.";
+      saveState.textContent = v197Copy("Saved. NUR will return in this language and writing style.");
       saveState.className = "nur-adjunct-status is-good";
       if (next.preferences) snapshot.preferences = next.preferences;
     } catch (error) {
@@ -571,23 +591,24 @@ async function renderSettings(
   });
 
   grid.append(provider, language, experience, security, sessionsPanel, ownership, deletion, savePanel);
+  await loadSessions();
 }
 
 async function renderMemory(document: Document, api: V197ApiClient, snapshot: V197BridgeSnapshot): Promise<void> {
   const shell = mount(
     document,
-    "Memory stays proposed until you choose it.",
-    "Candidate inferences, accepted memories and owner-written context remain separate, editable and deletable inside your private ledger.",
+    v197Copy("Memory stays proposed until you choose it."),
+    v197Copy("Candidate inferences, accepted memories and owner-written context remain separate, editable and deletable inside your private ledger."),
   );
   const grid = element(document, "div", "nur-adjunct-grid");
   shell.append(grid);
   const orbitId = activeOrbitId(snapshot);
 
-  const create = panel(document, "Owner-written memory", "Hold one thing deliberately");
+  const create = panel(document, v197Copy("Owner-written memory"), v197Copy("Hold one thing deliberately"));
   create.classList.add("is-wide");
   const createText = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
   createText.dataset.adjunctControl = "memory-create-text";
-  createText.placeholder = "Write only what you want NUR to remember...";
+  createText.placeholder = v197Copy("Write only what you want NUR to remember...");
   const createType = element(document, "select", "nur-adjunct-select") as HTMLSelectElement;
   createType.dataset.adjunctControl = "memory-create-type";
   selectOptions(document, createType, MEMORY_TYPES);
@@ -596,7 +617,7 @@ async function renderMemory(document: Document, api: V197ApiClient, snapshot: V1
   createSensitivity.dataset.adjunctControl = "memory-create-sensitivity";
   selectOptions(document, createSensitivity, MEMORY_SENSITIVITIES);
   createSensitivity.value = "PRIVATE";
-  const createAction = button(document, "Remember by my choice", "memory-create", true);
+  const createAction = button(document, v197Copy("Remember by my choice"), "memory-create", true);
   createAction.disabled = !orbitId;
   const createState = status(
     document,
@@ -606,28 +627,28 @@ async function renderMemory(document: Document, api: V197ApiClient, snapshot: V1
   const createActions = element(document, "div", "nur-adjunct-actions");
   createActions.append(createAction);
   create.append(
-    element(document, "p", "nur-adjunct-boundary", "Private means owner-scoped. Sensitive memory remains excluded from sharing unless you later select it through a separate boundary."),
-    labeledControl(document, "Memory", createText),
-    labeledControl(document, "Type", createType),
-    labeledControl(document, "Sensitivity", createSensitivity),
+    element(document, "p", "nur-adjunct-boundary", v197Copy("Private means owner-scoped. Sensitive memory remains excluded from sharing unless you later select it through a separate boundary.")),
+    labeledControl(document, v197Copy("Memory"), createText),
+    labeledControl(document, v197Copy("Type"), createType),
+    labeledControl(document, v197Copy("Sensitivity"), createSensitivity),
     createActions,
     createState,
   );
 
-  const candidates = panel(document, "Review queue", "Memory candidates");
-  const candidateState = status(document, "Candidates are not memories until you approve them.");
+  const candidates = panel(document, v197Copy("Review queue"), v197Copy("Memory candidates"));
+  const candidateState = status(document, v197Copy("Candidates are not memories until you approve them."));
   const candidateList = element(document, "div", "nur-adjunct-list");
   candidates.append(candidateState, candidateList);
 
-  const accepted = panel(document, "Owner ledger", "Accepted memories");
-  const memoryState = status(document, "Edits create a persisted version; deletion removes the owner memory.");
+  const accepted = panel(document, v197Copy("Owner ledger"), v197Copy("Accepted memories"));
+  const memoryState = status(document, v197Copy("Edits create a persisted version; deletion removes the owner memory."));
   const memoryList = element(document, "div", "nur-adjunct-list");
   accepted.append(memoryState, memoryList);
 
   const renderCandidates = (rows: V197MemoryCandidate[]) => {
     candidateList.replaceChildren();
     if (!rows.length) {
-      candidateList.append(empty(document, "No memory candidate is waiting", "NUR has not proposed an owner memory, or every proposal has already been reviewed."));
+      candidateList.append(empty(document, v197Copy("No memory candidate is waiting"), v197Copy("NUR has not proposed an owner memory, or every proposal has already been reviewed.")));
       return;
     }
     for (const candidate of rows) {
@@ -637,23 +658,23 @@ async function renderMemory(document: Document, api: V197ApiClient, snapshot: V1
         element(document, "strong", undefined, candidate.candidate_text),
         element(document, "span", "nur-adjunct-chip", candidate.status),
       );
-      row.append(head, element(document, "p", undefined, `${candidate.memory_type} · ${candidate.sensitivity} · ${candidate.provenance_label}`));
+      row.append(head, element(document, "p", undefined, v197Copy("{{0}} · {{1}} · {{2}}", { 0: candidate.memory_type, 1: candidate.sensitivity, 2: candidate.provenance_label })));
       if (["PENDING", "PENDING_REVIEW", "CANDIDATE", "EDITED"].includes(candidate.status)) {
         const correctedText = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
         correctedText.value = candidate.candidate_text;
         correctedText.dataset.adjunctControl = `memory-candidate-text-${candidate.id}`;
         const reason = element(document, "input", "nur-adjunct-input") as HTMLInputElement;
-        reason.placeholder = "Why this correction is needed";
+        reason.placeholder = v197Copy("Why this correction is needed");
         reason.dataset.adjunctControl = `memory-candidate-reason-${candidate.id}`;
         const actions = element(document, "div", "nur-adjunct-actions");
-        const approve = button(document, "Approve as memory", `memory-candidate-approve-${candidate.id}`, true);
-        const correct = button(document, "Correct proposal", `memory-candidate-correct-${candidate.id}`);
-        const reject = button(document, "Reject proposal", `memory-candidate-reject-${candidate.id}`);
+        const approve = button(document, v197Copy("Approve as memory"), `memory-candidate-approve-${candidate.id}`, true);
+        const correct = button(document, v197Copy("Correct proposal"), `memory-candidate-correct-${candidate.id}`);
+        const reject = button(document, v197Copy("Reject proposal"), `memory-candidate-reject-${candidate.id}`);
         actions.append(approve, correct, reject);
         const controls = [approve, correct, reject];
         const act = async (action: "approve" | "correct" | "reject") => {
           controls.forEach(control => { control.disabled = true; });
-          setStatus(candidateState, `${action === "approve" ? "Approving" : action === "correct" ? "Correcting" : "Rejecting"} owner candidate...`);
+          setStatus(candidateState, v197Copy("{{0}} owner candidate...", { 0: action === "approve" ? "Approving" : action === "correct" ? "Correcting" : "Rejecting" }));
           try {
             if (action === "approve") await api.approveMemoryCandidate(candidate.id);
             else if (action === "reject") await api.rejectMemoryCandidate(candidate.id);
@@ -666,7 +687,7 @@ async function renderMemory(document: Document, api: V197ApiClient, snapshot: V1
                 correction_reason: correctionReason,
               });
             }
-            setStatus(candidateState, "Owner candidate review persisted.", "good");
+            setStatus(candidateState, v197Copy("Owner candidate review persisted."), "good");
             await refreshLists();
           } catch (error) {
             setStatus(candidateState, error instanceof Error ? error.message : "The candidate action failed.", "warn");
@@ -677,8 +698,8 @@ async function renderMemory(document: Document, api: V197ApiClient, snapshot: V1
         correct.addEventListener("click", () => void act("correct"));
         reject.addEventListener("click", () => void act("reject"));
         row.append(
-          labeledControl(document, "Corrected wording", correctedText),
-          labeledControl(document, "Correction reason", reason),
+          labeledControl(document, v197Copy("Corrected wording"), correctedText),
+          labeledControl(document, v197Copy("Correction reason"), reason),
           actions,
         );
       }
@@ -689,7 +710,7 @@ async function renderMemory(document: Document, api: V197ApiClient, snapshot: V1
   const renderMemories = (rows: V197Memory[]) => {
     memoryList.replaceChildren();
     if (!rows.length) {
-      memoryList.append(empty(document, "No accepted memory", "Create one deliberately or approve a candidate. NUR does not backfill an invented memory."));
+      memoryList.append(empty(document, v197Copy("No accepted memory"), v197Copy("Create one deliberately or approve a candidate. NUR does not backfill an invented memory.")));
       return;
     }
     for (const memory of rows) {
@@ -697,7 +718,7 @@ async function renderMemory(document: Document, api: V197ApiClient, snapshot: V1
       const head = element(document, "div", "nur-adjunct-row-head");
       head.append(
         element(document, "strong", undefined, memory.canonical_text),
-        element(document, "span", "nur-adjunct-chip", `${memory.status} · v${memory.version}`),
+        element(document, "span", "nur-adjunct-chip", v197Copy("{{0}} · v{{1}}", { 0: memory.status, 1: memory.version })),
       );
       const canonicalText = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
       canonicalText.value = memory.canonical_text;
@@ -709,13 +730,13 @@ async function renderMemory(document: Document, api: V197ApiClient, snapshot: V1
       selectOptions(document, sensitivity, MEMORY_SENSITIVITIES);
       if (MEMORY_SENSITIVITIES.includes(memory.sensitivity as V197MemorySensitivity)) sensitivity.value = memory.sensitivity;
       const actions = element(document, "div", "nur-adjunct-actions");
-      const save = button(document, "Save owner edit", `memory-save-${memory.id}`, true);
-      const remove = button(document, "Delete memory", `memory-delete-${memory.id}`);
+      const save = button(document, v197Copy("Save owner edit"), `memory-save-${memory.id}`, true);
+      const remove = button(document, v197Copy("Delete memory"), `memory-delete-${memory.id}`);
       actions.append(save, remove);
       save.addEventListener("click", async () => {
         const value = canonicalText.value.trim();
         if (!value) {
-          setStatus(memoryState, "A memory cannot be blank.", "warn");
+          setStatus(memoryState, v197Copy("A memory cannot be blank."), "warn");
           return;
         }
         save.disabled = true;
@@ -726,7 +747,7 @@ async function renderMemory(document: Document, api: V197ApiClient, snapshot: V1
             memory_type: memoryType.value as V197MemoryType,
             sensitivity: sensitivity.value as V197MemorySensitivity,
           });
-          setStatus(memoryState, "Owner edit persisted as the next memory version.", "good");
+          setStatus(memoryState, v197Copy("Owner edit persisted as the next memory version."), "good");
           await refreshLists();
         } catch (error) {
           setStatus(memoryState, error instanceof Error ? error.message : "The memory edit failed.", "warn");
@@ -740,7 +761,7 @@ async function renderMemory(document: Document, api: V197ApiClient, snapshot: V1
         remove.disabled = true;
         try {
           await api.deleteMemory(memory.id);
-          setStatus(memoryState, "Memory deleted from the owner ledger.", "good");
+          setStatus(memoryState, v197Copy("Memory deleted from the owner ledger."), "good");
           await refreshLists();
         } catch (error) {
           setStatus(memoryState, error instanceof Error ? error.message : "The memory could not be deleted.", "warn");
@@ -750,10 +771,10 @@ async function renderMemory(document: Document, api: V197ApiClient, snapshot: V1
       });
       row.append(
         head,
-        element(document, "p", undefined, `${memory.memory_type} · ${memory.sensitivity} · ${memory.provenance_label}`),
-        labeledControl(document, "Canonical wording", canonicalText),
-        labeledControl(document, "Type", memoryType),
-        labeledControl(document, "Sensitivity", sensitivity),
+        element(document, "p", undefined, v197Copy("{{0}} · {{1}} · {{2}}", { 0: memory.memory_type, 1: memory.sensitivity, 2: memory.provenance_label })),
+        labeledControl(document, v197Copy("Canonical wording"), canonicalText),
+        labeledControl(document, v197Copy("Type"), memoryType),
+        labeledControl(document, v197Copy("Sensitivity"), sensitivity),
         actions,
       );
       memoryList.append(row);
@@ -776,7 +797,7 @@ async function renderMemory(document: Document, api: V197ApiClient, snapshot: V1
       return;
     }
     createAction.disabled = true;
-    setStatus(createState, "Writing only this owner-approved memory...");
+    setStatus(createState, v197Copy("Writing only this owner-approved memory..."));
     try {
       await api.createMemory({
         canonical_text: canonicalText,
@@ -787,7 +808,7 @@ async function renderMemory(document: Document, api: V197ApiClient, snapshot: V1
         confidence: 1,
       });
       createText.value = "";
-      setStatus(createState, "Memory persisted by your explicit choice.", "good");
+      setStatus(createState, v197Copy("Memory persisted by your explicit choice."), "good");
       await refreshLists();
     } catch (error) {
       setStatus(createState, error instanceof Error ? error.message : "The memory could not be created.", "warn");
@@ -803,14 +824,14 @@ async function renderMemory(document: Document, api: V197ApiClient, snapshot: V1
 async function renderTeachNUR(document: Document, api: V197ApiClient, snapshot: V197BridgeSnapshot): Promise<void> {
   const shell = mount(
     document,
-    "Teach NUR without surrendering authority.",
-    "Your contribution enters an owner-scoped review ledger. Consent is explicit, reversible and never authorizes model training by implication.",
+    v197Copy("Teach NUR without surrendering authority."),
+    v197Copy("Your contribution enters an owner-scoped review ledger. Consent is explicit, reversible and never authorizes model training by implication."),
   );
   const grid = element(document, "div", "nur-adjunct-grid");
   shell.append(grid);
   const orbitId = activeOrbitId(snapshot);
 
-  const contribute = panel(document, "Explicit contribution", "Offer one bounded correction or insight");
+  const contribute = panel(document, v197Copy("Explicit contribution"), v197Copy("Offer one bounded correction or insight"));
   contribute.classList.add("is-wide");
   const kind = element(document, "select", "nur-adjunct-select") as HTMLSelectElement;
   kind.dataset.adjunctControl = "teach-kind";
@@ -818,7 +839,7 @@ async function renderTeachNUR(document: Document, api: V197ApiClient, snapshot: 
   kind.value = "CORRECTION";
   const content = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
   content.dataset.adjunctControl = "teach-content";
-  content.placeholder = "What should NUR learn, question or correct?";
+  content.placeholder = v197Copy("What should NUR learn, question or correct?");
   const scope = element(document, "select", "nur-adjunct-select") as HTMLSelectElement;
   scope.dataset.adjunctControl = "teach-consent-scope";
   for (const [value, label] of [
@@ -838,37 +859,37 @@ async function renderTeachNUR(document: Document, api: V197ApiClient, snapshot: 
   consent.type = "checkbox";
   consent.dataset.adjunctControl = "teach-consent";
   consentRow.append(
-    element(document, "span", undefined, "I explicitly consent to this selected contribution scope."),
+    element(document, "span", undefined, v197Copy("I explicitly consent to this selected contribution scope.")),
     consent,
   );
-  const scopeState = status(document, "Private owner scope keeps the contribution inside your own retrieval ledger.");
-  const createAction = button(document, "Submit to review ledger", "teach-create", true);
+  const scopeState = status(document, v197Copy("Private owner scope keeps the contribution inside your own retrieval ledger."));
+  const createAction = button(document, v197Copy("Submit to review ledger"), "teach-create", true);
   createAction.disabled = true;
-  const createState = status(document, "No contribution is submitted without the checked consent control.");
+  const createState = status(document, v197Copy("No contribution is submitted without the checked consent control."));
   const actions = element(document, "div", "nur-adjunct-actions");
   actions.append(createAction);
   contribute.append(
-    element(document, "p", "nur-adjunct-boundary", "Deidentified research consent permits governed review only. It does not authorize foundation-model training, institutional promotion or public attribution."),
-    labeledControl(document, "Contribution kind", kind),
-    labeledControl(document, "Contribution", content),
-    labeledControl(document, "Consent scope", scope),
-    labeledControl(document, "Sensitivity", sensitivity),
+    element(document, "p", "nur-adjunct-boundary", v197Copy("Deidentified research consent permits governed review only. It does not authorize foundation-model training, institutional promotion or public attribution.")),
+    labeledControl(document, v197Copy("Contribution kind"), kind),
+    labeledControl(document, v197Copy("Contribution"), content),
+    labeledControl(document, v197Copy("Consent scope"), scope),
+    labeledControl(document, v197Copy("Sensitivity"), sensitivity),
     scopeState,
     consentRow,
     actions,
     createState,
   );
 
-  const ledger = panel(document, "Owner review ledger", "Your contributions");
+  const ledger = panel(document, v197Copy("Owner review ledger"), v197Copy("Your contributions"));
   ledger.classList.add("is-wide");
-  const ledgerState = status(document, "Withdrawal closes future use while preserving the required consent audit.");
+  const ledgerState = status(document, v197Copy("Withdrawal closes future use while preserving the required consent audit."));
   const list = element(document, "div", "nur-adjunct-list");
   ledger.append(ledgerState, list);
 
   const renderRows = (rows: V197TeachNURContribution[]) => {
     list.replaceChildren();
     if (!rows.length) {
-      list.append(empty(document, "No contribution submitted", "NUR does not invent a teaching history. Your first explicit contribution will appear here."));
+      list.append(empty(document, v197Copy("No contribution submitted"), v197Copy("NUR does not invent a teaching history. Your first explicit contribution will appear here.")));
       return;
     }
     for (const contribution of rows) {
@@ -880,11 +901,11 @@ async function renderTeachNUR(document: Document, api: V197ApiClient, snapshot: 
       );
       row.append(
         head,
-        element(document, "p", undefined, `${contribution.contribution_kind} · ${contribution.consent_scope} · ${contribution.sensitivity}`),
-        element(document, "p", undefined, `Model training: ${contribution.model_training_status} · Promotion: ${contribution.institutional_promotion_status}`),
+        element(document, "p", undefined, v197Copy("{{0}} · {{1}} · {{2}}", { 0: contribution.contribution_kind, 1: contribution.consent_scope, 2: contribution.sensitivity })),
+        element(document, "p", undefined, v197Copy("Model training: {{0}} · Promotion: {{1}}", { 0: contribution.model_training_status, 1: contribution.institutional_promotion_status })),
       );
       if (contribution.consent_granted && !["WITHDRAWN", "REJECTED", "ROLLED_BACK"].includes(contribution.status)) {
-        const withdraw = button(document, "Withdraw consent", `teach-withdraw-${contribution.id}`);
+        const withdraw = button(document, v197Copy("Withdraw consent"), `teach-withdraw-${contribution.id}`);
         const rowActions = element(document, "div", "nur-adjunct-actions");
         rowActions.append(withdraw);
         withdraw.addEventListener("click", async () => {
@@ -895,7 +916,7 @@ async function renderTeachNUR(document: Document, api: V197ApiClient, snapshot: 
               { action: "WITHDRAW_CONSENT", review_note: "Withdrawn by owner from the V197 contribution ledger." },
               requestKey(`teach-withdraw-${contribution.id}`),
             );
-            setStatus(ledgerState, "Consent withdrawn. The audit remains, but future use is closed.", "good");
+            setStatus(ledgerState, v197Copy("Consent withdrawn. The audit remains, but future use is closed."), "good");
             await refreshLedger();
           } catch (error) {
             setStatus(ledgerState, error instanceof Error ? error.message : "Consent could not be withdrawn.", "warn");
@@ -939,7 +960,7 @@ async function renderTeachNUR(document: Document, api: V197ApiClient, snapshot: 
       return;
     }
     createAction.disabled = true;
-    setStatus(createState, "Submitting only this bounded contribution...");
+    setStatus(createState, v197Copy("Submitting only this bounded contribution..."));
     try {
       await api.createTeachNURContribution({
         contribution_kind: kind.value as V197TeachNURContributionKind,
@@ -955,7 +976,7 @@ async function renderTeachNUR(document: Document, api: V197ApiClient, snapshot: 
       }, requestKey("teach-create"));
       content.value = "";
       consent.checked = false;
-      setStatus(createState, "Contribution entered your owner review ledger.", "good");
+      setStatus(createState, v197Copy("Contribution entered your owner review ledger."), "good");
       await refreshLedger();
     } catch (error) {
       setStatus(createState, error instanceof Error ? error.message : "The contribution could not be submitted.", "warn");
@@ -997,7 +1018,7 @@ function billingLegalLinks(document: Document, state: V197BillingState): HTMLEle
     links.append(anchor);
   }
   if (!links.childElementCount) {
-    links.append(status(document, "Provider legal links are not configured. Paid checkout remains unavailable until they are present.", "warn"));
+    links.append(status(document, v197Copy("Provider legal links are not configured. Paid checkout remains unavailable until they are present."), "warn"));
   }
   return links;
 }
@@ -1019,21 +1040,21 @@ async function renderBilling(document: Document, api: V197ApiClient): Promise<vo
   const [plans, billing] = await Promise.all([api.billingPlans(), api.billingSubscription()]);
   const shell = mount(
     document,
-    "Billing without hidden authority.",
-    "Plans, entitlements, renewal state and provider handoff come from the billing ledger. NUR never fabricates a purchase or silently changes your subscription.",
+    v197Copy("Billing without hidden authority."),
+    v197Copy("Plans, entitlements, renewal state and provider handoff come from the billing ledger. NUR never fabricates a purchase or silently changes your subscription."),
   );
   const grid = element(document, "div", "nur-adjunct-grid");
   shell.append(grid);
 
-  const current = panel(document, "Owner subscription", billing.subscription ? billing.subscription.plan_code : "Orbit Scan Free");
+  const current = panel(document, v197Copy("Owner subscription"), billing.subscription ? billing.subscription.plan_code : "Orbit Scan Free");
   const currentFacts = element(document, "div", "nur-adjunct-facts");
   currentFacts.append(
-    fact(document, "Provider", billing.subscription?.provider ?? (billing.provider_configured ? "Configured, no subscription" : "Disabled")),
-    fact(document, "Status", billing.subscription?.status ?? "FREE"),
-    fact(document, "Renews", billing.subscription ? (billing.subscription.cancel_at_period_end ? "No · cancellation scheduled" : "Provider managed") : "No paid renewal"),
-    fact(document, "Paid through", date(billing.subscription?.current_period_end)),
+    fact(document, v197Copy("Provider"), billing.subscription?.provider ?? (billing.provider_configured ? "Configured, no subscription" : "Disabled")),
+    fact(document, v197Copy("Status"), billing.subscription?.status ?? "FREE"),
+    fact(document, v197Copy("Renews"), billing.subscription ? (billing.subscription.cancel_at_period_end ? "No · cancellation scheduled" : "Provider managed") : "No paid renewal"),
+    fact(document, v197Copy("Paid through"), date(billing.subscription?.current_period_end)),
   );
-  const portal = button(document, "Manage subscription", "billing-portal");
+  const portal = button(document, v197Copy("Manage subscription"), "billing-portal");
   portal.disabled = !billing.portal_available;
   const portalState = status(document, billing.cancellation_note, billing.provider_configured ? "quiet" : "warn");
   const currentActions = element(document, "div", "nur-adjunct-actions");
@@ -1041,17 +1062,17 @@ async function renderBilling(document: Document, api: V197ApiClient): Promise<vo
   current.append(currentFacts, currentActions, portalState, billingLegalLinks(document, billing));
   portal.addEventListener("click", async () => {
     portal.disabled = true;
-    setStatus(portalState, "Requesting a short-lived provider portal...");
+    setStatus(portalState, v197Copy("Requesting a short-lived provider portal..."));
     try {
       const response = await api.billingPortal();
       const url = safeExternalUrl(response.url);
       if (!url) {
-        setStatus(portalState, "The API did not return a valid HTTPS portal URL. Nothing was opened.", "warn");
+        setStatus(portalState, v197Copy("The API did not return a valid HTTPS portal URL. Nothing was opened."), "warn");
       } else if (!openExternalUrl(url.toString())) {
         externalFallback(document, currentActions, url.toString(), "Open secure billing portal");
-        setStatus(portalState, "Your browser blocked the new tab. Use the secure provider link shown beside this control.", "warn");
+        setStatus(portalState, v197Copy("Your browser blocked the new tab. Use the secure provider link shown beside this control."), "warn");
       } else {
-        setStatus(portalState, `Provider portal opened in a new tab. Link expires ${date(response.expires_at)}.`, "good");
+        setStatus(portalState, v197Copy("Provider portal opened in a new tab. Link expires {{0}}.", { 0: date(response.expires_at) }), "good");
       }
     } catch (error) {
       setStatus(portalState, error instanceof Error ? error.message : "The provider portal is unavailable.", "warn");
@@ -1060,10 +1081,10 @@ async function renderBilling(document: Document, api: V197ApiClient): Promise<vo
     }
   });
 
-  const entitlements = panel(document, "Server projection", "Current entitlements");
+  const entitlements = panel(document, v197Copy("Server projection"), v197Copy("Current entitlements"));
   const entitlementList = element(document, "div", "nur-adjunct-list");
   if (!billing.entitlements.length) {
-    entitlementList.append(empty(document, "No paid entitlement projection", "Free access remains governed by the server. No paid feature is implied."));
+    entitlementList.append(empty(document, v197Copy("No paid entitlement projection"), v197Copy("Free access remains governed by the server. No paid feature is implied.")));
   }
   for (const entitlement of billing.entitlements) {
     const row = element(document, "div", "nur-adjunct-row");
@@ -1075,12 +1096,12 @@ async function renderBilling(document: Document, api: V197ApiClient): Promise<vo
     const usage = entitlement.usage_limit === null
       ? `${entitlement.usage_consumed} used · no fixed limit returned`
       : `${entitlement.usage_consumed} / ${entitlement.usage_limit} used`;
-    row.append(head, element(document, "p", undefined, `${usage} · ${entitlement.reason}`));
+    row.append(head, element(document, "p", undefined, v197Copy("{{0}} · {{1}}", { 0: usage, 1: entitlement.reason })));
     entitlementList.append(row);
   }
   entitlements.append(entitlementList);
 
-  const available = panel(document, "Available plans", "Choose only through the real provider");
+  const available = panel(document, v197Copy("Available plans"), v197Copy("Choose only through the real provider"));
   available.classList.add("is-wide");
   const checkoutState = status(
     document,
@@ -1091,19 +1112,19 @@ async function renderBilling(document: Document, api: V197ApiClient): Promise<vo
   );
   const planList = element(document, "div", "nur-adjunct-list");
   if (!plans.length) {
-    planList.append(empty(document, "No active plan returned", "NUR will not invent price, entitlement or availability data."));
+    planList.append(empty(document, v197Copy("No active plan returned"), v197Copy("NUR will not invent price, entitlement or availability data.")));
   }
   for (const plan of plans) {
     const row = element(document, "article", "nur-adjunct-row");
     const head = element(document, "div", "nur-adjunct-row-head");
     head.append(
-      element(document, "strong", undefined, `${plan.name} · ${billingPrice(plan)}`),
+      element(document, "strong", undefined, v197Copy("{{0}} · {{1}}", { 0: plan.name, 1: billingPrice(plan) })),
       element(document, "span", "nur-adjunct-chip", plan.billing_interval),
     );
     row.append(
       head,
       element(document, "p", undefined, plan.description),
-      element(document, "p", "nur-adjunct-boundary", `${plan.features.filter(feature => feature.allowed).length} server-declared features · legal copy ${plan.legal_copy_version}`),
+      element(document, "p", "nur-adjunct-boundary", v197Copy("{{0}} server-declared features · legal copy {{1}}", { 0: plan.features.filter(feature => feature.allowed).length, 1: plan.legal_copy_version })),
     );
     const planActions = element(document, "div", "nur-adjunct-actions");
     const checkout = button(document, plan.is_free ? "Included free" : `Choose ${plan.name}`, `billing-checkout-${plan.code}`, !plan.is_free);
@@ -1111,17 +1132,17 @@ async function renderBilling(document: Document, api: V197ApiClient): Promise<vo
     planActions.append(checkout);
     checkout.addEventListener("click", async () => {
       checkout.disabled = true;
-      setStatus(checkoutState, `Creating an idempotent ${plan.name} provider handoff...`);
+      setStatus(checkoutState, v197Copy("Creating an idempotent {{0}} provider handoff...", { 0: plan.name }));
       try {
         const response = await api.billingCheckout(plan.code, requestKey("billing-checkout"));
         const url = safeExternalUrl(response.checkout_url);
         if (!url) {
-          setStatus(checkoutState, "The API did not return a valid HTTPS checkout URL. Nothing was opened and no purchase is claimed.", "warn");
+          setStatus(checkoutState, v197Copy("The API did not return a valid HTTPS checkout URL. Nothing was opened and no purchase is claimed."), "warn");
         } else if (!openExternalUrl(url.toString())) {
           externalFallback(document, planActions, url.toString(), `Continue to ${plan.name}`);
-          setStatus(checkoutState, "Your browser blocked the new tab. Use the secure provider link on this plan. No subscription is claimed yet.", "warn");
+          setStatus(checkoutState, v197Copy("Your browser blocked the new tab. Use the secure provider link on this plan. No subscription is claimed yet."), "warn");
         } else {
-          setStatus(checkoutState, `${plan.name} checkout opened through ${response.provider}. No subscription is claimed until the webhook ledger confirms it.`, "good");
+          setStatus(checkoutState, v197Copy("{{0}} checkout opened through {{1}}. No subscription is claimed until the webhook ledger confirms it.", { 0: plan.name, 1: response.provider }), "good");
         }
       } catch (error) {
         setStatus(checkoutState, error instanceof Error ? error.message : "Checkout is unavailable.", "warn");
@@ -1145,21 +1166,21 @@ async function renderOwnerCapsules(document: Document, api: V197ApiClient, snaps
   let capsules = initialCapsules;
   const shell = mount(
     document,
-    "Share a room, never your whole mind.",
-    "A Context Capsule copies only explicitly allowlisted Orbit sources. Recipient grants, expiry, audit and revocation remain separate owner-controlled boundaries.",
+    v197Copy("Share a room, never your whole mind."),
+    v197Copy("A Context Capsule copies only explicitly allowlisted Orbit sources. Recipient grants, expiry, audit and revocation remain separate owner-controlled boundaries."),
     "/universe/orbits",
   );
   const grid = element(document, "div", "nur-adjunct-grid");
   shell.append(grid);
 
-  const create = panel(document, "Source allowlist", "Create a bounded Context Capsule");
+  const create = panel(document, v197Copy("Source allowlist"), v197Copy("Create a bounded Context Capsule"));
   create.classList.add("is-wide");
   const title = element(document, "input", "nur-adjunct-input") as HTMLInputElement;
   title.dataset.adjunctControl = "capsules-title";
-  title.placeholder = "Capsule title";
+  title.placeholder = v197Copy("Capsule title");
   const purpose = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
   purpose.dataset.adjunctControl = "capsules-purpose";
-  purpose.placeholder = "What should this bounded room help the recipient do?";
+  purpose.placeholder = v197Copy("What should this bounded room help the recipient do?");
   const capability = element(document, "select", "nur-adjunct-select") as HTMLSelectElement;
   capability.dataset.adjunctControl = "capsules-capability";
   for (const [value, label] of [
@@ -1172,7 +1193,7 @@ async function renderOwnerCapsules(document: Document, api: V197ApiClient, snaps
   }
   const instructions = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
   instructions.dataset.adjunctControl = "capsules-instructions";
-  instructions.placeholder = "Optional instructions shown inside the recipient room";
+  instructions.placeholder = v197Copy("Optional instructions shown inside the recipient room");
   const expires = element(document, "input", "nur-adjunct-input") as HTMLInputElement;
   expires.type = "datetime-local";
   expires.dataset.adjunctControl = "capsules-expires";
@@ -1188,7 +1209,7 @@ async function renderOwnerCapsules(document: Document, api: V197ApiClient, snaps
   }
   for (const source of sources) {
     const row = element(document, "label", "nur-adjunct-toggle");
-    const copy = element(document, "span", undefined, `${source.source_kind} · ${source.source_id} · ${source.inclusion_mode}`);
+    const copy = element(document, "span", undefined, v197Copy("{{0}} · {{1}} · {{2}}", { 0: source.source_kind, 1: source.source_id, 2: source.inclusion_mode }));
     const check = element(document, "input") as HTMLInputElement;
     check.type = "checkbox";
     check.dataset.capsuleSourceId = source.id;
@@ -1196,7 +1217,7 @@ async function renderOwnerCapsules(document: Document, api: V197ApiClient, snaps
     row.append(copy, check);
     sourceList.append(row);
   }
-  const createAction = button(document, "Create bounded capsule", "capsules-create", true);
+  const createAction = button(document, v197Copy("Create bounded capsule"), "capsules-create", true);
   createAction.disabled = !orbitId || !sources.length;
   const createState = status(
     document,
@@ -1208,28 +1229,28 @@ async function renderOwnerCapsules(document: Document, api: V197ApiClient, snaps
   const createActions = element(document, "div", "nur-adjunct-actions");
   createActions.append(createAction);
   create.append(
-    element(document, "p", "nur-adjunct-boundary", "Creating a Capsule does not share it. A recipient grant is a second explicit write, and revocation closes access immediately."),
-    labeledControl(document, "Title", title),
-    labeledControl(document, "Purpose", purpose),
-    labeledControl(document, "Recipient capability", capability),
-    labeledControl(document, "Recipient instructions", instructions),
-    labeledControl(document, "Capsule expiry (optional)", expires),
-    element(document, "h3", undefined, "Approved sources"),
+    element(document, "p", "nur-adjunct-boundary", v197Copy("Creating a Capsule does not share it. A recipient grant is a second explicit write, and revocation closes access immediately.")),
+    labeledControl(document, v197Copy("Title"), title),
+    labeledControl(document, v197Copy("Purpose"), purpose),
+    labeledControl(document, v197Copy("Recipient capability"), capability),
+    labeledControl(document, v197Copy("Recipient instructions"), instructions),
+    labeledControl(document, v197Copy("Capsule expiry (optional)"), expires),
+    element(document, "h3", undefined, v197Copy("Approved sources")),
     sourceList,
     createActions,
     createState,
   );
 
-  const owned = panel(document, "Owner lifecycle", "Your Context Capsules");
+  const owned = panel(document, v197Copy("Owner lifecycle"), v197Copy("Your Context Capsules"));
   owned.classList.add("is-wide");
-  const ownedState = status(document, "Email grants are hash-addressed by the server; this page never claims delivery or recipient acceptance.");
+  const ownedState = status(document, v197Copy("Email grants are hash-addressed by the server; this page never claims delivery or recipient acceptance."));
   const ownedList = element(document, "div", "nur-adjunct-list");
   owned.append(ownedState, ownedList);
 
   const renderOwned = () => {
     ownedList.replaceChildren();
     if (!capsules.length) {
-      ownedList.append(empty(document, "No owner Capsule", "Create a source-bounded room above. It remains unshared until you add a recipient grant."));
+      ownedList.append(empty(document, v197Copy("No owner Capsule"), v197Copy("Create a source-bounded room above. It remains unshared until you add a recipient grant.")));
       return;
     }
     for (const capsule of capsules) {
@@ -1243,10 +1264,10 @@ async function renderOwnerCapsules(document: Document, api: V197ApiClient, snaps
       row.append(
         head,
         element(document, "p", undefined, capsule.purpose),
-        element(document, "p", "nur-adjunct-boundary", `${capsule.capability} · expires ${date(capsule.expires_at)}`),
+        element(document, "p", "nur-adjunct-boundary", v197Copy("{{0}} · expires {{1}}", { 0: capsule.capability, 1: date(capsule.expires_at) })),
       );
       const controls = element(document, "div", "nur-adjunct-actions");
-      const open = button(document, "Open owner controls", `capsules-open-${capsule.id}`);
+      const open = button(document, v197Copy("Open owner controls"), `capsules-open-${capsule.id}`);
       open.addEventListener("click", () => navigate(`/capsule/${encodeURIComponent(capsule.id)}`));
       controls.append(open);
       row.append(controls);
@@ -1254,7 +1275,7 @@ async function renderOwnerCapsules(document: Document, api: V197ApiClient, snaps
         const email = element(document, "input", "nur-adjunct-input") as HTMLInputElement;
         email.type = "email";
         email.autocomplete = "email";
-        email.placeholder = "Exact recipient account email";
+        email.placeholder = v197Copy("Exact recipient account email");
         email.dataset.adjunctControl = `capsules-grant-email-${capsule.id}`;
         const grantCapability = element(document, "select", "nur-adjunct-select") as HTMLSelectElement;
         grantCapability.dataset.adjunctControl = `capsules-grant-capability-${capsule.id}`;
@@ -1267,18 +1288,18 @@ async function renderOwnerCapsules(document: Document, api: V197ApiClient, snaps
           grantCapability.append(option);
         }
         grantCapability.value = capsule.capability === "READ_ONLY" ? "READ_ONLY" : "ASK_SCOPED_QUESTIONS";
-        const grant = button(document, "Grant this recipient", `capsules-grant-${capsule.id}`, true);
-        const grantState = status(document, "Granting access does not send an email or prove the recipient opened the room.");
+        const grant = button(document, v197Copy("Grant this recipient"), `capsules-grant-${capsule.id}`, true);
+        const grantState = status(document, v197Copy("Granting access does not send an email or prove the recipient opened the room."));
         const grantActions = element(document, "div", "nur-adjunct-actions");
         grantActions.append(grant);
         grant.addEventListener("click", async () => {
           const recipientEmail = email.value.trim();
           if (!recipientEmail || !email.checkValidity()) {
-            setStatus(grantState, "Enter the exact valid email for the intended recipient.", "warn");
+            setStatus(grantState, v197Copy("Enter the exact valid email for the intended recipient."), "warn");
             return;
           }
           grant.disabled = true;
-          setStatus(grantState, "Writing the recipient grant...");
+          setStatus(grantState, v197Copy("Writing the recipient grant..."));
           try {
             await api.grantCapsule(capsule.id, {
               recipient_email: recipientEmail,
@@ -1286,7 +1307,7 @@ async function renderOwnerCapsules(document: Document, api: V197ApiClient, snaps
               expires_at: capsule.expires_at,
             });
             email.value = "";
-            setStatus(grantState, "Recipient grant persisted. Delivery and opening remain unclaimed.", "good");
+            setStatus(grantState, v197Copy("Recipient grant persisted. Delivery and opening remain unclaimed."), "good");
           } catch (error) {
             setStatus(grantState, error instanceof Error ? error.message : "The recipient grant failed.", "warn");
           } finally {
@@ -1294,8 +1315,8 @@ async function renderOwnerCapsules(document: Document, api: V197ApiClient, snaps
           }
         });
         row.append(
-          labeledControl(document, "Recipient email", email),
-          labeledControl(document, "Granted capability", grantCapability),
+          labeledControl(document, v197Copy("Recipient email"), email),
+          labeledControl(document, v197Copy("Granted capability"), grantCapability),
           grantActions,
           grantState,
         );
@@ -1311,7 +1332,7 @@ async function renderOwnerCapsules(document: Document, api: V197ApiClient, snaps
     const capsuleTitle = title.value.trim();
     const capsulePurpose = purpose.value.trim();
     if (!capsuleTitle || !capsulePurpose) {
-      setStatus(createState, "A Capsule title and bounded purpose are required.", "warn");
+      setStatus(createState, v197Copy("A Capsule title and bounded purpose are required."), "warn");
       return;
     }
     if (!orbitId || !selectedSourceIds.length) {
@@ -1322,13 +1343,13 @@ async function renderOwnerCapsules(document: Document, api: V197ApiClient, snaps
     if (expires.value) {
       const parsed = new Date(expires.value);
       if (Number.isNaN(parsed.getTime())) {
-        setStatus(createState, "Choose a valid Capsule expiry.", "warn");
+        setStatus(createState, v197Copy("Choose a valid Capsule expiry."), "warn");
         return;
       }
       expiresAt = parsed.toISOString();
     }
     createAction.disabled = true;
-    setStatus(createState, "Copying only the selected source allowlist...");
+    setStatus(createState, v197Copy("Copying only the selected source allowlist..."));
     try {
       const capsule = await api.createCapsule(orbitId, {
         title: capsuleTitle,
@@ -1346,7 +1367,7 @@ async function renderOwnerCapsules(document: Document, api: V197ApiClient, snaps
       expires.value = "";
       sourceList.querySelectorAll<HTMLInputElement>("[data-capsule-source-id]").forEach(control => { control.checked = false; });
       renderOwned();
-      setStatus(createState, "Capsule created from the selected allowlist. No recipient has access yet.", "good");
+      setStatus(createState, v197Copy("Capsule created from the selected allowlist. No recipient has access yet."), "good");
     } catch (error) {
       setStatus(createState, error instanceof Error ? error.message : "The Capsule could not be created.", "warn");
     } finally {
@@ -1359,21 +1380,21 @@ async function renderOwnerCapsules(document: Document, api: V197ApiClient, snaps
 }
 
 function capsuleStatePanel(document: Document, view: V197CapsuleView): HTMLElement {
-  const overview = panel(document, "Approved Context Capsule", `${view.title} — shared context`);
+  const overview = panel(document, v197Copy("Approved Context Capsule"), v197Copy("{{0}} — shared context", { 0: view.title }));
   overview.classList.add("is-wide");
   const facts = element(document, "div", "nur-adjunct-facts");
   facts.append(
-    fact(document, "State", view.state),
-    fact(document, "Purpose", view.purpose),
-    fact(document, "Access", view.capability),
-    fact(document, "Expires", date(view.expires_at)),
+    fact(document, v197Copy("State"), view.state),
+    fact(document, v197Copy("Purpose"), view.purpose),
+    fact(document, v197Copy("Access"), view.capability),
+    fact(document, v197Copy("Expires"), date(view.expires_at)),
   );
   overview.append(facts, element(document, "p", "nur-adjunct-boundary", view.safety_copy));
   return overview;
 }
 
 async function renderRecipientCapsule(document: Document, api: V197ApiClient, capsuleId: string, view: V197CapsuleView): Promise<void> {
-  const shell = mount(document, `${view.owner_display}'s shared context`, view.state === "ACTIVE"
+  const shell = mount(document, v197Copy("{{0}}'s shared context", { 0: view.owner_display }), view.state === "ACTIVE"
     ? "Held open deliberately. Only the sources approved for this room can be reached."
     : `This bounded room is ${view.state.toLowerCase()}. Nothing outside it becomes visible.`, "/today");
   const grid = element(document, "div", "nur-adjunct-grid");
@@ -1381,50 +1402,50 @@ async function renderRecipientCapsule(document: Document, api: V197ApiClient, ca
   grid.append(capsuleStatePanel(document, view));
 
   if (view.state !== "ACTIVE") {
-    const terminal = panel(document, view.state, "The owner's boundary now closes this room.");
+    const terminal = panel(document, view.state, v197Copy("The owner's boundary now closes this room."));
     terminal.classList.add("is-wide");
-    terminal.append(empty(document, "Access is closed", "No cached answer is shown and no new question can be asked after revocation or expiry."));
+    terminal.append(empty(document, v197Copy("Access is closed"), v197Copy("No cached answer is shown and no new question can be asked after revocation or expiry.")));
     grid.append(terminal);
     return;
   }
 
-  const included = panel(document, "Approved source ledger", "What is included");
+  const included = panel(document, v197Copy("Approved source ledger"), v197Copy("What is included"));
   const includedList = element(document, "div", "nur-adjunct-list");
-  if (!view.included.length) includedList.append(empty(document, "No source was included", "This room carries no answerable context."));
+  if (!view.included.length) includedList.append(empty(document, v197Copy("No source was included"), v197Copy("This room carries no answerable context.")));
   for (const source of view.included) {
     const row = element(document, "article", "nur-adjunct-row");
     const head = element(document, "div", "nur-adjunct-row-head");
-    head.append(element(document, "strong", undefined, source.title), element(document, "span", "nur-adjunct-chip", `${source.source_kind} · ${source.representation}`));
+    head.append(element(document, "strong", undefined, source.title), element(document, "span", "nur-adjunct-chip", v197Copy("{{0}} · {{1}}", { 0: source.source_kind, 1: source.representation })));
     row.append(head, element(document, "p", undefined, source.body));
     includedList.append(row);
   }
   included.append(includedList);
 
-  const excluded = panel(document, "Boundary proof", "What is excluded");
+  const excluded = panel(document, v197Copy("Boundary proof"), v197Copy("What is excluded"));
   const excludedList = element(document, "div", "nur-adjunct-list");
-  if (!view.excluded_summary.length) excludedList.append(empty(document, "No withheld category is enumerated", "The recipient still cannot traverse the owner's general memory, Talk, Journal, Timeline, Settings or Omega."));
+  if (!view.excluded_summary.length) excludedList.append(empty(document, v197Copy("No withheld category is enumerated"), v197Copy("The recipient still cannot traverse the owner's general memory, Talk, Journal, Timeline, Settings or Omega.")));
   for (const item of view.excluded_summary) {
     const row = element(document, "div", "nur-adjunct-row");
-    row.append(element(document, "strong", undefined, `${text(item.source_kind)} · ${text(item.count, "0")} withheld`));
-    row.append(element(document, "p", undefined, text(item.note, "Withheld by the owner")));
+    row.append(element(document, "strong", undefined, v197Copy("{{0}} · {{1}} withheld", { 0: text(item.source_kind), 1: text(item.count, "0") })));
+    row.append(element(document, "p", undefined, text(item.note, v197Copy("Withheld by the owner"))));
     excludedList.append(row);
   }
   excluded.append(excludedList);
 
-  const ask = panel(document, "Scoped question", "Ask within this approved boundary");
+  const ask = panel(document, v197Copy("Scoped question"), v197Copy("Ask within this approved boundary"));
   ask.classList.add("is-wide");
   const canAsk = view.capability === "ASK_SCOPED_QUESTIONS";
   const field = element(document, "label", "nur-adjunct-field");
-  field.append(element(document, "span", undefined, "Question"));
+  field.append(element(document, "span", undefined, v197Copy("Question")));
   const input = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
   input.placeholder = canAsk ? "Ask only about the approved sources…" : "This room is read-only.";
   input.disabled = !canAsk;
   input.dataset.adjunctControl = "capsule-question";
   field.append(input);
   const actions = element(document, "div", "nur-adjunct-actions");
-  const askButton = button(document, "Ask from approved context", "capsule-ask", true);
+  const askButton = button(document, v197Copy("Ask from approved context"), "capsule-ask", true);
   askButton.disabled = !canAsk;
-  const copyButton = button(document, "Copy room address", "capsule-copy");
+  const copyButton = button(document, v197Copy("Copy room address"), "capsule-copy");
   actions.append(askButton, copyButton);
   const askState = status(document, canAsk ? "Answers cite only included source IDs." : "The owner granted read-only access.");
   const answerHost = element(document, "div");
@@ -1432,28 +1453,28 @@ async function renderRecipientCapsule(document: Document, api: V197ApiClient, ca
 
   copyButton.addEventListener("click", async () => {
     await navigator.clipboard?.writeText(window.location.href);
-    askState.textContent = "Room address copied.";
+    askState.textContent = v197Copy("Room address copied.");
     askState.className = "nur-adjunct-status is-good";
   });
   askButton.addEventListener("click", async () => {
     const question = input.value.trim();
     if (!question) {
-      askState.textContent = "Write one scoped question first.";
+      askState.textContent = v197Copy("Write one scoped question first.");
       askState.className = "nur-adjunct-status is-warn";
       return;
     }
     askButton.disabled = true;
-    askState.textContent = "Reading only the approved sources…";
+    askState.textContent = v197Copy("Reading only the approved sources…");
     try {
       const answer: V197CapsuleAnswer = await api.askCapsule(capsuleId, question);
       answerHost.replaceChildren();
       const answerNode = element(document, "article", "nur-adjunct-answer");
-      answerNode.append(element(document, "p", "nur-adjunct-eyebrow", `${answer.answer_mode} · source-bound`));
+      answerNode.append(element(document, "p", "nur-adjunct-eyebrow", v197Copy("{{0}} · source-bound", { 0: answer.answer_mode })));
       answerNode.append(element(document, "blockquote", undefined, answer.answer_text));
       answerNode.append(element(document, "p", undefined, answer.source_refs.length ? `Sources: ${answer.source_refs.join(", ")}` : "No approved source supported a direct answer."));
       if (answer.policy_explanation) answerNode.append(element(document, "p", "nur-adjunct-boundary", answer.policy_explanation));
       answerHost.append(answerNode);
-      askState.textContent = "Answer persisted inside the capsule ledger.";
+      askState.textContent = v197Copy("Answer persisted inside the capsule ledger.");
       askState.className = "nur-adjunct-status is-good";
     } catch (error) {
       askState.textContent = error instanceof Error ? error.message : "The bounded answer could not be created.";
@@ -1467,18 +1488,18 @@ async function renderRecipientCapsule(document: Document, api: V197ApiClient, ca
 }
 
 async function renderOwnerCapsule(document: Document, api: V197ApiClient, capsule: V197OwnedCapsule): Promise<void> {
-  const shell = mount(document, "A bounded room you control.", "Owner preview exposes lifecycle and audit controls, never the recipient's private question composer.", "/universe/orbits");
+  const shell = mount(document, v197Copy("A bounded room you control."), v197Copy("Owner preview exposes lifecycle and audit controls, never the recipient's private question composer."), "/universe/orbits");
   const grid = element(document, "div", "nur-adjunct-grid");
   shell.append(grid);
-  const lifecycle = panel(document, "Owner capsule", capsule.title);
+  const lifecycle = panel(document, v197Copy("Owner capsule"), capsule.title);
   lifecycle.classList.add("is-wide");
   const state = capsule.revoked_at ? "REVOKED" : "ACTIVE";
   const facts = element(document, "div", "nur-adjunct-facts");
-  facts.append(fact(document, "State", state), fact(document, "Purpose", capsule.purpose), fact(document, "Capability", capsule.capability), fact(document, "Expires", date(capsule.expires_at)));
+  facts.append(fact(document, v197Copy("State"), state), fact(document, v197Copy("Purpose"), capsule.purpose), fact(document, v197Copy("Capability"), capsule.capability), fact(document, v197Copy("Expires"), date(capsule.expires_at)));
   lifecycle.append(facts);
   const actions = element(document, "div", "nur-adjunct-actions");
-  const auditButton = button(document, "Open access audit", "capsule-audit");
-  const revokeButton = button(document, "Revoke now", "capsule-revoke", true);
+  const auditButton = button(document, v197Copy("Open access audit"), "capsule-audit");
+  const revokeButton = button(document, v197Copy("Revoke now"), "capsule-revoke", true);
   revokeButton.disabled = state === "REVOKED";
   actions.append(auditButton, revokeButton);
   const lifecycleState = status(document, state === "ACTIVE" ? "Revocation takes effect immediately." : "This capsule is already revoked.", state === "ACTIVE" ? "quiet" : "warn");
@@ -1489,13 +1510,13 @@ async function renderOwnerCapsule(document: Document, api: V197ApiClient, capsul
     try {
       const rows = await api.capsuleAudit(capsule.id);
       auditHost.replaceChildren();
-      if (!rows.length) auditHost.append(empty(document, "No access event yet", "The room has not been opened by a recipient."));
+      if (!rows.length) auditHost.append(empty(document, v197Copy("No access event yet"), v197Copy("The room has not been opened by a recipient.")));
       for (const row of rows) {
         const item = element(document, "div", "nur-adjunct-row");
         item.append(element(document, "strong", undefined, text(row.event_kind)), element(document, "p", undefined, date(row.created_at)));
         auditHost.append(item);
       }
-      lifecycleState.textContent = `${rows.length} owner-scoped audit event${rows.length === 1 ? "" : "s"}.`;
+      lifecycleState.textContent = v197Copy("{{0}} owner-scoped audit event{{1}}.", { 0: rows.length, 1: rows.length === 1 ? "" : "s" });
     } catch (error) {
       lifecycleState.textContent = error instanceof Error ? error.message : "Audit could not be read.";
       lifecycleState.className = "nur-adjunct-status is-warn";
@@ -1505,10 +1526,10 @@ async function renderOwnerCapsule(document: Document, api: V197ApiClient, capsul
   });
   revokeButton.addEventListener("click", async () => {
     revokeButton.disabled = true;
-    lifecycleState.textContent = "Closing the room…";
+    lifecycleState.textContent = v197Copy("Closing the room…");
     try {
       await api.revokeCapsule(capsule.id);
-      lifecycleState.textContent = "Revoked. Recipient reads and asks are blocked immediately.";
+      lifecycleState.textContent = v197Copy("Revoked. Recipient reads and asks are blocked immediately.");
       lifecycleState.className = "nur-adjunct-status is-good";
     } catch (error) {
       lifecycleState.textContent = error instanceof Error ? error.message : "Revocation failed.";
@@ -1532,10 +1553,10 @@ async function renderCapsule(document: Document, api: V197ApiClient, capsuleId: 
     await renderOwnerCapsule(document, api, owned);
     return;
   }
-  const shell = mount(document, "This room is not available.", "No Context Capsule is shared with this session at this address.", "/today");
-  const unavailable = panel(document, "Boundary held", "Nothing leaks through a missing grant");
+  const shell = mount(document, v197Copy("This room is not available."), v197Copy("No Context Capsule is shared with this session at this address."), "/today");
+  const unavailable = panel(document, v197Copy("Boundary held"), v197Copy("Nothing leaks through a missing grant"));
   unavailable.classList.add("is-wide");
-  unavailable.append(empty(document, "No active grant", "Sign in as the intended recipient or ask the owner for a current capsule address."));
+  unavailable.append(empty(document, v197Copy("No active grant"), v197Copy("Sign in as the intended recipient or ask the owner for a current capsule address.")));
   const grid = element(document, "div", "nur-adjunct-grid");
   grid.append(unavailable);
   shell.append(grid);
@@ -1550,7 +1571,7 @@ function omegaList(
   actions?: (row: Record<string, unknown>) => HTMLElement,
 ): HTMLElement {
   const list = element(document, "div", "nur-adjunct-list");
-  if (!rows.length) return empty(document, "No persisted evidence yet", "Omega does not invent a result before the owner's evidence exists.");
+  if (!rows.length) return empty(document, v197Copy("No persisted evidence yet"), v197Copy("Omega does not invent a result before the owner's evidence exists."));
   for (const row of rows) {
     const item = element(document, "article", "nur-adjunct-row");
     const head = element(document, "div", "nur-adjunct-row-head");
@@ -1571,29 +1592,29 @@ function navigate(route: string): void {
 
 async function renderOmegaDashboard(document: Document, api: V197ApiClient): Promise<void> {
   const [dashboard, scheduler] = await Promise.all([api.omegaDashboard(), api.omegaScheduler()]);
-  const shell = mount(document, "Evidence changes the model, deliberately.", "Omega is an owner-only cognition ledger: claims, contradictions, predictions and governed learning proposals. It is not sentience and exposes no chain-of-thought.");
+  const shell = mount(document, v197Copy("Evidence changes the model, deliberately."), v197Copy("Omega is an owner-only cognition ledger: claims, contradictions, predictions and governed learning proposals. It is not sentience and exposes no chain-of-thought."));
   const grid = element(document, "div", "nur-adjunct-grid");
   shell.append(grid);
 
-  const runtime = panel(document, "Omega substrate", "Consolidation status");
+  const runtime = panel(document, v197Copy("Omega substrate"), v197Copy("Consolidation status"));
   runtime.classList.add("is-wide");
   const facts = element(document, "div", "nur-adjunct-facts");
-  facts.append(fact(document, "Scheduler", scheduler.enabled && scheduler.scheduled_consolidation ? "ACTIVE" : "DISABLED"), fact(document, "Worker", scheduler.worker_mode), fact(document, "Last run", scheduler.last_consolidation_status), fact(document, "Interval", `${scheduler.interval_hours} hours`));
+  facts.append(fact(document, v197Copy("Scheduler"), scheduler.enabled && scheduler.scheduled_consolidation ? "ACTIVE" : "DISABLED"), fact(document, v197Copy("Worker"), scheduler.worker_mode), fact(document, v197Copy("Last run"), scheduler.last_consolidation_status), fact(document, v197Copy("Interval"), v197Copy("{{0}} hours", { 0: scheduler.interval_hours })));
   runtime.append(facts);
   const runtimeActions = element(document, "div", "nur-adjunct-actions");
-  const consolidate = button(document, "Consolidate owner evidence", "omega-consolidate", true);
-  const review = button(document, `Open review queue (${dashboard.review_queue.length})`, "omega-review");
-  const exportButton = button(document, "Export owner Omega", "omega-export");
+  const consolidate = button(document, v197Copy("Consolidate owner evidence"), "omega-consolidate", true);
+  const review = button(document, v197Copy("Open review queue ({{0}})", { 0: dashboard.review_queue.length }), "omega-review");
+  const exportButton = button(document, v197Copy("Export owner Omega"), "omega-export");
   runtimeActions.append(consolidate, review, exportButton);
-  const runtimeState = status(document, "Consolidation proposes changes; sensitive inferences still require owner review.");
+  const runtimeState = status(document, v197Copy("Consolidation proposes changes; sensitive inferences still require owner review."));
   runtime.append(runtimeActions, runtimeState);
   review.addEventListener("click", () => navigate("/universe/omega/review"));
   consolidate.addEventListener("click", async () => {
     consolidate.disabled = true;
-    runtimeState.textContent = "Consolidating the owner ledger…";
+    runtimeState.textContent = v197Copy("Consolidating the owner ledger…");
     try {
       const run = await api.consolidateOmega();
-      runtimeState.textContent = `Run ${text(run.status)}: ${text(run.created_claims, "0")} claims created, ${text(run.contradictions_found, "0")} contradictions found.`;
+      runtimeState.textContent = v197Copy("Run {{0}}: {{1}} claims created, {{2}} contradictions found.", { 0: text(run.status), 1: text(run.created_claims, "0"), 2: text(run.contradictions_found, "0") });
       runtimeState.className = "nur-adjunct-status is-good";
     } catch (error) {
       runtimeState.textContent = error instanceof Error ? error.message : "Consolidation did not complete.";
@@ -1613,7 +1634,7 @@ async function renderOmegaDashboard(document: Document, api: V197ApiClient): Pro
       anchor.download = "nur-omega-owner-export.json";
       anchor.click();
       URL.revokeObjectURL(url);
-      runtimeState.textContent = "Owner-scoped Omega export prepared locally.";
+      runtimeState.textContent = v197Copy("Owner-scoped Omega export prepared locally.");
       runtimeState.className = "nur-adjunct-status is-good";
     } catch (error) {
       runtimeState.textContent = error instanceof Error ? error.message : "Export failed.";
@@ -1623,43 +1644,43 @@ async function renderOmegaDashboard(document: Document, api: V197ApiClient): Pro
     }
   });
 
-  const claimPanel = panel(document, "Candidate understanding", `Claims · ${dashboard.claims.length}`);
+  const claimPanel = panel(document, v197Copy("Candidate understanding"), v197Copy("Claims · {{0}}", { 0: dashboard.claims.length }));
   claimPanel.append(omegaList(document, dashboard.claims, "claim_text", "", "truth_status", row => {
     const actions = element(document, "div", "nur-adjunct-actions");
-    const why = button(document, "Why changed?", "omega-why");
+    const why = button(document, v197Copy("Why changed?"), "omega-why");
     why.addEventListener("click", () => navigate(`/universe/omega/why-changed/${recordId(row)}`));
     actions.append(why);
     return actions;
   }));
 
-  const contradictionPanel = panel(document, "Open tension", `Contradictions · ${dashboard.contradictions.length}`);
+  const contradictionPanel = panel(document, v197Copy("Open tension"), v197Copy("Contradictions · {{0}}", { 0: dashboard.contradictions.length }));
   contradictionPanel.append(omegaList(document, dashboard.contradictions, "description", "proposed_resolution", "severity"));
-  const predictionPanel = panel(document, "Unresolved future", `Predictions · ${dashboard.predictions.length}`);
+  const predictionPanel = panel(document, v197Copy("Unresolved future"), v197Copy("Predictions · {{0}}", { 0: dashboard.predictions.length }));
   predictionPanel.append(omegaList(document, dashboard.predictions, "prediction_text", "expected_observation", "status"));
-  const proposalPanel = panel(document, "Governed learning", `Proposals · ${dashboard.learning_proposals.length}`);
+  const proposalPanel = panel(document, v197Copy("Governed learning"), v197Copy("Proposals · {{0}}", { 0: dashboard.learning_proposals.length }));
   proposalPanel.append(omegaList(document, dashboard.learning_proposals, "description", "evidence_summary", "status"));
   grid.append(runtime, claimPanel, contradictionPanel, predictionPanel, proposalPanel);
 }
 
 async function renderOmegaReview(document: Document, api: V197ApiClient): Promise<void> {
   const rows = await api.omegaReviewQueue();
-  const shell = mount(document, "Nothing sensitive becomes truth by accident.", "Review model-generated claim candidates before they enter the owner evidence graph.", "/universe/omega");
+  const shell = mount(document, v197Copy("Nothing sensitive becomes truth by accident."), v197Copy("Review model-generated claim candidates before they enter the owner evidence graph."), "/universe/omega");
   const grid = element(document, "div", "nur-adjunct-grid");
   shell.append(grid);
-  const review = panel(document, "Owner confirmation gate", `Pending review · ${rows.length}`);
+  const review = panel(document, v197Copy("Owner confirmation gate"), v197Copy("Pending review · {{0}}", { 0: rows.length }));
   review.classList.add("is-wide");
-  const reviewState = status(document, "Approval and rejection are persisted and owner-scoped.");
+  const reviewState = status(document, v197Copy("Approval and rejection are persisted and owner-scoped."));
   review.append(omegaList(document, rows, "candidate_claim_text", "reason", "sensitivity", row => {
     const actions = element(document, "div", "nur-adjunct-actions");
-    const approve = button(document, "Approve as reviewed", `omega-review-approve-${recordId(row)}`, true);
-    const reject = button(document, "Reject", `omega-review-reject-${recordId(row)}`);
+    const approve = button(document, v197Copy("Approve as reviewed"), `omega-review-approve-${recordId(row)}`, true);
+    const reject = button(document, v197Copy("Reject"), `omega-review-reject-${recordId(row)}`);
     const act = async (action: "approve" | "reject") => {
       approve.disabled = true;
       reject.disabled = true;
       try {
         await api.reviewOmegaItem(recordId(row), action);
         row.status = action === "approve" ? "APPROVED" : "REJECTED";
-        reviewState.textContent = `Candidate ${action === "approve" ? "approved" : "rejected"}. Refreshing owner queue…`;
+        reviewState.textContent = v197Copy("Candidate {{0}}. Refreshing owner queue…", { 0: action === "approve" ? "approved" : "rejected" });
         reviewState.className = "nur-adjunct-status is-good";
         await renderOmegaReview(document, api);
       } catch (error) {
@@ -1679,26 +1700,26 @@ async function renderOmegaReview(document: Document, api: V197ApiClient): Promis
 
 async function renderOmegaWhyChanged(document: Document, api: V197ApiClient, claimId: string): Promise<void> {
   const [why, evidence] = await Promise.all([api.omegaWhyChanged(claimId), api.omegaEvidence(claimId)]);
-  const shell = mount(document, "Why NUR changed its mind.", "A provenance explanation assembled from the owner evidence graph, not hidden chain-of-thought.", "/universe/omega");
+  const shell = mount(document, v197Copy("Why NUR changed its mind."), v197Copy("A provenance explanation assembled from the owner evidence graph, not hidden chain-of-thought."), "/universe/omega");
   const grid = element(document, "div", "nur-adjunct-grid");
   shell.append(grid);
-  const claim = panel(document, "Current claim", text(why.claim_text));
+  const claim = panel(document, v197Copy("Current claim"), text(why.claim_text));
   claim.classList.add("is-wide");
   const facts = element(document, "div", "nur-adjunct-facts");
-  facts.append(fact(document, "Truth state", text(why.current_truth_status)), fact(document, "Confidence", text(why.current_confidence)));
+  facts.append(fact(document, v197Copy("Truth state"), text(why.current_truth_status)), fact(document, v197Copy("Confidence"), text(why.current_confidence)));
   claim.append(facts);
 
-  const changed = panel(document, "Change ledger", "What moved this claim");
+  const changed = panel(document, v197Copy("Change ledger"), v197Copy("What moved this claim"));
   const reasons = Array.isArray(why.changed_because) ? why.changed_because : [];
   changed.append(omegaList(document, reasons.map((value, index) => ({ id: String(index), title: text(value), state: "EVIDENCE" })), "title", "", "state"));
 
-  const evidencePanel = panel(document, "Evidence graph", `Edges · ${evidence.length}`);
+  const evidencePanel = panel(document, v197Copy("Evidence graph"), v197Copy("Edges · {{0}}", { 0: evidence.length }));
   evidencePanel.append(omegaList(document, evidence, "relation", "note", "evidence_kind"));
   const actions = element(document, "div", "nur-adjunct-actions");
-  const confirm = button(document, "Confirm claim", "omega-claim-confirm", true);
-  const retire = button(document, "Retire claim", "omega-claim-retire");
+  const confirm = button(document, v197Copy("Confirm claim"), "omega-claim-confirm", true);
+  const retire = button(document, v197Copy("Retire claim"), "omega-claim-retire");
   actions.append(confirm, retire);
-  const actionState = status(document, text(why.unresolved_note, "Owner review remains the final authority."));
+  const actionState = status(document, text(why.unresolved_note, v197Copy("Owner review remains the final authority.")));
   claim.append(actions, actionState);
   const act = async (action: "confirm" | "retire") => {
     confirm.disabled = true;
@@ -1738,14 +1759,14 @@ async function renderCandidateInsights(
   const insights = await api.candidateInsights();
   const shell = mount(
     document,
-    "Candidate insight, never silent truth.",
-    "Every inference keeps its evidence, counter-evidence, uncertainty, provenance and owner decision. Acceptance is explicit; correction preserves the original audit trail.",
+    v197Copy("Candidate insight, never silent truth."),
+    v197Copy("Every inference keeps its evidence, counter-evidence, uncertainty, provenance and owner decision. Acceptance is explicit; correction preserves the original audit trail."),
     "/universe",
   );
   const grid = element(document, "div", "nur-adjunct-grid");
   shell.append(grid);
 
-  const overview = panel(document, "Owner review queue", `Candidates · ${insights.length}`);
+  const overview = panel(document, v197Copy("Owner review queue"), v197Copy("Candidates · {{0}}", { 0: insights.length }));
   overview.classList.add("is-wide");
   const counts = insights.reduce<Record<string, number>>((result, insight) => {
     result[insight.status] = (result[insight.status] ?? 0) + 1;
@@ -1753,13 +1774,13 @@ async function renderCandidateInsights(
   }, {});
   const facts = element(document, "div", "nur-adjunct-facts");
   facts.append(
-    fact(document, "Candidate", String(counts.CANDIDATE ?? counts.PENDING ?? 0)),
-    fact(document, "Accepted", String(counts.ACCEPTED ?? 0)),
-    fact(document, "Corrected", String(counts.CORRECTED ?? 0)),
-    fact(document, "Rejected", String(counts.REJECTED ?? 0)),
+    fact(document, v197Copy("Candidate"), String(counts.CANDIDATE ?? counts.PENDING ?? 0)),
+    fact(document, v197Copy("Accepted"), String(counts.ACCEPTED ?? 0)),
+    fact(document, v197Copy("Corrected"), String(counts.CORRECTED ?? 0)),
+    fact(document, v197Copy("Rejected"), String(counts.REJECTED ?? 0)),
   );
-  const generate = button(document, "Generate from owner ledger", "candidate-generate", true);
-  const generateState = status(document, "Generation may honestly refuse when the owner ledger has insufficient evidence.");
+  const generate = button(document, v197Copy("Generate from owner ledger"), "candidate-generate", true);
+  const generateState = status(document, v197Copy("Generation may honestly refuse when the owner ledger has insufficient evidence."));
   overview.append(facts, generate, generateState);
   generate.addEventListener("click", async () => {
     generate.disabled = true;
@@ -1775,46 +1796,46 @@ async function renderCandidateInsights(
   grid.append(overview);
 
   if (!insights.length) {
-    const quiet = panel(document, "Honest state", "No candidate insight yet");
+    const quiet = panel(document, v197Copy("Honest state"), v197Copy("No candidate insight yet"));
     quiet.classList.add("is-wide");
-    quiet.append(empty(document, "The review queue is empty", "NUR will not invent a pattern merely to populate this page."));
+    quiet.append(empty(document, v197Copy("The review queue is empty"), v197Copy("NUR will not invent a pattern merely to populate this page.")));
     grid.append(quiet);
     return;
   }
 
   for (const insight of insights) {
-    const card = panel(document, `${insight.insight_type} · ${insight.provenance_label}`, insight.title);
+    const card = panel(document, v197Copy("{{0}} · {{1}}", { 0: insight.insight_type, 1: insight.provenance_label }), insight.title);
     card.classList.add("is-wide", "nur-candidate-card");
     const facts = element(document, "div", "nur-adjunct-facts");
     facts.append(
-      fact(document, "Status", insight.status),
-      fact(document, "Confidence", `${Math.round(insight.confidence * 100)}%`),
-      fact(document, "System", insight.affected_system_slug ?? "Not linked"),
-      fact(document, "Updated", date(insight.updated_at)),
+      fact(document, v197Copy("Status"), insight.status),
+      fact(document, v197Copy("Confidence"), `${Math.round(insight.confidence * 100)}%`),
+      fact(document, v197Copy("System"), insight.affected_system_slug ?? "Not linked"),
+      fact(document, v197Copy("Updated"), date(insight.updated_at)),
     );
     const claim = element(document, "blockquote", "nur-adjunct-candidate-claim", insight.claim);
     const interpretations = element(document, "div", "nur-adjunct-grid nur-adjunct-evidence-grid");
     const evidence = element(document, "section", "nur-adjunct-evidence-block");
     evidence.append(
-      element(document, "p", "nur-adjunct-eyebrow", "Evidence"),
-      element(document, "h3", undefined, `${insight.evidence.length} linked`),
+      element(document, "p", "nur-adjunct-eyebrow", v197Copy("Evidence")),
+      element(document, "h3", undefined, v197Copy("{{0}} linked", { 0: insight.evidence.length })),
     );
     const evidenceList = element(document, "div", "nur-adjunct-list");
     for (const item of insight.evidence) evidenceList.append(element(document, "p", "nur-adjunct-evidence-line", conciseRecord(item)));
-    if (!insight.evidence.length) evidenceList.append(status(document, "No evidence record was returned.", "warn"));
+    if (!insight.evidence.length) evidenceList.append(status(document, v197Copy("No evidence record was returned."), "warn"));
     evidence.append(evidenceList);
     const counter = element(document, "section", "nur-adjunct-evidence-block");
     counter.append(
-      element(document, "p", "nur-adjunct-eyebrow", "Counter-evidence"),
-      element(document, "h3", undefined, `${insight.counter_evidence.length} linked`),
+      element(document, "p", "nur-adjunct-eyebrow", v197Copy("Counter-evidence")),
+      element(document, "h3", undefined, v197Copy("{{0}} linked", { 0: insight.counter_evidence.length })),
     );
     const counterList = element(document, "div", "nur-adjunct-list");
     for (const item of insight.counter_evidence) counterList.append(element(document, "p", "nur-adjunct-evidence-line", conciseRecord(item)));
-    if (!insight.counter_evidence.length) counterList.append(status(document, "No counter-evidence record was returned."));
+    if (!insight.counter_evidence.length) counterList.append(status(document, v197Copy("No counter-evidence record was returned.")));
     counter.append(counterList);
     interpretations.append(evidence, counter);
 
-    const uncertainty = element(document, "p", "nur-adjunct-boundary", `What NUR may be wrong about: ${insight.what_nur_may_be_wrong_about}`);
+    const uncertainty = element(document, "p", "nur-adjunct-boundary", v197Copy("What NUR may be wrong about: {{0}}", { 0: insight.what_nur_may_be_wrong_about }));
     const reading = element(
       document,
       "p",
@@ -1822,18 +1843,18 @@ async function renderCandidateInsights(
       [insight.positive_interpretation, insight.hard_interpretation, insight.suggested_action].filter(Boolean).join(" · "),
     );
     const correction = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
-    correction.placeholder = "Correct the candidate without erasing its original record";
+    correction.placeholder = v197Copy("Correct the candidate without erasing its original record");
     correction.value = insight.correction ?? "";
     const actions = element(document, "div", "nur-adjunct-actions");
-    const accept = button(document, "Accept", `candidate-accept-${insight.id}`, true);
-    const reject = button(document, "Reject", `candidate-reject-${insight.id}`);
-    const correct = button(document, "Persist correction", `candidate-correct-${insight.id}`);
-    const plan = button(document, "Convert to plan", `candidate-plan-${insight.id}`);
-    const timeline = button(document, "Add review to Timeline", `candidate-timeline-${insight.id}`);
-    const memory = button(document, "Save as memory candidate", `candidate-memory-${insight.id}`);
+    const accept = button(document, v197Copy("Accept"), `candidate-accept-${insight.id}`, true);
+    const reject = button(document, v197Copy("Reject"), `candidate-reject-${insight.id}`);
+    const correct = button(document, v197Copy("Persist correction"), `candidate-correct-${insight.id}`);
+    const plan = button(document, v197Copy("Convert to plan"), `candidate-plan-${insight.id}`);
+    const timeline = button(document, v197Copy("Add review to Timeline"), `candidate-timeline-${insight.id}`);
+    const memory = button(document, v197Copy("Save as memory candidate"), `candidate-memory-${insight.id}`);
     memory.disabled = insight.status !== "ACCEPTED";
     actions.append(accept, reject, correct, plan, timeline, memory);
-    const actionState = status(document, "Every action writes through the owner-scoped API.");
+    const actionState = status(document, v197Copy("Every action writes through the owner-scoped API."));
     const act = async (control: HTMLButtonElement, task: () => Promise<unknown>) => {
       control.disabled = true;
       try {
@@ -1849,7 +1870,7 @@ async function renderCandidateInsights(
     reject.addEventListener("click", () => void act(reject, () => api.rejectInsight(insight.id)));
     correct.addEventListener("click", () => {
       if (!correction.value.trim()) {
-        actionState.textContent = "Write the correction first.";
+        actionState.textContent = v197Copy("Write the correction first.");
         actionState.className = "nur-adjunct-status is-warn";
         return;
       }
@@ -1883,20 +1904,20 @@ async function renderConsultationIndex(
     api.consultations(),
     api.communityRooms(),
   ]);
-  const shell = mount(document, "A question moves when context returns.", "Consultation keeps lived experience, constraints, disagreement, evidence and the final outcome inside one bounded ORIENT → RETURN path.", "/universe");
+  const shell = mount(document, v197Copy("A question moves when context returns."), v197Copy("Consultation keeps lived experience, constraints, disagreement, evidence and the final outcome inside one bounded ORIENT → RETURN path."), "/universe");
   const grid = element(document, "div", "nur-adjunct-grid");
   shell.append(grid);
 
-  const listPanel = panel(document, "Consultation ledger", `Open and returned · ${rows.length}`);
+  const listPanel = panel(document, v197Copy("Consultation ledger"), v197Copy("Open and returned · {{0}}", { 0: rows.length }));
   const list = element(document, "div", "nur-adjunct-list");
-  if (!rows.length) list.append(empty(document, "No Consultation yet", "Open one bounded question. Nothing is synthesized before contributions exist."));
+  if (!rows.length) list.append(empty(document, v197Copy("No Consultation yet"), v197Copy("Open one bounded question. Nothing is synthesized before contributions exist.")));
   for (const row of rows) {
     const item = element(document, "article", "nur-adjunct-row");
     const head = element(document, "div", "nur-adjunct-row-head");
-    head.append(element(document, "strong", undefined, row.title), element(document, "span", "nur-adjunct-chip", `${row.current_stage} · ${row.status}`));
+    head.append(element(document, "strong", undefined, row.title), element(document, "span", "nur-adjunct-chip", v197Copy("{{0}} · {{1}}", { 0: row.current_stage, 1: row.status })));
     item.append(head, element(document, "p", undefined, row.question));
     const actions = element(document, "div", "nur-adjunct-actions");
-    const open = button(document, "Enter Consultation", `consultation-open-${row.id}`);
+    const open = button(document, v197Copy("Enter Consultation"), `consultation-open-${row.id}`);
     open.addEventListener("click", () => navigate(`/universe/consultation/${row.id}`));
     actions.append(open);
     item.append(actions);
@@ -1904,40 +1925,40 @@ async function renderConsultationIndex(
   }
   listPanel.append(list);
 
-  const create = panel(document, "ORIENT", "Open a bounded Consultation");
+  const create = panel(document, "ORIENT", v197Copy("Open a bounded Consultation"));
   const field = (label: string, control: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement) => {
     const wrapper = element(document, "label", "nur-adjunct-field");
     wrapper.append(element(document, "span", undefined, label), control);
     return wrapper;
   };
   const title = element(document, "input", "nur-adjunct-input") as HTMLInputElement;
-  title.placeholder = "Consultation title";
+  title.placeholder = v197Copy("Consultation title");
   const question = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
-  question.placeholder = "What is the actual question?";
+  question.placeholder = v197Copy("What is the actual question?");
   const purpose = element(document, "input", "nur-adjunct-input") as HTMLInputElement;
-  purpose.placeholder = "Why does this need a shared return?";
+  purpose.placeholder = v197Copy("Why does this need a shared return?");
   const desired = element(document, "input", "nur-adjunct-input") as HTMLInputElement;
-  desired.placeholder = "What useful outcome should exist?";
+  desired.placeholder = v197Copy("What useful outcome should exist?");
   const scope = element(document, "input", "nur-adjunct-input") as HTMLInputElement;
-  scope.placeholder = "What is inside and outside this Consultation?";
+  scope.placeholder = v197Copy("What is inside and outside this Consultation?");
   const room = element(document, "select", "nur-adjunct-select") as HTMLSelectElement;
-  room.append(element(document, "option", undefined, "Private owner Consultation"));
+  room.append(element(document, "option", undefined, v197Copy("Private owner Consultation")));
   room.options[0].value = "";
   for (const candidate of communityRooms) {
-    const option = element(document, "option", undefined, `${candidate.title} · ${candidate.current_user_role}`) as HTMLOptionElement;
+    const option = element(document, "option", undefined, v197Copy("{{0}} · {{1}}", { 0: candidate.title, 1: candidate.current_user_role })) as HTMLOptionElement;
     option.value = candidate.id;
     room.append(option);
   }
   create.append(field("Title", title), field("Question", question), field("Purpose", purpose), field("Desired outcome", desired), field("Scope statement", scope), field("Bounded room", room));
   const actions = element(document, "div", "nur-adjunct-actions");
-  const createButton = button(document, "Open Consultation", "consultation-create", true);
+  const createButton = button(document, v197Copy("Open Consultation"), "consultation-create", true);
   actions.append(createButton);
-  const createState = status(document, "Only explicit Consultation records are shared. Private Talk, Journal and Omega remain outside.");
+  const createState = status(document, v197Copy("Only explicit Consultation records are shared. Private Talk, Journal and Omega remain outside."));
   create.append(actions, createState);
   createButton.addEventListener("click", async () => {
     const values = [title.value, question.value, purpose.value, desired.value, scope.value].map(value => value.trim());
     if (values.some(value => !value)) {
-      createState.textContent = "Title, question, purpose, desired outcome and scope are all required.";
+      createState.textContent = v197Copy("Title, question, purpose, desired outcome and scope are all required.");
       createState.className = "nur-adjunct-status is-warn";
       return;
     }
@@ -1965,15 +1986,15 @@ async function renderConsultationDetail(document: Document, api: V197ApiClient, 
   const grid = element(document, "div", "nur-adjunct-grid");
   shell.append(grid);
 
-  const orientation = panel(document, "Bounded Consultation", `${row.current_stage} · ${row.status}`);
+  const orientation = panel(document, v197Copy("Bounded Consultation"), v197Copy("{{0}} · {{1}}", { 0: row.current_stage, 1: row.status }));
   orientation.classList.add("is-wide");
   const facts = element(document, "div", "nur-adjunct-facts");
-  facts.append(fact(document, "Purpose", row.purpose), fact(document, "Desired outcome", row.desired_outcome), fact(document, "Scope", row.scope_statement), fact(document, "Your role", row.current_user_role));
+  facts.append(fact(document, v197Copy("Purpose"), row.purpose), fact(document, v197Copy("Desired outcome"), row.desired_outcome), fact(document, v197Copy("Scope"), row.scope_statement), fact(document, v197Copy("Your role"), row.current_user_role));
   orientation.append(facts, consultationStages(document, detail), element(document, "p", "nur-adjunct-boundary", detail.what_nur_may_be_wrong_about));
 
-  const contributions = panel(document, "GATHER", `Contributions · ${detail.contributions.length}`);
+  const contributions = panel(document, "GATHER", v197Copy("Contributions · {{0}}", { 0: detail.contributions.length }));
   const contributionList = element(document, "div", "nur-adjunct-list");
-  if (!detail.contributions.length) contributionList.append(empty(document, "No contribution yet", "Lived experience, constraints and disagreement stay visible instead of being smoothed away."));
+  if (!detail.contributions.length) contributionList.append(empty(document, v197Copy("No contribution yet"), v197Copy("Lived experience, constraints and disagreement stay visible instead of being smoothed away.")));
   for (const contribution of detail.contributions) {
     const item = element(document, "article", "nur-adjunct-row");
     const head = element(document, "div", "nur-adjunct-row-head");
@@ -1990,13 +2011,13 @@ async function renderConsultationDetail(document: Document, api: V197ApiClient, 
       type.append(option);
     }
     const body = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
-    body.placeholder = "Add only what belongs inside this Consultation…";
-    const send = button(document, "Add contribution", "consultation-contribute", true);
-    const contributionState = status(document, "This contribution is shared only with members of the bounded room.");
+    body.placeholder = v197Copy("Add only what belongs inside this Consultation…");
+    const send = button(document, v197Copy("Add contribution"), "consultation-contribute", true);
+    const contributionState = status(document, v197Copy("This contribution is shared only with members of the bounded room."));
     contributions.append(type, body, send, contributionState);
     send.addEventListener("click", async () => {
       if (!body.value.trim()) {
-        contributionState.textContent = "Write one contribution first.";
+        contributionState.textContent = v197Copy("Write one contribution first.");
         contributionState.className = "nur-adjunct-status is-warn";
         return;
       }
@@ -2015,7 +2036,7 @@ async function renderConsultationDetail(document: Document, api: V197ApiClient, 
     });
   }
 
-  const movement = panel(document, "Owner movement", row.status === "COMPLETED" ? "RETURN is held" : `Complete ${detail.next_stage}`);
+  const movement = panel(document, v197Copy("Owner movement"), row.status === "COMPLETED" ? "RETURN is held" : `Complete ${detail.next_stage}`);
   const stageList = element(document, "div", "nur-adjunct-list");
   for (const stage of detail.completed_stages) {
     const item = element(document, "article", "nur-adjunct-row");
@@ -2026,19 +2047,19 @@ async function renderConsultationDetail(document: Document, api: V197ApiClient, 
   if (row.status === "ACTIVE" && row.current_user_role === "OWNER" && detail.next_stage) {
     const note = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
     note.placeholder = detail.next_stage === "RETURN" ? "Record the outcome and prediction comparison…" : `Record the ${detail.next_stage} evidence…`;
-    const advance = button(document, `Persist ${detail.next_stage}`, `consultation-stage-${detail.next_stage.toLowerCase()}`, true);
-    const stageState = status(document, "Stage movement happens only after server persistence.");
+    const advance = button(document, v197Copy("Persist {{0}}", { 0: detail.next_stage }), `consultation-stage-${detail.next_stage.toLowerCase()}`, true);
+    const stageState = status(document, v197Copy("Stage movement happens only after server persistence."));
     movement.append(note, advance, stageState);
     advance.addEventListener("click", async () => {
       if (!note.value.trim()) {
-        stageState.textContent = "Record this stage before advancing.";
+        stageState.textContent = v197Copy("Record this stage before advancing.");
         stageState.className = "nur-adjunct-status is-warn";
         return;
       }
       advance.disabled = true;
       try {
         const result = await api.completeConsultationStage(consultationId, detail.next_stage!, { note: note.value.trim() });
-        if (result.glow?.status === "AWARDED") stageState.textContent = `RETURN persisted · +${text(result.glow.awarded_points, "0")} Glow`;
+        if (result.glow?.status === "AWARDED") stageState.textContent = v197Copy("RETURN persisted · +{{0}} Glow", { 0: text(result.glow.awarded_points, "0") });
         await renderConsultationDetail(document, api, consultationId);
       } catch (error) {
         stageState.textContent = error instanceof Error ? error.message : "Stage was not persisted.";
@@ -2047,9 +2068,9 @@ async function renderConsultationDetail(document: Document, api: V197ApiClient, 
       }
     });
   } else if (row.status === "ACTIVE") {
-    movement.append(empty(document, "Owner movement only", "Members contribute evidence and disagreement. The Consultation owner advances the stage."));
+    movement.append(empty(document, v197Copy("Owner movement only"), v197Copy("Members contribute evidence and disagreement. The Consultation owner advances the stage.")));
   } else {
-    movement.append(status(document, "This Consultation completed its RETURN loop.", "good"));
+    movement.append(status(document, v197Copy("This Consultation completed its RETURN loop."), "good"));
   }
   grid.append(orientation, contributions, movement);
 }
@@ -2066,21 +2087,21 @@ async function loadCommunityFeed(api: V197ApiClient): Promise<{
 
 async function renderCommunityIndex(document: Document, api: V197ApiClient): Promise<void> {
   const { rooms, posts } = await loadCommunityFeed(api);
-  const shell = mount(document, "Shared signal without private spill.", "Community is built from real bounded rooms and persisted contributions. No fake people, replies, activity or live public count appears here.", "/universe");
+  const shell = mount(document, v197Copy("Shared signal without private spill."), v197Copy("Community is built from real bounded rooms and persisted contributions. No fake people, replies, activity or live public count appears here."), "/universe");
   const grid = element(document, "div", "nur-adjunct-grid");
   shell.append(grid);
 
-  const roomPanel = panel(document, "Group NUR boundaries", `Rooms · ${rooms.length}`);
+  const roomPanel = panel(document, v197Copy("Group NUR boundaries"), v197Copy("Rooms · {{0}}", { 0: rooms.length }));
   roomPanel.id = "nur-v197-community-controls";
   const roomList = element(document, "div", "nur-adjunct-list");
-  if (!rooms.length) roomList.append(empty(document, "No bounded room yet", "Create one real room. NUR will not invent a community around you."));
+  if (!rooms.length) roomList.append(empty(document, v197Copy("No bounded room yet"), v197Copy("Create one real room. NUR will not invent a community around you.")));
   for (const room of rooms) {
     const row = element(document, "article", "nur-adjunct-row");
     const head = element(document, "div", "nur-adjunct-row-head");
     head.append(element(document, "strong", undefined, room.title), element(document, "span", "nur-adjunct-chip", `${room.is_demo ? "DEMO · " : ""}${room.room_kind}`));
     row.append(head, element(document, "p", undefined, room.description ?? room.privacy));
     const actions = element(document, "div", "nur-adjunct-actions");
-    const open = button(document, "Enter bounded room", `community-room-${room.id}`);
+    const open = button(document, v197Copy("Enter bounded room"), `community-room-${room.id}`);
     open.addEventListener("click", () => navigate(`/universe/community/room/${room.id}`));
     actions.append(open);
     row.append(actions);
@@ -2089,10 +2110,10 @@ async function renderCommunityIndex(document: Document, api: V197ApiClient): Pro
   roomPanel.append(roomList);
   const roomTitle = element(document, "input", "nur-adjunct-input") as HTMLInputElement;
   roomTitle.id = "nur-v197-room-title";
-  roomTitle.placeholder = "Name one bounded room";
-  const createRoom = button(document, "Create Group NUR room", "community-room-create", true);
-  const createCouncil = button(document, "Start a Council room", "community-council-create");
-  const roomState = status(document, "The creator becomes owner. Membership is explicit and server-enforced.");
+  roomTitle.placeholder = v197Copy("Name one bounded room");
+  const createRoom = button(document, v197Copy("Create Group NUR room"), "community-room-create", true);
+  const createCouncil = button(document, v197Copy("Start a Council room"), "community-council-create");
+  const roomState = status(document, v197Copy("The creator becomes owner. Membership is explicit and server-enforced."));
   const roomActions = element(document, "div", "nur-adjunct-actions");
   roomActions.append(createRoom, createCouncil);
   roomPanel.append(roomTitle, roomActions, roomState);
@@ -2101,7 +2122,7 @@ async function renderCommunityIndex(document: Document, api: V197ApiClient): Pro
     roomKind: "GROUP" | "COUNCIL",
   ): Promise<void> => {
     if (!roomTitle.value.trim()) {
-      roomState.textContent = "Name the room first.";
+      roomState.textContent = v197Copy("Name the room first.");
       roomState.className = "nur-adjunct-status is-warn";
       return;
     }
@@ -2121,9 +2142,9 @@ async function renderCommunityIndex(document: Document, api: V197ApiClient): Pro
   createRoom.addEventListener("click", () => { void createBoundedRoom(createRoom, "GROUP"); });
   createCouncil.addEventListener("click", () => { void createBoundedRoom(createCouncil, "COUNCIL"); });
 
-  const feed = panel(document, "Persisted signal feed", `Posts · ${posts.length}`);
+  const feed = panel(document, v197Copy("Persisted signal feed"), v197Copy("Posts · {{0}}", { 0: posts.length }));
   const postList = element(document, "div", "nur-adjunct-list");
-  if (!posts.length) postList.append(empty(document, "No post yet", "Room members can write the first persisted contribution."));
+  if (!posts.length) postList.append(empty(document, v197Copy("No post yet"), v197Copy("Room members can write the first persisted contribution.")));
   for (const post of posts) {
     const room = rooms.find(candidate => candidate.id === post.room_id);
     const row = element(document, "article", "nur-adjunct-row");
@@ -2131,7 +2152,7 @@ async function renderCommunityIndex(document: Document, api: V197ApiClient): Pro
     head.append(element(document, "strong", undefined, post.title), element(document, "span", "nur-adjunct-chip", `${post.is_demo ? "DEMO · " : ""}${room?.title ?? "ROOM"}`));
     row.append(head, element(document, "p", undefined, post.body));
     const actions = element(document, "div", "nur-adjunct-actions");
-    const open = button(document, "Open thread", `community-post-${post.id}`);
+    const open = button(document, v197Copy("Open thread"), `community-post-${post.id}`);
     open.addEventListener("click", () => navigate(`/universe/community/post/${post.id}?room=${post.room_id}`));
     actions.append(open);
     row.append(actions);
@@ -2146,16 +2167,16 @@ async function renderCommunityRoom(document: Document, api: V197ApiClient, roomI
     api.get<Record<string, unknown>>(`/community/rooms/${encodeURIComponent(roomId)}`),
     api.communityRoomSummary(roomId), api.communityMessages(roomId), api.communityPosts(roomId),
   ]);
-  const shell = mount(document, text(room.title), text(room.description, "A bounded Group NUR room."), "/universe/community");
+  const shell = mount(document, text(room.title), text(room.description, v197Copy("A bounded Group NUR room.")), "/universe/community");
   const grid = element(document, "div", "nur-adjunct-grid");
   shell.append(grid);
-  const boundary = panel(document, "Room boundary", `${text(room.current_user_role)} · ${text(room.room_kind)}`);
+  const boundary = panel(document, v197Copy("Room boundary"), v197Copy("{{0}} · {{1}}", { 0: text(room.current_user_role), 1: text(room.room_kind) }));
   boundary.classList.add("is-wide");
   const facts = element(document, "div", "nur-adjunct-facts");
-  facts.append(fact(document, "Messages", text(summary.counts.messages, "0")), fact(document, "Posts", text(summary.counts.posts, "0")), fact(document, "Contributions", text(summary.counts.comments, "0")), fact(document, "External public feed", summary.external_public_feed));
+  facts.append(fact(document, v197Copy("Messages"), text(summary.counts.messages, "0")), fact(document, v197Copy("Posts"), text(summary.counts.posts, "0")), fact(document, v197Copy("Contributions"), text(summary.counts.comments, "0")), fact(document, v197Copy("External public feed"), summary.external_public_feed));
   boundary.append(facts, element(document, "p", "nur-adjunct-boundary", text(room.privacy)));
   const boundaryActions = element(document, "div", "nur-adjunct-actions");
-  const consultation = button(document, "Start Consultation", "community-start-consultation", true);
+  const consultation = button(document, v197Copy("Start Consultation"), "community-start-consultation", true);
   consultation.addEventListener("click", () => navigate("/universe/consultation"));
   boundaryActions.append(consultation);
   boundary.append(boundaryActions);
@@ -2164,20 +2185,20 @@ async function renderCommunityRoom(document: Document, api: V197ApiClient, roomI
     memberEmail.id = "nur-v197-member-email";
     memberEmail.type = "email";
     memberEmail.autocomplete = "off";
-    memberEmail.placeholder = "Exact NUR account email";
-    const addMember = button(document, "Add member", "community-member-add");
-    const memberState = status(document, "Only an existing NUR account can cross this room boundary.");
+    memberEmail.placeholder = v197Copy("Exact NUR account email");
+    const addMember = button(document, v197Copy("Add member"), "community-member-add");
+    const memberState = status(document, v197Copy("Only an existing NUR account can cross this room boundary."));
     boundary.append(memberEmail, addMember, memberState);
     addMember.addEventListener("click", async () => {
       if (!memberEmail.value.trim()) {
-        memberState.textContent = "Enter the exact account email first.";
+        memberState.textContent = v197Copy("Enter the exact account email first.");
         memberState.className = "nur-adjunct-status is-warn";
         return;
       }
       addMember.disabled = true;
       try {
         await api.addCommunityMember(roomId, memberEmail.value.trim());
-        memberState.textContent = "Member added to this boundary.";
+        memberState.textContent = v197Copy("Member added to this boundary.");
         memberState.className = "nur-adjunct-status is-good";
       } catch (error) {
         memberState.textContent = error instanceof Error ? error.message : "Member was not added.";
@@ -2187,10 +2208,10 @@ async function renderCommunityRoom(document: Document, api: V197ApiClient, roomI
     });
   }
 
-  const conversation = panel(document, "Group NUR", `Conversation · ${messages.length}`);
+  const conversation = panel(document, v197Copy("Group NUR"), v197Copy("Conversation · {{0}}", { 0: messages.length }));
   conversation.id = "universe-community";
   const messageList = element(document, "div", "nur-adjunct-list");
-  if (!messages.length) messageList.append(empty(document, "No room message yet", "NUR stays quiet until a member contributes."));
+  if (!messages.length) messageList.append(empty(document, v197Copy("No room message yet"), v197Copy("NUR stays quiet until a member contributes.")));
   for (const message of messages) {
     const item = element(document, "article", "nur-adjunct-row");
     item.append(element(document, "span", "nur-adjunct-chip", `${message.is_demo ? "DEMO · " : ""}${message.provenance_label}`), element(document, "p", undefined, message.body));
@@ -2198,9 +2219,9 @@ async function renderCommunityRoom(document: Document, api: V197ApiClient, roomI
   }
   const messageInput = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
   messageInput.id = "nur-v197-room-message";
-  messageInput.placeholder = "Write inside this room boundary…";
-  const sendMessage = button(document, "Send to room", "community-message-send", true);
-  const messageState = status(document, "A persisted real message may earn server-verified Glow. DEMO messages never do.");
+  messageInput.placeholder = v197Copy("Write inside this room boundary…");
+  const sendMessage = button(document, v197Copy("Send to room"), "community-message-send", true);
+  const messageState = status(document, v197Copy("A persisted real message may earn server-verified Glow. DEMO messages never do."));
   conversation.append(messageList, messageInput, sendMessage, messageState);
   sendMessage.addEventListener("click", async () => {
     if (!messageInput.value.trim()) return;
@@ -2217,28 +2238,28 @@ async function renderCommunityRoom(document: Document, api: V197ApiClient, roomI
     }
   });
 
-  const threads = panel(document, "Room threads", `Posts · ${posts.length}`);
+  const threads = panel(document, v197Copy("Room threads"), v197Copy("Posts · {{0}}", { 0: posts.length }));
   const threadList = element(document, "div", "nur-adjunct-list");
   for (const post of posts) {
     const item = element(document, "article", "nur-adjunct-row");
     const head = element(document, "div", "nur-adjunct-row-head");
     head.append(element(document, "strong", undefined, post.title), element(document, "span", "nur-adjunct-chip", post.is_demo ? "DEMO" : post.provenance_label));
     item.append(head, element(document, "p", undefined, post.body));
-    const open = button(document, "Open thread", `community-post-${post.id}`);
+    const open = button(document, v197Copy("Open thread"), `community-post-${post.id}`);
     open.addEventListener("click", () => navigate(`/universe/community/post/${post.id}?room=${roomId}`));
     item.append(open);
     threadList.append(item);
   }
   const postTitle = element(document, "input", "nur-adjunct-input") as HTMLInputElement;
-  postTitle.placeholder = "Thread title";
+  postTitle.placeholder = v197Copy("Thread title");
   const postBody = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
-  postBody.placeholder = "Question, lived experience, resource, outcome or Project log…";
-  const publish = button(document, "Publish in room", "community-post-create", true);
-  const postState = status(document, "Only room members can read this thread.");
+  postBody.placeholder = v197Copy("Question, lived experience, resource, outcome or Project log…");
+  const publish = button(document, v197Copy("Publish in room"), "community-post-create", true);
+  const postState = status(document, v197Copy("Only room members can read this thread."));
   threads.append(threadList, postTitle, postBody, publish, postState);
   publish.addEventListener("click", async () => {
     if (!postTitle.value.trim() || !postBody.value.trim()) {
-      postState.textContent = "A thread needs both title and body.";
+      postState.textContent = v197Copy("A thread needs both title and body.");
       postState.className = "nur-adjunct-status is-warn";
       return;
     }
@@ -2256,23 +2277,23 @@ async function renderCommunityRoom(document: Document, api: V197ApiClient, roomI
 
   if (text(room.room_kind) === "COUNCIL") {
     const positions = await api.communityPositions(roomId);
-    const council = panel(document, "Council ledger", `Positions · ${positions.length} · Decisions · ${text(summary.counts.decisions, "0")}`);
+    const council = panel(document, v197Copy("Council ledger"), v197Copy("Positions · {{0}} · Decisions · {{1}}", { 0: positions.length, 1: text(summary.counts.decisions, "0") }));
     council.classList.add("is-wide");
     const positionList = element(document, "div", "nur-adjunct-list");
     if (!positions.length) {
-      positionList.append(empty(document, "No position yet", "A Council preserves disagreement before it records a decision."));
+      positionList.append(empty(document, v197Copy("No position yet"), v197Copy("A Council preserves disagreement before it records a decision.")));
     }
     for (const position of positions) {
       const row = element(document, "article", "nur-adjunct-row");
       row.append(element(document, "p", undefined, position.position));
-      if (position.is_minority) row.append(element(document, "span", "nur-adjunct-chip", "MINORITY POSITION"));
+      if (position.is_minority) row.append(element(document, "span", "nur-adjunct-chip", v197Copy("MINORITY POSITION")));
       positionList.append(row);
     }
     const positionInput = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
     positionInput.id = "nur-v197-council-position";
-    positionInput.placeholder = "State one position without erasing disagreement";
-    const addPosition = button(document, "Add position", "council-position-add", true);
-    const councilState = status(document, "Every position is persisted with its real owner.");
+    positionInput.placeholder = v197Copy("State one position without erasing disagreement");
+    const addPosition = button(document, v197Copy("Add position"), "council-position-add", true);
+    const councilState = status(document, v197Copy("Every position is persisted with its real owner."));
     council.append(positionList, positionInput, addPosition, councilState);
     addPosition.addEventListener("click", async () => {
       if (!positionInput.value.trim()) return;
@@ -2289,8 +2310,8 @@ async function renderCommunityRoom(document: Document, api: V197ApiClient, roomI
     if (text(room.current_user_role) === "OWNER") {
       const decisionInput = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
       decisionInput.id = "nur-v197-council-decision";
-      decisionInput.placeholder = "Record the bounded Council decision";
-      const recordDecision = button(document, "Record decision", "council-decision-record");
+      decisionInput.placeholder = v197Copy("Record the bounded Council decision");
+      const recordDecision = button(document, v197Copy("Record decision"), "council-decision-record");
       council.append(decisionInput, recordDecision);
       recordDecision.addEventListener("click", async () => {
         if (!decisionInput.value.trim()) return;
@@ -2326,18 +2347,18 @@ async function renderCommunityPost(document: Document, api: V197ApiClient, postI
   const shell = mount(document, post.title, post.body, `/universe/community/room/${roomId}`);
   const grid = element(document, "div", "nur-adjunct-grid");
   shell.append(grid);
-  const thread = panel(document, "Bounded thread", `${post.is_demo ? "DEMO · " : ""}${post.provenance_label}`);
+  const thread = panel(document, v197Copy("Bounded thread"), `${post.is_demo ? "DEMO · " : ""}${post.provenance_label}`);
   thread.classList.add("is-wide");
   thread.append(element(document, "p", undefined, post.body));
   const reactions = element(document, "div", "nur-adjunct-actions");
-  const useful = button(document, "✦ Useful", "community-react-useful");
-  const witness = button(document, "Witness", "community-react-witness");
-  const reactionState = status(document, "Reactions are unique persisted room records.");
+  const useful = button(document, v197Copy("✦ Useful"), "community-react-useful");
+  const witness = button(document, v197Copy("Witness"), "community-react-witness");
+  const reactionState = status(document, v197Copy("Reactions are unique persisted room records."));
   const react = async (reaction: string) => {
     useful.disabled = true; witness.disabled = true;
     try {
       await api.createCommunityReaction(roomId!, "POST", postId, reaction);
-      reactionState.textContent = `${reaction} reaction persisted.`;
+      reactionState.textContent = v197Copy("{{0}} reaction persisted.", { 0: reaction });
       reactionState.className = "nur-adjunct-status is-good";
     } catch (error) {
       reactionState.textContent = error instanceof Error ? error.message : "Reaction failed.";
@@ -2349,19 +2370,19 @@ async function renderCommunityPost(document: Document, api: V197ApiClient, postI
   reactions.append(useful, witness);
   thread.append(reactions, reactionState);
 
-  const discussion = panel(document, "Discussion", `Replies · ${comments.length}`);
+  const discussion = panel(document, v197Copy("Discussion"), v197Copy("Replies · {{0}}", { 0: comments.length }));
   discussion.classList.add("is-wide");
   const list = element(document, "div", "nur-adjunct-list");
-  if (!comments.length) list.append(empty(document, "No reply yet", "No fabricated person is waiting here."));
+  if (!comments.length) list.append(empty(document, v197Copy("No reply yet"), v197Copy("No fabricated person is waiting here.")));
   for (const comment of comments) {
     const row = element(document, "article", "nur-adjunct-row");
     row.append(element(document, "span", "nur-adjunct-chip", comment.is_demo ? "DEMO" : "MEMBER_WRITTEN"), element(document, "p", undefined, comment.body));
     list.append(row);
   }
   const reply = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
-  reply.placeholder = "Reply with experience, evidence, constraint or disagreement…";
-  const send = button(document, "Reply", "community-comment-create", true);
-  const replyState = status(document, "The reply remains inside this room thread.");
+  reply.placeholder = v197Copy("Reply with experience, evidence, constraint or disagreement…");
+  const send = button(document, v197Copy("Reply"), "community-comment-create", true);
+  const replyState = status(document, v197Copy("The reply remains inside this room thread."));
   discussion.append(list, reply, send, replyState);
   send.addEventListener("click", async () => {
     if (!reply.value.trim()) return;
@@ -2382,41 +2403,41 @@ async function renderCommunityPost(document: Document, api: V197ApiClient, postI
 
 async function renderProjectsIndex(document: Document, api: V197ApiClient): Promise<void> {
   const projects = await api.projects();
-  const shell = mount(document, "Intent becomes evidence, then a shipped result.", "AM Projects keeps objective, tasks, bounded agent proposals, evidence, reviews and owner approval in one Project Orbit.");
+  const shell = mount(document, v197Copy("Intent becomes evidence, then a shipped result."), v197Copy("AM Projects keeps objective, tasks, bounded agent proposals, evidence, reviews and owner approval in one Project Orbit."));
   const grid = element(document, "div", "nur-adjunct-grid");
   shell.append(grid);
-  const ledger = panel(document, "Owner Project ledger", `Projects · ${projects.length}`);
+  const ledger = panel(document, v197Copy("Owner Project ledger"), v197Copy("Projects · {{0}}", { 0: projects.length }));
   const list = element(document, "div", "nur-adjunct-list");
-  if (!projects.length) list.append(empty(document, "No Project yet", "Create one objective. No agent gets authority merely because a card exists."));
+  if (!projects.length) list.append(empty(document, v197Copy("No Project yet"), v197Copy("Create one objective. No agent gets authority merely because a card exists.")));
   for (const project of projects) {
     const row = element(document, "article", "nur-adjunct-row");
     const head = element(document, "div", "nur-adjunct-row-head");
     head.append(element(document, "strong", undefined, text(project.title)), element(document, "span", "nur-adjunct-chip", text(project.status)));
     row.append(head, element(document, "p", undefined, text(project.objective)));
-    const open = button(document, "Open Project Orbit", `project-open-${recordId(project)}`);
+    const open = button(document, v197Copy("Open Project Orbit"), `project-open-${recordId(project)}`);
     open.addEventListener("click", () => navigate(`/projects/${recordId(project)}/overview`));
     row.append(open);
     list.append(row);
   }
   ledger.append(list);
 
-  const create = panel(document, "New Project Orbit", "Define what done means");
+  const create = panel(document, v197Copy("New Project Orbit"), v197Copy("Define what done means"));
   const title = element(document, "input", "nur-adjunct-input") as HTMLInputElement;
-  title.placeholder = "Project title";
+  title.placeholder = v197Copy("Project title");
   const objective = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
-  objective.placeholder = "Objective and success definition…";
+  objective.placeholder = v197Copy("Objective and success definition…");
   const system = element(document, "select", "nur-adjunct-select") as HTMLSelectElement;
   for (const value of ["quiet-ambition", "rebuild", "study", "money", "body", "connection", "creation"]) {
     const option = element(document, "option", undefined, value.replaceAll("-", " ")) as HTMLOptionElement;
     option.value = value;
     system.append(option);
   }
-  const createButton = button(document, "Create Project Orbit", "project-create", true);
-  const createState = status(document, "External actions remain denied until an owner explicitly approves a bounded run.");
+  const createButton = button(document, v197Copy("Create Project Orbit"), "project-create", true);
+  const createState = status(document, v197Copy("External actions remain denied until an owner explicitly approves a bounded run."));
   create.append(title, objective, system, createButton, createState);
   createButton.addEventListener("click", async () => {
     if (!title.value.trim() || !objective.value.trim()) {
-      createState.textContent = "A Project needs a title and objective.";
+      createState.textContent = v197Copy("A Project needs a title and objective.");
       createState.className = "nur-adjunct-status is-warn";
       return;
     }
@@ -2451,21 +2472,21 @@ async function renderProjectDetail(document: Document, api: V197ApiClient, proje
   const grid = element(document, "div", "nur-adjunct-grid");
   shell.append(grid);
 
-  const state = panel(document, "Project Orbit", `${text(project.status)} · ${text(project.system_slug, "unassigned system")}`);
+  const state = panel(document, v197Copy("Project Orbit"), v197Copy("{{0}} · {{1}}", { 0: text(project.status), 1: text(project.system_slug, v197Copy("unassigned system")) }));
   state.classList.add("is-wide");
   const facts = element(document, "div", "nur-adjunct-facts");
-  facts.append(fact(document, "Tasks", text(tasks.length)), fact(document, "Passed evidence", text(evidence.filter(row => row.verification_status === "PASSED").length)), fact(document, "Agent proposals", text(runs.length)), fact(document, "Owner reviews", text(reviews.length)));
-  state.append(facts, element(document, "p", "nur-adjunct-boundary", "No run can pre-authorize spending, publishing, deployment, messaging, secret access or security changes."));
+  facts.append(fact(document, v197Copy("Tasks"), text(tasks.length)), fact(document, v197Copy("Passed evidence"), text(evidence.filter(row => row.verification_status === "PASSED").length)), fact(document, v197Copy("Agent proposals"), text(runs.length)), fact(document, v197Copy("Owner reviews"), text(reviews.length)));
+  state.append(facts, element(document, "p", "nur-adjunct-boundary", v197Copy("No run can pre-authorize spending, publishing, deployment, messaging, secret access or security changes.")));
 
-  const taskPanel = panel(document, "Execution", `Tasks · ${tasks.length}`);
+  const taskPanel = panel(document, v197Copy("Execution"), v197Copy("Tasks · {{0}}", { 0: tasks.length }));
   const taskList = element(document, "div", "nur-adjunct-list");
   for (const task of tasks) {
     const row = element(document, "article", "nur-adjunct-row");
     const head = element(document, "div", "nur-adjunct-row-head");
     head.append(element(document, "strong", undefined, text(task.title)), element(document, "span", "nur-adjunct-chip", text(task.status)));
-    row.append(head, element(document, "p", undefined, text(task.acceptance_criteria, "Acceptance criteria not set")));
+    row.append(head, element(document, "p", undefined, text(task.acceptance_criteria, v197Copy("Acceptance criteria not set"))));
     if (task.status !== "DONE") {
-      const done = button(document, "Close with passed evidence", `project-task-done-${recordId(task)}`);
+      const done = button(document, v197Copy("Close with passed evidence"), `project-task-done-${recordId(task)}`);
       done.addEventListener("click", async () => {
         try {
           await api.patchProjectTask(recordId(task), { status: "DONE" });
@@ -2480,11 +2501,11 @@ async function renderProjectDetail(document: Document, api: V197ApiClient, proje
     taskList.append(row);
   }
   const taskTitle = element(document, "input", "nur-adjunct-input") as HTMLInputElement;
-  taskTitle.placeholder = "One concrete task";
+  taskTitle.placeholder = v197Copy("One concrete task");
   const criteria = element(document, "input", "nur-adjunct-input") as HTMLInputElement;
-  criteria.placeholder = "Acceptance criteria";
-  const addTask = button(document, "Add task", "project-task-create", true);
-  const taskState = status(document, "A task cannot become DONE without PASSED evidence.");
+  criteria.placeholder = v197Copy("Acceptance criteria");
+  const addTask = button(document, v197Copy("Add task"), "project-task-create", true);
+  const taskState = status(document, v197Copy("A task cannot become DONE without PASSED evidence."));
   taskPanel.append(taskList, taskTitle, criteria, addTask, taskState);
   addTask.addEventListener("click", async () => {
     if (!taskTitle.value.trim() || !criteria.value.trim()) return;
@@ -2499,7 +2520,7 @@ async function renderProjectDetail(document: Document, api: V197ApiClient, proje
     }
   });
 
-  const proof = panel(document, "Evidence gate", `Evidence · ${evidence.length}`);
+  const proof = panel(document, v197Copy("Evidence gate"), v197Copy("Evidence · {{0}}", { 0: evidence.length }));
   const proofList = element(document, "div", "nur-adjunct-list");
   for (const item of evidence) {
     const row = element(document, "article", "nur-adjunct-row");
@@ -2507,19 +2528,19 @@ async function renderProjectDetail(document: Document, api: V197ApiClient, proje
     proofList.append(row);
   }
   const proofSummary = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
-  proofSummary.placeholder = "What was verified?";
+  proofSummary.placeholder = v197Copy("What was verified?");
   const proofLocator = element(document, "input", "nur-adjunct-input") as HTMLInputElement;
-  proofLocator.placeholder = "Evidence locator/path/URL";
+  proofLocator.placeholder = v197Copy("Evidence locator/path/URL");
   const taskSelect = element(document, "select", "nur-adjunct-select") as HTMLSelectElement;
-  taskSelect.append(element(document, "option", undefined, "Project-level evidence"));
+  taskSelect.append(element(document, "option", undefined, v197Copy("Project-level evidence")));
   taskSelect.options[0].value = "";
   for (const task of tasks) {
     const option = element(document, "option", undefined, text(task.title)) as HTMLOptionElement;
     option.value = recordId(task);
     taskSelect.append(option);
   }
-  const addEvidence = button(document, "Record passed evidence", "project-evidence-create", true);
-  const proofState = status(document, "PASSED evidence requires both a named verifier and a locator.");
+  const addEvidence = button(document, v197Copy("Record passed evidence"), "project-evidence-create", true);
+  const proofState = status(document, v197Copy("PASSED evidence requires both a named verifier and a locator."));
   proof.append(proofList, taskSelect, proofSummary, proofLocator, addEvidence, proofState);
   addEvidence.addEventListener("click", async () => {
     if (!proofSummary.value.trim() || !proofLocator.value.trim()) return;
@@ -2540,7 +2561,7 @@ async function renderProjectDetail(document: Document, api: V197ApiClient, proje
     }
   });
 
-  const agent = panel(document, "Bounded agent work", `Runs · ${runs.length}`);
+  const agent = panel(document, v197Copy("Bounded agent work"), v197Copy("Runs · {{0}}", { 0: runs.length }));
   const runList = element(document, "div", "nur-adjunct-list");
   for (const run of runs) {
     const row = element(document, "article", "nur-adjunct-row");
@@ -2549,8 +2570,8 @@ async function renderProjectDetail(document: Document, api: V197ApiClient, proje
     row.append(head, element(document, "p", undefined, text(run.request_summary)));
     if (run.status === "PROPOSED") {
       const actions = element(document, "div", "nur-adjunct-actions");
-      const approve = button(document, "Approve bounded run", `project-run-approve-${recordId(run)}`, true);
-      const cancel = button(document, "Cancel", `project-run-cancel-${recordId(run)}`);
+      const approve = button(document, v197Copy("Approve bounded run"), `project-run-approve-${recordId(run)}`, true);
+      const cancel = button(document, v197Copy("Cancel"), `project-run-cancel-${recordId(run)}`);
       approve.addEventListener("click", async () => { await api.projectRunAction(recordId(run), "approve"); await renderProjectDetail(document, api, projectId, route); });
       cancel.addEventListener("click", async () => { await api.projectRunAction(recordId(run), "cancel"); await renderProjectDetail(document, api, projectId, route); });
       actions.append(approve, cancel); row.append(actions);
@@ -2562,9 +2583,9 @@ async function renderProjectDetail(document: Document, api: V197ApiClient, proje
     const option = element(document, "option", undefined, value) as HTMLOptionElement; option.value = value; role.append(option);
   }
   const request = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
-  request.placeholder = "Propose a scoped task. This records intent; it does not execute autonomously.";
-  const propose = button(document, "Propose agent run", "project-run-propose", true);
-  const runState = status(document, "Owner approval changes PROPOSED to APPROVED. It still does not grant external action authority.");
+  request.placeholder = v197Copy("Propose a scoped task. This records intent; it does not execute autonomously.");
+  const propose = button(document, v197Copy("Propose agent run"), "project-run-propose", true);
+  const runState = status(document, v197Copy("Owner approval changes PROPOSED to APPROVED. It still does not grant external action authority."));
   agent.append(runList, role, request, propose, runState);
   propose.addEventListener("click", async () => {
     if (!request.value.trim()) return;
@@ -2579,17 +2600,17 @@ async function renderProjectDetail(document: Document, api: V197ApiClient, proje
     }
   });
 
-  const review = panel(document, "Owner review", `Reviews · ${reviews.length} · Artifacts · ${artifacts.length}`);
+  const review = panel(document, v197Copy("Owner review"), v197Copy("Reviews · {{0}} · Artifacts · {{1}}", { 0: reviews.length, 1: artifacts.length }));
   const reviewList = element(document, "div", "nur-adjunct-list");
   for (const item of reviews) {
     const row = element(document, "article", "nur-adjunct-row");
-    row.append(element(document, "span", "nur-adjunct-chip", text(item.decision)), element(document, "p", undefined, text(item.note, "No note")));
+    row.append(element(document, "span", "nur-adjunct-chip", text(item.decision)), element(document, "p", undefined, text(item.note, v197Copy("No note"))));
     reviewList.append(row);
   }
   const reviewNote = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
-  reviewNote.placeholder = "Why is this accepted, rejected or corrected?";
-  const approveReview = button(document, "Record owner approval", "project-review-create", true);
-  const reviewState = status(document, "Review records judgment; it does not rewrite evidence.");
+  reviewNote.placeholder = v197Copy("Why is this accepted, rejected or corrected?");
+  const approveReview = button(document, v197Copy("Record owner approval"), "project-review-create", true);
+  const reviewState = status(document, v197Copy("Review records judgment; it does not rewrite evidence."));
   review.append(reviewList, reviewNote, approveReview, reviewState);
   approveReview.addEventListener("click", async () => {
     if (!reviewNote.value.trim()) return;
@@ -2649,29 +2670,29 @@ function buildDeliverablesPanel(
   files: Array<Record<string, unknown>>,
   tasks: Array<Record<string, unknown>>,
 ): HTMLElement {
-  const deliverables = panel(document, "Deliverables", `Files · ${files.length}`);
+  const deliverables = panel(document, v197Copy("Deliverables"), v197Copy("Files · {{0}}", { 0: files.length }));
   deliverables.classList.add("is-wide");
   deliverables.dataset.adjunctPanel = "deliverables";
   const fileList = element(document, "div", "nur-adjunct-list");
   fileList.dataset.adjunctList = "project-files";
-  if (!files.length) fileList.append(empty(document, "No stored bytes yet", "Upload a real file, or generate an evidence package. Nothing is invented."));
+  if (!files.length) fileList.append(empty(document, v197Copy("No stored bytes yet"), v197Copy("Upload a real file, or generate an evidence package. Nothing is invented.")));
   for (const file of files) {
     const row = element(document, "article", "nur-adjunct-row");
     row.dataset.adjunctFile = recordId(file);
     const head = element(document, "div", "nur-adjunct-row-head");
     const stateLabel = `${text(file.provenance)} · ${text(file.storage_state)}`;
     head.append(
-      element(document, "strong", undefined, text(file.original_filename, "file")),
+      element(document, "strong", undefined, text(file.original_filename, v197Copy("file"))),
       element(document, "span", "nur-adjunct-chip", stateLabel),
     );
-    row.append(head, element(document, "p", undefined, `${humanBytes(file.byte_size)} · sha256 ${text(file.checksum_sha256, "—").slice(0, 12)}… · scan ${text(file.scan_state)}`));
+    row.append(head, element(document, "p", undefined, v197Copy("{{0}} · sha256 {{1}}… · scan {{2}}", { 0: humanBytes(file.byte_size), 1: text(file.checksum_sha256, "—").slice(0, 12), 2: text(file.scan_state) })));
     const actions = element(document, "div", "nur-adjunct-actions");
     if (file.storage_state === "STORED") {
-      const download = button(document, "Download", `project-file-download-${recordId(file)}`);
+      const download = button(document, v197Copy("Download"), `project-file-download-${recordId(file)}`);
       download.addEventListener("click", async () => {
         download.disabled = true;
         try {
-          await triggerBrowserDownload(api, recordId(file), text(file.safe_filename, "download"));
+          await triggerBrowserDownload(api, recordId(file), text(file.safe_filename, v197Copy("download")));
         } catch (error) {
           row.append(status(document, error instanceof Error ? error.message : "Download failed.", "warn"));
         } finally {
@@ -2680,7 +2701,7 @@ function buildDeliverablesPanel(
       });
       actions.append(download);
     } else if (file.storage_state === "QUARANTINED") {
-      actions.append(status(document, text(file.quarantine_reason, "Quarantined; download blocked."), "warn"));
+      actions.append(status(document, text(file.quarantine_reason, v197Copy("Quarantined; download blocked.")), "warn"));
     }
     row.append(actions);
     fileList.append(row);
@@ -2689,15 +2710,15 @@ function buildDeliverablesPanel(
   const upload = element(document, "input", "nur-adjunct-input") as HTMLInputElement;
   upload.type = "file";
   upload.dataset.adjunctControl = "project-file-input";
-  const uploadButton = button(document, "Upload file", "project-file-upload", true);
-  const generate = button(document, "Generate evidence package", "project-run-evidence-package");
-  const deliverState = status(document, "Files are owner-scoped real bytes. Executable formats are quarantined; no run gains authority beyond its approved, deny-by-default capabilities.");
+  const uploadButton = button(document, v197Copy("Upload file"), "project-file-upload", true);
+  const generate = button(document, v197Copy("Generate evidence package"), "project-run-evidence-package");
+  const deliverState = status(document, v197Copy("Files are owner-scoped real bytes. Executable formats are quarantined; no run gains authority beyond its approved, deny-by-default capabilities."));
   deliverables.append(fileList, upload, uploadButton, generate, deliverState);
 
   uploadButton.addEventListener("click", async () => {
     const chosen = upload.files?.[0];
     if (!chosen) {
-      deliverState.textContent = "Choose a file to upload.";
+      deliverState.textContent = v197Copy("Choose a file to upload.");
       deliverState.className = "nur-adjunct-status is-warn";
       return;
     }
@@ -2719,7 +2740,7 @@ function buildDeliverablesPanel(
 
   generate.addEventListener("click", async () => {
     generate.disabled = true;
-    deliverState.textContent = "Proposing, approving and queueing a bounded EVIDENCE_PACKAGE run…";
+    deliverState.textContent = v197Copy("Proposing, approving and queueing a bounded EVIDENCE_PACKAGE run…");
     deliverState.className = "nur-adjunct-status is-quiet";
     try {
       const firstTaskId = tasks.length ? recordId(tasks[0]) : null;
@@ -2737,13 +2758,13 @@ function buildDeliverablesPanel(
       }
       const finalStatus = text(run.status);
       if (finalStatus === "SUCCEEDED") {
-        deliverState.textContent = "Evidence package generated. It is listed above as a downloadable deliverable.";
+        deliverState.textContent = v197Copy("Evidence package generated. It is listed above as a downloadable deliverable.");
         deliverState.className = "nur-adjunct-status is-good";
       } else if (finalStatus === "RUNNING" || finalStatus === "QUEUED") {
-        deliverState.textContent = "The run is executing on the queue. Refresh shortly to download the package.";
+        deliverState.textContent = v197Copy("The run is executing on the queue. Refresh shortly to download the package.");
         deliverState.className = "nur-adjunct-status is-quiet";
       } else {
-        deliverState.textContent = `The run did not succeed (${finalStatus}${run.failure_code ? ` · ${text(run.failure_code)}` : ""}). Nothing was fabricated.`;
+        deliverState.textContent = v197Copy("The run did not succeed ({{0}}{{1}}). Nothing was fabricated.", { 0: finalStatus, 1: run.failure_code ? ` · ${text(run.failure_code)}` : "" });
         deliverState.className = "nur-adjunct-status is-warn";
       }
       await renderProjectDetail(document, api, projectId, route);
@@ -2759,21 +2780,21 @@ function buildDeliverablesPanel(
 
 function renderGlow(document: Document, snapshot: V197BridgeSnapshot): void {
   const glow = snapshot.glow;
-  const shell = mount(document, "Movement becomes visible light.", "Glow is a persisted, source-linked economy. Points appear only after a server-verified action; caps, idempotency and DEMO gates remain active.");
+  const shell = mount(document, v197Copy("Movement becomes visible light."), v197Copy("Glow is a persisted, source-linked economy. Points appear only after a server-verified action; caps, idempotency and DEMO gates remain active."));
   const grid = element(document, "div", "nur-adjunct-grid");
   shell.append(grid);
-  const level = panel(document, "Current constellation", `${glow.rank} · Level ${glow.level}`);
+  const level = panel(document, v197Copy("Current constellation"), v197Copy("{{0}} · Level {{1}}", { 0: glow.rank, 1: glow.level }));
   level.classList.add("is-wide");
   const facts = element(document, "div", "nur-adjunct-facts");
-  facts.append(fact(document, "Available Glow", text(glow.balance)), fact(document, "Lifetime", text(glow.lifetime_points)), fact(document, "Today", text(glow.today_points)), fact(document, "This week", text(glow.weekly_points)));
+  facts.append(fact(document, v197Copy("Available Glow"), text(glow.balance)), fact(document, v197Copy("Lifetime"), text(glow.lifetime_points)), fact(document, v197Copy("Today"), text(glow.today_points)), fact(document, v197Copy("This week"), text(glow.weekly_points)));
   level.append(facts);
   if (glow.next_unlock) {
     const remaining = text((glow.next_unlock as Record<string, unknown>).points_remaining, "0");
-    const rank = text((glow.next_unlock as Record<string, unknown>).rank, "next constellation");
-    level.append(status(document, `${remaining} source-linked Glow until ${rank}.`));
-  } else level.append(status(document, "Current configured constellation reached.", "good"));
+    const rank = text((glow.next_unlock as Record<string, unknown>).rank, v197Copy("next constellation"));
+    level.append(status(document, v197Copy("{{0}} source-linked Glow until {{1}}.", { 0: remaining, 1: rank })));
+  } else level.append(status(document, v197Copy("Current configured constellation reached."), "good"));
 
-  const quests = panel(document, "Return tension", "Quests and mission");
+  const quests = panel(document, v197Copy("Return tension"), v197Copy("Quests and mission"));
   const questRows = [glow.daily_quest, glow.weekly_mission].filter(Boolean) as Array<Record<string, unknown>>;
   const questList = element(document, "div", "nur-adjunct-list");
   for (const quest of questRows) {
@@ -2783,44 +2804,44 @@ function renderGlow(document: Document, snapshot: V197BridgeSnapshot): void {
     row.append(head);
     questList.append(row);
   }
-  if (!questRows.length) questList.append(empty(document, "No active quest", "NUR will not invent progress."));
+  if (!questRows.length) questList.append(empty(document, v197Copy("No active quest"), v197Copy("NUR will not invent progress.")));
   quests.append(questList);
 
-  const streaks = panel(document, "Continuity", `Streaks · ${glow.streaks.length}`);
+  const streaks = panel(document, v197Copy("Continuity"), v197Copy("Streaks · {{0}}", { 0: glow.streaks.length }));
   const streakList = element(document, "div", "nur-adjunct-list");
   for (const streak of glow.streaks) {
     const row = element(document, "article", "nur-adjunct-row");
     const head = element(document, "div", "nur-adjunct-row-head");
-    head.append(element(document, "strong", undefined, streak.streak_key.replaceAll("_", " ")), element(document, "span", "nur-adjunct-chip", `${streak.current_count} current · ${streak.best_count} best`));
+    head.append(element(document, "strong", undefined, streak.streak_key.replaceAll("_", " ")), element(document, "span", "nur-adjunct-chip", v197Copy("{{0}} current · {{1}} best", { 0: streak.current_count, 1: streak.best_count })));
     row.append(head, element(document, "p", undefined, streak.repairs_remaining ? `${streak.repairs_remaining} recovery token${streak.repairs_remaining === 1 ? "" : "s"}` : "No recovery token recorded"));
     streakList.append(row);
   }
-  if (!glow.streaks.length) streakList.append(empty(document, "No streak yet", "One eligible persisted action starts continuity."));
+  if (!glow.streaks.length) streakList.append(empty(document, v197Copy("No streak yet"), v197Copy("One eligible persisted action starts continuity.")));
   streaks.append(streakList);
 
-  const ledger = panel(document, "Source-linked ledger", `Recent Glow · ${glow.recent_transactions.length}`);
+  const ledger = panel(document, v197Copy("Source-linked ledger"), v197Copy("Recent Glow · {{0}}", { 0: glow.recent_transactions.length }));
   ledger.classList.add("is-wide");
   const transactionList = element(document, "div", "nur-adjunct-list");
   for (const transaction of glow.recent_transactions) {
     const row = element(document, "article", "nur-adjunct-row");
     const head = element(document, "div", "nur-adjunct-row-head");
     head.append(element(document, "strong", undefined, transaction.reason), element(document, "span", "nur-adjunct-chip", `+${transaction.final_points}`));
-    row.append(head, element(document, "p", undefined, `${transaction.event_type} · ${date(transaction.created_at)}`));
+    row.append(head, element(document, "p", undefined, v197Copy("{{0}} · {{1}}", { 0: transaction.event_type, 1: date(transaction.created_at) })));
     transactionList.append(row);
   }
-  if (!glow.recent_transactions.length) transactionList.append(empty(document, "No transaction yet", "No points are displayed without persisted proof."));
+  if (!glow.recent_transactions.length) transactionList.append(empty(document, v197Copy("No transaction yet"), v197Copy("No points are displayed without persisted proof.")));
   ledger.append(transactionList);
   grid.append(level, quests, streaks, ledger);
 }
 
 async function renderNotifications(document: Document, api: V197ApiClient): Promise<void> {
   const [preferences, notifications] = await Promise.all([api.notificationPreferences(), api.notifications()]);
-  const shell = mount(document, "Return cues, under your control.", "NUR notifications are owner-scoped and factual. There are no fabricated replies, fake urgency or hidden external delivery channels.");
+  const shell = mount(document, v197Copy("Return cues, under your control."), v197Copy("NUR notifications are owner-scoped and factual. There are no fabricated replies, fake urgency or hidden external delivery channels."));
   const grid = element(document, "div", "nur-adjunct-grid");
   shell.append(grid);
-  const inbox = panel(document, "In-app ledger", `Notifications · ${notifications.length}`);
+  const inbox = panel(document, v197Copy("In-app ledger"), v197Copy("Notifications · {{0}}", { 0: notifications.length }));
   const list = element(document, "div", "nur-adjunct-list");
-  if (!notifications.length) list.append(empty(document, "Nothing is demanding your attention", "NUR will not manufacture a social obligation."));
+  if (!notifications.length) list.append(empty(document, v197Copy("Nothing is demanding your attention"), v197Copy("NUR will not manufacture a social obligation.")));
   for (const notification of notifications) {
     const row = element(document, "article", "nur-adjunct-row");
     const head = element(document, "div", "nur-adjunct-row-head");
@@ -2828,12 +2849,12 @@ async function renderNotifications(document: Document, api: V197ApiClient): Prom
     row.append(head, element(document, "p", undefined, text(notification.body)));
     const actions = element(document, "div", "nur-adjunct-actions");
     if (notification.route) {
-      const open = button(document, "Open", `notification-open-${recordId(notification)}`);
-      open.addEventListener("click", () => navigate(text(notification.route, "/today")));
+      const open = button(document, v197Copy("Open"), `notification-open-${recordId(notification)}`);
+      open.addEventListener("click", () => navigate(text(notification.route, v197Copy("/today"))));
       actions.append(open);
     }
     if (!notification.read_at) {
-      const read = button(document, "Mark read", `notification-read-${recordId(notification)}`);
+      const read = button(document, v197Copy("Mark read"), `notification-read-${recordId(notification)}`);
       read.addEventListener("click", async () => { await api.markNotificationRead(recordId(notification)); await renderNotifications(document, api); });
       actions.append(read);
     }
@@ -2842,7 +2863,7 @@ async function renderNotifications(document: Document, api: V197ApiClient): Prom
   }
   inbox.append(list);
 
-  const controls = panel(document, "Delivery boundary", "Frequency and quiet hours");
+  const controls = panel(document, v197Copy("Delivery boundary"), v197Copy("Frequency and quiet hours"));
   const frequency = element(document, "select", "nur-adjunct-select") as HTMLSelectElement;
   frequency.dataset.adjunctControl = "notification-frequency";
   for (const value of ["QUIET", "BALANCED", "ACTIVE"]) {
@@ -2855,14 +2876,14 @@ async function renderNotifications(document: Document, api: V197ApiClient): Prom
   const quietEnd = element(document, "input", "nur-adjunct-input") as HTMLInputElement;
   quietEnd.dataset.adjunctControl = "notification-quiet-end";
   quietEnd.type = "time"; quietEnd.value = text(preferences.quiet_hours_end, "");
-  const save = button(document, "Save notification boundary", "notification-preferences-save", true);
-  const preferenceState = status(document, `${text(preferences.delivery_status, "IN_APP_ONLY")} · external push is not claimed.`);
+  const save = button(document, v197Copy("Save notification boundary"), "notification-preferences-save", true);
+  const preferenceState = status(document, v197Copy("{{0}} · external push is not claimed.", { 0: text(preferences.delivery_status, "IN_APP_ONLY") }));
   controls.append(frequency, quietStart, quietEnd, save, preferenceState);
   save.addEventListener("click", async () => {
     save.disabled = true;
     try {
       await api.patchNotificationPreferences({ category_settings: preferences.category_settings ?? {}, frequency: frequency.value, quiet_hours_start: quietStart.value || null, quiet_hours_end: quietEnd.value || null, push_enabled: false, email_enabled: false });
-      preferenceState.textContent = "Notification boundary persisted.";
+      preferenceState.textContent = v197Copy("Notification boundary persisted.");
       preferenceState.className = "nur-adjunct-status is-good";
     } catch (error) {
       preferenceState.textContent = error instanceof Error ? error.message : "Preferences were not saved.";
@@ -2871,18 +2892,18 @@ async function renderNotifications(document: Document, api: V197ApiClient): Prom
     }
   });
 
-  const reminder = panel(document, "Owner reminder", "Create one truthful re-entry cue");
+  const reminder = panel(document, v197Copy("Owner reminder"), v197Copy("Create one truthful re-entry cue"));
   const title = element(document, "input", "nur-adjunct-input") as HTMLInputElement;
   title.dataset.adjunctControl = "notification-title";
-  title.placeholder = "What should return?";
+  title.placeholder = v197Copy("What should return?");
   const body = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
   body.dataset.adjunctControl = "notification-body";
-  body.placeholder = "Why will this still matter?";
+  body.placeholder = v197Copy("Why will this still matter?");
   const route = element(document, "input", "nur-adjunct-input") as HTMLInputElement;
   route.dataset.adjunctControl = "notification-route";
   route.placeholder = "/plan";
-  const create = button(document, "Create in-app reminder", "notification-reminder-create", true);
-  const reminderState = status(document, "This creates a real owner-written reminder, not a fake human ping.");
+  const create = button(document, v197Copy("Create in-app reminder"), "notification-reminder-create", true);
+  const reminderState = status(document, v197Copy("This creates a real owner-written reminder, not a fake human ping."));
   reminder.append(title, body, route, create, reminderState);
   create.addEventListener("click", async () => {
     if (!title.value.trim() || !body.value.trim()) return;
@@ -2997,7 +3018,7 @@ function agenticWorkflowRows(
   const container = element(document, "div", "nur-agentic-groups");
   for (const section of DRAWER_SECTIONS) {
     const group = element(document, "section", "nur-agentic-group");
-    group.append(element(document, "h3", undefined, `${section.label} · ${grouped[section.id].length}`));
+    group.append(element(document, "h3", undefined, v197Copy("{{0}} · {{1}}", { 0: section.label, 1: grouped[section.id].length })));
     const list = element(document, "div", "nur-adjunct-list");
     for (const workflow of grouped[section.id]) {
       const row = element(document, "div", "nur-adjunct-row");
@@ -3008,13 +3029,13 @@ function agenticWorkflowRows(
       );
       const progress = `${workflow.steps_done}/${workflow.step_count} steps · ${workflow.cost_cents} cents recorded`;
       const actions = element(document, "div", "nur-adjunct-actions");
-      const open = button(document, "Open run ledger", `agentic-open-${workflow.id}`);
+      const open = button(document, v197Copy("Open run ledger"), `agentic-open-${workflow.id}`);
       open.addEventListener("click", () => navigate(`/agents/${workflow.id}`));
       actions.append(open);
       row.append(head, element(document, "p", undefined, workflow.objective), element(document, "p", undefined, progress), actions);
       list.append(row);
     }
-    if (!grouped[section.id].length) list.append(empty(document, `Nothing ${section.label.toLowerCase()}`, "No owner-scoped workflow is placed here."));
+    if (!grouped[section.id].length) list.append(empty(document, v197Copy("Nothing {{0}}", { 0: section.label.toLowerCase() }), v197Copy("No owner-scoped workflow is placed here.")));
     group.append(list);
     container.append(group);
   }
@@ -3034,20 +3055,20 @@ async function renderAgents(
   ]);
   const shell = mount(
     document,
-    "Agency under your authority.",
-    "NUR can only run a bounded, owner-authored plan through the persisted policy, approval ledger and durable outbox.",
+    v197Copy("Agency under your authority."),
+    v197Copy("NUR can only run a bounded, owner-authored plan through the persisted policy, approval ledger and durable outbox."),
     "/systems",
   );
   const grid = element(document, "div", "nur-adjunct-grid");
   shell.append(grid);
 
-  const policyPanel = panel(document, "Owner policy", "What NUR may prepare or run");
+  const policyPanel = panel(document, v197Copy("Owner policy"), v197Copy("What NUR may prepare or run"));
   policyPanel.classList.add("is-wide");
   const policyFacts = element(document, "div", "nur-adjunct-facts");
   policyFacts.append(
-    fact(document, "Scope", "Account only"),
-    fact(document, "Persisted", policy.persisted ? "Yes" : "No policy row yet"),
-    fact(document, "Capabilities", policy.granted_capabilities.join(", ") || "None"),
+    fact(document, v197Copy("Scope"), v197Copy("Account only")),
+    fact(document, v197Copy("Persisted"), policy.persisted ? "Yes" : "No policy row yet"),
+    fact(document, v197Copy("Capabilities"), policy.granted_capabilities.join(", ") || "None"),
   );
   const initiative = agenticSelect(document, "agentic-initiative");
   for (const level of ["OFF", "SUGGEST", "PREPARE", "INTERNAL", "CONNECTED", "DELEGATED"] as const) {
@@ -3084,7 +3105,7 @@ async function renderAgents(
     );
     const permissions = element(document, "div", "nur-agentic-tool-permissions");
     const permitLabel = element(document, "label", "nur-adjunct-toggle");
-    permitLabel.append(element(document, "span", undefined, "Permit this tool"));
+    permitLabel.append(element(document, "span", undefined, v197Copy("Permit this tool")));
     const permit = element(document, "input") as HTMLInputElement;
     permit.type = "checkbox";
     permit.checked = tool.bound && policy.permitted_tools.includes(tool.key);
@@ -3092,7 +3113,7 @@ async function renderAgents(
     permit.dataset.agenticPermit = tool.key;
     permitLabel.append(permit);
     const autoLabel = element(document, "label", "nur-adjunct-toggle");
-    autoLabel.append(element(document, "span", undefined, "Allow policy auto-run"));
+    autoLabel.append(element(document, "span", undefined, v197Copy("Allow policy auto-run")));
     const auto = element(document, "input") as HTMLInputElement;
     auto.type = "checkbox";
     auto.checked = tool.bound && policy.auto_run_tools.includes(tool.key);
@@ -3108,8 +3129,8 @@ async function renderAgents(
     toolList.append(row);
   }
   const policyActions = element(document, "div", "nur-adjunct-actions");
-  const savePolicy = button(document, "Save agency policy", "agentic-policy-save", true);
-  const policyState = status(document, "Unbound tools stay visible but cannot be permitted or called.");
+  const savePolicy = button(document, v197Copy("Save agency policy"), "agentic-policy-save", true);
+  const policyState = status(document, v197Copy("Unbound tools stay visible but cannot be permitted or called."));
   policyActions.append(savePolicy);
   policyPanel.append(policyFacts, policyControls, toolList, policyActions, policyState);
   savePolicy.addEventListener("click", async () => {
@@ -3134,7 +3155,7 @@ async function renderAgents(
       policy.permitted_tools = next.permitted_tools;
       policy.auto_run_tools = next.auto_run_tools;
       policy.version = next.version;
-      policyState.textContent = "Owner policy persisted. No workflow was started.";
+      policyState.textContent = v197Copy("Owner policy persisted. No workflow was started.");
       policyState.className = "nur-adjunct-status is-good";
     } catch (error) {
       policyState.textContent = error instanceof Error ? error.message : "Agency policy could not be saved.";
@@ -3144,18 +3165,18 @@ async function renderAgents(
     }
   });
 
-  const builder = panel(document, "Owner-authored workflow", "One bounded step at a time");
+  const builder = panel(document, v197Copy("Owner-authored workflow"), v197Copy("One bounded step at a time"));
   const title = element(document, "input", "nur-adjunct-input") as HTMLInputElement;
   title.dataset.adjunctControl = "agentic-title";
-  title.placeholder = "Name this workflow";
+  title.placeholder = v197Copy("Name this workflow");
   title.maxLength = 400;
   const objective = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
   objective.dataset.adjunctControl = "agentic-objective";
-  objective.placeholder = "What exact result should this workflow pursue?";
+  objective.placeholder = v197Copy("What exact result should this workflow pursue?");
   objective.maxLength = 5000;
   const success = element(document, "input", "nur-adjunct-input") as HTMLInputElement;
   success.dataset.adjunctControl = "agentic-success";
-  success.placeholder = "What observable result counts as done?";
+  success.placeholder = v197Copy("What observable result counts as done?");
   success.maxLength = 500;
   const toolSelect = agenticSelect(document, "agentic-tool");
   for (const tool of tools.filter(row => row.bound)) toolSelect.append(agenticOption(document, tool.key, tool.key.replace(/_/g, " ")));
@@ -3169,10 +3190,10 @@ async function renderAgents(
   argumentsInput.spellcheck = false;
   const rationale = element(document, "textarea", "nur-adjunct-textarea") as HTMLTextAreaElement;
   rationale.dataset.adjunctControl = "agentic-rationale";
-  rationale.placeholder = "Why is this step necessary?";
+  rationale.placeholder = v197Copy("Why is this step necessary?");
   rationale.maxLength = 2000;
-  const create = button(document, "Compile workflow draft", "agentic-workflow-create", true);
-  const createState = status(document, "Create compiles and persists a draft. It does not start execution.");
+  const create = button(document, v197Copy("Compile workflow draft"), "agentic-workflow-create", true);
+  const createState = status(document, v197Copy("Create compiles and persists a draft. It does not start execution."));
   const createActions = element(document, "div", "nur-adjunct-actions");
   createActions.append(create);
   builder.append(
@@ -3188,12 +3209,12 @@ async function renderAgents(
   );
   create.addEventListener("click", async () => {
     if (!title.value.trim() || !objective.value.trim() || !success.value.trim() || !rationale.value.trim()) {
-      createState.textContent = "Title, objective, success criterion and rationale are required.";
+      createState.textContent = v197Copy("Title, objective, success criterion and rationale are required.");
       createState.className = "nur-adjunct-status is-warn";
       return;
     }
     if (!policy.permitted_tools.includes(toolSelect.value)) {
-      createState.textContent = "Permit the selected tool in the owner policy before compiling this workflow.";
+      createState.textContent = v197Copy("Permit the selected tool in the owner policy before compiling this workflow.");
       createState.className = "nur-adjunct-status is-warn";
       return;
     }
@@ -3232,7 +3253,7 @@ async function renderAgents(
     }
   });
 
-  const approvalPanel = panel(document, "Waiting for you", `Approvals · ${approvals.length}`);
+  const approvalPanel = panel(document, v197Copy("Waiting for you"), v197Copy("Approvals · {{0}}", { 0: approvals.length }));
   const approvalList = element(document, "div", "nur-adjunct-list");
   for (const approval of approvals) {
     const card = buildApprovalCard(approval);
@@ -3244,17 +3265,17 @@ async function renderAgents(
     const decisionState = status(document, card.expiryNote ?? "This decision is bound to the displayed plan, call version and argument digest.");
     const decisions = element(document, "div", "nur-adjunct-actions");
     if (card.actionable) {
-      const approve = button(document, "Approve exact call", `agentic-approval-approve-${approval.id}`, true);
-      const reject = button(document, "Reject", `agentic-approval-reject-${approval.id}`);
-      const edit = button(document, "Edit arguments", `agentic-approval-edit-${approval.id}`);
-      const submitEdit = button(document, "Submit edited call", `agentic-approval-submit-edit-${approval.id}`, true);
+      const approve = button(document, v197Copy("Approve exact call"), `agentic-approval-approve-${approval.id}`, true);
+      const reject = button(document, v197Copy("Reject"), `agentic-approval-reject-${approval.id}`);
+      const edit = button(document, v197Copy("Edit arguments"), `agentic-approval-edit-${approval.id}`);
+      const submitEdit = button(document, v197Copy("Submit edited call"), `agentic-approval-submit-edit-${approval.id}`, true);
       const editInput = element(
         document,
         "textarea",
         "nur-adjunct-json-input",
         JSON.stringify(approval.redacted_arguments, null, 2),
       ) as HTMLTextAreaElement;
-      editInput.setAttribute("aria-label", "Edit the owner-visible approval arguments as JSON");
+      editInput.setAttribute("aria-label", v197Copy("Edit the owner-visible approval arguments as JSON"));
       editInput.hidden = true;
       submitEdit.hidden = true;
       const editorContract = resolveApprovalEditor(approval);
@@ -3309,22 +3330,22 @@ async function renderAgents(
     row.append(
       head,
       element(document, "p", undefined, card.why),
-      fact(document, "Tool", card.toolLabel),
-      fact(document, "Scope", card.scope),
-      fact(document, "Risk", card.risk),
-      fact(document, "Expected", card.expected),
-      fact(document, "Cost", card.cost),
-      ...(approval.expires_at ? [fact(document, "Expires", date(approval.expires_at))] : []),
+      fact(document, v197Copy("Tool"), card.toolLabel),
+      fact(document, v197Copy("Scope"), card.scope),
+      fact(document, v197Copy("Risk"), card.risk),
+      fact(document, v197Copy("Expected"), card.expected),
+      fact(document, v197Copy("Cost"), card.cost),
+      ...(approval.expires_at ? [fact(document, v197Copy("Expires"), date(approval.expires_at))] : []),
       exactArguments,
       decisions,
       decisionState,
     );
     approvalList.append(row);
   }
-  if (!approvals.length) approvalList.append(empty(document, "No approval is waiting", "NUR has no pending call that requires your consent."));
+  if (!approvals.length) approvalList.append(empty(document, v197Copy("No approval is waiting"), v197Copy("NUR has no pending call that requires your consent.")));
   approvalPanel.append(approvalList);
 
-  const workflowPanel = panel(document, "Run ledger", `Owner workflows · ${workflows.length}`);
+  const workflowPanel = panel(document, v197Copy("Run ledger"), v197Copy("Owner workflows · {{0}}", { 0: workflows.length }));
   workflowPanel.classList.add("is-wide");
   workflowPanel.append(agenticWorkflowRows(document, workflows));
   grid.append(policyPanel, builder, approvalPanel, workflowPanel);
@@ -3344,18 +3365,18 @@ async function renderAgenticDetail(
   const shell = mount(document, workflow.title, workflow.objective, "/agents");
   const grid = element(document, "div", "nur-adjunct-grid");
   shell.append(grid);
-  const statePanel = panel(document, "Workflow state", workflow.state);
+  const statePanel = panel(document, v197Copy("Workflow state"), workflow.state);
   statePanel.classList.add("is-wide");
   const stateFacts = element(document, "div", "nur-adjunct-facts");
   stateFacts.append(
-    fact(document, "Plan version", String(workflow.plan_version)),
-    fact(document, "Cost recorded", `${workflow.cost_cents} cents`),
-    fact(document, "Success", workflow.success_criteria.join(" · ")),
+    fact(document, v197Copy("Plan version"), String(workflow.plan_version)),
+    fact(document, v197Copy("Cost recorded"), v197Copy("{{0}} cents", { 0: workflow.cost_cents })),
+    fact(document, v197Copy("Success"), workflow.success_criteria.join(" · ")),
   );
   const lifecycleActions = element(document, "div", "nur-adjunct-actions");
-  const lifecycleState = status(document, "Every lifecycle write is owner-scoped, version-fenced and append-only in the run ledger.");
+  const lifecycleState = status(document, v197Copy("Every lifecycle write is owner-scoped, version-fenced and append-only in the run ledger."));
   if (workflow.state === "PLAN_READY") {
-    const start = button(document, "Start this plan", "agentic-workflow-start", true);
+    const start = button(document, v197Copy("Start this plan"), "agentic-workflow-start", true);
     start.addEventListener("click", async () => {
       start.disabled = true;
       try {
@@ -3370,7 +3391,7 @@ async function renderAgenticDetail(
     lifecycleActions.append(start);
   }
   if (!AGENTIC_TERMINAL_STATES.has(workflow.state)) {
-    const cancel = button(document, "Cancel workflow", "agentic-workflow-cancel");
+    const cancel = button(document, v197Copy("Cancel workflow"), "agentic-workflow-cancel");
     cancel.addEventListener("click", async () => {
       cancel.disabled = true;
       try {
@@ -3386,17 +3407,17 @@ async function renderAgenticDetail(
   }
   statePanel.append(stateFacts, lifecycleActions, lifecycleState);
 
-  const stepsPanel = panel(document, "Compiled plan", `Steps · ${workflow.steps.length}`);
+  const stepsPanel = panel(document, v197Copy("Compiled plan"), v197Copy("Steps · {{0}}", { 0: workflow.steps.length }));
   const stepList = element(document, "div", "nur-adjunct-list");
   for (const step of workflow.steps) {
     const row = element(document, "div", "nur-adjunct-row");
     const head = element(document, "div", "nur-adjunct-row-head");
     head.append(element(document, "strong", undefined, `${step.ordinal}. ${step.key}`), element(document, "span", "nur-adjunct-chip", step.state));
-    row.append(head, element(document, "p", undefined, `${step.role} · ${step.tool_key ?? "No tool"} v${step.tool_version ?? "none"}`));
+    row.append(head, element(document, "p", undefined, v197Copy("{{0}} · {{1}} v{{2}}", { 0: step.role, 1: step.tool_key ?? "No tool", 2: step.tool_version ?? "none" })));
     row.append(element(document, "pre", "nur-adjunct-json", JSON.stringify(step.input_refs, null, 2)));
     if (step.retryable) {
       const actions = element(document, "div", "nur-adjunct-actions");
-      const retry = button(document, "Retry workflow from this plan", `agentic-workflow-retry-${workflow.id}`);
+      const retry = button(document, v197Copy("Retry workflow from this plan"), `agentic-workflow-retry-${workflow.id}`);
       retry.addEventListener("click", async () => {
         retry.disabled = true;
         try {
@@ -3415,27 +3436,27 @@ async function renderAgenticDetail(
   }
   stepsPanel.append(stepList);
 
-  const eventPanel = panel(document, "Append-only evidence", `Run events · ${events.length}`);
+  const eventPanel = panel(document, v197Copy("Append-only evidence"), v197Copy("Run events · {{0}}", { 0: events.length }));
   const eventList = element(document, "div", "nur-adjunct-list");
   for (const event of events) {
     const row = element(document, "div", "nur-adjunct-row");
     row.append(
       element(document, "strong", undefined, text(event.event_type)),
       element(document, "p", undefined, text(event.summary)),
-      element(document, "p", undefined, `${text(event.actor)} · ${date(event.created_at)}`),
+      element(document, "p", undefined, v197Copy("{{0}} · {{1}}", { 0: text(event.actor), 1: date(event.created_at) })),
     );
     eventList.append(row);
   }
-  if (!events.length) eventList.append(empty(document, "No event returned", "The API did not return an append-only event for this workflow."));
+  if (!events.length) eventList.append(empty(document, v197Copy("No event returned"), v197Copy("The API did not return an append-only event for this workflow.")));
   eventPanel.append(eventList);
   grid.append(statePanel, stepsPanel, eventPanel);
   startAgenticDetailPolling(document, api, session, workflow.id, workflow.state, events, lifecycleState);
 }
 
 function renderError(document: Document, error: unknown, backRoute = "/systems"): void {
-  const shell = mount(document, "This chamber could not open.", "NUR kept the boundary closed instead of inventing data.", backRoute);
+  const shell = mount(document, v197Copy("This chamber could not open."), v197Copy("NUR kept the boundary closed instead of inventing data."), backRoute);
   const grid = element(document, "div", "nur-adjunct-grid");
-  const errorPanel = panel(document, "Honest runtime state", "No fabricated fallback");
+  const errorPanel = panel(document, v197Copy("Honest runtime state"), v197Copy("No fabricated fallback"));
   errorPanel.classList.add("is-wide");
   errorPanel.append(status(document, error instanceof Error ? error.message : "The requested owner data is unavailable.", "warn"));
   grid.append(errorPanel);

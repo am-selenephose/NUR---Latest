@@ -1,3 +1,4 @@
+import { v197Copy } from "./v197I18n";
 export type V197GlowTransaction = {
   id: string;
   event_type: string;
@@ -66,7 +67,7 @@ function makeTodayRow(document: Document, transaction: V197GlowTransaction): HTM
   const icon = document.createElement("span");
   icon.className = "glow-icon nur-v136-v89-mini-host";
   const description = document.createElement("span");
-  description.textContent = `${transaction.reason} · +${transaction.final_points}`;
+  description.textContent = v197Copy("{{0}} · +{{1}}", { 0: transaction.reason, 1: transaction.final_points });
   const time = document.createElement("time");
   time.textContent = timeLabel(transaction.created_at);
   row.append(icon, description, time);
@@ -84,9 +85,9 @@ function makeRailRow(document: Document, transaction: V197GlowTransaction): HTML
   icon.textContent = "✦";
   const copy = document.createElement("div");
   const title = document.createElement("b");
-  title.textContent = `${transaction.reason} · +${transaction.final_points}`;
+  title.textContent = v197Copy("{{0}} · +{{1}}", { 0: transaction.reason, 1: transaction.final_points });
   const detail = document.createElement("small");
-  detail.textContent = `Persisted · ${timeLabel(transaction.created_at)}`;
+  detail.textContent = v197Copy("Persisted · {{0}}", { 0: timeLabel(transaction.created_at) });
   copy.append(title, detail);
   row.append(icon, copy);
   return row;
@@ -105,7 +106,7 @@ export function renderPersistedGlow(
   const todayHeading = document.querySelector<HTMLElement>("#page-today .today-grid > aside .panel-title");
   const todaySub = document.querySelector<HTMLElement>("#page-today .today-grid > aside .panel-sub");
 
-  if (todayHeading) todayHeading.textContent = `${summary.balance} Glow Points · Level ${summary.level ?? 1}`;
+  if (todayHeading) todayHeading.textContent = v197Copy("{{0}} Glow Points · Level {{1}}", { 0: summary.balance, 1: summary.level ?? 1 });
   if (todaySub) {
     todaySub.textContent = primaryStreak
       ? `${summary.today_points ?? 0} today · ${summary.weekly_points ?? 0} this week · ${primaryStreak.current_count} day streak`
@@ -116,7 +117,7 @@ export function renderPersistedGlow(
     if (summary.recent_transactions.length === 0) {
       const emptyState = document.createElement("div");
       emptyState.className = "glow-item";
-      emptyState.textContent = "No persisted Glow yet. Complete one real action.";
+      emptyState.textContent = v197Copy("No persisted Glow yet. Complete one real action.");
       todayPanel.append(emptyState);
     } else {
       summary.recent_transactions.slice(0, 3).forEach(transaction => {
@@ -141,13 +142,13 @@ export function renderPersistedGlow(
     if (summary.recent_transactions.length === 0) {
       const emptyState = document.createElement("p");
       emptyState.className = "context-title";
-      emptyState.textContent = "No persisted Glow yet.";
+      emptyState.textContent = v197Copy("No persisted Glow yet.");
       railContainer.append(emptyState);
     }
   }
 
   const principle = document.querySelector<HTMLElement>(".v172-glow-principle .context-title");
-  if (principle) principle.textContent = "Glow Points move only after the server confirms a real action.";
+  if (principle) principle.textContent = v197Copy("Glow Points move only after the server confirms a real action.");
 }
 
 export function announcePersistedGlow(document: Document, award: V197GlowAward): void {

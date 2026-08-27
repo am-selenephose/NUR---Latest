@@ -1,7 +1,6 @@
-"""Authoritative backend metadata for NUR's 35 locale slots."""
+"""Backend locale metadata aligned with the bundled frontend catalog authority."""
 
 from dataclasses import asdict, dataclass
-
 
 SUPPORTED_LOCALES = (
     "en", "ur", "hi", "bn", "pa", "ar", "fa", "tr", "id", "ms",
@@ -10,11 +9,24 @@ SUPPORTED_LOCALES = (
     "it", "nl", "sv", "ro", "sw",
 )
 
-QUALITY_STATES = {
-    "CORE_POLISHED",
-    "BETA_REVIEWED",
+STATIC_CATALOG_QUALITY_STATES = {
+    "MACHINE_DRAFT",
+    "TECHNICALLY_COMPLETE",
+    "HUMAN_REVIEWED",
+}
+
+# Dynamic, explicitly requested content translation records retain their
+# historical lifecycle states. They are not the static UI catalog status.
+DYNAMIC_TRANSLATION_QUALITY_STATES = {
     "DRAFT_MACHINE_TRANSLATED",
+    "BETA_REVIEWED",
     "MISSING_REVIEW",
+}
+QUALITY_STATES = DYNAMIC_TRANSLATION_QUALITY_STATES
+
+LOCALE_QUALITY = {
+    locale: "TECHNICALLY_COMPLETE" if locale == "en" else "MACHINE_DRAFT"
+    for locale in SUPPORTED_LOCALES
 }
 
 LABELS = {
@@ -77,6 +89,8 @@ SCRIPT_BY_LOCALE = {
     "uk": "Cyrl",
 }
 
+RTL_LOCALES = {"ar", "fa"}
+
 
 @dataclass(frozen=True)
 class WritingVariant:
@@ -84,32 +98,28 @@ class WritingVariant:
     label: str
     script: str
     direction: str
-    quality_state: str = "MISSING_REVIEW"
+    quality_state: str
     priority_for_review: bool = False
 
 
 def writing_variants(locale: str) -> tuple[WritingVariant, ...]:
     locale = normalize_locale(locale)
+    quality = LOCALE_QUALITY[locale]
     if locale == "ur":
         return (
-            WritingVariant("roman", "Roman Urdu", "Latn", "ltr", priority_for_review=True),
-            WritingVariant("script", "Urdu script", "Arab", "rtl", priority_for_review=True),
+            WritingVariant("roman", "Roman Urdu", "Latn", "ltr", quality, priority_for_review=True),
+            WritingVariant("script", "Urdu script", "Arab", "rtl", quality, priority_for_review=True),
         )
     if locale == "hi":
         return (
-            WritingVariant("roman", "Roman Hindi", "Latn", "ltr", priority_for_review=True),
-            WritingVariant("script", "Hindi", "Deva", "ltr", priority_for_review=True),
+            WritingVariant("roman", "Roman Hindi", "Latn", "ltr", quality, priority_for_review=True),
+            WritingVariant("script", "Hindi", "Deva", "ltr", quality, priority_for_review=True),
         )
     script = SCRIPT_BY_LOCALE.get(locale, "Latn")
-    direction = "rtl" if locale in {"ar", "fa"} else "ltr"
+    direction = "rtl" if locale in RTL_LOCALES else "ltr"
+    preference = "script" if script != "Latn" else "default"
     return (
-        WritingVariant(
-            "script" if script != "Latn" else "default",
-            LABELS[locale],
-            script,
-            direction,
-            priority_for_review=locale == "en",
-        ),
+        WritingVariant(preference, LABELS[locale], script, direction, quality, priority_for_review=locale == "en"),
     )
 
 
@@ -144,8 +154,8 @@ def locale_catalog() -> list[dict]:
         {
             "locale": locale,
             "label": LABELS[locale],
+            "quality": LOCALE_QUALITY[locale],
             "variants": [asdict(variant) for variant in writing_variants(locale)],
         }
         for locale in SUPPORTED_LOCALES
     ]
-

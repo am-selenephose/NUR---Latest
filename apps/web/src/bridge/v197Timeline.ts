@@ -1,3 +1,4 @@
+import { v197Copy } from "./v197I18n";
 /**
  * Timeline — past, present and possible futures, rendered V197-native.
  *
@@ -533,15 +534,15 @@ export async function renderV197Timeline(
     const header = el(doc, "header", "nur-timeline-header");
 
     const title = el(doc, "div", "nur-timeline-title");
-    const heading = el(doc, "h1", undefined, "Timeline");
+    const heading = el(doc, "h1", undefined, v197Copy("Timeline"));
     markV197HolographicWordmark(heading);
     title.append(heading);
-    title.append(el(doc, "p", "nur-timeline-subtitle", "Past, present and possible futures"));
+    title.append(el(doc, "p", "nur-timeline-subtitle", v197Copy("Past, present and possible futures")));
     header.append(title);
 
     const modes = el(doc, "div", "nur-timeline-header-actions");
     modes.setAttribute("role", "tablist");
-    modes.setAttribute("aria-label", "Timeline view mode");
+    modes.setAttribute("aria-label", v197Copy("Timeline view mode"));
     ([
       ["flow", "Flow"], ["calendar", "Calendar"],
       ["horizons", "Horizons"], ["review", "Review"],
@@ -562,9 +563,9 @@ export async function renderV197Timeline(
     tools.append(jump);
     const search = el(doc, "input", "nur-timeline-search");
     search.type = "search";
-    search.placeholder = "Search events, actions, milestones or memories";
+    search.placeholder = v197Copy("Search events, actions, milestones or memories");
     search.value = state.query;
-    search.setAttribute("aria-label", "Search the Timeline");
+    search.setAttribute("aria-label", v197Copy("Search the Timeline"));
     search.style.width = "220px";
     search.addEventListener("input", () => {
       scheduleV197SearchCommit(doc, SEARCH_KEY, search.value, actions.setQuery);
@@ -586,11 +587,11 @@ export async function renderV197Timeline(
 
   function timelineNavigator(): HTMLElement {
     const pane = el(doc, "aside", "nur-timeline-pane nur-timeline-nav");
-    pane.setAttribute("aria-label", "Time navigator");
+    pane.setAttribute("aria-label", v197Copy("Time navigator"));
     const scroll = el(doc, "div", "nur-timeline-pane-scroll");
 
     const modeGroup = el(doc, "div", "nur-timeline-nav-group");
-    modeGroup.append(el(doc, "p", "nur-timeline-nav-label", "Objects"));
+    modeGroup.append(el(doc, "p", "nur-timeline-nav-label", v197Copy("Objects")));
     const objectChips = el(doc, "div", "nur-timeline-chips");
     for (const row of OBJECT_FILTERS) {
       const button = chip(doc, row.label, state.objectFilter === row.key);
@@ -601,7 +602,7 @@ export async function renderV197Timeline(
     scroll.append(modeGroup);
 
     const statusGroup = el(doc, "div", "nur-timeline-nav-group");
-    statusGroup.append(el(doc, "p", "nur-timeline-nav-label", "Status"));
+    statusGroup.append(el(doc, "p", "nur-timeline-nav-label", v197Copy("Status")));
     const statusChips = el(doc, "div", "nur-timeline-chips");
     for (const row of STATUS_FILTERS) {
       const button = chip(doc, row.label, state.statusFilter === row.key);
@@ -622,7 +623,7 @@ export async function renderV197Timeline(
       group.dataset.timelineSection = key;
       group.append(el(doc, "p", "nur-timeline-nav-label", label));
       if (!rows.length) {
-        group.append(el(doc, "p", "nur-timeline-empty", "Nothing here yet."));
+        group.append(el(doc, "p", "nur-timeline-empty", v197Copy("Nothing here yet.")));
       } else {
         const list = el(doc, "ul", "nur-timeline-nav-list");
         for (const row of rows.slice(0, 6)) {
@@ -728,13 +729,13 @@ export async function renderV197Timeline(
 
   function timelineFlowView(): HTMLElement {
     const pane = el(doc, "section", "nur-timeline-pane nur-timeline-workspace");
-    pane.setAttribute("aria-label", "Living Timeline");
+    pane.setAttribute("aria-label", v197Copy("Living Timeline"));
     const wrap = el(doc, "div", "nur-timeline-flow-wrap");
 
     if (!state.loaded) {
       const loading = el(doc, "div", "nur-timeline-pane-scroll");
       loading.dataset.timelineLoading = "true";
-      loading.append(el(doc, "p", "nur-timeline-empty", "Assembling your history and horizon…"));
+      loading.append(el(doc, "p", "nur-timeline-empty", v197Copy("Assembling your history and horizon…")));
       wrap.append(loading);
       pane.append(wrap);
       return pane;
@@ -744,7 +745,7 @@ export async function renderV197Timeline(
     if (!entries.length && !state.flow.unscheduled.length) {
       const empty = el(doc, "div", "nur-timeline-pane-scroll");
       empty.dataset.timelineEmpty = "true";
-      empty.append(el(doc, "h2", "nur-timeline-detail-title", "Your Timeline begins where memory meets intention."));
+      empty.append(el(doc, "h2", "nur-timeline-detail-title", v197Copy("Your Timeline begins where memory meets intention.")));
       empty.append(el(
         doc, "p", "nur-timeline-empty",
         "Nothing has been recorded yet. Once something is scheduled or logged, it "
@@ -814,7 +815,7 @@ export async function renderV197Timeline(
     if (state.flow.unscheduled.length) {
       const holding = el(doc, "div", "nur-timeline-unscheduled");
       holding.dataset.timelineUnscheduled = "true";
-      holding.append(el(doc, "p", "nur-timeline-nav-label", "Unscheduled"));
+      holding.append(el(doc, "p", "nur-timeline-nav-label", v197Copy("Unscheduled")));
       for (const entry of state.flow.unscheduled) {
         holding.append(entryRow(entry, "future"));
       }
@@ -843,7 +844,7 @@ export async function renderV197Timeline(
     box.style.position = "absolute";
     box.style.inset = "0";
     box.style.background = "rgba(0,0,0,0.94)";
-    box.append(el(doc, "p", "nur-timeline-nav-label", "Timeline outline"));
+    box.append(el(doc, "p", "nur-timeline-nav-label", v197Copy("Timeline outline")));
     const list = el(doc, "ul", "nur-timeline-outline");
     for (const entry of entries) {
       const item = el(doc, "li");
@@ -872,10 +873,10 @@ export async function renderV197Timeline(
     dialog.setAttribute("role", "dialog");
     dialog.setAttribute("aria-modal", "true");
     const card = el(doc, "div", "nur-timeline-ripple-card");
-    card.append(el(doc, "h2", "nur-timeline-ripple-title", `Move "${state.ripple!.entryTitle}"?`));
+    card.append(el(doc, "h2", "nur-timeline-ripple-title", v197Copy("Move \"{{0}}\"?", { 0: state.ripple!.entryTitle })));
     card.append(el(
       doc, "p", "nur-timeline-ripple-move",
-      `From ${fmt(state.ripple!.currentStartAt)} to ${fmt(state.ripple!.proposedStartAt)}.`,
+      v197Copy("From {{0}} to {{1}}.", { 0: fmt(state.ripple!.currentStartAt), 1: fmt(state.ripple!.proposedStartAt) }),
     ));
     card.append(el(doc, "p", "nur-timeline-ripple-move", state.ripple!.note));
 
@@ -919,11 +920,11 @@ export async function renderV197Timeline(
     const pane = el(doc, "section", "nur-timeline-pane nur-timeline-workspace");
     const scroll = el(doc, "div", "nur-timeline-pane-scroll");
     scroll.dataset.timelineCalendar = "true";
-    scroll.append(el(doc, "p", "nur-timeline-detail-kind", "Calendar · This week"));
+    scroll.append(el(doc, "p", "nur-timeline-detail-kind", v197Copy("Calendar · This week")));
 
     const entries = (state.calendar?.entries as Entry[] | undefined) ?? [];
     if (!entries.length) {
-      scroll.append(el(doc, "p", "nur-timeline-empty", "Nothing exact-timed this week."));
+      scroll.append(el(doc, "p", "nur-timeline-empty", v197Copy("Nothing exact-timed this week.")));
       pane.append(scroll);
       return pane;
     }
@@ -952,10 +953,10 @@ export async function renderV197Timeline(
     const pane = el(doc, "section", "nur-timeline-pane nur-timeline-workspace");
     const scroll = el(doc, "div", "nur-timeline-pane-scroll");
     scroll.dataset.timelineHorizons = "true";
-    scroll.append(el(doc, "p", "nur-timeline-detail-kind", "Horizons"));
+    scroll.append(el(doc, "p", "nur-timeline-detail-kind", v197Copy("Horizons")));
 
     if (!state.horizons) {
-      scroll.append(el(doc, "p", "nur-timeline-empty", "Loading horizons…"));
+      scroll.append(el(doc, "p", "nur-timeline-empty", v197Copy("Loading horizons…")));
       pane.append(scroll);
       return pane;
     }
@@ -968,7 +969,7 @@ export async function renderV197Timeline(
       col.append(el(doc, "p", "nur-timeline-horizon-label", HORIZON_LABEL[key]));
       const rows = buckets[key] ?? [];
       if (!rows.length) {
-        col.append(el(doc, "p", "nur-timeline-empty", "Nothing here."));
+        col.append(el(doc, "p", "nur-timeline-empty", v197Copy("Nothing here.")));
       } else {
         for (const row of rows) {
           const item = el(doc, "div", "nur-timeline-horizon-item", row.label);
@@ -984,7 +985,7 @@ export async function renderV197Timeline(
     if (drift.length) {
       const banner = el(doc, "div", "nur-timeline-drift");
       banner.dataset.timelineDrift = "true";
-      banner.textContent = `${drift.length} item${drift.length === 1 ? "" : "s"} moved outward more than once — worth a look, not a judgement.`;
+      banner.textContent = v197Copy("{{0}} item{{1}} moved outward more than once — worth a look, not a judgement.", { 0: drift.length, 1: drift.length === 1 ? "" : "s" });
       scroll.append(banner);
     }
     pane.append(scroll);
@@ -995,16 +996,16 @@ export async function renderV197Timeline(
     const pane = el(doc, "section", "nur-timeline-pane nur-timeline-workspace");
     const scroll = el(doc, "div", "nur-timeline-pane-scroll");
     scroll.dataset.timelineReview = "true";
-    scroll.append(el(doc, "p", "nur-timeline-detail-kind", "Review"));
+    scroll.append(el(doc, "p", "nur-timeline-detail-kind", v197Copy("Review")));
 
     if (!state.review) {
-      scroll.append(el(doc, "p", "nur-timeline-empty", "Loading this week's comparison…"));
+      scroll.append(el(doc, "p", "nur-timeline-empty", v197Copy("Loading this week's comparison…")));
       pane.append(scroll);
       return pane;
     }
 
     const findings = state.review.live_findings as Record<string, unknown>;
-    scroll.append(el(doc, "h2", "nur-timeline-detail-title", "This week: planned versus actual"));
+    scroll.append(el(doc, "h2", "nur-timeline-detail-title", v197Copy("This week: planned versus actual")));
 
     const grid = el(doc, "div", "nur-timeline-review-grid");
     const stat = (label: string, value: string) => {
@@ -1041,18 +1042,18 @@ export async function renderV197Timeline(
 
     const recent = (state.review.recent_reviews as Record<string, unknown>[] | undefined) ?? [];
     if (recent.length) {
-      scroll.append(el(doc, "p", "nur-timeline-nav-label", "Recent reviews"));
+      scroll.append(el(doc, "p", "nur-timeline-nav-label", v197Copy("Recent reviews")));
       for (const row of recent) {
         const card = el(doc, "div", "nur-timeline-card");
         card.append(el(doc, "p", "nur-timeline-field-value", text(row.review_type)));
-        card.append(el(doc, "p", "nur-timeline-row-meta", text(row.summary, "Computed, not written")));
+        card.append(el(doc, "p", "nur-timeline-row-meta", text(row.summary, v197Copy("Computed, not written"))));
         scroll.append(card);
       }
     }
 
     scroll.append(el(
       doc, "p", "nur-timeline-empty",
-      "Deterministic — computed from your own recorded timestamps, no model consulted.",
+      v197Copy("Deterministic — computed from your own recorded timestamps, no model consulted."),
     ));
     pane.append(scroll);
     return pane;
@@ -1060,15 +1061,15 @@ export async function renderV197Timeline(
 
   function timelineDetailPanel(): HTMLElement {
     const pane = el(doc, "aside", "nur-timeline-pane nur-timeline-detail");
-    pane.setAttribute("aria-label", "Selection detail");
+    pane.setAttribute("aria-label", v197Copy("Selection detail"));
     const scroll = el(doc, "div", "nur-timeline-pane-scroll");
 
     const entry = state.selected ? entryByRef(state.selected) : undefined;
     if (!entry) {
-      scroll.append(el(doc, "p", "nur-timeline-detail-kind", "Nothing selected"));
+      scroll.append(el(doc, "p", "nur-timeline-detail-kind", v197Copy("Nothing selected")));
       scroll.append(el(
         doc, "p", "nur-timeline-empty",
-        "Select something in time to explore its meaning, dependencies and outcome.",
+        v197Copy("Select something in time to explore its meaning, dependencies and outcome."),
       ));
       pane.append(scroll);
       return pane;
@@ -1110,8 +1111,8 @@ export async function renderV197Timeline(
   }
 
   function overviewTab(into: HTMLElement, entry: Entry): void {
-    into.append(field(doc, "Description", text(entry.description, "None recorded"), !entry.description));
-    into.append(field(doc, "System", text(entry.system_slug, "Not linked"), !entry.system_slug));
+    into.append(field(doc, "Description", text(entry.description, v197Copy("None recorded")), !entry.description));
+    into.append(field(doc, "System", text(entry.system_slug, v197Copy("Not linked")), !entry.system_slug));
     into.append(field(doc, "Priority", `${entry.importance}/100`));
     into.append(field(doc, "Source", text(entry.source_type)));
 
@@ -1152,7 +1153,7 @@ export async function renderV197Timeline(
     into.append(field(doc, "Actual end", fmt(entry.actual_end_at), !entry.actual_end_at));
     into.append(field(
       doc, "Completion quality",
-      text(entry.completion_state, "Not assessed"), !entry.completion_state,
+      text(entry.completion_state, v197Copy("Not assessed")), !entry.completion_state,
     ));
 
     if (entry.kind === "timeline_event" && entry.scheduled_for) {
@@ -1171,14 +1172,14 @@ export async function renderV197Timeline(
 
     const history = state.rescheduleHistory ?? [];
     if (history.length) {
-      into.append(el(doc, "p", "nur-timeline-nav-label", "Reschedule history"));
+      into.append(el(doc, "p", "nur-timeline-nav-label", v197Copy("Reschedule history")));
       for (const row of history) {
         const card = el(doc, "div", "nur-timeline-card");
         card.append(el(
           doc, "p", "nur-timeline-field-value",
           `${fmt(row.previous_start_at as string | null)} → ${fmt(row.new_start_at as string | null)}`,
         ));
-        card.append(el(doc, "p", "nur-timeline-row-meta", text(row.reason, "No reason given")));
+        card.append(el(doc, "p", "nur-timeline-row-meta", text(row.reason, v197Copy("No reason given"))));
         into.append(card);
       }
     }
@@ -1225,7 +1226,7 @@ export async function renderV197Timeline(
   function nurViewTab(into: HTMLElement, entry: Entry): void {
     const doubt = el(doc, "div", "nur-timeline-doubt");
     doubt.dataset.timelineDoubt = "true";
-    doubt.append(el(doc, "p", "nur-timeline-doubt-label", "What NUR may be wrong about"));
+    doubt.append(el(doc, "p", "nur-timeline-doubt-label", v197Copy("What NUR may be wrong about")));
     doubt.append(el(
       doc, "p", "nur-timeline-field-value",
       entry.status === "PREDICTED"

@@ -2930,15 +2930,14 @@ body.universe-edition #nur-front-v61 .universe-top-tools > .nur-user {
     #scope-open,
     .nur-v197-language-open
   ) {
-    width: 76px !important;
+    width: auto !important;
     min-width: 76px !important;
-    max-width: 76px !important;
-    height: 36px !important;
+    max-width: 148px !important;
+    height: auto !important;
     min-height: 36px !important;
-    padding: 0 10px !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
+    padding: 6px 10px !important;
+    overflow-wrap: anywhere !important;
+    white-space: normal !important;
   }
 }
 
@@ -3220,7 +3219,7 @@ body.universe-edition #nur-front-v61 :is(.toast, [role="status"][data-toast]) {
   }
 
   body.universe-edition #nur-front-v61 #scope-open::before {
-    content: "\25C8" !important;
+  content: "\25C8" !important;
     display: block !important;
     font-size: 16px !important;
     line-height: 1 !important;

@@ -9,7 +9,7 @@ import type {
   V197SystemSnapshot,
   V197TalkThreadRow,
 } from "./v197ApiClient";
-import { applyV197Locale } from "./v197I18n";
+import { applyV197Locale, setActiveV197Catalog, v197Copy } from "./v197I18n";
 import { hydrateReadOnlyV197 } from "./v197Mutations";
 import { renderPersistedGlow } from "./v197Rewards";
 
@@ -77,8 +77,8 @@ function renderTalk(document: Document, rows: V197TalkThreadRow[]): void {
     message.dataset.nurTalkEmpty = "true";
     const meta = document.createElement("div");
     meta.className = "talk-meta";
-    meta.textContent = "NUR · private ledger";
-    message.append(meta, document.createTextNode("No persisted Talk turns yet. Say one true line to begin."));
+    meta.textContent = v197Copy("NUR · private ledger");
+    message.append(meta, document.createTextNode(v197Copy("No persisted Talk turns yet. Say one true line to begin.")));
     stream.append(message);
     return;
   }
@@ -90,7 +90,7 @@ function renderTalk(document: Document, rows: V197TalkThreadRow[]): void {
     if (row.who === "nur") {
       const meta = document.createElement("div");
       meta.className = "talk-meta";
-      meta.textContent = "NUR · model-generated";
+      meta.textContent = v197Copy("NUR · model-generated");
       message.append(meta);
     }
     const body = document.createElement("span");
@@ -131,17 +131,17 @@ function renderJournal(document: Document, snapshot: V197BridgeSnapshot): void {
 function renderToday(document: Document, snapshot: V197BridgeSnapshot): void {
   const today = snapshot.today;
   if (!today) {
-    text(document.querySelector("#page-today .page-kicker"), "Today in NUR · owner ledger unavailable");
+    text(document.querySelector("#page-today .page-kicker"), v197Copy("Today in NUR · owner ledger unavailable"));
     return;
   }
   const parsed = new Date(`${today.date}T12:00:00`);
   const dateLabel = Number.isNaN(parsed.getTime())
     ? today.date
     : parsed.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
-  text(document.querySelector("#page-today .page-kicker"), `Today in NUR · ${today.day_label}, ${dateLabel} · ${today.daypart}`);
+  text(document.querySelector("#page-today .page-kicker"), v197Copy("Today in NUR · {{0}}, {{1}} · {{2}}", { 0: today.day_label, 1: dateLabel, 2: today.daypart }));
   text(
     document.querySelector("#page-today .page-sub"),
-    `${today.timezone} · ${today.active_goals.length} active goals · ${today.completed_today.length} completed · ${today.missed_today.length} missed · ${today.glow_today} Glow today.`,
+    v197Copy("{{0}} · {{1}} active goals · {{2}} completed · {{3}} missed · {{4}} Glow today.", { 0: today.timezone, 1: today.active_goals.length, 2: today.completed_today.length, 3: today.missed_today.length, 4: today.glow_today }),
   );
 
   const dimensions = [today.body, today.mind, today.life];
@@ -152,8 +152,8 @@ function renderToday(document: Document, snapshot: V197BridgeSnapshot): void {
     text(line.querySelector(":scope > span:first-child"), labels[index]);
     const bar = line.querySelector<HTMLElement>(".reading-bar > i");
     if (bar) bar.style.width = `${Math.max(0, Math.min(100, dimension.score))}%`;
-    text(line.querySelector("strong"), `${dimension.score}% · persisted evidence`);
-    line.title = `${dimension.calculation}. Sources: ${JSON.stringify(dimension.sources)}`;
+    text(line.querySelector("strong"), v197Copy("{{0}}% · persisted evidence", { 0: dimension.score }));
+    line.title = v197Copy("{{0}}. Sources: {{1}}", { 0: dimension.calculation, 1: JSON.stringify(dimension.sources) });
   });
 
   const nextMove = today.next_move;
@@ -201,9 +201,9 @@ function ensureTodayOperatingControls(document: Document, snapshot: V197BridgeSn
     chamber.className = "nur-v197-checkin";
     chamber.hidden = true;
     const title = document.createElement("h3");
-    title.textContent = "Adjust today's real reading";
+    title.textContent = v197Copy("Adjust today's real reading");
     const note = document.createElement("p");
-    note.textContent = "0 is low, 10 is high. Pain and emotional load are inverse capacity signals.";
+    note.textContent = v197Copy("0 is low, 10 is high. Pain and emotional load are inverse capacity signals.");
     const fields = document.createElement("div");
     fields.className = "nur-v197-checkin-grid";
     fields.append(
@@ -217,13 +217,13 @@ function ensureTodayOperatingControls(document: Document, snapshot: V197BridgeSn
     );
     const noteInput = document.createElement("input");
     noteInput.id = "nur-checkin-note";
-    noteInput.placeholder = "One private note, optional";
+    noteInput.placeholder = v197Copy("One private note, optional");
     noteInput.autocomplete = "off";
     const save = document.createElement("button");
     save.type = "button";
     save.className = "f4-primary compact";
     save.dataset.action = "save-today-checkin";
-    save.textContent = "Hold this reading →";
+    save.textContent = v197Copy("Hold this reading →");
     chamber.append(title, note, fields, noteInput, save);
     readingLines.after(chamber);
   }
@@ -294,12 +294,12 @@ function ensureOutcomeComposer(document: Document): void {
   const input = document.createElement("input");
   input.id = "nur-outcome-input";
   input.autocomplete = "off";
-  input.placeholder = "What changed in the real world?";
+  input.placeholder = v197Copy("What changed in the real world?");
   const button = document.createElement("button");
   button.type = "button";
   button.className = "thought-send-button send-holo-pill";
   button.dataset.action = "return-outcome";
-  button.textContent = "Return outcome →";
+  button.textContent = v197Copy("Return outcome →");
   shell.append(input, button);
   page.append(shell);
 }
@@ -320,7 +320,7 @@ function renderPlans(document: Document, plans: V197Plan[]): void {
       state.className = "plan-step";
       const copy = document.createElement("div");
       const title = document.createElement("h3");
-      title.textContent = "A Plan begins after one direction is persisted.";
+      title.textContent = v197Copy("A Plan begins after one direction is persisted.");
       copy.append(title);
       state.append(copy);
       list.append(state);
@@ -476,11 +476,11 @@ function renderLiveUniverse(document: Document, snapshot: V197BridgeSnapshot): v
   const coverage = Math.round(Math.max(0, Math.min(1, live.state.confidence)) * 100);
   text(
     document.querySelector("#page-systems .universe-hero-copy .page-sub"),
-    `${live.state.summary} ${live.state.source_count} owner-ledger sources · ${coverage}% source coverage, not truth probability.`,
+    v197Copy("{{0}} {{1}} owner-ledger sources · {{2}}% source coverage, not truth probability.", { 0: live.state.summary, 1: live.state.source_count, 2: coverage }),
   );
   text(
     document.querySelector(".universe-field-readout > span"),
-    `${live.active_systems.length} active Systems · ${live.open_loops.length} open loops · ${live.glow.today_points ?? 0} Glow today`,
+    v197Copy("{{0}} active Systems · {{1}} open loops · {{2}} Glow today", { 0: live.active_systems.length, 1: live.open_loops.length, 2: live.glow.today_points ?? 0 }),
   );
 
   const cards = [...document.querySelectorAll<HTMLElement>(".universe-state-strip > article")];
@@ -568,7 +568,7 @@ function renderLiveUniverse(document: Document, snapshot: V197BridgeSnapshot): v
     recordTitle(firstChange, "No recent persisted change"),
     firstChange ? "Recent owner ledger, not a verified last-visit diff" : "No invented change state",
   );
-  lane?.setAttribute("aria-label", "Live Universe owner-ledger highlights");
+  lane?.setAttribute("aria-label", v197Copy("Live Universe owner-ledger highlights"));
   document.body.dataset.nurLiveProvenance = live.provenance_label;
 }
 
@@ -584,26 +584,26 @@ function renderSelectedSystem(document: Document, snapshot: V197BridgeSnapshot):
 
   const panel = document.querySelector<HTMLElement>(".universe-insight-panel");
   if (panel) panel.dataset.nurLens = "system";
-  ownText(document.querySelector(".system-badge"), `${system.title} System`);
-  text(document.querySelector(".live-label"), "OWNER LEDGER");
-  text(document.querySelector(".universe-insight-title small"), "Definition");
+  ownText(document.querySelector(".system-badge"), v197Copy("{{0}} System", { 0: system.title }));
+  text(document.querySelector(".live-label"), v197Copy("OWNER LEDGER"));
+  text(document.querySelector(".universe-insight-title small"), v197Copy("Definition"));
   text(document.querySelector(".universe-insight-title h2"), system.title);
   text(document.querySelector(".universe-insight-copy"), system.definition);
   document.querySelectorAll<HTMLElement>(".signal-list span").forEach((slot, index) => {
     slot.textContent = system.questions[index] ?? "No additional diagnostic question.";
   });
-  text(document.querySelector(".insight-opportunity small"), "Suggested next move");
+  text(document.querySelector(".insight-opportunity small"), v197Copy("Suggested next move"));
   text(document.querySelector(".insight-opportunity b"), system.next_move.title);
-  text(document.querySelector(".insight-uncertainty span"), "If ignored");
+  text(document.querySelector(".insight-uncertainty span"), v197Copy("If ignored"));
   text(document.querySelector(".insight-uncertainty p"), system.prediction.if_ignored);
-  text(document.querySelector(".insight-strength span"), "Persisted progress");
+  text(document.querySelector(".insight-strength span"), v197Copy("Persisted progress"));
   text(document.querySelector(".insight-strength b"), `${system.progress_percent}%`);
   const decorativeStrengthBar = document.querySelector<HTMLElement>(".insight-strength i");
   if (decorativeStrengthBar) decorativeStrengthBar.hidden = true;
-  text(document.querySelector(".insight-evidence small"), "Evidence");
+  text(document.querySelector(".insight-evidence small"), v197Copy("Evidence"));
   text(
     document.querySelector(".insight-evidence b"),
-    `${system.progress_sources.completed_actions}/${system.progress_sources.total_actions} actions · ${system.progress_sources.glow_points} Glow`,
+    v197Copy("{{0}}/{{1}} actions · {{2}} Glow", { 0: system.progress_sources.completed_actions, 1: system.progress_sources.total_actions, 2: system.progress_sources.glow_points }),
   );
   text(document.querySelector(".insight-evidence span"), system.progress_sources.formula);
   text(document.querySelector(".insight-revision span"), system.prediction.if_followed);
@@ -665,10 +665,10 @@ function ensureInsightControls(document: Document, claim: Record<string, unknown
     controls = document.createElement("section");
     controls.id = "nur-v197-insight-controls";
     controls.className = "nur-v197-insight-controls";
-    controls.setAttribute("aria-label", "Insight owner review controls");
+    controls.setAttribute("aria-label", v197Copy("Insight owner review controls"));
     const correction = document.createElement("input");
     correction.id = "nur-v197-insight-correction";
-    correction.placeholder = "Correct what NUR got wrong";
+    correction.placeholder = v197Copy("Correct what NUR got wrong");
     correction.autocomplete = "off";
     const actions = document.createElement("div");
     actions.className = "nur-v197-insight-actions";
@@ -736,7 +736,7 @@ export function renderInsightInspection(
     host = document.createElement("section");
     host.id = "nur-v197-insight-inspection";
     host.className = "nur-v197-insight-inspection";
-    host.setAttribute("aria-label", "Insight evidence and change history");
+    host.setAttribute("aria-label", v197Copy("Insight evidence and change history"));
     panel.append(host);
   }
   host.hidden = false;
@@ -754,27 +754,27 @@ export function renderInsightInspection(
   });
 
   const heading = document.createElement("strong");
-  heading.textContent = `${detail.epistemic_state} · ${detail.time_scale} · version ${detail.insight_version}`;
+  heading.textContent = v197Copy("{{0}} · {{1}} · version {{2}}", { 0: detail.epistemic_state, 1: detail.time_scale, 2: detail.insight_version });
   const sourceState = document.createElement("p");
   const support = evidence.relations.filter(row => row.relation === "SUPPORTS");
   const counter = evidence.relations.filter(row => row.relation === "CONTRADICTS");
-  sourceState.textContent = `${support.length} supporting · ${counter.length} counter · ${detail.source_diversity} source domains`;
+  sourceState.textContent = v197Copy("{{0}} supporting · {{1}} counter · {{2}} source domains", { 0: support.length, 1: counter.length, 2: detail.source_diversity });
   const uncertainty = document.createElement("p");
-  uncertainty.textContent = `What NUR may be wrong about: ${detail.what_nur_may_be_wrong_about}`;
+  uncertainty.textContent = v197Copy("What NUR may be wrong about: {{0}}", { 0: detail.what_nur_may_be_wrong_about });
   host.append(heading, sourceState, uncertainty);
 
   const evidenceList = document.createElement("ul");
-  evidenceList.setAttribute("aria-label", "Canonical Insight evidence");
+  evidenceList.setAttribute("aria-label", v197Copy("Canonical Insight evidence"));
   evidence.relations.slice(0, 8).forEach(row => {
     const item = document.createElement("li");
-    item.textContent = `${row.relation} · ${row.source_domain} · ${row.provenance_label} · ${row.source_exists ? "source present" : "source invalidated"}${row.evidence_summary ? ` · ${row.evidence_summary}` : ""}`;
+    item.textContent = v197Copy("{{0}} · {{1}} · {{2}} · {{3}}{{4}}", { 0: row.relation, 1: row.source_domain, 2: row.provenance_label, 3: row.source_exists ? "source present" : "source invalidated", 4: row.evidence_summary ? ` · ${row.evidence_summary}` : "" });
     evidenceList.append(item);
   });
   host.append(evidenceList);
 
   if (detail.alternative_explanations.length) {
     const alternatives = document.createElement("p");
-    alternatives.textContent = `Alternatives: ${detail.alternative_explanations.join(" · ")}`;
+    alternatives.textContent = v197Copy("Alternatives: {{0}}", { 0: detail.alternative_explanations.join(" · ") });
     host.append(alternatives);
   }
   const changes = document.createElement("p");
@@ -784,7 +784,7 @@ export function renderInsightInspection(
   host.append(changes);
 
   const routes = document.createElement("nav");
-  routes.setAttribute("aria-label", "Canonical Insight links");
+  routes.setAttribute("aria-label", v197Copy("Canonical Insight links"));
   Object.entries(detail.canonical_links).forEach(([label, route]) => {
     if (!route) return;
     const button = document.createElement("button");
@@ -806,8 +806,8 @@ function renderVisibleLens(
   const panel = document.querySelector<HTMLElement>(".universe-insight-panel");
   if (!panel) return;
   panel.dataset.nurLens = focus;
-  ownText(panel.querySelector(".system-badge"), `${focus[0].toUpperCase()}${focus.slice(1)} lens`);
-  text(panel.querySelector(".live-label"), "OWNER LEDGER");
+  ownText(panel.querySelector(".system-badge"), v197Copy("{{0}}{{1}} lens", { 0: focus[0].toUpperCase(), 1: focus.slice(1) }));
+  text(panel.querySelector(".live-label"), v197Copy("OWNER LEDGER"));
 
   let title = "No persisted data yet";
   let copy = "This lens will not invent content before owner-scoped records exist.";
@@ -927,7 +927,7 @@ function renderVisibleLens(
     );
   }
 
-  text(panel.querySelector(".universe-insight-title small"), "Persisted view");
+  text(panel.querySelector(".universe-insight-title small"), v197Copy("Persisted view"));
   text(panel.querySelector(".universe-insight-title h2"), title);
   text(panel.querySelector(".universe-insight-copy"), copy);
   text(panel.querySelector(".insight-uncertainty p"), uncertainty);
@@ -935,12 +935,12 @@ function renderVisibleLens(
   signalSlots.forEach((slot, index) => {
     slot.textContent = signals[index] ?? "No additional persisted signal";
   });
-  text(panel.querySelector(".insight-strength span"), "Persisted records");
+  text(panel.querySelector(".insight-strength span"), v197Copy("Persisted records"));
   text(panel.querySelector(".insight-strength b"), String(count));
-  text(panel.querySelector(".insight-evidence small"), "Provenance");
+  text(panel.querySelector(".insight-evidence small"), v197Copy("Provenance"));
   text(panel.querySelector(".insight-evidence b"), snapshot.timeline?.provenance_label ?? snapshot.map?.provenance_label ?? "owner_ledger");
-  text(panel.querySelector(".insight-evidence span"), "No fake live metrics");
-  text(panel.querySelector(".insight-revision span"), "Updated from the latest persisted snapshot.");
+  text(panel.querySelector(".insight-evidence span"), v197Copy("No fake live metrics"));
+  text(panel.querySelector(".insight-revision span"), v197Copy("Updated from the latest persisted snapshot."));
   const controls = document.querySelector<HTMLElement>("#nur-v197-insight-controls");
   const inspection = document.querySelector<HTMLElement>("#nur-v197-insight-inspection");
   if (focus === "insights") ensureInsightControls(document, primaryInsight(snapshot));
@@ -979,7 +979,7 @@ export function renderWorldLens(
       const row = rows[index];
       setLaneCard(card, row?.kind.replaceAll("_", " ") ?? "owner timeline", row?.title ?? "No event", row ? shorten(row.body, 80) : "No persisted event in this slot.");
     });
-    lane.setAttribute("aria-label", "Owner timeline summary");
+    lane.setAttribute("aria-label", v197Copy("Owner timeline summary"));
     return;
   }
 
@@ -1014,7 +1014,7 @@ export function renderWorldLens(
       const held = row ? Object.values(row.counts).reduce((sum, value) => sum + value, 0) : 0;
       setLaneCard(card, row?.kind ?? "project orbit", row?.title ?? "No Orbit", row ? `${held} held objects · ${row.status.toLowerCase()}` : "No persisted Orbit in this slot.");
     });
-    lane.setAttribute("aria-label", "Owner Orbits summary");
+    lane.setAttribute("aria-label", v197Copy("Owner Orbits summary"));
     return;
   }
 
@@ -1023,7 +1023,7 @@ export function renderWorldLens(
     setLaneCard(cards[0], "candidate claims", number(insight?.counts.claims), "owner-only Omega ledger");
     setLaneCard(cards[1], "open contradictions", number(insight?.counts.open_contradictions), "needs review");
     setLaneCard(cards[2], "review queue", number(insight?.counts.review_queue), "no automatic promotion");
-    lane.setAttribute("aria-label", "Owner insight summary");
+    lane.setAttribute("aria-label", v197Copy("Owner insight summary"));
     return;
   }
 
@@ -1038,7 +1038,7 @@ export function renderWorldLens(
         room ? `your role ${room.current_user_role.toLowerCase()} · member content only` : "No persisted room in this slot.",
       );
     });
-    lane.setAttribute("aria-label", "Persisted community rooms");
+    lane.setAttribute("aria-label", v197Copy("Persisted community rooms"));
     return;
   }
 
@@ -1074,7 +1074,7 @@ export function renderWorldLens(
       score ? `${score.score} persisted Glow` : row ? "persisted private data" : "No persisted count in this slot.",
     );
   });
-  lane.setAttribute("aria-label", "Owner map summary");
+  lane.setAttribute("aria-label", v197Copy("Owner map summary"));
 }
 
 function renderInsight(document: Document, snapshot: V197BridgeSnapshot): void {
@@ -1096,7 +1096,7 @@ function renderInsight(document: Document, snapshot: V197BridgeSnapshot): void {
   const openStep = snapshot.plans.flatMap(plan => plan.steps).find(step => !step.done);
   const latestEvent = snapshot.timeline?.items[0];
 
-  ownText(document.querySelector(".system-badge"), "Candidate insight");
+  ownText(document.querySelector(".system-badge"), v197Copy("Candidate insight"));
   text(document.querySelector(".universe-insight-title small"), claimText ? "Candidate claim" : "Evidence state");
   text(document.querySelector(".universe-insight-title h2"), claimText ?? NO_RELIABLE_INSIGHT);
   text(
@@ -1106,7 +1106,7 @@ function renderInsight(document: Document, snapshot: V197BridgeSnapshot): void {
       : "More owner evidence across time or domains is required before NUR surfaces one.",
   );
   const contradictionText = typeof contradiction?.description === "string" ? contradiction.description : "No open contradiction is persisted.";
-  text(document.querySelector(".insight-uncertainty span"), "Open contradiction");
+  text(document.querySelector(".insight-uncertainty span"), v197Copy("Open contradiction"));
   text(document.querySelector(".insight-uncertainty p"), contradictionText);
   const signals = [
     `${claimCount} candidate ${claimCount === 1 ? "claim" : "claims"}`,
@@ -1116,23 +1116,23 @@ function renderInsight(document: Document, snapshot: V197BridgeSnapshot): void {
   document.querySelectorAll<HTMLElement>(".signal-list span").forEach((slot, index) => {
     slot.textContent = signals[index] ?? "No additional persisted signal";
   });
-  text(document.querySelector(".insight-opportunity small"), "Next persisted move");
+  text(document.querySelector(".insight-opportunity small"), v197Copy("Next persisted move"));
   text(document.querySelector(".insight-opportunity b"), openStep?.title ?? "No persisted next move yet.");
-  text(document.querySelector(".insight-strength span"), "Persisted claims");
+  text(document.querySelector(".insight-strength span"), v197Copy("Persisted claims"));
   text(document.querySelector(".insight-strength b"), String(claimCount));
   const decorativeStrengthBar = document.querySelector<HTMLElement>(".insight-strength i");
   if (decorativeStrengthBar) {
     decorativeStrengthBar.hidden = true;
     decorativeStrengthBar.style.display = "none";
   }
-  text(document.querySelector(".insight-evidence small"), "Owner evidence");
-  text(document.querySelector(".insight-evidence b"), `${snapshot.timeline?.items.length ?? 0} persisted events`);
+  text(document.querySelector(".insight-evidence small"), v197Copy("Owner evidence"));
+  text(document.querySelector(".insight-evidence b"), v197Copy("{{0}} persisted events", { 0: snapshot.timeline?.items.length ?? 0 }));
   text(document.querySelector(".insight-evidence span"), insights?.provenance_label ?? "owner_ledger");
   text(
     document.querySelector(".insight-revision span"),
     latestEvent ? `Latest persisted change: ${latestEvent.title}.` : `No persisted revision yet · ${reviewCount} awaiting review.`,
   );
-  text(document.querySelector(".live-label"), "OWNER LEDGER");
+  text(document.querySelector(".live-label"), v197Copy("OWNER LEDGER"));
   ensureUniversePortal(document, ".candidate-insight", "Review candidates", "insights");
 }
 
@@ -1146,7 +1146,7 @@ function makeHonestResult(document: Document, mark: string, title: string, detai
   const body = document.createElement("span");
   body.textContent = detail;
   const status = document.createElement("small");
-  status.textContent = "Local owner ledger · no invented external data";
+  status.textContent = v197Copy("Local owner ledger · no invented external data");
   copy.append(heading, body, status);
   article.append(icon, copy);
   return article;
@@ -1159,19 +1159,19 @@ function ensureResearchStaging(document: Document, host: HTMLElement, results: H
   staging.setAttribute("aria-labelledby", "research-staging-title");
   const title = document.createElement("h3");
   title.id = "research-staging-title";
-  title.textContent = "Stage a local question";
+  title.textContent = v197Copy("Stage a local question");
   const note = document.createElement("p");
-  note.textContent = "Saved to your owner ledger. No external source or citation is invented.";
+  note.textContent = v197Copy("Saved to your owner ledger. No external source or citation is invented.");
   const input = document.createElement("textarea");
   input.id = "research-query";
   input.rows = 2;
   input.maxLength = 4000;
-  input.placeholder = "What should NUR hold for later evidence?";
-  input.setAttribute("aria-label", "Research question");
+  input.placeholder = v197Copy("What should NUR hold for later evidence?");
+  input.setAttribute("aria-label", v197Copy("Research question"));
   const submit = document.createElement("button");
   submit.type = "button";
   submit.dataset.researchSubmit = "true";
-  submit.textContent = "Save local question";
+  submit.textContent = v197Copy("Save local question");
   staging.append(title, note, input, submit);
   if (results) results.before(staging);
   else host.append(staging);
@@ -1197,7 +1197,7 @@ function renderResearch(document: Document, snapshot: V197BridgeSnapshot): void 
     }
   }
   if (!host) return;
-  text(host.querySelector(".universe-card-head h2"), "Research evidence, held honestly.");
+  text(host.querySelector(".universe-card-head h2"), v197Copy("Research evidence, held honestly."));
   const results = host.querySelector<HTMLElement>(".research-results");
   ensureResearchStaging(document, host, results);
   if (results) {
@@ -1241,7 +1241,7 @@ function ensureUniversePortal(
     head.append(control);
   }
   control.dataset.nurUniversePortal = "true";
-  control.textContent = `${label} →`;
+  control.textContent = v197Copy("{{0}} →", { 0: label });
   control.disabled = false;
   control.removeAttribute("aria-disabled");
   control.removeAttribute("data-action");
@@ -1301,7 +1301,7 @@ function renderCommunity(document: Document, snapshot: V197BridgeSnapshot): void
   document.querySelectorAll<HTMLElement>("[data-community-tab]").forEach(control => {
     control.setAttribute("aria-disabled", "true");
     if (control.tagName === "BUTTON") (control as HTMLButtonElement).disabled = true;
-    control.setAttribute("title", "Public community feeds stay disconnected; only your persisted rooms are shown.");
+    control.setAttribute("title", v197Copy("Public community feeds stay disconnected; only your persisted rooms are shown."));
   });
 
   const council = (snapshot.communityRooms ?? []).find(room => room.room_kind === "COUNCIL" && room.status === "ACTIVE");
@@ -1331,6 +1331,7 @@ export function hydrateTrackAV197(document: Document, snapshot: V197BridgeSnapsh
   hydrateReadOnlyV197(document, snapshot);
   const locale = snapshot.preferences?.locale ?? snapshot.session.profile.locale ?? "en";
   const writingPreference = snapshot.preferences?.writing_preference ?? snapshot.session.profile.writing_preference ?? "default";
+  setActiveV197Catalog(locale, writingPreference);
   renderTalk(document, snapshot.talkThread);
   renderToday(document, snapshot);
   renderJournal(document, snapshot);
@@ -1346,9 +1347,9 @@ export function hydrateTrackAV197(document: Document, snapshot: V197BridgeSnapsh
   renderCommunity(document, snapshot);
   renderHonestDisabledSurfaces(document);
   renderPersistedGlow(document, snapshot.glow);
-  text(document.querySelector('[data-thread-action="glow"]'), "Glow this persisted Talk");
+  text(document.querySelector('[data-thread-action="glow"]'), v197Copy("Glow this persisted Talk"));
   document.querySelectorAll<HTMLElement>(".quiet-chip").forEach(chip => {
-    if (chip.textContent?.toLowerCase().includes("live feed")) ownText(chip, "local owner ledger");
+    if (chip.textContent?.toLowerCase().includes("live feed")) ownText(chip, v197Copy("local owner ledger"));
   });
   const latestUserTalk = [...snapshot.talkThread].reverse().find(row => row.who === "user" && row.text);
   text(document.querySelector("#page-today .mini-thread"), latestUserTalk?.text ? `“${shorten(latestUserTalk.text, 170)}”` : "No persisted Talk signal yet.");

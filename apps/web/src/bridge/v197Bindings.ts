@@ -1,3 +1,4 @@
+import { v197Copy } from "./v197I18n";
 import {
   V197ApiClient,
   V197ApiError,
@@ -162,29 +163,29 @@ export class V197ActionBindings {
     chamber.className = "nur-v197-system-dialog__chamber";
     const kicker = this.document.createElement("p");
     kicker.className = "nur-v197-system-dialog__kicker";
-    kicker.textContent = "Private system";
+    kicker.textContent = v197Copy("Private system");
     const title = this.document.createElement("h2");
     title.id = "nur-v197-system-create-title";
-    title.textContent = "Name the field.";
+    title.textContent = v197Copy("Name the field.");
     const note = this.document.createElement("p");
     note.className = "nur-v197-system-dialog__note";
-    note.textContent = "One life area with its own evidence, actions, and return path.";
+    note.textContent = v197Copy("One life area with its own evidence, actions, and return path.");
     const input = this.document.createElement("input");
     input.id = "nur-v197-system-title";
     input.autocomplete = "off";
     input.maxLength = 80;
-    input.placeholder = "e.g. Quiet Ambition";
-    input.setAttribute("aria-label", "System name");
+    input.placeholder = v197Copy("e.g. Quiet Ambition");
+    input.setAttribute("aria-label", v197Copy("System name"));
     const actions = this.document.createElement("div");
     actions.className = "nur-v197-system-dialog__actions";
     const cancel = this.document.createElement("button");
     cancel.type = "button";
     cancel.dataset.action = "system-create-cancel";
-    cancel.textContent = "Cancel";
+    cancel.textContent = v197Copy("Cancel");
     const create = this.document.createElement("button");
     create.type = "button";
     create.dataset.action = "system-create-submit";
-    create.textContent = "Create system";
+    create.textContent = v197Copy("Create system");
     actions.append(cancel, create);
     chamber.append(kicker, title, note, input, actions);
     dialog.append(chamber);
@@ -215,12 +216,12 @@ export class V197ActionBindings {
     const menu = this.document.createElement("aside");
     menu.id = "nur-v197-owner-auth-menu";
     menu.hidden = true;
-    menu.setAttribute("aria-label", "Owner session");
+    menu.setAttribute("aria-label", v197Copy("Owner session"));
     const note = this.document.createElement("p");
-    note.textContent = "Your private session is active on this device.";
+    note.textContent = v197Copy("Your private session is active on this device.");
     const navigation = this.document.createElement("nav");
     navigation.className = "nur-owner-menu-routes";
-    navigation.setAttribute("aria-label", "Owner spaces");
+    navigation.setAttribute("aria-label", v197Copy("Owner spaces"));
     for (const [label, route] of [
       ["Settings", "/settings"],
       ["Memory", "/memory"],
@@ -242,7 +243,7 @@ export class V197ActionBindings {
     const logout = this.document.createElement("button");
     logout.type = "button";
     logout.dataset.action = "auth-logout";
-    logout.textContent = "Sign out of NUR";
+    logout.textContent = v197Copy("Sign out of NUR");
     menu.append(note, navigation, logout);
     this.document.body.append(menu);
   }
@@ -432,15 +433,15 @@ export class V197ActionBindings {
     response.setAttribute("aria-busy", "true");
     const meta = this.document.createElement("div");
     meta.className = "talk-meta";
-    meta.textContent = "NUR · opening live model stream ";
+    meta.textContent = `${v197Copy("NUR · opening live model stream")} `;
     const cancel = this.document.createElement("button");
     cancel.type = "button";
     cancel.className = "tiny-link";
     cancel.dataset.action = "talk-cancel";
-    cancel.textContent = "cancel";
+    cancel.textContent = v197Copy("cancel");
     const body = this.document.createElement("span");
     body.dataset.nurStreamText = requestId;
-    body.textContent = "Holding your context…";
+    body.textContent = v197Copy("Holding your context…");
     meta.append(cancel);
     response.append(meta, body);
     stream.append(user, response);
@@ -453,14 +454,14 @@ export class V197ActionBindings {
           hasDelta = true;
         }
         body.append(this.document.createTextNode(value));
-        meta.firstChild!.textContent = "NUR · live model stream ";
+        meta.firstChild!.textContent = `${v197Copy("NUR · live model stream")} `;
         stream.scrollTop = stream.scrollHeight;
       },
       event: value => {
-        if (value.event === "talk.accepted") meta.firstChild!.textContent = "NUR · private turn accepted ";
-        if (value.event === "provider.created") meta.firstChild!.textContent = "NUR · model is responding ";
+        if (value.event === "talk.accepted") meta.firstChild!.textContent = `${v197Copy("NUR · private turn accepted")} `;
+        if (value.event === "provider.created") meta.firstChild!.textContent = `${v197Copy("NUR · model is responding")} `;
         if (value.event === "talk.validated") {
-          meta.firstChild!.textContent = "NUR · validating and persisting ";
+          meta.firstChild!.textContent = `${v197Copy("NUR · validating and persisting")} `;
           response.setAttribute("aria-busy", "false");
         }
       },
@@ -472,7 +473,7 @@ export class V197ActionBindings {
         response.classList.add("is-error");
         response.dataset.nurTalkError = "true";
         cancel.remove();
-        meta.textContent = "NUR · could not answer";
+        meta.textContent = v197Copy("NUR · could not answer");
         body.textContent = honest;
         stream.scrollTop = stream.scrollHeight;
       },
@@ -547,7 +548,7 @@ export class V197ActionBindings {
       panel.className = "talk-capability-panel";
       panel.setAttribute("aria-live", "polite");
       const title = this.document.createElement("h3");
-      title.textContent = "Plan from Conversation";
+      title.textContent = v197Copy("Plan from Conversation");
       const copy = this.document.createElement("p");
       copy.dataset.f5PreviewCopy = "true";
       const state = this.document.createElement("p");
@@ -576,8 +577,8 @@ export class V197ActionBindings {
     }
     if (reviewButton) {
       reviewButton.hidden = !hasWorkflow;
-      reviewButton.textContent = "Review in Agency";
-      reviewButton.setAttribute("aria-label", "Review this Plan proposal in Agency");
+      reviewButton.textContent = v197Copy("Review in Agency");
+      reviewButton.setAttribute("aria-label", v197Copy("Review this Plan proposal in Agency"));
     }
     const saveButton = this.document.querySelector<HTMLElement>('[data-thread-action="plan"]');
     if (saveButton) {
@@ -1045,7 +1046,7 @@ function bindV197PasswordRecovery(
   const openButton = document.createElement("button");
   openButton.type = "button";
   openButton.dataset.passwordRecoveryOpen = "true";
-  openButton.textContent = "Reset your password";
+  openButton.textContent = v197Copy("Reset your password");
   switchRow.append("Cannot enter? ", openButton);
   signInForm.insertAdjacentElement("afterend", switchRow);
 
@@ -1078,8 +1079,8 @@ function bindV197PasswordRecovery(
     closeButton.type = "button";
     closeButton.className = "nur-v197-recovery-close";
     closeButton.dataset.passwordRecoveryClose = "true";
-    closeButton.setAttribute("aria-label", "Close password recovery");
-    closeButton.textContent = "Close";
+    closeButton.setAttribute("aria-label", v197Copy("Close password recovery"));
+    closeButton.textContent = v197Copy("Close");
     const title = document.createElement("h2");
     title.id = "nur-v197-recovery-title";
     title.textContent = token ? "Choose a new password." : "Return to your Orbit.";
@@ -1113,7 +1114,7 @@ function bindV197PasswordRecovery(
       const confirmationField = document.createElement("label");
       confirmationField.className = "nur-v197-recovery-field";
       const confirmationName = document.createElement("span");
-      confirmationName.textContent = "confirm password";
+      confirmationName.textContent = v197Copy("confirm password");
       const confirmation = document.createElement("input");
       confirmation.id = "nur-v197-reset-confirmation";
       confirmation.type = "password";
@@ -1160,7 +1161,7 @@ function bindV197PasswordRecovery(
     submit?.setAttribute("aria-busy", "true");
     if (submit) submit.disabled = true;
     if (status) {
-      status.textContent = "Working…";
+      status.textContent = v197Copy("Working…");
       status.className = "nur-v197-recovery-status";
       status.setAttribute("role", "status");
     }
@@ -1318,7 +1319,7 @@ function ensureV197AuthWaitLayer(document: Document): HTMLElement {
   message.dataset.nurAuthWaitMessage = "true";
   const note = document.createElement("p");
   note.className = "nur-v197-auth-wait-note";
-  note.textContent = "Your private context stays inside its boundary while the universe opens.";
+  note.textContent = v197Copy("Your private context stays inside its boundary while the universe opens.");
   inner.append(starHost, word, message, note);
   layer.append(inner);
   document.body.append(layer);

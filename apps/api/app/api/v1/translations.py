@@ -13,6 +13,7 @@ from app.api.deps import Identity, Scoped, require_csrf
 from app.ai.errors import AIProviderError
 from app.i18n.catalog import (
     QUALITY_STATES,
+    STATIC_CATALOG_QUALITY_STATES,
     SUPPORTED_LOCALES,
     locale_catalog,
     normalize_locale,
@@ -247,6 +248,7 @@ async def translation_catalog() -> dict:
         "protected_glossary_terms": list(PROTECTED_GLOSSARY_TERMS),
         "locale_count": len(SUPPORTED_LOCALES),
         "quality_states": sorted(QUALITY_STATES),
+        "catalog_quality_states": sorted(STATIC_CATALOG_QUALITY_STATES),
         "locales": locale_catalog(),
         "fallback_locale": "en",
         "quality_claim": (

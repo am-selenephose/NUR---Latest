@@ -71,6 +71,44 @@ async def test_profile_preferences_persist_and_reject_foreign_orbit(client):
     assert ra.json()["id"] != (await client.get("/api/v1/auth/me")).json()["id"]
 
 
+async def test_profile_locale_writing_variants_normalize_and_reject_impossible_pairs(client):
+    await register_user(client, chosen_name="Locale Owner")
+
+    roman_urdu = await client.patch(
+        "/api/v1/profile/preferences",
+        headers=H(client),
+        json={"locale": "ur-PK", "writing_preference": "roman"},
+    )
+    assert roman_urdu.status_code == 200
+    assert roman_urdu.json()["locale"] == "ur"
+    assert roman_urdu.json()["writing_preference"] == "roman"
+
+    script_urdu = await client.patch(
+        "/api/v1/profile/preferences",
+        headers=H(client),
+        json={"locale": "ur", "writing_preference": "script"},
+    )
+    assert script_urdu.status_code == 200
+    assert script_urdu.json()["writing_preference"] == "script"
+
+    for payload in (
+        {"locale": "ar", "writing_preference": "roman"},
+        {"locale": "en", "writing_preference": "script"},
+        {"locale": "not-a-nur-locale", "writing_preference": "default"},
+    ):
+        response = await client.patch("/api/v1/profile/preferences", headers=H(client), json=payload)
+        assert response.status_code == 422, payload
+
+    traditional = await client.patch(
+        "/api/v1/profile/preferences",
+        headers=H(client),
+        json={"locale": "zh-TW", "writing_preference": "default"},
+    )
+    assert traditional.status_code == 200
+    assert traditional.json()["locale"] == "zh-Hant"
+    assert traditional.json()["writing_preference"] == "script"
+
+
 async def test_journal_and_research_convert_to_orbit_sources(client):
     await register_user(client)
     orbit_id = (await client.get("/api/v1/orbits")).json()[0]["id"]

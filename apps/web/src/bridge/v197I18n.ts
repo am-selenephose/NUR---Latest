@@ -1,3 +1,4 @@
+import manifest from "../i18n/source-manifest.json";
 import {
   CORE_COPY,
   LOCALE_META,
@@ -7,10 +8,39 @@ import {
   resolveLocale,
   type SupportedLocale,
 } from "../lib/i18n";
+import { getUiCopy, LOCALE_VARIANTS, resolveWritingPreference, type UiCopyKey } from "../i18n";
 
 export type WritingPreference = "default" | "roman" | "script";
 
+const V197_SOURCE_TO_KEY = new Map(
+  (manifest as Array<{ id: UiCopyKey; source: string }>).map(row => [row.source, row.id]),
+);
+let activeLocale: SupportedLocale = "en";
+let activeWritingPreference: WritingPreference = "default";
+
+export function setActiveV197Catalog(
+  rawLocale: string | null | undefined,
+  writingPreference: WritingPreference = "default",
+): void {
+  activeLocale = resolveLocale(rawLocale);
+  activeWritingPreference = resolveWritingPreference(activeLocale, writingPreference);
+}
+
+export function v197Copy(
+  source: string,
+  params?: Record<string, unknown>,
+): string {
+  const key = V197_SOURCE_TO_KEY.get(source);
+  if (!key) throw new Error(`Uncatalogued V197 copy: ${source}`);
+  return getUiCopy(activeLocale, key, activeWritingPreference, params);
+}
+
 export const V197_LOCALE_META = LOCALE_META.map(row => ({ ...row }));
+
+export function writingOptionsForLocale(rawLocale: string | null | undefined): readonly WritingPreference[] {
+  const locale = resolveLocale(rawLocale);
+  return LOCALE_VARIANTS[locale] as readonly WritingPreference[];
+}
 
 function setText(document: Document, selector: string, value: string): void {
   document.querySelectorAll<HTMLElement>(selector).forEach(node => {
@@ -74,14 +104,16 @@ export function applyV197Locale(
   writingPreference: WritingPreference = "default",
 ): void {
   const locale = resolveLocale(rawLocale);
+  const resolvedWritingPreference = resolveWritingPreference(locale, writingPreference);
+  setActiveV197Catalog(locale, resolvedWritingPreference);
   const copy = navigationCopyFor(locale);
   const critical = criticalCopyFor(locale);
-  const direction = directionForPreference(locale, writingPreference);
+  const direction = directionForPreference(locale, resolvedWritingPreference);
 
   document.documentElement.lang = locale;
   document.documentElement.dir = direction;
   document.body.dataset.nurLocale = locale;
-  document.body.dataset.nurWritingPreference = writingPreference;
+  document.body.dataset.nurWritingPreference = resolvedWritingPreference;
 
   const pageLabels: Array<[string, string]> = [
     ["today", copy.today],
@@ -138,6 +170,27 @@ export function applyV197Locale(
   setLeadingText(document, "#page-systems .universe-field-readout > b", critical.systems.systemField);
 }
 
+function refreshWritingControl(
+  document: Document,
+  select: HTMLSelectElement,
+  rawLocale: string | null | undefined,
+  preferred: WritingPreference,
+): WritingPreference {
+  const locale = resolveLocale(rawLocale);
+  const copy = languageControlCopyFor(locale);
+  const allowed = writingOptionsForLocale(locale);
+  const selected = resolveWritingPreference(locale, preferred);
+  select.replaceChildren(...allowed.map(value => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = value === "roman" ? copy.writingRoman : value === "script" ? copy.writingScript : copy.writingDefault;
+    option.selected = value === selected;
+    return option;
+  }));
+  select.value = selected;
+  return selected;
+}
+
 export function ensureV197LanguageControls(
   document: Document,
   rawLocale: string | null | undefined,
@@ -150,6 +203,7 @@ export function ensureV197LanguageControls(
   const providerLabel = aiProvider === "openai"
     ? copy.providerConfigured
     : copy.providerDisabled;
+  const resolvedWritingPreference = resolveWritingPreference(currentLocale, writingPreference);
   let topbarButton = document.querySelector<HTMLButtonElement>("#nur-v197-language-open");
   if (!topbarButton) {
     topbarButton = document.createElement("button");
@@ -172,8 +226,14 @@ export function ensureV197LanguageControls(
   const existingWriting = document.querySelector<HTMLSelectElement>("#nur-v197-writing-preference");
   if (existingLocale && existingWriting) {
     existingLocale.value = currentLocale;
-    existingWriting.value = writingPreference;
+    const selected = refreshWritingControl(document, existingWriting, currentLocale, resolvedWritingPreference);
+    existingWriting.value = selected;
+    existingLocale.labels[0]?.replaceChildren(copy.language);
+    existingWriting.labels[0]?.replaceChildren(copy.writingPreference);
+    setText(document, "#nur-v197-language-title", copy.languageAndWriting);
+    setText(document, "#nur-v197-language-note", copy.settingsNote);
     setText(document, "#nur-v197-provider-status strong", providerLabel);
+    setText(document, "#nur-v197-language-save", copy.saveLanguage);
     return;
   }
 
@@ -188,6 +248,7 @@ export function ensureV197LanguageControls(
   title.id = "nur-v197-language-title";
   title.textContent = copy.languageAndWriting;
   const note = document.createElement("p");
+  note.id = "nur-v197-language-note";
   note.textContent = copy.settingsNote;
 
   const providerStatus = document.createElement("div");
@@ -213,7 +274,7 @@ export function ensureV197LanguageControls(
   V197_LOCALE_META.forEach(row => {
     const option = document.createElement("option");
     option.value = row.locale;
-    option.textContent = `${row.label} · ${row.status === "polished_beta" ? copy.reviewed : copy.draft}`;
+    option.textContent = v197Copy("{{0}} · {{1}}", { 0: row.label, 1: row.status === "polished_beta" ? copy.reviewed : copy.draft });
     localeSelect.append(option);
   });
   localeSelect.value = currentLocale;
@@ -228,16 +289,13 @@ export function ensureV197LanguageControls(
   writingSelect.id = "nur-v197-writing-preference";
   writingSelect.className = "scope-option nur-v197-select";
   writingSelect.setAttribute("aria-label", copy.writingPreferenceAria);
-  (["default", "roman", "script"] as const).forEach(value => {
-    const option = document.createElement("option");
-    option.value = value;
-    option.textContent = value === "roman" ? copy.writingRoman : value === "script" ? copy.writingScript : copy.writingDefault;
-    writingSelect.append(option);
-  });
-  writingSelect.value = writingPreference;
+  refreshWritingControl(document, writingSelect, currentLocale, resolvedWritingPreference);
   const writingShell = document.createElement("div");
   writingShell.className = "nur-v197-select-shell";
   writingShell.append(writingSelect);
+  localeSelect.addEventListener("change", () => {
+    refreshWritingControl(document, writingSelect, localeSelect.value, writingSelect.value as WritingPreference);
+  });
 
   const saveButton = document.createElement("button");
   saveButton.id = "nur-v197-language-save";

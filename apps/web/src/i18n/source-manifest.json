@@ -1,0 +1,9523 @@
+[
+  {
+    "id": "ui.0000",
+    "source": "{{0}} — {{1}}",
+    "kinds": [
+      "property:title"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:728"
+    ]
+  },
+  {
+    "id": "ui.0001",
+    "source": "{{0}} — {{1}}, {{2}}",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1093"
+    ]
+  },
+  {
+    "id": "ui.0002",
+    "source": "{{0}} — owner session",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Mutations.ts:42"
+    ]
+  },
+  {
+    "id": "ui.0003",
+    "source": "{{0}} — shared context",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1362"
+    ]
+  },
+  {
+    "id": "ui.0004",
+    "source": "{{0}} · {{1}}",
+    "kinds": [
+      "element:3",
+      "panel:1",
+      "panel:2",
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1078",
+      "apps/web/src/bridge/v197Adjuncts.ts:1100",
+      "apps/web/src/bridge/v197Adjuncts.ts:1397",
+      "apps/web/src/bridge/v197Adjuncts.ts:1786",
+      "apps/web/src/bridge/v197Adjuncts.ts:1896",
+      "apps/web/src/bridge/v197Adjuncts.ts:1927",
+      "apps/web/src/bridge/v197Adjuncts.ts:1968",
+      "apps/web/src/bridge/v197Adjuncts.ts:2152",
+      "apps/web/src/bridge/v197Adjuncts.ts:2454",
+      "apps/web/src/bridge/v197Adjuncts.ts:2808",
+      "apps/web/src/bridge/v197Adjuncts.ts:3000",
+      "apps/web/src/bridge/v197Adjuncts.ts:319",
+      "apps/web/src/bridge/v197Adjuncts.ts:3425",
+      "apps/web/src/bridge/v197I18n.ts:216",
+      "apps/web/src/bridge/v197Orbit.ts:629"
+    ]
+  },
+  {
+    "id": "ui.0005",
+    "source": "{{0}} · {{1}} · {{2}}",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1191",
+      "apps/web/src/bridge/v197Adjuncts.ts:640",
+      "apps/web/src/bridge/v197Adjuncts.ts:753",
+      "apps/web/src/bridge/v197Adjuncts.ts:883"
+    ]
+  },
+  {
+    "id": "ui.0006",
+    "source": "{{0}} · {{1}} · {{2}} · {{3}}{{4}}",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:770"
+    ]
+  },
+  {
+    "id": "ui.0007",
+    "source": "{{0}} · {{1}} · version {{2}}",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:757"
+    ]
+  },
+  {
+    "id": "ui.0008",
+    "source": "{{0}} · {{1}} active goals · {{2}} completed · {{3}} missed · {{4}} Glow today.",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:144"
+    ]
+  },
+  {
+    "id": "ui.0009",
+    "source": "{{0}} · {{1}} v{{2}}",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3395"
+    ]
+  },
+  {
+    "id": "ui.0010",
+    "source": "{{0}} · {{1}} withheld",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1408"
+    ]
+  },
+  {
+    "id": "ui.0011",
+    "source": "{{0}} · +{{1}}",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Rewards.ts:69",
+      "apps/web/src/bridge/v197Rewards.ts:87"
+    ]
+  },
+  {
+    "id": "ui.0012",
+    "source": "{{0}} · expires {{1}}",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1246"
+    ]
+  },
+  {
+    "id": "ui.0013",
+    "source": "{{0}} · external push is not claimed.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2859"
+    ]
+  },
+  {
+    "id": "ui.0014",
+    "source": "{{0}} · Level {{1}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2765"
+    ]
+  },
+  {
+    "id": "ui.0015",
+    "source": "{{0}} · sha256 {{1}}… · scan {{2}}",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2667"
+    ]
+  },
+  {
+    "id": "ui.0016",
+    "source": "{{0}} · source-bound",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1451"
+    ]
+  },
+  {
+    "id": "ui.0017",
+    "source": "{{0}} · v{{1}}",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:700"
+    ]
+  },
+  {
+    "id": "ui.0018",
+    "source": "{{0}} {{1}} owner-ledger sources · {{2}}% source coverage, not truth probability.",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:479"
+    ]
+  },
+  {
+    "id": "ui.0019",
+    "source": "{{0}} →",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1244"
+    ]
+  },
+  {
+    "id": "ui.0020",
+    "source": "{{0}} active Systems · {{1}} open loops · {{2}} Glow today",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:483"
+    ]
+  },
+  {
+    "id": "ui.0021",
+    "source": "{{0}} active systems · {{1}} returned outcomes",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Mutations.ts:32"
+    ]
+  },
+  {
+    "id": "ui.0022",
+    "source": "{{0}} cents",
+    "kinds": [
+      "fact:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3352"
+    ]
+  },
+  {
+    "id": "ui.0023",
+    "source": "{{0}} checkout opened through {{1}}. No subscription is claimed until the webhook ledger confirms it.",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1124"
+    ]
+  },
+  {
+    "id": "ui.0024",
+    "source": "{{0}} current · {{1}} best",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2794"
+    ]
+  },
+  {
+    "id": "ui.0025",
+    "source": "{{0}} Glow Points · Level {{1}}",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Rewards.ts:108"
+    ]
+  },
+  {
+    "id": "ui.0026",
+    "source": "{{0}} hours",
+    "kinds": [
+      "fact:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1581"
+    ]
+  },
+  {
+    "id": "ui.0027",
+    "source": "{{0}} item{{1}} moved outward more than once — worth a look, not a judgement.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:987"
+    ]
+  },
+  {
+    "id": "ui.0028",
+    "source": "{{0}} linked",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1800",
+      "apps/web/src/bridge/v197Adjuncts.ts:1809"
+    ]
+  },
+  {
+    "id": "ui.0029",
+    "source": "{{0}} other session{{1}} revoked.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:491"
+    ]
+  },
+  {
+    "id": "ui.0030",
+    "source": "{{0}} owner candidate...",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:656"
+    ]
+  },
+  {
+    "id": "ui.0031",
+    "source": "{{0}} owner-scoped audit event{{1}}.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1498"
+    ]
+  },
+  {
+    "id": "ui.0032",
+    "source": "{{0}} owner-scoped session{{1}}.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:479"
+    ]
+  },
+  {
+    "id": "ui.0033",
+    "source": "{{0}} persisted events",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1129"
+    ]
+  },
+  {
+    "id": "ui.0034",
+    "source": "{{0}} reaction persisted.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2340"
+    ]
+  },
+  {
+    "id": "ui.0035",
+    "source": "{{0}} server-declared features · legal copy {{1}}",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1106"
+    ]
+  },
+  {
+    "id": "ui.0036",
+    "source": "{{0}} source-linked Glow until {{1}}.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2773"
+    ]
+  },
+  {
+    "id": "ui.0037",
+    "source": "{{0}} supporting · {{1}} counter · {{2}} source domains",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:761"
+    ]
+  },
+  {
+    "id": "ui.0038",
+    "source": "{{0}} System",
+    "kinds": [
+      "ownText:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:587"
+    ]
+  },
+  {
+    "id": "ui.0039",
+    "source": "{{0}}. Sources: {{1}}",
+    "kinds": [
+      "property:title"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:156"
+    ]
+  },
+  {
+    "id": "ui.0040",
+    "source": "{{0}}'s Orbit, held gently.",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Mutations.ts:37"
+    ]
+  },
+  {
+    "id": "ui.0041",
+    "source": "{{0}}{{1}} lens",
+    "kinds": [
+      "ownText:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:809"
+    ]
+  },
+  {
+    "id": "ui.0042",
+    "source": "{{0}}/{{1}} actions · {{2}} Glow",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:606"
+    ]
+  },
+  {
+    "id": "ui.0043",
+    "source": "{{0}}% · persisted evidence",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:155"
+    ]
+  },
+  {
+    "id": "ui.0044",
+    "source": "⏻ Sign out",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Polish.ts:84"
+    ]
+  },
+  {
+    "id": "ui.0045",
+    "source": "◇ Prediction",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1852"
+    ]
+  },
+  {
+    "id": "ui.0046",
+    "source": "◈ NUR suggests · {{0}}",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1903"
+    ]
+  },
+  {
+    "id": "ui.0047",
+    "source": "✦ Useful",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2333"
+    ]
+  },
+  {
+    "id": "ui.0048",
+    "source": "0 is low, 10 is high. Pain and emotional load are inverse capacity signals.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:206"
+    ]
+  },
+  {
+    "id": "ui.0049",
+    "source": "A bounded Group NUR room.",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2149"
+    ]
+  },
+  {
+    "id": "ui.0050",
+    "source": "A Capsule title and bounded purpose are required.",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1314"
+    ]
+  },
+  {
+    "id": "ui.0051",
+    "source": "A Council preserves disagreement before it records a decision.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2263"
+    ]
+  },
+  {
+    "id": "ui.0052",
+    "source": "A living brain made of stars. Drag to spin it. Click and it dissolves into tiny star glitter, then flows back together.",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197StarBrain.ts:124"
+    ]
+  },
+  {
+    "id": "ui.0053",
+    "source": "A memory cannot be blank.",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:718"
+    ]
+  },
+  {
+    "id": "ui.0054",
+    "source": "A persisted real message may earn server-verified Glow. DEMO messages never do.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2203"
+    ]
+  },
+  {
+    "id": "ui.0055",
+    "source": "A Plan begins after one direction is persisted.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:323"
+    ]
+  },
+  {
+    "id": "ui.0056",
+    "source": "A Project needs a title and objective.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2419"
+    ]
+  },
+  {
+    "id": "ui.0057",
+    "source": "A successful change signs every device out, including this one.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:408"
+    ]
+  },
+  {
+    "id": "ui.0058",
+    "source": "A task cannot become DONE without PASSED evidence.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2487"
+    ]
+  },
+  {
+    "id": "ui.0059",
+    "source": "A thread needs both title and body.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2241"
+    ]
+  },
+  {
+    "id": "ui.0060",
+    "source": "Accept",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1828"
+    ]
+  },
+  {
+    "id": "ui.0061",
+    "source": "Acceptance criteria",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2485"
+    ]
+  },
+  {
+    "id": "ui.0062",
+    "source": "Acceptance criteria not set",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2466"
+    ]
+  },
+  {
+    "id": "ui.0063",
+    "source": "Accepted",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1757"
+    ]
+  },
+  {
+    "id": "ui.0064",
+    "source": "Accepted memories",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:622"
+    ]
+  },
+  {
+    "id": "ui.0065",
+    "source": "Access",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1368"
+    ]
+  },
+  {
+    "id": "ui.0066",
+    "source": "Access is closed",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1386"
+    ]
+  },
+  {
+    "id": "ui.0067",
+    "source": "Account only",
+    "kinds": [
+      "fact:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3048"
+    ]
+  },
+  {
+    "id": "ui.0068",
+    "source": "Add contribution",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1994"
+    ]
+  },
+  {
+    "id": "ui.0069",
+    "source": "Add member",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2168"
+    ]
+  },
+  {
+    "id": "ui.0070",
+    "source": "Add only what belongs inside this Consultation…",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1993"
+    ]
+  },
+  {
+    "id": "ui.0071",
+    "source": "Add position",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2274"
+    ]
+  },
+  {
+    "id": "ui.0072",
+    "source": "Add review to Timeline",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1832"
+    ]
+  },
+  {
+    "id": "ui.0073",
+    "source": "Add task",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2486"
+    ]
+  },
+  {
+    "id": "ui.0074",
+    "source": "Adjust today's real reading",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:204"
+    ]
+  },
+  {
+    "id": "ui.0075",
+    "source": "Agent proposals",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2457"
+    ]
+  },
+  {
+    "id": "ui.0076",
+    "source": "Allow policy auto-run",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3095"
+    ]
+  },
+  {
+    "id": "ui.0077",
+    "source": "Alternatives: {{0}}",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:777"
+    ]
+  },
+  {
+    "id": "ui.0078",
+    "source": "an unnamed source",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:394"
+    ]
+  },
+  {
+    "id": "ui.0079",
+    "source": "Answer persisted inside the capsule ledger.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1456"
+    ]
+  },
+  {
+    "id": "ui.0080",
+    "source": "Append-only evidence",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3418"
+    ]
+  },
+  {
+    "id": "ui.0081",
+    "source": "Approval and rejection are persisted and owner-scoped.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1651"
+    ]
+  },
+  {
+    "id": "ui.0082",
+    "source": "Approvals · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3235"
+    ]
+  },
+  {
+    "id": "ui.0083",
+    "source": "Approve as memory",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:649"
+    ]
+  },
+  {
+    "id": "ui.0084",
+    "source": "Approve as reviewed",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1654"
+    ]
+  },
+  {
+    "id": "ui.0085",
+    "source": "Approve bounded run",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2552"
+    ]
+  },
+  {
+    "id": "ui.0086",
+    "source": "Approve exact call",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3247"
+    ]
+  },
+  {
+    "id": "ui.0087",
+    "source": "Approved Context Capsule",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1362"
+    ]
+  },
+  {
+    "id": "ui.0088",
+    "source": "Approved source ledger",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1391"
+    ]
+  },
+  {
+    "id": "ui.0089",
+    "source": "Approved sources",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1217"
+    ]
+  },
+  {
+    "id": "ui.0090",
+    "source": "Ask from approved context",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1425"
+    ]
+  },
+  {
+    "id": "ui.0091",
+    "source": "Ask within this approved boundary",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1414"
+    ]
+  },
+  {
+    "id": "ui.0092",
+    "source": "Available Glow",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2768"
+    ]
+  },
+  {
+    "id": "ui.0093",
+    "source": "Available plans",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1083"
+    ]
+  },
+  {
+    "id": "ui.0094",
+    "source": "Boundary held",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1536"
+    ]
+  },
+  {
+    "id": "ui.0095",
+    "source": "Boundary proof",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1403"
+    ]
+  },
+  {
+    "id": "ui.0096",
+    "source": "Bounded agent work",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2543"
+    ]
+  },
+  {
+    "id": "ui.0097",
+    "source": "Bounded Consultation",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1968"
+    ]
+  },
+  {
+    "id": "ui.0098",
+    "source": "Bounded thread",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2329"
+    ]
+  },
+  {
+    "id": "ui.0099",
+    "source": "cancel",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:440"
+    ]
+  },
+  {
+    "id": "ui.0100",
+    "source": "Cancel",
+    "kinds": [
+      "button:1",
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2553",
+      "apps/web/src/bridge/v197Bindings.ts:183"
+    ]
+  },
+  {
+    "id": "ui.0101",
+    "source": "Cancel workflow",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3373"
+    ]
+  },
+  {
+    "id": "ui.0102",
+    "source": "Candidate",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1756"
+    ]
+  },
+  {
+    "id": "ui.0103",
+    "source": "Candidate {{0}}. Refreshing owner queue…",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1662"
+    ]
+  },
+  {
+    "id": "ui.0104",
+    "source": "Candidate insight",
+    "kinds": [
+      "ownText:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1099"
+    ]
+  },
+  {
+    "id": "ui.0105",
+    "source": "Candidate understanding",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1626"
+    ]
+  },
+  {
+    "id": "ui.0106",
+    "source": "Candidates · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1748"
+    ]
+  },
+  {
+    "id": "ui.0107",
+    "source": "Candidates are not memories until you approve them.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:618"
+    ]
+  },
+  {
+    "id": "ui.0108",
+    "source": "Canonical Insight evidence",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:767"
+    ]
+  },
+  {
+    "id": "ui.0109",
+    "source": "Canonical Insight links",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:787"
+    ]
+  },
+  {
+    "id": "ui.0110",
+    "source": "Canonical wording",
+    "kinds": [
+      "labeledControl:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:754"
+    ]
+  },
+  {
+    "id": "ui.0111",
+    "source": "Capabilities",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3050"
+    ]
+  },
+  {
+    "id": "ui.0112",
+    "source": "Capability",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1477"
+    ]
+  },
+  {
+    "id": "ui.0113",
+    "source": "Capsule created from the selected allowlist. No recipient has access yet.",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1349"
+    ]
+  },
+  {
+    "id": "ui.0114",
+    "source": "Capsule expiry (optional)",
+    "kinds": [
+      "labeledControl:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1216"
+    ]
+  },
+  {
+    "id": "ui.0115",
+    "source": "Capsule title",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1159"
+    ]
+  },
+  {
+    "id": "ui.0116",
+    "source": "Change it and revoke every active session",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:386"
+    ]
+  },
+  {
+    "id": "ui.0117",
+    "source": "Change ledger",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1691"
+    ]
+  },
+  {
+    "id": "ui.0118",
+    "source": "Change password",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:407"
+    ]
+  },
+  {
+    "id": "ui.0119",
+    "source": "Changes are stored only in your owner-scoped preference row.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:544"
+    ]
+  },
+  {
+    "id": "ui.0120",
+    "source": "Changing password and revoking sessions…",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:426"
+    ]
+  },
+  {
+    "id": "ui.0121",
+    "source": "Choose a file to upload.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2700"
+    ]
+  },
+  {
+    "id": "ui.0122",
+    "source": "Choose a valid Capsule expiry.",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1325"
+    ]
+  },
+  {
+    "id": "ui.0123",
+    "source": "Choose only through the real provider",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1083"
+    ]
+  },
+  {
+    "id": "ui.0124",
+    "source": "Claims · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1626"
+    ]
+  },
+  {
+    "id": "ui.0125",
+    "source": "Close",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:1082"
+    ]
+  },
+  {
+    "id": "ui.0126",
+    "source": "Close password recovery",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:1081"
+    ]
+  },
+  {
+    "id": "ui.0127",
+    "source": "Close with passed evidence",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2468"
+    ]
+  },
+  {
+    "id": "ui.0128",
+    "source": "Closing the room…",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1508"
+    ]
+  },
+  {
+    "id": "ui.0129",
+    "source": "Compile workflow draft",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3174"
+    ]
+  },
+  {
+    "id": "ui.0130",
+    "source": "Compiled plan",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3389"
+    ]
+  },
+  {
+    "id": "ui.0131",
+    "source": "Computed, not written",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:1048"
+    ]
+  },
+  {
+    "id": "ui.0132",
+    "source": "Confidence",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1688",
+      "apps/web/src/bridge/v197Adjuncts.ts:1791"
+    ]
+  },
+  {
+    "id": "ui.0133",
+    "source": "Confirm claim",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1698"
+    ]
+  },
+  {
+    "id": "ui.0134",
+    "source": "confirm password",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:1116"
+    ]
+  },
+  {
+    "id": "ui.0135",
+    "source": "Consent scope",
+    "kinds": [
+      "labeledControl:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:854"
+    ]
+  },
+  {
+    "id": "ui.0136",
+    "source": "Consent withdrawn. The audit remains, but future use is closed.",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:898"
+    ]
+  },
+  {
+    "id": "ui.0137",
+    "source": "Consolidate owner evidence",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1584"
+    ]
+  },
+  {
+    "id": "ui.0138",
+    "source": "Consolidating the owner ledger…",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1593"
+    ]
+  },
+  {
+    "id": "ui.0139",
+    "source": "Consolidation proposes changes; sensitive inferences still require owner review.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1588"
+    ]
+  },
+  {
+    "id": "ui.0140",
+    "source": "Consolidation status",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1578"
+    ]
+  },
+  {
+    "id": "ui.0141",
+    "source": "Consultation ledger",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1890"
+    ]
+  },
+  {
+    "id": "ui.0142",
+    "source": "Consultation title",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1914"
+    ]
+  },
+  {
+    "id": "ui.0143",
+    "source": "Continuity",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2789"
+    ]
+  },
+  {
+    "id": "ui.0144",
+    "source": "Contradictions · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1635"
+    ]
+  },
+  {
+    "id": "ui.0145",
+    "source": "Contribution",
+    "kinds": [
+      "labeledControl:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:853"
+    ]
+  },
+  {
+    "id": "ui.0146",
+    "source": "Contribution entered your owner review ledger.",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:958"
+    ]
+  },
+  {
+    "id": "ui.0147",
+    "source": "Contribution kind",
+    "kinds": [
+      "labeledControl:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:852"
+    ]
+  },
+  {
+    "id": "ui.0148",
+    "source": "Contributions",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2155"
+    ]
+  },
+  {
+    "id": "ui.0149",
+    "source": "Contributions · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1974"
+    ]
+  },
+  {
+    "id": "ui.0150",
+    "source": "Conversation · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2190"
+    ]
+  },
+  {
+    "id": "ui.0151",
+    "source": "Convert to plan",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1831"
+    ]
+  },
+  {
+    "id": "ui.0152",
+    "source": "Copied",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Diagnose.ts:183"
+    ]
+  },
+  {
+    "id": "ui.0153",
+    "source": "Copy report",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Diagnose.ts:174"
+    ]
+  },
+  {
+    "id": "ui.0154",
+    "source": "Copy room address",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1427"
+    ]
+  },
+  {
+    "id": "ui.0155",
+    "source": "Copying only the selected source allowlist...",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1331"
+    ]
+  },
+  {
+    "id": "ui.0156",
+    "source": "Correct proposal",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:650"
+    ]
+  },
+  {
+    "id": "ui.0157",
+    "source": "Correct the candidate without erasing its original record",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1825"
+    ]
+  },
+  {
+    "id": "ui.0158",
+    "source": "Correct what NUR got wrong",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:671"
+    ]
+  },
+  {
+    "id": "ui.0159",
+    "source": "Corrected",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1758"
+    ]
+  },
+  {
+    "id": "ui.0160",
+    "source": "Corrected wording",
+    "kinds": [
+      "labeledControl:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:680"
+    ]
+  },
+  {
+    "id": "ui.0161",
+    "source": "Correction reason",
+    "kinds": [
+      "labeledControl:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:681"
+    ]
+  },
+  {
+    "id": "ui.0162",
+    "source": "Cost",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3316"
+    ]
+  },
+  {
+    "id": "ui.0163",
+    "source": "Cost recorded",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3352"
+    ]
+  },
+  {
+    "id": "ui.0164",
+    "source": "Council ledger",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2259"
+    ]
+  },
+  {
+    "id": "ui.0165",
+    "source": "Create a bounded Context Capsule",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1155"
+    ]
+  },
+  {
+    "id": "ui.0166",
+    "source": "Create a source-bounded room above. It remains unshared until you add a recipient grant.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1232"
+    ]
+  },
+  {
+    "id": "ui.0167",
+    "source": "Create bounded capsule",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1199"
+    ]
+  },
+  {
+    "id": "ui.0168",
+    "source": "Create compiles and persists a draft. It does not start execution.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3175"
+    ]
+  },
+  {
+    "id": "ui.0169",
+    "source": "Create Group NUR room",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2093"
+    ]
+  },
+  {
+    "id": "ui.0170",
+    "source": "Create in-app reminder",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2884"
+    ]
+  },
+  {
+    "id": "ui.0171",
+    "source": "Create one deliberately or approve a candidate. NUR does not backfill an invented memory.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:692"
+    ]
+  },
+  {
+    "id": "ui.0172",
+    "source": "Create one objective. No agent gets authority merely because a card exists.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2390"
+    ]
+  },
+  {
+    "id": "ui.0173",
+    "source": "Create one real room. NUR will not invent a community around you.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2076"
+    ]
+  },
+  {
+    "id": "ui.0174",
+    "source": "Create one truthful re-entry cue",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2874"
+    ]
+  },
+  {
+    "id": "ui.0175",
+    "source": "Create Project Orbit",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2414"
+    ]
+  },
+  {
+    "id": "ui.0176",
+    "source": "Create system",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:187"
+    ]
+  },
+  {
+    "id": "ui.0177",
+    "source": "Creating a Capsule does not share it. A recipient grant is a second explicit write, and revocation closes access immediately.",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1211"
+    ]
+  },
+  {
+    "id": "ui.0178",
+    "source": "Creating an idempotent {{0}} provider handoff...",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1114"
+    ]
+  },
+  {
+    "id": "ui.0179",
+    "source": "Current claim",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1685"
+    ]
+  },
+  {
+    "id": "ui.0180",
+    "source": "Current configured constellation reached.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2774"
+    ]
+  },
+  {
+    "id": "ui.0181",
+    "source": "Current constellation",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2765"
+    ]
+  },
+  {
+    "id": "ui.0182",
+    "source": "Current entitlements",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1063"
+    ]
+  },
+  {
+    "id": "ui.0183",
+    "source": "Danger zone",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:502"
+    ]
+  },
+  {
+    "id": "ui.0184",
+    "source": "Decision",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1472"
+    ]
+  },
+  {
+    "id": "ui.0185",
+    "source": "Define what done means",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2403"
+    ]
+  },
+  {
+    "id": "ui.0186",
+    "source": "Definition",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:589"
+    ]
+  },
+  {
+    "id": "ui.0187",
+    "source": "Deidentified research consent permits governed review only. It does not authorize foundation-model training, institutional promotion or public attribution.",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:851"
+    ]
+  },
+  {
+    "id": "ui.0188",
+    "source": "Delete account permanently",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:513"
+    ]
+  },
+  {
+    "id": "ui.0189",
+    "source": "Delete memory",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:713"
+    ]
+  },
+  {
+    "id": "ui.0190",
+    "source": "Deleting owner data and revoking sessions…",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:526"
+    ]
+  },
+  {
+    "id": "ui.0191",
+    "source": "Deliverables",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2652"
+    ]
+  },
+  {
+    "id": "ui.0192",
+    "source": "Delivery boundary",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2845"
+    ]
+  },
+  {
+    "id": "ui.0193",
+    "source": "Desired outcome",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1971"
+    ]
+  },
+  {
+    "id": "ui.0194",
+    "source": "Devices with access to this Orbit",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:439"
+    ]
+  },
+  {
+    "id": "ui.0195",
+    "source": "Discussion",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2352"
+    ]
+  },
+  {
+    "id": "ui.0196",
+    "source": "download",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2674"
+    ]
+  },
+  {
+    "id": "ui.0197",
+    "source": "Download",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2670"
+    ]
+  },
+  {
+    "id": "ui.0198",
+    "source": "drag to spin the mind - click: it dissolves into stardust and reforms - double-click: neural storm - scroll to zoom",
+    "kinds": [
+      "property:title"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197StarBrain.ts:121"
+    ]
+  },
+  {
+    "id": "ui.0199",
+    "source": "e.g. Quiet Ambition",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:176"
+    ]
+  },
+  {
+    "id": "ui.0200",
+    "source": "Edges · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1695"
+    ]
+  },
+  {
+    "id": "ui.0201",
+    "source": "Edit arguments",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3249"
+    ]
+  },
+  {
+    "id": "ui.0202",
+    "source": "Edit the owner-visible approval arguments as JSON",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3257"
+    ]
+  },
+  {
+    "id": "ui.0203",
+    "source": "Edits create a persisted version; deletion removes the owner memory.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:623"
+    ]
+  },
+  {
+    "id": "ui.0204",
+    "source": "Email grants are hash-addressed by the server; this page never claims delivery or recipient acceptance.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1225"
+    ]
+  },
+  {
+    "id": "ui.0205",
+    "source": "Enter bounded room",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2083"
+    ]
+  },
+  {
+    "id": "ui.0206",
+    "source": "Enter Consultation",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1899"
+    ]
+  },
+  {
+    "id": "ui.0207",
+    "source": "Enter the current password and a new password of at least 8 characters.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:416"
+    ]
+  },
+  {
+    "id": "ui.0208",
+    "source": "Enter the current password and type \"DELETE MY NUR ACCOUNT\" exactly.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:520"
+    ]
+  },
+  {
+    "id": "ui.0209",
+    "source": "Enter the exact account email first.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2173"
+    ]
+  },
+  {
+    "id": "ui.0210",
+    "source": "Enter the exact valid email for the intended recipient.",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1277"
+    ]
+  },
+  {
+    "id": "ui.0211",
+    "source": "event",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1837"
+    ]
+  },
+  {
+    "id": "ui.0212",
+    "source": "Every action writes through the owner-scoped API.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1836"
+    ]
+  },
+  {
+    "id": "ui.0213",
+    "source": "Every lifecycle write is owner-scoped, version-fenced and append-only in the run ledger.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3356"
+    ]
+  },
+  {
+    "id": "ui.0214",
+    "source": "Every position is persisted with its real owner.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2275"
+    ]
+  },
+  {
+    "id": "ui.0215",
+    "source": "Evidence",
+    "kinds": [
+      "element:3",
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1799",
+      "apps/web/src/bridge/v197Hydration.ts:603"
+    ]
+  },
+  {
+    "id": "ui.0216",
+    "source": "Evidence · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2502"
+    ]
+  },
+  {
+    "id": "ui.0217",
+    "source": "Evidence gate",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2502"
+    ]
+  },
+  {
+    "id": "ui.0218",
+    "source": "Evidence graph",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1695"
+    ]
+  },
+  {
+    "id": "ui.0219",
+    "source": "Evidence locator/path/URL",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2512"
+    ]
+  },
+  {
+    "id": "ui.0220",
+    "source": "Evidence package generated. It is listed above as a downloadable deliverable.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2740"
+    ]
+  },
+  {
+    "id": "ui.0221",
+    "source": "Exact NUR account email",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2167"
+    ]
+  },
+  {
+    "id": "ui.0222",
+    "source": "Exact recipient account email",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1257"
+    ]
+  },
+  {
+    "id": "ui.0223",
+    "source": "Execution",
+    "kinds": [
+      "fact:1",
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2460",
+      "apps/web/src/bridge/v197Adjuncts.ts:306"
+    ]
+  },
+  {
+    "id": "ui.0224",
+    "source": "Expected",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3315"
+    ]
+  },
+  {
+    "id": "ui.0225",
+    "source": "Expires",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1369",
+      "apps/web/src/bridge/v197Adjuncts.ts:1477",
+      "apps/web/src/bridge/v197Adjuncts.ts:3317"
+    ]
+  },
+  {
+    "id": "ui.0226",
+    "source": "Explicit contribution",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:813"
+    ]
+  },
+  {
+    "id": "ui.0227",
+    "source": "Export downloaded. SHA-256 {{0}}.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:376"
+    ]
+  },
+  {
+    "id": "ui.0228",
+    "source": "Export my NUR",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:359"
+    ]
+  },
+  {
+    "id": "ui.0229",
+    "source": "Export owner Omega",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1586"
+    ]
+  },
+  {
+    "id": "ui.0230",
+    "source": "Export the complete owner-scoped ledger",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:356"
+    ]
+  },
+  {
+    "id": "ui.0231",
+    "source": "External actions remain denied until an owner explicitly approves a bounded run.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2415"
+    ]
+  },
+  {
+    "id": "ui.0232",
+    "source": "External public feed",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2155"
+    ]
+  },
+  {
+    "id": "ui.0233",
+    "source": "file",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2664"
+    ]
+  },
+  {
+    "id": "ui.0234",
+    "source": "Files · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2652"
+    ]
+  },
+  {
+    "id": "ui.0235",
+    "source": "Files are owner-scoped real bytes. Executable formats are quarantined; no run gains authority beyond its approved, deny-by-default capabilities.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2694"
+    ]
+  },
+  {
+    "id": "ui.0236",
+    "source": "Focus list",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1298"
+    ]
+  },
+  {
+    "id": "ui.0237",
+    "source": "Free access remains governed by the server. No paid feature is implied.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1066"
+    ]
+  },
+  {
+    "id": "ui.0238",
+    "source": "Frequency and quiet hours",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2845"
+    ]
+  },
+  {
+    "id": "ui.0239",
+    "source": "Generate evidence package",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2693"
+    ]
+  },
+  {
+    "id": "ui.0240",
+    "source": "Generate from owner ledger",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1761"
+    ]
+  },
+  {
+    "id": "ui.0241",
+    "source": "Generation may honestly refuse when the owner ledger has insufficient evidence.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1762"
+    ]
+  },
+  {
+    "id": "ui.0242",
+    "source": "Glow Points move only after the server confirms a real action.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Rewards.ts:150"
+    ]
+  },
+  {
+    "id": "ui.0243",
+    "source": "Glow this persisted Talk",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1349"
+    ]
+  },
+  {
+    "id": "ui.0244",
+    "source": "Governed learning",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1639"
+    ]
+  },
+  {
+    "id": "ui.0245",
+    "source": "Grant this recipient",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1270"
+    ]
+  },
+  {
+    "id": "ui.0246",
+    "source": "Granted capability",
+    "kinds": [
+      "labeledControl:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1298"
+    ]
+  },
+  {
+    "id": "ui.0247",
+    "source": "Granting access does not send an email or prove the recipient opened the room.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1271"
+    ]
+  },
+  {
+    "id": "ui.0248",
+    "source": "Group NUR",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2190"
+    ]
+  },
+  {
+    "id": "ui.0249",
+    "source": "Group NUR boundaries",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2073"
+    ]
+  },
+  {
+    "id": "ui.0250",
+    "source": "Group NUR workspace is not built yet.",
+    "kinds": [
+      "property:title"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:894"
+    ]
+  },
+  {
+    "id": "ui.0251",
+    "source": "Hold one thing deliberately",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:586"
+    ]
+  },
+  {
+    "id": "ui.0252",
+    "source": "Hold this reading →",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:226"
+    ]
+  },
+  {
+    "id": "ui.0253",
+    "source": "Holding your context…",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:443"
+    ]
+  },
+  {
+    "id": "ui.0254",
+    "source": "Honest runtime state",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3438"
+    ]
+  },
+  {
+    "id": "ui.0255",
+    "source": "Honest state",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1778"
+    ]
+  },
+  {
+    "id": "ui.0256",
+    "source": "How NUR speaks with you",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:313"
+    ]
+  },
+  {
+    "id": "ui.0257",
+    "source": "I explicitly consent to this selected contribution scope.",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:841"
+    ]
+  },
+  {
+    "id": "ui.0258",
+    "source": "If ignored",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:597"
+    ]
+  },
+  {
+    "id": "ui.0259",
+    "source": "In-app ledger",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2821"
+    ]
+  },
+  {
+    "id": "ui.0260",
+    "source": "Insight evidence and change history",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:739"
+    ]
+  },
+  {
+    "id": "ui.0261",
+    "source": "Insight owner review controls",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:668"
+    ]
+  },
+  {
+    "id": "ui.0262",
+    "source": "Intelligence connection",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:301"
+    ]
+  },
+  {
+    "id": "ui.0263",
+    "source": "Interface language",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:315"
+    ]
+  },
+  {
+    "id": "ui.0264",
+    "source": "Interval",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1581"
+    ]
+  },
+  {
+    "id": "ui.0265",
+    "source": "Language and voice",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:313"
+    ]
+  },
+  {
+    "id": "ui.0266",
+    "source": "Last run",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1581"
+    ]
+  },
+  {
+    "id": "ui.0267",
+    "source": "Lifetime",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2768"
+    ]
+  },
+  {
+    "id": "ui.0268",
+    "source": "Live Universe owner-ledger highlights",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:571"
+    ]
+  },
+  {
+    "id": "ui.0269",
+    "source": "Lived experience, constraints and disagreement stay visible instead of being smoothed away.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1976"
+    ]
+  },
+  {
+    "id": "ui.0270",
+    "source": "Living Map",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:824"
+    ]
+  },
+  {
+    "id": "ui.0271",
+    "source": "Living Timeline",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:731"
+    ]
+  },
+  {
+    "id": "ui.0272",
+    "source": "Loading the real session ledger…",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:443"
+    ]
+  },
+  {
+    "id": "ui.0273",
+    "source": "Local files must be removed before the database account can be deleted. External provider erasure is never claimed unless a provider adapter performs it.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:514"
+    ]
+  },
+  {
+    "id": "ui.0274",
+    "source": "local owner ledger",
+    "kinds": [
+      "ownText:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1351"
+    ]
+  },
+  {
+    "id": "ui.0275",
+    "source": "Local owner ledger · no invented external data",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1149"
+    ]
+  },
+  {
+    "id": "ui.0276",
+    "source": "Manage subscription",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1036"
+    ]
+  },
+  {
+    "id": "ui.0277",
+    "source": "Map navigator",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:716"
+    ]
+  },
+  {
+    "id": "ui.0278",
+    "source": "Map view mode",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:667"
+    ]
+  },
+  {
+    "id": "ui.0279",
+    "source": "Mark read",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2836"
+    ]
+  },
+  {
+    "id": "ui.0280",
+    "source": "Member added to this boundary.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2180"
+    ]
+  },
+  {
+    "id": "ui.0281",
+    "source": "Members contribute evidence and disagreement. The Consultation owner advances the stage.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2050"
+    ]
+  },
+  {
+    "id": "ui.0282",
+    "source": "Memory",
+    "kinds": [
+      "labeledControl:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:610"
+    ]
+  },
+  {
+    "id": "ui.0283",
+    "source": "Memory candidates",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:617"
+    ]
+  },
+  {
+    "id": "ui.0284",
+    "source": "Memory deleted from the owner ledger.",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:743"
+    ]
+  },
+  {
+    "id": "ui.0285",
+    "source": "Memory persisted by your explicit choice.",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:790"
+    ]
+  },
+  {
+    "id": "ui.0286",
+    "source": "Messages",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2155"
+    ]
+  },
+  {
+    "id": "ui.0287",
+    "source": "MINORITY POSITION",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2268"
+    ]
+  },
+  {
+    "id": "ui.0288",
+    "source": "Model training: {{0}} · Promotion: {{1}}",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:884"
+    ]
+  },
+  {
+    "id": "ui.0289",
+    "source": "Motion, sound and Omega",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:339"
+    ]
+  },
+  {
+    "id": "ui.0290",
+    "source": "Name one bounded room",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2092"
+    ]
+  },
+  {
+    "id": "ui.0291",
+    "source": "Name the field.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:168"
+    ]
+  },
+  {
+    "id": "ui.0292",
+    "source": "Name the room first.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2104"
+    ]
+  },
+  {
+    "id": "ui.0293",
+    "source": "Name this workflow",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3150"
+    ]
+  },
+  {
+    "id": "ui.0294",
+    "source": "Neural Upgrade Rewiring",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:274"
+    ]
+  },
+  {
+    "id": "ui.0295",
+    "source": "New Project Orbit",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2403"
+    ]
+  },
+  {
+    "id": "ui.0296",
+    "source": "next constellation",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2772"
+    ]
+  },
+  {
+    "id": "ui.0297",
+    "source": "Next persisted move",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1119"
+    ]
+  },
+  {
+    "id": "ui.0298",
+    "source": "No accepted memory",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:692"
+    ]
+  },
+  {
+    "id": "ui.0299",
+    "source": "No access event yet",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1492"
+    ]
+  },
+  {
+    "id": "ui.0300",
+    "source": "No active grant",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1538"
+    ]
+  },
+  {
+    "id": "ui.0301",
+    "source": "No active plan returned",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1094"
+    ]
+  },
+  {
+    "id": "ui.0302",
+    "source": "No active quest",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2786"
+    ]
+  },
+  {
+    "id": "ui.0303",
+    "source": "No approval is waiting",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3324"
+    ]
+  },
+  {
+    "id": "ui.0304",
+    "source": "No bounded room yet",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2076"
+    ]
+  },
+  {
+    "id": "ui.0305",
+    "source": "No cached answer is shown and no new question can be asked after revocation or expiry.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1386"
+    ]
+  },
+  {
+    "id": "ui.0306",
+    "source": "No candidate insight yet",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1778"
+    ]
+  },
+  {
+    "id": "ui.0307",
+    "source": "No Consultation yet",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1892"
+    ]
+  },
+  {
+    "id": "ui.0308",
+    "source": "No contribution is submitted without the checked consent control.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:847"
+    ]
+  },
+  {
+    "id": "ui.0309",
+    "source": "No contribution submitted",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:871"
+    ]
+  },
+  {
+    "id": "ui.0310",
+    "source": "No contribution yet",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1976"
+    ]
+  },
+  {
+    "id": "ui.0311",
+    "source": "No counter-evidence record was returned.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1813"
+    ]
+  },
+  {
+    "id": "ui.0312",
+    "source": "No device is shown without an API response.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:481"
+    ]
+  },
+  {
+    "id": "ui.0313",
+    "source": "No event returned",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3429"
+    ]
+  },
+  {
+    "id": "ui.0314",
+    "source": "No evidence record was returned.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1804"
+    ]
+  },
+  {
+    "id": "ui.0315",
+    "source": "No fabricated fallback",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3438"
+    ]
+  },
+  {
+    "id": "ui.0316",
+    "source": "No fabricated person is waiting here.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2355"
+    ]
+  },
+  {
+    "id": "ui.0317",
+    "source": "No fake live metrics",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:942"
+    ]
+  },
+  {
+    "id": "ui.0318",
+    "source": "No memory candidate is waiting",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:630"
+    ]
+  },
+  {
+    "id": "ui.0319",
+    "source": "No note",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2586"
+    ]
+  },
+  {
+    "id": "ui.0320",
+    "source": "No owner Capsule",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1232"
+    ]
+  },
+  {
+    "id": "ui.0321",
+    "source": "No owner-scoped workflow is placed here.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3017"
+    ]
+  },
+  {
+    "id": "ui.0322",
+    "source": "No paid entitlement projection",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1066"
+    ]
+  },
+  {
+    "id": "ui.0323",
+    "source": "No persisted evidence yet",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1553"
+    ]
+  },
+  {
+    "id": "ui.0324",
+    "source": "No persisted Glow yet.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Rewards.ts:144"
+    ]
+  },
+  {
+    "id": "ui.0325",
+    "source": "No persisted Glow yet. Complete one real action.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Rewards.ts:119"
+    ]
+  },
+  {
+    "id": "ui.0326",
+    "source": "No persisted Talk turns yet. Say one true line to begin.",
+    "kinds": [
+      "createTextNode:0"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:81"
+    ]
+  },
+  {
+    "id": "ui.0327",
+    "source": "No points are displayed without persisted proof.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2811"
+    ]
+  },
+  {
+    "id": "ui.0328",
+    "source": "No position yet",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2263"
+    ]
+  },
+  {
+    "id": "ui.0329",
+    "source": "No post yet",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2126"
+    ]
+  },
+  {
+    "id": "ui.0330",
+    "source": "No Project yet",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2390"
+    ]
+  },
+  {
+    "id": "ui.0331",
+    "source": "No reason given",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:1181"
+    ]
+  },
+  {
+    "id": "ui.0332",
+    "source": "No reply yet",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2355"
+    ]
+  },
+  {
+    "id": "ui.0333",
+    "source": "No room message yet",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2193"
+    ]
+  },
+  {
+    "id": "ui.0334",
+    "source": "No run can pre-authorize spending, publishing, deployment, messaging, secret access or security changes.",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2458"
+    ]
+  },
+  {
+    "id": "ui.0335",
+    "source": "No session row returned",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:478"
+    ]
+  },
+  {
+    "id": "ui.0336",
+    "source": "No source was included",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1393"
+    ]
+  },
+  {
+    "id": "ui.0337",
+    "source": "No stored bytes yet",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2657"
+    ]
+  },
+  {
+    "id": "ui.0338",
+    "source": "No streak yet",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2798"
+    ]
+  },
+  {
+    "id": "ui.0339",
+    "source": "No target date",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1718"
+    ]
+  },
+  {
+    "id": "ui.0340",
+    "source": "No transaction yet",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2811"
+    ]
+  },
+  {
+    "id": "ui.0341",
+    "source": "No withheld category is enumerated",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1405"
+    ]
+  },
+  {
+    "id": "ui.0342",
+    "source": "None recorded",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1714",
+      "apps/web/src/bridge/v197Timeline.ts:1113"
+    ]
+  },
+  {
+    "id": "ui.0343",
+    "source": "Not assessed",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1406",
+      "apps/web/src/bridge/v197Timeline.ts:1155"
+    ]
+  },
+  {
+    "id": "ui.0344",
+    "source": "Not linked",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:1114"
+    ]
+  },
+  {
+    "id": "ui.0345",
+    "source": "Not recorded",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1719"
+    ]
+  },
+  {
+    "id": "ui.0346",
+    "source": "Not stated",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1723"
+    ]
+  },
+  {
+    "id": "ui.0347",
+    "source": "Nothing {{0}}",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3017"
+    ]
+  },
+  {
+    "id": "ui.0348",
+    "source": "Nothing is demanding your attention",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2823"
+    ]
+  },
+  {
+    "id": "ui.0349",
+    "source": "Nothing is marked exported until the API returns the real owner manifest.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:360"
+    ]
+  },
+  {
+    "id": "ui.0350",
+    "source": "Nothing leaks through a missing grant",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1536"
+    ]
+  },
+  {
+    "id": "ui.0351",
+    "source": "Notification boundary persisted.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2865"
+    ]
+  },
+  {
+    "id": "ui.0352",
+    "source": "Notifications · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2821"
+    ]
+  },
+  {
+    "id": "ui.0353",
+    "source": "NUR · could not answer",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:475"
+    ]
+  },
+  {
+    "id": "ui.0354",
+    "source": "NUR · live model stream",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:456"
+    ]
+  },
+  {
+    "id": "ui.0355",
+    "source": "NUR · model is responding",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:461"
+    ]
+  },
+  {
+    "id": "ui.0356",
+    "source": "NUR · model-generated",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:93"
+    ]
+  },
+  {
+    "id": "ui.0357",
+    "source": "NUR · opening live model stream",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:435"
+    ]
+  },
+  {
+    "id": "ui.0358",
+    "source": "NUR · private ledger",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:80"
+    ]
+  },
+  {
+    "id": "ui.0359",
+    "source": "NUR · private turn accepted",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:460"
+    ]
+  },
+  {
+    "id": "ui.0360",
+    "source": "NUR · validating and persisting",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:463"
+    ]
+  },
+  {
+    "id": "ui.0361",
+    "source": "NUR DIAG RM:{{0}}",
+    "kinds": [
+      "property:title"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Diagnose.ts:140"
+    ]
+  },
+  {
+    "id": "ui.0362",
+    "source": "NUR does not invent a teaching history. Your first explicit contribution will appear here.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:871"
+    ]
+  },
+  {
+    "id": "ui.0363",
+    "source": "NUR galaxy diagnostics",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Diagnose.ts:144"
+    ]
+  },
+  {
+    "id": "ui.0364",
+    "source": "NUR has no pending call that requires your consent.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3324"
+    ]
+  },
+  {
+    "id": "ui.0365",
+    "source": "NUR has not proposed an owner memory, or every proposal has already been reviewed.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:630"
+    ]
+  },
+  {
+    "id": "ui.0366",
+    "source": "NUR stays quiet until a member contributes.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2193"
+    ]
+  },
+  {
+    "id": "ui.0367",
+    "source": "NUR will not invent a pattern merely to populate this page.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1780"
+    ]
+  },
+  {
+    "id": "ui.0368",
+    "source": "NUR will not invent price, entitlement or availability data.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1094"
+    ]
+  },
+  {
+    "id": "ui.0369",
+    "source": "NUR will not invent progress.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2786"
+    ]
+  },
+  {
+    "id": "ui.0370",
+    "source": "NUR will not manufacture a social obligation.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2823"
+    ]
+  },
+  {
+    "id": "ui.0371",
+    "source": "Objective and success definition…",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2407"
+    ]
+  },
+  {
+    "id": "ui.0372",
+    "source": "Off by default",
+    "kinds": [
+      "fact:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:307"
+    ]
+  },
+  {
+    "id": "ui.0373",
+    "source": "Offer one bounded correction or insight",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:813"
+    ]
+  },
+  {
+    "id": "ui.0374",
+    "source": "Omega does not invent a result before the owner's evidence exists.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1553"
+    ]
+  },
+  {
+    "id": "ui.0375",
+    "source": "Omega substrate",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1578"
+    ]
+  },
+  {
+    "id": "ui.0376",
+    "source": "One bounded step at a time",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3147"
+    ]
+  },
+  {
+    "id": "ui.0377",
+    "source": "One concrete task",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2483"
+    ]
+  },
+  {
+    "id": "ui.0378",
+    "source": "One eligible persisted action starts continuity.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2798"
+    ]
+  },
+  {
+    "id": "ui.0379",
+    "source": "One life area with its own evidence, actions, and return path.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:171"
+    ]
+  },
+  {
+    "id": "ui.0380",
+    "source": "One private note, optional",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:220"
+    ]
+  },
+  {
+    "id": "ui.0381",
+    "source": "Only an existing NUR account can cross this room boundary.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2169"
+    ]
+  },
+  {
+    "id": "ui.0382",
+    "source": "Only explicit Consultation records are shared. Private Talk, Journal and Omega remain outside.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1935"
+    ]
+  },
+  {
+    "id": "ui.0383",
+    "source": "Only room members can read this thread.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2237"
+    ]
+  },
+  {
+    "id": "ui.0384",
+    "source": "Open",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2831"
+    ]
+  },
+  {
+    "id": "ui.0385",
+    "source": "Open a bounded Consultation",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1907"
+    ]
+  },
+  {
+    "id": "ui.0386",
+    "source": "Open access audit",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1480"
+    ]
+  },
+  {
+    "id": "ui.0387",
+    "source": "Open and returned · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1890"
+    ]
+  },
+  {
+    "id": "ui.0388",
+    "source": "Open Consultation",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1933"
+    ]
+  },
+  {
+    "id": "ui.0389",
+    "source": "Open contradiction",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1109"
+    ]
+  },
+  {
+    "id": "ui.0390",
+    "source": "Open one bounded question. Nothing is synthesized before contributions exist.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1892"
+    ]
+  },
+  {
+    "id": "ui.0391",
+    "source": "Open owner controls",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1249"
+    ]
+  },
+  {
+    "id": "ui.0392",
+    "source": "Open Project Orbit",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2396"
+    ]
+  },
+  {
+    "id": "ui.0393",
+    "source": "Open review queue ({{0}})",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1585"
+    ]
+  },
+  {
+    "id": "ui.0394",
+    "source": "Open run ledger",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3011"
+    ]
+  },
+  {
+    "id": "ui.0395",
+    "source": "Open tension",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1635"
+    ]
+  },
+  {
+    "id": "ui.0396",
+    "source": "Open thread",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2134",
+      "apps/web/src/bridge/v197Adjuncts.ts:2227"
+    ]
+  },
+  {
+    "id": "ui.0397",
+    "source": "Option",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1486"
+    ]
+  },
+  {
+    "id": "ui.0398",
+    "source": "Optional instructions shown inside the recipient room",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1175"
+    ]
+  },
+  {
+    "id": "ui.0399",
+    "source": "Orbit detail",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:865"
+    ]
+  },
+  {
+    "id": "ui.0400",
+    "source": "Orbit filters",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:353"
+    ]
+  },
+  {
+    "id": "ui.0401",
+    "source": "Orbit people",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:711"
+    ]
+  },
+  {
+    "id": "ui.0402",
+    "source": "Orbit view",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:317"
+    ]
+  },
+  {
+    "id": "ui.0403",
+    "source": "Owner approval changes PROPOSED to APPROVED. It still does not grant external action authority.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2567"
+    ]
+  },
+  {
+    "id": "ui.0404",
+    "source": "Owner candidate review persisted.",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:669"
+    ]
+  },
+  {
+    "id": "ui.0405",
+    "source": "Owner capsule",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1473"
+    ]
+  },
+  {
+    "id": "ui.0406",
+    "source": "Owner confirmation gate",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1649"
+    ]
+  },
+  {
+    "id": "ui.0407",
+    "source": "Owner data",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:356"
+    ]
+  },
+  {
+    "id": "ui.0408",
+    "source": "Owner edit persisted as the next memory version.",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:729"
+    ]
+  },
+  {
+    "id": "ui.0409",
+    "source": "Owner evidence",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1128"
+    ]
+  },
+  {
+    "id": "ui.0410",
+    "source": "Owner insight summary",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1026"
+    ]
+  },
+  {
+    "id": "ui.0411",
+    "source": "Owner ledger",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:622"
+    ]
+  },
+  {
+    "id": "ui.0412",
+    "source": "OWNER LEDGER",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1135",
+      "apps/web/src/bridge/v197Hydration.ts:588",
+      "apps/web/src/bridge/v197Hydration.ts:810"
+    ]
+  },
+  {
+    "id": "ui.0413",
+    "source": "Owner lifecycle",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1223"
+    ]
+  },
+  {
+    "id": "ui.0414",
+    "source": "Owner map summary",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1077"
+    ]
+  },
+  {
+    "id": "ui.0415",
+    "source": "Owner movement",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2018"
+    ]
+  },
+  {
+    "id": "ui.0416",
+    "source": "Owner movement only",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2050"
+    ]
+  },
+  {
+    "id": "ui.0417",
+    "source": "Owner Orbits summary",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1017"
+    ]
+  },
+  {
+    "id": "ui.0418",
+    "source": "Owner policy",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3044"
+    ]
+  },
+  {
+    "id": "ui.0419",
+    "source": "Owner policy persisted. No workflow was started.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3137"
+    ]
+  },
+  {
+    "id": "ui.0420",
+    "source": "Owner Project ledger",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2388"
+    ]
+  },
+  {
+    "id": "ui.0421",
+    "source": "Owner reminder",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2874"
+    ]
+  },
+  {
+    "id": "ui.0422",
+    "source": "Owner review",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2582"
+    ]
+  },
+  {
+    "id": "ui.0423",
+    "source": "Owner review ledger",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:862"
+    ]
+  },
+  {
+    "id": "ui.0424",
+    "source": "Owner review queue",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1748"
+    ]
+  },
+  {
+    "id": "ui.0425",
+    "source": "Owner review remains the final authority.",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1701"
+    ]
+  },
+  {
+    "id": "ui.0426",
+    "source": "Owner reviews",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2457"
+    ]
+  },
+  {
+    "id": "ui.0427",
+    "source": "Owner session",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:218"
+    ]
+  },
+  {
+    "id": "ui.0428",
+    "source": "Owner spaces",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:223"
+    ]
+  },
+  {
+    "id": "ui.0429",
+    "source": "Owner subscription",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1028"
+    ]
+  },
+  {
+    "id": "ui.0430",
+    "source": "Owner timeline summary",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:982"
+    ]
+  },
+  {
+    "id": "ui.0431",
+    "source": "Owner workflows · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3327"
+    ]
+  },
+  {
+    "id": "ui.0432",
+    "source": "Owner-authored workflow",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3147"
+    ]
+  },
+  {
+    "id": "ui.0433",
+    "source": "Owner-scoped Omega export prepared locally.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1616"
+    ]
+  },
+  {
+    "id": "ui.0434",
+    "source": "Owner-written memory",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:586"
+    ]
+  },
+  {
+    "id": "ui.0435",
+    "source": "Paid through",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1034"
+    ]
+  },
+  {
+    "id": "ui.0436",
+    "source": "Passed evidence",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2457"
+    ]
+  },
+  {
+    "id": "ui.0437",
+    "source": "PASSED evidence requires both a named verifier and a locator.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2522"
+    ]
+  },
+  {
+    "id": "ui.0438",
+    "source": "Password",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:386"
+    ]
+  },
+  {
+    "id": "ui.0439",
+    "source": "Password changed. Returning to Sign in…",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:429"
+    ]
+  },
+  {
+    "id": "ui.0440",
+    "source": "Pending review · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1649"
+    ]
+  },
+  {
+    "id": "ui.0441",
+    "source": "Permanently delete this NUR account",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:502"
+    ]
+  },
+  {
+    "id": "ui.0442",
+    "source": "Permit the selected tool in the owner policy before compiling this workflow.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3196"
+    ]
+  },
+  {
+    "id": "ui.0443",
+    "source": "Permit this tool",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3087"
+    ]
+  },
+  {
+    "id": "ui.0444",
+    "source": "Persist {{0}}",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2029"
+    ]
+  },
+  {
+    "id": "ui.0445",
+    "source": "Persist correction",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1830"
+    ]
+  },
+  {
+    "id": "ui.0446",
+    "source": "Persisted",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3049"
+    ]
+  },
+  {
+    "id": "ui.0447",
+    "source": "Persisted · {{0}}",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Rewards.ts:89"
+    ]
+  },
+  {
+    "id": "ui.0448",
+    "source": "Persisted claims",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1121"
+    ]
+  },
+  {
+    "id": "ui.0449",
+    "source": "Persisted community rooms",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1041"
+    ]
+  },
+  {
+    "id": "ui.0450",
+    "source": "Persisted insights",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Insights.ts:141"
+    ]
+  },
+  {
+    "id": "ui.0451",
+    "source": "Persisted owner preference",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:539"
+    ]
+  },
+  {
+    "id": "ui.0452",
+    "source": "Persisted progress",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:599"
+    ]
+  },
+  {
+    "id": "ui.0453",
+    "source": "Persisted records",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:938"
+    ]
+  },
+  {
+    "id": "ui.0454",
+    "source": "Persisted signal feed",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2124"
+    ]
+  },
+  {
+    "id": "ui.0455",
+    "source": "Persisted view",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:930"
+    ]
+  },
+  {
+    "id": "ui.0456",
+    "source": "Plan from Conversation",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:550"
+    ]
+  },
+  {
+    "id": "ui.0457",
+    "source": "Plan version",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3351"
+    ]
+  },
+  {
+    "id": "ui.0458",
+    "source": "Positions · {{0}} · Decisions · {{1}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2259"
+    ]
+  },
+  {
+    "id": "ui.0459",
+    "source": "Posts",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2155"
+    ]
+  },
+  {
+    "id": "ui.0460",
+    "source": "Posts · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2124",
+      "apps/web/src/bridge/v197Adjuncts.ts:2220"
+    ]
+  },
+  {
+    "id": "ui.0461",
+    "source": "Predictions · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1637"
+    ]
+  },
+  {
+    "id": "ui.0462",
+    "source": "Preparing the owner-scoped export…",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:365"
+    ]
+  },
+  {
+    "id": "ui.0463",
+    "source": "Presence",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:339"
+    ]
+  },
+  {
+    "id": "ui.0464",
+    "source": "Privacy boundary",
+    "kinds": [
+      "attribute:aria-label",
+      "property:title"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Polish.ts:119",
+      "apps/web/src/bridge/v197Polish.ts:120"
+    ]
+  },
+  {
+    "id": "ui.0465",
+    "source": "Private by default. Shared only by choice.",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:272"
+    ]
+  },
+  {
+    "id": "ui.0466",
+    "source": "Private means owner-scoped. Sensitive memory remains excluded from sharing unless you later select it through a separate boundary.",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:609"
+    ]
+  },
+  {
+    "id": "ui.0467",
+    "source": "Private owner Consultation",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1924"
+    ]
+  },
+  {
+    "id": "ui.0468",
+    "source": "Private owner scope keeps the contribution inside your own retrieval ledger.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:844"
+    ]
+  },
+  {
+    "id": "ui.0469",
+    "source": "Private system",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:165"
+    ]
+  },
+  {
+    "id": "ui.0470",
+    "source": "Project Orbit",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2454"
+    ]
+  },
+  {
+    "id": "ui.0471",
+    "source": "Project title",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2405"
+    ]
+  },
+  {
+    "id": "ui.0472",
+    "source": "Project-level evidence",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2514"
+    ]
+  },
+  {
+    "id": "ui.0473",
+    "source": "Projects · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2388"
+    ]
+  },
+  {
+    "id": "ui.0474",
+    "source": "Prompt logging",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:307"
+    ]
+  },
+  {
+    "id": "ui.0475",
+    "source": "Proposals · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1639"
+    ]
+  },
+  {
+    "id": "ui.0476",
+    "source": "Propose a scoped task. This records intent; it does not execute autonomously.",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2565"
+    ]
+  },
+  {
+    "id": "ui.0477",
+    "source": "Propose agent run",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2566"
+    ]
+  },
+  {
+    "id": "ui.0478",
+    "source": "Proposing, approving and queueing a bounded EVIDENCE_PACKAGE run…",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2722"
+    ]
+  },
+  {
+    "id": "ui.0479",
+    "source": "Provenance",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:940"
+    ]
+  },
+  {
+    "id": "ui.0480",
+    "source": "Provider",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1031",
+      "apps/web/src/bridge/v197Adjuncts.ts:305"
+    ]
+  },
+  {
+    "id": "ui.0481",
+    "source": "Provider boundary",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:301"
+    ]
+  },
+  {
+    "id": "ui.0482",
+    "source": "Provider legal links are not configured. Paid checkout remains unavailable until they are present.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1000"
+    ]
+  },
+  {
+    "id": "ui.0483",
+    "source": "Provider portal opened in a new tab. Link expires {{0}}.",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1054"
+    ]
+  },
+  {
+    "id": "ui.0484",
+    "source": "Public community feeds stay disconnected; only your persisted rooms are shown.",
+    "kinds": [
+      "attribute:title"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1304"
+    ]
+  },
+  {
+    "id": "ui.0485",
+    "source": "Publish in room",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2236"
+    ]
+  },
+  {
+    "id": "ui.0486",
+    "source": "Purpose",
+    "kinds": [
+      "fact:1",
+      "labeledControl:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1213",
+      "apps/web/src/bridge/v197Adjuncts.ts:1367",
+      "apps/web/src/bridge/v197Adjuncts.ts:1477",
+      "apps/web/src/bridge/v197Adjuncts.ts:1971"
+    ]
+  },
+  {
+    "id": "ui.0487",
+    "source": "Quarantined; download blocked.",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2683"
+    ]
+  },
+  {
+    "id": "ui.0488",
+    "source": "Question",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1418"
+    ]
+  },
+  {
+    "id": "ui.0489",
+    "source": "Question, lived experience, resource, outcome or Project log…",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2235"
+    ]
+  },
+  {
+    "id": "ui.0490",
+    "source": "Quests and mission",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2776"
+    ]
+  },
+  {
+    "id": "ui.0491",
+    "source": "Reactions are unique persisted room records.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2335"
+    ]
+  },
+  {
+    "id": "ui.0492",
+    "source": "Reading only the approved sources…",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1446"
+    ]
+  },
+  {
+    "id": "ui.0493",
+    "source": "Recent Glow · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2801"
+    ]
+  },
+  {
+    "id": "ui.0494",
+    "source": "Recipient capability",
+    "kinds": [
+      "labeledControl:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1214"
+    ]
+  },
+  {
+    "id": "ui.0495",
+    "source": "Recipient email",
+    "kinds": [
+      "labeledControl:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1297"
+    ]
+  },
+  {
+    "id": "ui.0496",
+    "source": "Recipient grant persisted. Delivery and opening remain unclaimed.",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1289"
+    ]
+  },
+  {
+    "id": "ui.0497",
+    "source": "Recipient instructions",
+    "kinds": [
+      "labeledControl:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1215"
+    ]
+  },
+  {
+    "id": "ui.0498",
+    "source": "Record decision",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2293"
+    ]
+  },
+  {
+    "id": "ui.0499",
+    "source": "Record owner approval",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2591"
+    ]
+  },
+  {
+    "id": "ui.0500",
+    "source": "Record passed evidence",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2521"
+    ]
+  },
+  {
+    "id": "ui.0501",
+    "source": "Record the bounded Council decision",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2292"
+    ]
+  },
+  {
+    "id": "ui.0502",
+    "source": "Record this stage before advancing.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2034"
+    ]
+  },
+  {
+    "id": "ui.0503",
+    "source": "Reject",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1655",
+      "apps/web/src/bridge/v197Adjuncts.ts:1829",
+      "apps/web/src/bridge/v197Adjuncts.ts:3248"
+    ]
+  },
+  {
+    "id": "ui.0504",
+    "source": "Reject proposal",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:651"
+    ]
+  },
+  {
+    "id": "ui.0505",
+    "source": "Rejected",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1759"
+    ]
+  },
+  {
+    "id": "ui.0506",
+    "source": "Remember by my choice",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:599"
+    ]
+  },
+  {
+    "id": "ui.0507",
+    "source": "Renews",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1033"
+    ]
+  },
+  {
+    "id": "ui.0508",
+    "source": "Replies · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2352"
+    ]
+  },
+  {
+    "id": "ui.0509",
+    "source": "Reply",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2363"
+    ]
+  },
+  {
+    "id": "ui.0510",
+    "source": "Reply with experience, evidence, constraint or disagreement…",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2362"
+    ]
+  },
+  {
+    "id": "ui.0511",
+    "source": "Requesting a short-lived provider portal...",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1044"
+    ]
+  },
+  {
+    "id": "ui.0512",
+    "source": "Research evidence, held honestly.",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1200"
+    ]
+  },
+  {
+    "id": "ui.0513",
+    "source": "Research question",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1170"
+    ]
+  },
+  {
+    "id": "ui.0514",
+    "source": "Reset your password",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:1048"
+    ]
+  },
+  {
+    "id": "ui.0515",
+    "source": "Retire claim",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1699"
+    ]
+  },
+  {
+    "id": "ui.0516",
+    "source": "Retry workflow from this plan",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3399"
+    ]
+  },
+  {
+    "id": "ui.0517",
+    "source": "Return outcome →",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:302"
+    ]
+  },
+  {
+    "id": "ui.0518",
+    "source": "RETURN persisted · +{{0}} Glow",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2041"
+    ]
+  },
+  {
+    "id": "ui.0519",
+    "source": "Return tension",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2776"
+    ]
+  },
+  {
+    "id": "ui.0520",
+    "source": "Return with the same language",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:539"
+    ]
+  },
+  {
+    "id": "ui.0521",
+    "source": "Review in Agency",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:579"
+    ]
+  },
+  {
+    "id": "ui.0522",
+    "source": "Review queue",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:617"
+    ]
+  },
+  {
+    "id": "ui.0523",
+    "source": "Review records judgment; it does not rewrite evidence.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2592"
+    ]
+  },
+  {
+    "id": "ui.0524",
+    "source": "Review this Plan proposal in Agency",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:580"
+    ]
+  },
+  {
+    "id": "ui.0525",
+    "source": "Reviews · {{0}} · Artifacts · {{1}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2582"
+    ]
+  },
+  {
+    "id": "ui.0526",
+    "source": "Revoke now",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1481"
+    ]
+  },
+  {
+    "id": "ui.0527",
+    "source": "Revoke session",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:459"
+    ]
+  },
+  {
+    "id": "ui.0528",
+    "source": "Revoked. Recipient reads and asks are blocked immediately.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1511"
+    ]
+  },
+  {
+    "id": "ui.0529",
+    "source": "Risk",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3314"
+    ]
+  },
+  {
+    "id": "ui.0530",
+    "source": "Roman Urdu is stored as locale=ur with writing_preference=roman. Draft locales are labelled honestly.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:337"
+    ]
+  },
+  {
+    "id": "ui.0531",
+    "source": "Room address copied.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1435"
+    ]
+  },
+  {
+    "id": "ui.0532",
+    "source": "Room boundary",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2152"
+    ]
+  },
+  {
+    "id": "ui.0533",
+    "source": "Room members can write the first persisted contribution.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2126"
+    ]
+  },
+  {
+    "id": "ui.0534",
+    "source": "Room threads",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2220"
+    ]
+  },
+  {
+    "id": "ui.0535",
+    "source": "Rooms · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2073"
+    ]
+  },
+  {
+    "id": "ui.0536",
+    "source": "Route",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1399"
+    ]
+  },
+  {
+    "id": "ui.0537",
+    "source": "Run {{0}}: {{1}} claims created, {{2}} contradictions found.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1596"
+    ]
+  },
+  {
+    "id": "ui.0538",
+    "source": "Run events · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3418"
+    ]
+  },
+  {
+    "id": "ui.0539",
+    "source": "Run ledger",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3327"
+    ]
+  },
+  {
+    "id": "ui.0540",
+    "source": "Runs · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2543"
+    ]
+  },
+  {
+    "id": "ui.0541",
+    "source": "Save agency policy",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3111"
+    ]
+  },
+  {
+    "id": "ui.0542",
+    "source": "Save as memory candidate",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1833"
+    ]
+  },
+  {
+    "id": "ui.0543",
+    "source": "Save local question",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1174"
+    ]
+  },
+  {
+    "id": "ui.0544",
+    "source": "Save notification boundary",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2858"
+    ]
+  },
+  {
+    "id": "ui.0545",
+    "source": "Save owner edit",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:712"
+    ]
+  },
+  {
+    "id": "ui.0546",
+    "source": "Save preferences",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:542"
+    ]
+  },
+  {
+    "id": "ui.0547",
+    "source": "Saved to your owner ledger. No external source or citation is invented.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1164"
+    ]
+  },
+  {
+    "id": "ui.0548",
+    "source": "Saved. NUR will return in this language and writing style.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:562"
+    ]
+  },
+  {
+    "id": "ui.0549",
+    "source": "Saving…",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:548"
+    ]
+  },
+  {
+    "id": "ui.0550",
+    "source": "Scheduler",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1581"
+    ]
+  },
+  {
+    "id": "ui.0551",
+    "source": "Scope",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1971",
+      "apps/web/src/bridge/v197Adjuncts.ts:3048",
+      "apps/web/src/bridge/v197Adjuncts.ts:3313"
+    ]
+  },
+  {
+    "id": "ui.0552",
+    "source": "Scoped question",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1414"
+    ]
+  },
+  {
+    "id": "ui.0553",
+    "source": "Search events, actions, milestones or memories",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:565"
+    ]
+  },
+  {
+    "id": "ui.0554",
+    "source": "Search people, groups, plans or threads",
+    "kinds": [
+      "attribute:aria-label",
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:334",
+      "apps/web/src/bridge/v197Orbit.ts:335"
+    ]
+  },
+  {
+    "id": "ui.0555",
+    "source": "Search Systems, goals, plans, decisions or signals",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:684"
+    ]
+  },
+  {
+    "id": "ui.0556",
+    "source": "Search the Map",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:686"
+    ]
+  },
+  {
+    "id": "ui.0557",
+    "source": "Search the Timeline",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:567"
+    ]
+  },
+  {
+    "id": "ui.0558",
+    "source": "Select and copy manually",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Diagnose.ts:184"
+    ]
+  },
+  {
+    "id": "ui.0559",
+    "source": "Selection detail",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1540",
+      "apps/web/src/bridge/v197Timeline.ts:1063"
+    ]
+  },
+  {
+    "id": "ui.0560",
+    "source": "Send to room",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2202"
+    ]
+  },
+  {
+    "id": "ui.0561",
+    "source": "Sensitivity",
+    "kinds": [
+      "labeledControl:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:612",
+      "apps/web/src/bridge/v197Adjuncts.ts:756",
+      "apps/web/src/bridge/v197Adjuncts.ts:855"
+    ]
+  },
+  {
+    "id": "ui.0562",
+    "source": "Server projection",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1063"
+    ]
+  },
+  {
+    "id": "ui.0563",
+    "source": "Server-side only",
+    "kinds": [
+      "fact:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:306"
+    ]
+  },
+  {
+    "id": "ui.0564",
+    "source": "Session ledger unavailable",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:481"
+    ]
+  },
+  {
+    "id": "ui.0565",
+    "source": "Session revoked.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:465"
+    ]
+  },
+  {
+    "id": "ui.0566",
+    "source": "Sessions",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:439"
+    ]
+  },
+  {
+    "id": "ui.0567",
+    "source": "Sign in as the intended recipient or ask the owner for a current capsule address.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1538"
+    ]
+  },
+  {
+    "id": "ui.0568",
+    "source": "Sign out of NUR",
+    "kinds": [
+      "attribute:aria-label",
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:245",
+      "apps/web/src/bridge/v197Polish.ts:75"
+    ]
+  },
+  {
+    "id": "ui.0569",
+    "source": "Sign out other devices",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:442"
+    ]
+  },
+  {
+    "id": "ui.0570",
+    "source": "Source allowlist",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1155"
+    ]
+  },
+  {
+    "id": "ui.0571",
+    "source": "Source-linked ledger",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2801"
+    ]
+  },
+  {
+    "id": "ui.0572",
+    "source": "Stage a local question",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1162"
+    ]
+  },
+  {
+    "id": "ui.0573",
+    "source": "Stage movement happens only after server persistence.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2030"
+    ]
+  },
+  {
+    "id": "ui.0574",
+    "source": "Start a Council room",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2094"
+    ]
+  },
+  {
+    "id": "ui.0575",
+    "source": "Start Consultation",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2158"
+    ]
+  },
+  {
+    "id": "ui.0576",
+    "source": "Start this plan",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3358"
+    ]
+  },
+  {
+    "id": "ui.0577",
+    "source": "Started {{0}} · Expires {{1}}",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:457"
+    ]
+  },
+  {
+    "id": "ui.0578",
+    "source": "State",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1366",
+      "apps/web/src/bridge/v197Adjuncts.ts:1477"
+    ]
+  },
+  {
+    "id": "ui.0579",
+    "source": "State one position without erasing disagreement",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2273"
+    ]
+  },
+  {
+    "id": "ui.0580",
+    "source": "Status",
+    "kinds": [
+      "fact:1",
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1032",
+      "apps/web/src/bridge/v197Adjuncts.ts:1790",
+      "apps/web/src/bridge/v197Timeline.ts:605"
+    ]
+  },
+  {
+    "id": "ui.0581",
+    "source": "Steps · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3389"
+    ]
+  },
+  {
+    "id": "ui.0582",
+    "source": "Streaks · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2789"
+    ]
+  },
+  {
+    "id": "ui.0583",
+    "source": "Submit edited call",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3250"
+    ]
+  },
+  {
+    "id": "ui.0584",
+    "source": "Submit to review ledger",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:845"
+    ]
+  },
+  {
+    "id": "ui.0585",
+    "source": "Submitting only this bounded contribution...",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:942"
+    ]
+  },
+  {
+    "id": "ui.0586",
+    "source": "Success",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3353"
+    ]
+  },
+  {
+    "id": "ui.0587",
+    "source": "Suggested next move",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:595"
+    ]
+  },
+  {
+    "id": "ui.0588",
+    "source": "System",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1792"
+    ]
+  },
+  {
+    "id": "ui.0589",
+    "source": "System name",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:177"
+    ]
+  },
+  {
+    "id": "ui.0590",
+    "source": "Tasks",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2457"
+    ]
+  },
+  {
+    "id": "ui.0591",
+    "source": "Tasks · {{0}}",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2460"
+    ]
+  },
+  {
+    "id": "ui.0592",
+    "source": "The API did not report an active browser session.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:478"
+    ]
+  },
+  {
+    "id": "ui.0593",
+    "source": "The API did not return a valid HTTPS checkout URL. Nothing was opened and no purchase is claimed.",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1119"
+    ]
+  },
+  {
+    "id": "ui.0594",
+    "source": "The API did not return a valid HTTPS portal URL. Nothing was opened.",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1049"
+    ]
+  },
+  {
+    "id": "ui.0595",
+    "source": "The API did not return an append-only event for this workflow.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3429"
+    ]
+  },
+  {
+    "id": "ui.0596",
+    "source": "The creator becomes owner. Membership is explicit and server-enforced.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2095"
+    ]
+  },
+  {
+    "id": "ui.0597",
+    "source": "The download includes deterministic JSON, a SHA-256 manifest checksum, and explicit status for any unavailable stored object. Secret hashes are excluded.",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:357"
+    ]
+  },
+  {
+    "id": "ui.0598",
+    "source": "The owner's boundary now closes this room.",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1384"
+    ]
+  },
+  {
+    "id": "ui.0599",
+    "source": "The recipient still cannot traverse the owner's general memory, Talk, Journal, Timeline, Settings or Omega.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1405"
+    ]
+  },
+  {
+    "id": "ui.0600",
+    "source": "The reply remains inside this room thread.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2364"
+    ]
+  },
+  {
+    "id": "ui.0601",
+    "source": "The review queue is empty",
+    "kinds": [
+      "empty:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1780"
+    ]
+  },
+  {
+    "id": "ui.0602",
+    "source": "The room has not been opened by a recipient.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1492"
+    ]
+  },
+  {
+    "id": "ui.0603",
+    "source": "The run did not succeed ({{0}}{{1}}). Nothing was fabricated.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2746"
+    ]
+  },
+  {
+    "id": "ui.0604",
+    "source": "The run is executing on the queue. Refresh shortly to download the package.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2743"
+    ]
+  },
+  {
+    "id": "ui.0605",
+    "source": "The two new passwords do not match.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:421"
+    ]
+  },
+  {
+    "id": "ui.0606",
+    "source": "This Consultation completed its RETURN loop.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2052"
+    ]
+  },
+  {
+    "id": "ui.0607",
+    "source": "This contribution is shared only with members of the bounded room.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1995"
+    ]
+  },
+  {
+    "id": "ui.0608",
+    "source": "This creates a real owner-written reminder, not a fake human ping.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2885"
+    ]
+  },
+  {
+    "id": "ui.0609",
+    "source": "This goal",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1386"
+    ]
+  },
+  {
+    "id": "ui.0610",
+    "source": "This room carries no answerable context.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1393"
+    ]
+  },
+  {
+    "id": "ui.0611",
+    "source": "This week",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2768"
+    ]
+  },
+  {
+    "id": "ui.0612",
+    "source": "Thread title",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2233"
+    ]
+  },
+  {
+    "id": "ui.0613",
+    "source": "Time navigator",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:589"
+    ]
+  },
+  {
+    "id": "ui.0614",
+    "source": "Timeline view mode",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:544"
+    ]
+  },
+  {
+    "id": "ui.0615",
+    "source": "Title",
+    "kinds": [
+      "labeledControl:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1212"
+    ]
+  },
+  {
+    "id": "ui.0616",
+    "source": "Title, objective, success criterion and rationale are required.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3191"
+    ]
+  },
+  {
+    "id": "ui.0617",
+    "source": "Title, question, purpose, desired outcome and scope are all required.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1940"
+    ]
+  },
+  {
+    "id": "ui.0618",
+    "source": "Today",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2768"
+    ]
+  },
+  {
+    "id": "ui.0619",
+    "source": "Today in NUR · {{0}}, {{1}} · {{2}}",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:141"
+    ]
+  },
+  {
+    "id": "ui.0620",
+    "source": "Today in NUR · owner ledger unavailable",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:134"
+    ]
+  },
+  {
+    "id": "ui.0621",
+    "source": "Tool",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3312"
+    ]
+  },
+  {
+    "id": "ui.0622",
+    "source": "Truth state",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1688"
+    ]
+  },
+  {
+    "id": "ui.0623",
+    "source": "Type",
+    "kinds": [
+      "labeledControl:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:611",
+      "apps/web/src/bridge/v197Adjuncts.ts:755"
+    ]
+  },
+  {
+    "id": "ui.0624",
+    "source": "Type DELETE MY NUR ACCOUNT",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:506"
+    ]
+  },
+  {
+    "id": "ui.0625",
+    "source": "unassigned system",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2454"
+    ]
+  },
+  {
+    "id": "ui.0626",
+    "source": "Unbound tools stay visible but cannot be permitted or called.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3112"
+    ]
+  },
+  {
+    "id": "ui.0627",
+    "source": "Universe chambers",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:238"
+    ]
+  },
+  {
+    "id": "ui.0628",
+    "source": "unknown",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1805"
+    ]
+  },
+  {
+    "id": "ui.0629",
+    "source": "Unresolved future",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1637"
+    ]
+  },
+  {
+    "id": "ui.0630",
+    "source": "Updated",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1793"
+    ]
+  },
+  {
+    "id": "ui.0631",
+    "source": "Updated from the latest persisted snapshot.",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:943"
+    ]
+  },
+  {
+    "id": "ui.0632",
+    "source": "Upload a real file, or generate an evidence package. Nothing is invented.",
+    "kinds": [
+      "empty:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2657"
+    ]
+  },
+  {
+    "id": "ui.0633",
+    "source": "Upload file",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2692"
+    ]
+  },
+  {
+    "id": "ui.0634",
+    "source": "Waiting for you",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3235"
+    ]
+  },
+  {
+    "id": "ui.0635",
+    "source": "What changed in the real world?",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:297"
+    ]
+  },
+  {
+    "id": "ui.0636",
+    "source": "What exact result should this workflow pursue?",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3154"
+    ]
+  },
+  {
+    "id": "ui.0637",
+    "source": "What is excluded",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1403"
+    ]
+  },
+  {
+    "id": "ui.0638",
+    "source": "What is included",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1391"
+    ]
+  },
+  {
+    "id": "ui.0639",
+    "source": "What is inside and outside this Consultation?",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1922"
+    ]
+  },
+  {
+    "id": "ui.0640",
+    "source": "What is the actual question?",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1916"
+    ]
+  },
+  {
+    "id": "ui.0641",
+    "source": "What moved this claim",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1691"
+    ]
+  },
+  {
+    "id": "ui.0642",
+    "source": "What NUR may be wrong about: {{0}}",
+    "kinds": [
+      "element:3",
+      "property:textContent",
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1817",
+      "apps/web/src/bridge/v197Hydration.ts:763",
+      "apps/web/src/bridge/v197Orbit.ts:1156"
+    ]
+  },
+  {
+    "id": "ui.0643",
+    "source": "What NUR may prepare or run",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3044"
+    ]
+  },
+  {
+    "id": "ui.0644",
+    "source": "What observable result counts as done?",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3158"
+    ]
+  },
+  {
+    "id": "ui.0645",
+    "source": "What should NUR hold for later evidence?",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Hydration.ts:1169"
+    ]
+  },
+  {
+    "id": "ui.0646",
+    "source": "What should NUR learn, question or correct?",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:821"
+    ]
+  },
+  {
+    "id": "ui.0647",
+    "source": "What should return?",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2877"
+    ]
+  },
+  {
+    "id": "ui.0648",
+    "source": "What should this bounded room help the recipient do?",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1162"
+    ]
+  },
+  {
+    "id": "ui.0649",
+    "source": "What useful outcome should exist?",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1920"
+    ]
+  },
+  {
+    "id": "ui.0650",
+    "source": "What was verified?",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2510"
+    ]
+  },
+  {
+    "id": "ui.0651",
+    "source": "Why changed?",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1629"
+    ]
+  },
+  {
+    "id": "ui.0652",
+    "source": "Why does this need a shared return?",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1918"
+    ]
+  },
+  {
+    "id": "ui.0653",
+    "source": "Why is this accepted, rejected or corrected?",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2590"
+    ]
+  },
+  {
+    "id": "ui.0654",
+    "source": "Why is this step necessary?",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3172"
+    ]
+  },
+  {
+    "id": "ui.0655",
+    "source": "Why this correction is needed",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:646"
+    ]
+  },
+  {
+    "id": "ui.0656",
+    "source": "Why will this still matter?",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2880"
+    ]
+  },
+  {
+    "id": "ui.0657",
+    "source": "Withdraw consent",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:887"
+    ]
+  },
+  {
+    "id": "ui.0658",
+    "source": "Withdrawal closes future use while preserving the required consent audit.",
+    "kinds": [
+      "status:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:864"
+    ]
+  },
+  {
+    "id": "ui.0659",
+    "source": "Withheld by the owner",
+    "kinds": [
+      "text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1409"
+    ]
+  },
+  {
+    "id": "ui.0660",
+    "source": "Witness",
+    "kinds": [
+      "button:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2334"
+    ]
+  },
+  {
+    "id": "ui.0661",
+    "source": "Worker",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1581"
+    ]
+  },
+  {
+    "id": "ui.0662",
+    "source": "Workflow state",
+    "kinds": [
+      "panel:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:3347"
+    ]
+  },
+  {
+    "id": "ui.0663",
+    "source": "Working…",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:1163"
+    ]
+  },
+  {
+    "id": "ui.0664",
+    "source": "Write inside this room boundary…",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2201"
+    ]
+  },
+  {
+    "id": "ui.0665",
+    "source": "Write one contribution first.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1999"
+    ]
+  },
+  {
+    "id": "ui.0666",
+    "source": "Write one scoped question first.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1441"
+    ]
+  },
+  {
+    "id": "ui.0667",
+    "source": "Write only what you want NUR to remember...",
+    "kinds": [
+      "property:placeholder"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:590"
+    ]
+  },
+  {
+    "id": "ui.0668",
+    "source": "Write the correction first.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1852"
+    ]
+  },
+  {
+    "id": "ui.0669",
+    "source": "Writing only this owner-approved memory...",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:779"
+    ]
+  },
+  {
+    "id": "ui.0670",
+    "source": "Writing preference",
+    "kinds": [
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:326"
+    ]
+  },
+  {
+    "id": "ui.0671",
+    "source": "Writing the recipient grant...",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1281"
+    ]
+  },
+  {
+    "id": "ui.0672",
+    "source": "You - your relational center",
+    "kinds": [
+      "attribute:aria-label"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:644"
+    ]
+  },
+  {
+    "id": "ui.0673",
+    "source": "Your browser blocked the new tab. Use the secure provider link on this plan. No subscription is claimed yet.",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1122"
+    ]
+  },
+  {
+    "id": "ui.0674",
+    "source": "Your browser blocked the new tab. Use the secure provider link shown beside this control.",
+    "kinds": [
+      "setStatus:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1052"
+    ]
+  },
+  {
+    "id": "ui.0675",
+    "source": "Your Context Capsules",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1223"
+    ]
+  },
+  {
+    "id": "ui.0676",
+    "source": "Your contributions",
+    "kinds": [
+      "panel:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:862"
+    ]
+  },
+  {
+    "id": "ui.0677",
+    "source": "Your private context stays inside its boundary while the universe opens.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:1321"
+    ]
+  },
+  {
+    "id": "ui.0678",
+    "source": "Your private session is active on this device.",
+    "kinds": [
+      "property:textContent"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Bindings.ts:220"
+    ]
+  },
+  {
+    "id": "ui.0679",
+    "source": "Your role",
+    "kinds": [
+      "fact:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1971"
+    ]
+  },
+  {
+    "id": "ui.0680",
+    "source": "Talk",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0681",
+    "source": "Journal",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0682",
+    "source": "Plan",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0683",
+    "source": "Systems",
+    "kinds": [
+      "legacy-seed",
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts",
+      "apps/web/src/bridge/v197Map.ts:722",
+      "apps/web/src/bridge/v197Map.ts:1339"
+    ]
+  },
+  {
+    "id": "ui.0684",
+    "source": "Universe",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0685",
+    "source": "Map",
+    "kinds": [
+      "legacy-seed",
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts",
+      "apps/web/src/bridge/v197Map.ts:660",
+      "apps/web/src/bridge/v197Map.ts:837"
+    ]
+  },
+  {
+    "id": "ui.0686",
+    "source": "Orbits",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0687",
+    "source": "Timeline",
+    "kinds": [
+      "legacy-seed",
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts",
+      "apps/web/src/bridge/v197Timeline.ts:537"
+    ]
+  },
+  {
+    "id": "ui.0688",
+    "source": "Insights",
+    "kinds": [
+      "legacy-seed",
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts",
+      "apps/web/src/bridge/v197Insights.ts:111"
+    ]
+  },
+  {
+    "id": "ui.0689",
+    "source": "Research",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0690",
+    "source": "Community",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0691",
+    "source": "Send",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0692",
+    "source": "Choose NUR language",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0693",
+    "source": "Language and writing",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0694",
+    "source": "Saved privately. NUR uses this language for interface copy and Talk.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0695",
+    "source": "AI provider status",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0696",
+    "source": "OPENAI_CONFIGURED · server-side only",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0697",
+    "source": "DISABLED · AI not connected",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0698",
+    "source": "Talk calls OpenAI through the NUR backend. No key is sent to this browser.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0699",
+    "source": "Run the local OpenAI setup, then start NUR in openai mode.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0700",
+    "source": "Language",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0701",
+    "source": "NUR language",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0702",
+    "source": "beta reviewed",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0703",
+    "source": "draft",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0704",
+    "source": "NUR writing preference",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0705",
+    "source": "Roman / transliterated",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0706",
+    "source": "Native script",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0707",
+    "source": "Locale default",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0708",
+    "source": "Save language",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0709",
+    "source": "Saving privately...",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0710",
+    "source": "Language could not be saved.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0711",
+    "source": "Ask NUR",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0712",
+    "source": "Talk in a room",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0713",
+    "source": "that stays yours.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0714",
+    "source": "NUR does not carry this anywhere unless you choose it.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0715",
+    "source": "Start where the pressure is, not where the plan is.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0716",
+    "source": "Holding",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0717",
+    "source": "talk",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0718",
+    "source": "Think deeper",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0719",
+    "source": "challenge",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0720",
+    "source": "summarize",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0721",
+    "source": "Observed",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0722",
+    "source": "Inferred",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0723",
+    "source": "Hypotheses",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0724",
+    "source": "Uncertainty",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0725",
+    "source": "Next move",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0726",
+    "source": "Use this move in Plan",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0727",
+    "source": "Current thread",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0728",
+    "source": "Design continuity without burying the voice underneath it.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0729",
+    "source": "Keep private",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0730",
+    "source": "Save to Journal",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0731",
+    "source": "Make a Plan",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0732",
+    "source": "Record what changed",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0733",
+    "source": "Return outcome",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0734",
+    "source": "Returning",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0735",
+    "source": "only this Orbit",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0736",
+    "source": "change boundary",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0737",
+    "source": "What NUR is holding",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0738",
+    "source": "Correct the model",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0739",
+    "source": "Corrections are saved as owner-scoped evidence, not hidden prompt magic.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0740",
+    "source": "What should NUR stop assuming?",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0741",
+    "source": "Save correction",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0742",
+    "source": "Systems universe",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0743",
+    "source": "A living universe for",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0744",
+    "source": "what you are becoming.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0745",
+    "source": "A private Orbit when you need it. Shared systems when you choose them.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0746",
+    "source": "active systems",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0747",
+    "source": "outcomes returned",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0748",
+    "source": "insights evolving",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0749",
+    "source": "NUR systems constellation map",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0750",
+    "source": "Add system",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0751",
+    "source": "When a life problem needs its own sky.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0752",
+    "source": "System field",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0753",
+    "source": "owner ledger",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0754",
+    "source": "Share this Orbit",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0755",
+    "source": "Research field",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0756",
+    "source": "held open, deliberately.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0757",
+    "source": "has been revoked.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0758",
+    "source": "has expired.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0759",
+    "source": "No expiry — revocable at any time",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0760",
+    "source": "Only these approved sources exist inside this room.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0761",
+    "source": "Ask about this context",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0762",
+    "source": "Answers draw only on the included sources — nothing else can be reached.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0763",
+    "source": "Ask within the approved boundary…",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0764",
+    "source": "Ask",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0765",
+    "source": "The owner's boundary now closes this room. Nothing here is cached, and no answers remain readable.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0766",
+    "source": "Share this Orbit, deliberately.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0767",
+    "source": "A Context Capsule carries only what you approve — never your life, never your voice.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0768",
+    "source": "purpose",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0769",
+    "source": "e.g. Get a designer useful in 20 minutes",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0770",
+    "source": "who can access",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0771",
+    "source": "their email — named, never public",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0772",
+    "source": "what they can do",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0773",
+    "source": "Read only",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0774",
+    "source": "Ask scoped questions",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0775",
+    "source": "expires",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0776",
+    "source": "No expiry (revocable)",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0777",
+    "source": "In 7 days",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0778",
+    "source": "In 30 days",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0779",
+    "source": "Included sources",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0780",
+    "source": "Nothing shareable yet — capture a decision or reference below.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0781",
+    "source": "Capture into this Orbit",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0782",
+    "source": "a decision already made…",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0783",
+    "source": "a reference or constraint…",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0784",
+    "source": "keep decision",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0785",
+    "source": "keep reference",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0786",
+    "source": "Create Context Capsule",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0787",
+    "source": "Capsule live",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0788",
+    "source": "Room address",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0789",
+    "source": "They sign in with their own Orbit; the room opens only for them.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0790",
+    "source": "Existing capsules",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0791",
+    "source": "revoked",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0792",
+    "source": "active · no expiry",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0793",
+    "source": "audit",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0794",
+    "source": "revoke",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0795",
+    "source": "Access audit",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0796",
+    "source": "A capsule needs a purpose, a named recipient, and at least one source.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0797",
+    "source": "Capsule created. The boundary is visible and revocable.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0798",
+    "source": "The capsule could not be created.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0799",
+    "source": "Revoked. The room closed immediately.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0800",
+    "source": "{{0}} persisted Talk turns are available in this private ledger.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0801",
+    "source": "Saved: {{0}}.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0802",
+    "source": "Nothing here is cached, and no answers remain readable.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0803",
+    "source": "{{0}} source stays excluded — the recipient sees the boundary, never the content.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0804",
+    "source": "{{0}} sources stay excluded — the recipient sees the boundary, never the content.",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0805",
+    "source": "Private Orbit",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0806",
+    "source": "Say it plainly...",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.0807",
+    "source": "A Context Capsule copies only explicitly allowlisted Orbit sources. Recipient grants, expiry, audit and revocation remain separate owner-controlled boundaries.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0808",
+    "source": "A bounded room you control.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0809",
+    "source": "A provenance explanation assembled from the owner evidence graph, not hidden chain-of-thought.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0810",
+    "source": "A question moves when context returns.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0811",
+    "source": "AM Projects keeps objective, tasks, bounded agent proposals, evidence, reviews and owner approval in one Project Orbit.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0812",
+    "source": "Agency under your authority.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0813",
+    "source": "Billing without hidden authority.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0814",
+    "source": "Candidate inferences, accepted memories and owner-written context remain separate, editable and deletable inside your private ledger.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0815",
+    "source": "Candidate insight, never silent truth.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0816",
+    "source": "Community is built from real bounded rooms and persisted contributions. No fake people, replies, activity or live public count appears here.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0817",
+    "source": "Consultation keeps lived experience, constraints, disagreement, evidence and the final outcome inside one bounded ORIENT → RETURN path.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0818",
+    "source": "Every inference keeps its evidence, counter-evidence, uncertainty, provenance and owner decision. Acceptance is explicit; correction preserves the original audit trail.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0819",
+    "source": "Evidence changes the model, deliberately.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0820",
+    "source": "Glow is a persisted, source-linked economy. Points appear only after a server-verified action; caps, idempotency and DEMO gates remain active.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0821",
+    "source": "Intent becomes evidence, then a shipped result.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0822",
+    "source": "Language, model access, motion and learning preferences stay in your owner-scoped ledger.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0823",
+    "source": "Memory stays proposed until you choose it.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0824",
+    "source": "Movement becomes visible light.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0825",
+    "source": "NUR can only run a bounded, owner-authored plan through the persisted policy, approval ledger and durable outbox.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0826",
+    "source": "NUR kept the boundary closed instead of inventing data.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0827",
+    "source": "NUR notifications are owner-scoped and factual. There are no fabricated replies, fake urgency or hidden external delivery channels.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0828",
+    "source": "No Context Capsule is shared with this session at this address.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0829",
+    "source": "Nothing sensitive becomes truth by accident.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0830",
+    "source": "Omega is an owner-only cognition ledger: claims, contradictions, predictions and governed learning proposals. It is not sentience and exposes no chain-of-thought.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0831",
+    "source": "Owner preview exposes lifecycle and audit controls, never the recipient's private question composer.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0832",
+    "source": "Plans, entitlements, renewal state and provider handoff come from the billing ledger. NUR never fabricates a purchase or silently changes your subscription.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0833",
+    "source": "Return cues, under your control.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0834",
+    "source": "Review model-generated claim candidates before they enter the owner evidence graph.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0835",
+    "source": "Share a room, never your whole mind.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0836",
+    "source": "Shared signal without private spill.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0837",
+    "source": "Teach NUR without surrendering authority.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0838",
+    "source": "This chamber could not open.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0839",
+    "source": "This room is not available.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0840",
+    "source": "Why NUR changed its mind.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0841",
+    "source": "Your NUR, held on your terms.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0842",
+    "source": "Your contribution enters an owner-scoped review ledger. Consent is explicit, reversible and never authorizes model training by implication.",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0843",
+    "source": "{{0}}'s shared context",
+    "kinds": [
+      "mount:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts"
+    ]
+  },
+  {
+    "id": "ui.0844",
+    "source": "Roman writing",
+    "kinds": [
+      "legacy-seed"
+    ],
+    "locations": [
+      "apps/web/src/lib/i18n.ts"
+    ]
+  },
+  {
+    "id": "ui.1690",
+    "source": "Counter-evidence",
+    "kinds": [
+      "static:element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:1829"
+    ]
+  },
+  {
+    "id": "ui.1691",
+    "source": "/today",
+    "kinds": [
+      "static:text:1"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:2853"
+    ]
+  },
+  {
+    "id": "ui.1692",
+    "source": "Persisted record awaiting review.",
+    "kinds": [
+      "static:text:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Insights.ts:68"
+    ]
+  },
+  {
+    "id": "ui.1693",
+    "source": "OWNER INTERPRETATION FIELD",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Insights.ts:110"
+    ]
+  },
+  {
+    "id": "ui.1694",
+    "source": "Patterns, tensions and possible futures held against persisted owner evidence.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Insights.ts:116"
+    ]
+  },
+  {
+    "id": "ui.1695",
+    "source": "Interpretations",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Insights.ts:143"
+    ]
+  },
+  {
+    "id": "ui.1696",
+    "source": "EVIDENCE STATE",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Insights.ts:151"
+    ]
+  },
+  {
+    "id": "ui.1697",
+    "source": "No reliable insight yet.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Insights.ts:152"
+    ]
+  },
+  {
+    "id": "ui.1698",
+    "source": "NUR needs persisted evidence across time or domains before it surfaces an interpretation.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Insights.ts:157"
+    ]
+  },
+  {
+    "id": "ui.1699",
+    "source": "OPEN HORIZON",
+    "kinds": [
+      "static:text:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Insights.ts:169"
+    ]
+  },
+  {
+    "id": "ui.1700",
+    "source": "Persisted candidate insight",
+    "kinds": [
+      "static:text:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Insights.ts:175"
+    ]
+  },
+  {
+    "id": "ui.1701",
+    "source": "This interpretation is limited to what the owner has recorded.",
+    "kinds": [
+      "static:text:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Insights.ts:193"
+    ]
+  },
+  {
+    "id": "ui.1702",
+    "source": "No action has been proposed.",
+    "kinds": [
+      "static:text:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Insights.ts:195"
+    ]
+  },
+  {
+    "id": "ui.1703",
+    "source": "No candidate interpretation has been persisted.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Insights.ts:207"
+    ]
+  },
+  {
+    "id": "ui.1704",
+    "source": "Insight {{0}}",
+    "kinds": [
+      "static:text:2"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Insights.ts:214"
+    ]
+  },
+  {
+    "id": "ui.1705",
+    "source": "Review state",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Insights.ts:231"
+    ]
+  },
+  {
+    "id": "ui.1706",
+    "source": "Systems, paths and possible futures",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:663"
+    ]
+  },
+  {
+    "id": "ui.1707",
+    "source": "Objects",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:738",
+      "apps/web/src/bridge/v197Timeline.ts:594"
+    ]
+  },
+  {
+    "id": "ui.1708",
+    "source": "Time horizon",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:750"
+    ]
+  },
+  {
+    "id": "ui.1709",
+    "source": "Filters what the Map shows. The full chronology lives on Timeline.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:761"
+    ]
+  },
+  {
+    "id": "ui.1710",
+    "source": "Nothing here yet.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:780",
+      "apps/web/src/bridge/v197Map.ts:1307",
+      "apps/web/src/bridge/v197Timeline.ts:626"
+    ]
+  },
+  {
+    "id": "ui.1711",
+    "source": "Create",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:802"
+    ]
+  },
+  {
+    "id": "ui.1712",
+    "source": "Assembling your Systems and routes…",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:838"
+    ]
+  },
+  {
+    "id": "ui.1713",
+    "source": "Your Map",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:847"
+    ]
+  },
+  {
+    "id": "ui.1714",
+    "source": "Your Map begins with where you are and where you want to move.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:850"
+    ]
+  },
+  {
+    "id": "ui.1715",
+    "source": "Map outline",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1252"
+    ]
+  },
+  {
+    "id": "ui.1716",
+    "source": "NUR suggests",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1361",
+      "apps/web/src/bridge/v197Map.ts:1555"
+    ]
+  },
+  {
+    "id": "ui.1717",
+    "source": "Paths",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1373"
+    ]
+  },
+  {
+    "id": "ui.1718",
+    "source": "Nothing to compare yet",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1377"
+    ]
+  },
+  {
+    "id": "ui.1719",
+    "source": "Select a goal, then Paths compares the routes that actually exist toward it.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1380"
+    ]
+  },
+  {
+    "id": "ui.1720",
+    "source": "Decisions",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1458"
+    ]
+  },
+  {
+    "id": "ui.1721",
+    "source": "No open decision",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1462"
+    ]
+  },
+  {
+    "id": "ui.1722",
+    "source": "Dimension",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1485"
+    ]
+  },
+  {
+    "id": "ui.1723",
+    "source": "NUR's reading",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1510"
+    ]
+  },
+  {
+    "id": "ui.1724",
+    "source": "Nothing selected",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1546",
+      "apps/web/src/bridge/v197Timeline.ts:1069"
+    ]
+  },
+  {
+    "id": "ui.1725",
+    "source": "Select something on the Map to understand its role, evidence and possible movement.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1549"
+    ]
+  },
+  {
+    "id": "ui.1726",
+    "source": "Not confirmed",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1691"
+    ]
+  },
+  {
+    "id": "ui.1727",
+    "source": "NUR proposed this. It is not treated as a real blocker until you say it is.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1694"
+    ]
+  },
+  {
+    "id": "ui.1728",
+    "source": "This object carries no recorded detail beyond its name and place.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1733"
+    ]
+  },
+  {
+    "id": "ui.1729",
+    "source": "Loading the evidence for this object…",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1788"
+    ]
+  },
+  {
+    "id": "ui.1730",
+    "source": "Source: {{0}}",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1806"
+    ]
+  },
+  {
+    "id": "ui.1731",
+    "source": "Supporting",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1811"
+    ]
+  },
+  {
+    "id": "ui.1732",
+    "source": "Nothing supports this yet.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1813"
+    ]
+  },
+  {
+    "id": "ui.1733",
+    "source": "Contradicting",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1815"
+    ]
+  },
+  {
+    "id": "ui.1734",
+    "source": "Nothing argues against this yet.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1817"
+    ]
+  },
+  {
+    "id": "ui.1735",
+    "source": "Missing information",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1821"
+    ]
+  },
+  {
+    "id": "ui.1736",
+    "source": "Nothing has happened to this object yet.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1832"
+    ]
+  },
+  {
+    "id": "ui.1737",
+    "source": "Predictions",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1849"
+    ]
+  },
+  {
+    "id": "ui.1738",
+    "source": "Rests on: {{0}}",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1865"
+    ]
+  },
+  {
+    "id": "ui.1739",
+    "source": "Past its review date — anything resting on this rests on an unchecked assumption.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1870"
+    ]
+  },
+  {
+    "id": "ui.1740",
+    "source": "Outcome: {{0}}",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1874"
+    ]
+  },
+  {
+    "id": "ui.1741",
+    "source": "NUR has made no prediction about this.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1879"
+    ]
+  },
+  {
+    "id": "ui.1742",
+    "source": "What NUR may be wrong about",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1885",
+      "apps/web/src/bridge/v197Timeline.ts:1229"
+    ]
+  },
+  {
+    "id": "ui.1743",
+    "source": "May be wrong about",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Map.ts:1909"
+    ]
+  },
+  {
+    "id": "ui.1744",
+    "source": "Orbit",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:308"
+    ]
+  },
+  {
+    "id": "ui.1745",
+    "source": "People, circles and relational gravity",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:312"
+    ]
+  },
+  {
+    "id": "ui.1746",
+    "source": "Scopes",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:360"
+    ]
+  },
+  {
+    "id": "ui.1747",
+    "source": "Segments",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:383"
+    ]
+  },
+  {
+    "id": "ui.1748",
+    "source": "Context",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:404"
+    ]
+  },
+  {
+    "id": "ui.1749",
+    "source": "Your Orbit begins with one person, one signal, one shared field.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:664"
+    ]
+  },
+  {
+    "id": "ui.1750",
+    "source": "· suggestion",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:744"
+    ]
+  },
+  {
+    "id": "ui.1751",
+    "source": "· {{0}} members",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:781"
+    ]
+  },
+  {
+    "id": "ui.1752",
+    "source": "Group",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:784"
+    ]
+  },
+  {
+    "id": "ui.1753",
+    "source": "Open decision: {{0}}",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:849"
+    ]
+  },
+  {
+    "id": "ui.1754",
+    "source": "Next: {{0}}",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:852",
+      "apps/web/src/bridge/v197Orbit.ts:1108"
+    ]
+  },
+  {
+    "id": "ui.1755",
+    "source": "Select a person or group to explore its Orbit.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:871"
+    ]
+  },
+  {
+    "id": "ui.1756",
+    "source": "That group is no longer here.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:878"
+    ]
+  },
+  {
+    "id": "ui.1757",
+    "source": "{{0}} members · {{1}}",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:883"
+    ]
+  },
+  {
+    "id": "ui.1758",
+    "source": "That person is no longer here.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:909"
+    ]
+  },
+  {
+    "id": "ui.1759",
+    "source": "Suggested move to {{0}} Orbit.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:925"
+    ]
+  },
+  {
+    "id": "ui.1760",
+    "source": "Written by you",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:991"
+    ]
+  },
+  {
+    "id": "ui.1761",
+    "source": "NUR observation, not your words",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:997"
+    ]
+  },
+  {
+    "id": "ui.1762",
+    "source": "Nothing recorded",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:1012"
+    ]
+  },
+  {
+    "id": "ui.1763",
+    "source": "You stated this directly.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:1045"
+    ]
+  },
+  {
+    "id": "ui.1764",
+    "source": "Evidence against this reading:",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:1050"
+    ]
+  },
+  {
+    "id": "ui.1765",
+    "source": "No context is linked to this person yet.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:1079"
+    ]
+  },
+  {
+    "id": "ui.1766",
+    "source": "No open threads with this person.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:1099"
+    ]
+  },
+  {
+    "id": "ui.1767",
+    "source": "Confidence {{0}}",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:1143"
+    ]
+  },
+  {
+    "id": "ui.1768",
+    "source": "Alternative reading: {{0}}",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:1147"
+    ]
+  },
+  {
+    "id": "ui.1769",
+    "source": "Suggested move: {{0}}",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Orbit.ts:1151"
+    ]
+  },
+  {
+    "id": "ui.1770",
+    "source": "Past, present and possible futures",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:540"
+    ]
+  },
+  {
+    "id": "ui.1771",
+    "source": "Assembling your history and horizon…",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:738"
+    ]
+  },
+  {
+    "id": "ui.1772",
+    "source": "Your Timeline begins where memory meets intention.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:748"
+    ]
+  },
+  {
+    "id": "ui.1773",
+    "source": "Unscheduled",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:818"
+    ]
+  },
+  {
+    "id": "ui.1774",
+    "source": "Timeline outline",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:847"
+    ]
+  },
+  {
+    "id": "ui.1775",
+    "source": "Move \"{{0}}\"?",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:876"
+    ]
+  },
+  {
+    "id": "ui.1776",
+    "source": "From {{0}} to {{1}}.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:879"
+    ]
+  },
+  {
+    "id": "ui.1777",
+    "source": "Calendar · This week",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:923"
+    ]
+  },
+  {
+    "id": "ui.1778",
+    "source": "Nothing exact-timed this week.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:927"
+    ]
+  },
+  {
+    "id": "ui.1779",
+    "source": "Horizons",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:956"
+    ]
+  },
+  {
+    "id": "ui.1780",
+    "source": "Loading horizons…",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:959"
+    ]
+  },
+  {
+    "id": "ui.1781",
+    "source": "Nothing here.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:972"
+    ]
+  },
+  {
+    "id": "ui.1782",
+    "source": "Review",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:999"
+    ]
+  },
+  {
+    "id": "ui.1783",
+    "source": "Loading this week's comparison…",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:1002"
+    ]
+  },
+  {
+    "id": "ui.1784",
+    "source": "This week: planned versus actual",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:1008"
+    ]
+  },
+  {
+    "id": "ui.1785",
+    "source": "Recent reviews",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:1045"
+    ]
+  },
+  {
+    "id": "ui.1786",
+    "source": "Deterministic — computed from your own recorded timestamps, no model consulted.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:1056"
+    ]
+  },
+  {
+    "id": "ui.1787",
+    "source": "Select something in time to explore its meaning, dependencies and outcome.",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:1072"
+    ]
+  },
+  {
+    "id": "ui.1788",
+    "source": "Reschedule history",
+    "kinds": [
+      "static:el:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Timeline.ts:1175"
+    ]
+  }
+]

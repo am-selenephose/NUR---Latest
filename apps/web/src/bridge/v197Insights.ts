@@ -1,3 +1,4 @@
+import { v197Copy } from "./v197I18n";
 import INSIGHTS_CSS from "../styles/v197-insights.css?raw";
 import type { V197BridgeSnapshot, V197Insights } from "./v197ApiClient";
 import { claimV197SurfaceHost, releaseV197SurfaceHost } from "./v197SurfaceHost";
@@ -64,7 +65,7 @@ function list(
   for (const row of source.slice(0, 4)) {
     const item = el(document, "li", "nur-insights-review-item");
     item.append(el(document, "span", "nur-insights-review-mark", "*"));
-    item.append(el(document, "span", "", text(row, keys, "Persisted record awaiting review.")));
+    item.append(el(document, "span", "", text(row, keys, v197Copy("Persisted record awaiting review."))));
     items.append(item);
   }
   section.append(items);
@@ -106,13 +107,13 @@ export function renderV197Insights(
   const shell = el(document, "div", "nur-insights-shell");
   const header = el(document, "header", "nur-insights-header");
   const heading = el(document, "div", "nur-insights-heading");
-  heading.append(el(document, "p", "nur-insights-kicker", "OWNER INTERPRETATION FIELD"));
-  heading.append(el(document, "h1", "", "Insights"));
+  heading.append(el(document, "p", "nur-insights-kicker", v197Copy("OWNER INTERPRETATION FIELD")));
+  heading.append(el(document, "h1", "", v197Copy("Insights")));
   heading.append(el(
     document,
     "p",
     "nur-insights-subtitle",
-    "Patterns, tensions and possible futures held against persisted owner evidence.",
+    v197Copy("Patterns, tensions and possible futures held against persisted owner evidence."),
   ));
   const provenance = el(
     document,
@@ -138,8 +139,8 @@ export function renderV197Insights(
 
   const zones = el(document, "div", "nur-insights-zones");
   const navigator = el(document, "nav", "nur-insights-pane nur-insights-nav");
-  navigator.setAttribute("aria-label", "Persisted insights");
-  navigator.append(el(document, "h2", "nur-insights-pane-title", "Interpretations"));
+  navigator.setAttribute("aria-label", v197Copy("Persisted insights"));
+  navigator.append(el(document, "h2", "nur-insights-pane-title", v197Copy("Interpretations")));
   const navList = el(document, "div", "nur-insights-nav-list");
 
   const detail = el(document, "main", "nur-insights-pane nur-insights-detail");
@@ -147,13 +148,13 @@ export function renderV197Insights(
     detail.replaceChildren();
     const row = claims[selected] ?? null;
     if (!row) {
-      detail.append(el(document, "p", "nur-insights-detail-kicker", "EVIDENCE STATE"));
-      detail.append(el(document, "h2", "nur-insights-detail-title", "No reliable insight yet."));
+      detail.append(el(document, "p", "nur-insights-detail-kicker", v197Copy("EVIDENCE STATE")));
+      detail.append(el(document, "h2", "nur-insights-detail-title", v197Copy("No reliable insight yet.")));
       detail.append(el(
         document,
         "p",
         "nur-insights-detail-copy",
-        "NUR needs persisted evidence across time or domains before it surfaces an interpretation.",
+        v197Copy("NUR needs persisted evidence across time or domains before it surfaces an interpretation."),
       ));
       return;
     }
@@ -165,13 +166,13 @@ export function renderV197Insights(
       document,
       "p",
       "nur-insights-detail-kicker",
-      `${text(row, ["truth_status", "epistemic_state"], "CANDIDATE")} / ${text(row, ["time_scale"], "OPEN HORIZON")}`,
+      `${text(row, ["truth_status", "epistemic_state"], "CANDIDATE")} / ${text(row, ["time_scale"], v197Copy("OPEN HORIZON"))}`,
     ));
     detail.append(el(
       document,
       "h2",
       "nur-insights-detail-title",
-      text(row, ["claim_text", "title", "claim"], "Persisted candidate insight"),
+      text(row, ["claim_text", "title", "claim"], v197Copy("Persisted candidate insight")),
     ));
     detail.append(el(
       document,
@@ -189,9 +190,9 @@ export function renderV197Insights(
       ["What NUR may be wrong about", text(
         row,
         ["what_nur_may_be_wrong_about"],
-        "This interpretation is limited to what the owner has recorded.",
+        v197Copy("This interpretation is limited to what the owner has recorded."),
       )],
-      ["Suggested next move", text(row, ["suggested_action"], "No action has been proposed.")],
+      ["Suggested next move", text(row, ["suggested_action"], v197Copy("No action has been proposed."))],
     ] as const;
     for (const [label, value] of evidenceRows) {
       const field = el(document, "div", "nur-insights-field");
@@ -203,14 +204,14 @@ export function renderV197Insights(
   };
 
   if (!claims.length) {
-    navList.append(el(document, "p", "nur-insights-empty", "No candidate interpretation has been persisted."));
+    navList.append(el(document, "p", "nur-insights-empty", v197Copy("No candidate interpretation has been persisted.")));
   } else {
     claims.forEach((row, index) => {
       const button = el(
         document,
         "button",
         "nur-insights-nav-item",
-        text(row, ["title", "claim_text", "claim"], `Insight ${index + 1}`),
+        text(row, ["title", "claim_text", "claim"], v197Copy("Insight {{0}}", { 0: index + 1 })),
       );
       button.type = "button";
       button.setAttribute("aria-pressed", index === selected ? "true" : "false");
@@ -227,7 +228,7 @@ export function renderV197Insights(
   navigator.append(navList);
 
   const review = el(document, "aside", "nur-insights-pane nur-insights-review");
-  review.append(el(document, "h2", "nur-insights-pane-title", "Review state"));
+  review.append(el(document, "h2", "nur-insights-pane-title", v197Copy("Review state")));
   review.append(list(
     document,
     "Open tensions",

@@ -51,10 +51,14 @@ async def test_locale_catalog_has_35_truthful_slots_and_priority_writing_variant
     assert len(body["locales"]) == 35
     assert len({row["locale"] for row in body["locales"]}) == 35
     assert set(body["quality_states"]) == {
-        "CORE_POLISHED",
         "BETA_REVIEWED",
         "DRAFT_MACHINE_TRANSLATED",
         "MISSING_REVIEW",
+    }
+    assert set(body["catalog_quality_states"]) == {
+        "MACHINE_DRAFT",
+        "TECHNICALLY_COMPLETE",
+        "HUMAN_REVIEWED",
     }
 
     by_locale = {row["locale"]: row for row in body["locales"]}
@@ -64,7 +68,7 @@ async def test_locale_catalog_has_35_truthful_slots_and_priority_writing_variant
             "label": "Roman Urdu",
             "script": "Latn",
             "direction": "ltr",
-            "quality_state": "MISSING_REVIEW",
+            "quality_state": "MACHINE_DRAFT",
             "priority_for_review": True,
         },
         {
@@ -72,7 +76,7 @@ async def test_locale_catalog_has_35_truthful_slots_and_priority_writing_variant
             "label": "Urdu script",
             "script": "Arab",
             "direction": "rtl",
-            "quality_state": "MISSING_REVIEW",
+            "quality_state": "MACHINE_DRAFT",
             "priority_for_review": True,
         },
     ]
@@ -81,7 +85,7 @@ async def test_locale_catalog_has_35_truthful_slots_and_priority_writing_variant
         "Hindi",
     ]
     assert all(
-        variant["quality_state"] == "MISSING_REVIEW"
+        variant["quality_state"] == "MACHINE_DRAFT"
         for locale in body["locales"]
         for variant in locale["variants"]
     )

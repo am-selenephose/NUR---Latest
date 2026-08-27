@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { criticalCopyFor, navigationCopyFor } from "../lib/i18n";
 import type { V197BridgeSnapshot } from "../bridge/v197ApiClient";
 import { hydrateTrackAV197, renderInsightInspection, renderWorldLens } from "../bridge/v197Hydration";
 
@@ -180,18 +181,17 @@ describe("Track A V197 persisted hydration", () => {
 
     expect(document.documentElement.lang).toBe("ur");
     expect(document.documentElement.dir).toBe("ltr");
-    expect(document.querySelector("#page-talk .page-kicker")?.textContent).toBe("NUR se baat");
-    expect(document.querySelector("#talk-title")?.childNodes[0]?.nodeValue).toBe("Apne kamray mein baat");
-    expect(document.querySelector("#talk-title em")?.textContent).toBe("jo tera rehta hai.");
-    expect(document.querySelector("#page-talk .page-sub")?.textContent).toBe(
-      "NUR isay kahin nahi le jata jab tak tu khud na chahay.",
-    );
-    expect(document.querySelector("[data-nur-talk-empty]")?.textContent).toContain(
-      "Abhi koi persisted Talk turn nahi.",
-    );
-    expect(document.querySelector("#page-systems .page-kicker")?.textContent).toContain("Systems universe");
-    expect(document.querySelector("#systems-title")?.childNodes[0]?.nodeValue).toBe("Zinda universe");
-    expect(document.querySelector("#systems-title em")?.textContent).toBe("jo tu ban rahi hai.");
+    const urNavigation = navigationCopyFor("ur");
+    const urCritical = criticalCopyFor("ur");
+    expect(document.querySelector("#page-talk .page-kicker")?.textContent).toBe(urCritical.talk.kicker);
+    expect(document.querySelector("#talk-title")?.childNodes[0]?.nodeValue).toBe(urCritical.talk.title);
+    expect(document.querySelector("#talk-title em")?.textContent).toBe(urCritical.talk.titleEmphasis);
+    expect(document.querySelector("#page-talk .page-sub")?.textContent).toBe(urCritical.talk.subtitle);
+    expect(document.querySelector("[data-nur-talk-empty]")?.textContent).toContain(urCritical.talk.holdingEmpty);
+    expect(document.querySelector("#page-systems .page-kicker")?.textContent).toContain(urCritical.systems.kicker);
+    expect(document.querySelector("#systems-title")?.childNodes[0]?.nodeValue).toBe(urCritical.systems.title);
+    expect(document.querySelector("#systems-title em")?.textContent).toBe(urCritical.systems.titleEmphasis);
+    expect(urNavigation.talk).toBeTruthy();
   });
 
   it("replaces fake V197 demo content with owner-scoped persisted state", () => {

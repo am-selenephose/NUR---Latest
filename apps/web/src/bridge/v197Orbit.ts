@@ -1,3 +1,4 @@
+import { v197Copy } from "./v197I18n";
 /**
  * Orbit — the relational world, rendered V197-native.
  *
@@ -304,17 +305,17 @@ function orbitHeader(doc: Document, state: OrbitState, actions: Actions): HTMLEl
   const header = el(doc, "header", "nur-orbit-header");
 
   const titleBlock = el(doc, "div");
-  const title = el(doc, "h1", "nur-orbit-title", "Orbit");
+  const title = el(doc, "h1", "nur-orbit-title", v197Copy("Orbit"));
   markV197HolographicWordmark(title);
   titleBlock.append(title);
   titleBlock.append(
-    el(doc, "p", "nur-orbit-subtitle", "People, circles and relational gravity"),
+    el(doc, "p", "nur-orbit-subtitle", v197Copy("People, circles and relational gravity")),
   );
   header.append(titleBlock);
 
   const switcher = el(doc, "div", "nur-orbit-segmented");
   switcher.setAttribute("role", "tablist");
-  switcher.setAttribute("aria-label", "Orbit view");
+  switcher.setAttribute("aria-label", v197Copy("Orbit view"));
   for (const [view, label] of [
     ["orbit", "Orbit"], ["list", "List"], ["threads", "Threads"],
   ] as [OrbitView, string][]) {
@@ -331,8 +332,8 @@ function orbitHeader(doc: Document, state: OrbitState, actions: Actions): HTMLEl
 
   const search = el(doc, "input", "nur-orbit-search");
   search.type = "search";
-  search.placeholder = "Search people, groups, plans or threads";
-  search.setAttribute("aria-label", "Search people, groups, plans or threads");
+  search.placeholder = v197Copy("Search people, groups, plans or threads");
+  search.setAttribute("aria-label", v197Copy("Search people, groups, plans or threads"));
   search.value = state.query;
   search.addEventListener("input", () => {
     scheduleV197SearchCommit(doc, SEARCH_KEY, search.value, actions.setQuery);
@@ -350,13 +351,13 @@ function orbitHeader(doc: Document, state: OrbitState, actions: Actions): HTMLEl
 
 function orbitLeftRail(doc: Document, state: OrbitState, actions: Actions): HTMLElement {
   const rail = el(doc, "aside", "nur-orbit-rail");
-  rail.setAttribute("aria-label", "Orbit filters");
+  rail.setAttribute("aria-label", v197Copy("Orbit filters"));
 
   const people = state.field.people;
   const countIn = (band: OrbitBand) => people.filter((p) => p.orbit_level === band).length;
 
   const scopes = el(doc, "section", "nur-orbit-rail-section");
-  scopes.append(el(doc, "h2", "nur-orbit-rail-heading", "Scopes"));
+  scopes.append(el(doc, "h2", "nur-orbit-rail-heading", v197Copy("Scopes")));
   const scopeChips = el(doc, "div", "nur-orbit-chips");
   const scopeDefs: [OrbitBand | "ALL" | "GROUPS", string, number][] = [
     ["ALL", "All", people.length],
@@ -379,7 +380,7 @@ function orbitLeftRail(doc: Document, state: OrbitState, actions: Actions): HTML
   // Smart segments, each computed from real rows. A segment with nothing in it
   // shows zero rather than being hidden, so the owner can see it is empty.
   const segments = el(doc, "section", "nur-orbit-rail-section");
-  segments.append(el(doc, "h2", "nur-orbit-rail-heading", "Segments"));
+  segments.append(el(doc, "h2", "nur-orbit-rail-heading", v197Copy("Segments")));
   const segChips = el(doc, "div", "nur-orbit-chips");
   const active = people.filter((p) => activityOf(p) === "active").length;
   const dormant = people.filter((p) => activityOf(p) === "dormant").length;
@@ -400,7 +401,7 @@ function orbitLeftRail(doc: Document, state: OrbitState, actions: Actions): HTML
   rail.append(segments);
 
   const create = el(doc, "section", "nur-orbit-rail-section");
-  create.append(el(doc, "h2", "nur-orbit-rail-heading", "Context"));
+  create.append(el(doc, "h2", "nur-orbit-rail-heading", v197Copy("Context")));
   // Import is declared and honestly disabled: suggesting people from Talk and
   // Journal requires an approval step that does not exist yet, and adding
   // inferred people without it is exactly what the spec forbids.
@@ -626,7 +627,7 @@ function orbitCanvas(doc: Document, state: OrbitState, actions: Actions): HTMLEl
     const label = svg(doc, "text", {
       x: at.x, y: at.y + 40, "text-anchor": "middle", class: "nur-orbit-node-label",
     });
-    label.textContent = `${groupRow.name} · ${groupRow.member_count}`;
+    label.textContent = v197Copy("{{0}} · {{1}}", { 0: groupRow.name, 1: groupRow.member_count });
     node.append(label);
     const tip = svg(doc, "title", {});
     tip.textContent =
@@ -641,7 +642,7 @@ function orbitCanvas(doc: Document, state: OrbitState, actions: Actions): HTMLEl
 
   const anchor = el(doc, "div", "nur-orbit-anchor-sigil");
   anchor.setAttribute("role", "img");
-  anchor.setAttribute("aria-label", "You - your relational center");
+  anchor.setAttribute("aria-label", v197Copy("You - your relational center"));
   anchor.dataset.nurOrbitAnchor = "v197-startup-sigil";
   anchor.append(createV197StartupStar(doc));
   surface.append(anchor);
@@ -660,7 +661,7 @@ function orbitEmptyState(doc: Document, _state: OrbitState, actions: Actions): H
   const empty = el(doc, "div", "nur-orbit-empty");
   empty.dataset.nurOrbitEmptyLayout = "bottom-footer";
   empty.append(el(doc, "p", undefined,
-    "Your Orbit begins with one person, one signal, one shared field."));
+    v197Copy("Your Orbit begins with one person, one signal, one shared field.")));
   const row = el(doc, "div", "nur-orbit-empty-actions");
   const add = capsule(doc, "✦ Add first person", "primary");
   add.addEventListener("click", () => actions.addPerson());
@@ -708,7 +709,7 @@ function orbitListView(doc: Document, state: OrbitState, actions: Actions): HTML
 
   const list = el(doc, "div", "nur-orbit-list");
   list.setAttribute("role", "table");
-  list.setAttribute("aria-label", "Orbit people");
+  list.setAttribute("aria-label", v197Copy("Orbit people"));
 
   const head = el(doc, "div", "nur-orbit-list-head");
   head.setAttribute("role", "row");
@@ -740,7 +741,7 @@ function orbitListView(doc: Document, state: OrbitState, actions: Actions): HTML
     const name = el(doc, "div", "nur-orbit-row-name");
     name.append(el(doc, "strong", undefined, person.display_name));
     if (person.orbit_level_suggestion) {
-      const flag = el(doc, "span", "nur-orbit-privacy", "· suggestion");
+      const flag = el(doc, "span", "nur-orbit-privacy", v197Copy("· suggestion"));
       flag.title = person.orbit_level_suggestion_reason ?? "";
       name.append(flag);
     }
@@ -777,10 +778,10 @@ function orbitListView(doc: Document, state: OrbitState, actions: Actions): HTML
     if (state.selected?.id === group.id) row.setAttribute("aria-selected", "true");
     const name = el(doc, "div", "nur-orbit-row-name");
     name.append(el(doc, "strong", undefined, group.name));
-    name.append(el(doc, "span", "nur-orbit-privacy", `· ${group.member_count} members`));
+    name.append(el(doc, "span", "nur-orbit-privacy", v197Copy("· {{0}} members", { 0: group.member_count })));
     row.append(name);
     const band = el(doc, "div");
-    const pill = el(doc, "span", "nur-orbit-band", "Group");
+    const pill = el(doc, "span", "nur-orbit-band", v197Copy("Group"));
     pill.dataset.band = "UNPLACED";
     band.append(pill);
     row.append(band);
@@ -845,10 +846,10 @@ function orbitThreadsView(doc: Document, state: OrbitState, actions: Actions): H
         `${nameFor(thread)} · ${relativeDate(thread.last_event_at)}`));
       if (thread.open_decision) {
         card.append(el(doc, "div", "nur-orbit-item-meta",
-          `Open decision: ${thread.open_decision}`));
+          v197Copy("Open decision: {{0}}", { 0: thread.open_decision })));
       }
       if (thread.next_action) {
-        card.append(el(doc, "div", "nur-orbit-item-meta", `Next: ${thread.next_action}`));
+        card.append(el(doc, "div", "nur-orbit-item-meta", v197Copy("Next: {{0}}", { 0: thread.next_action })));
       }
       section.append(card);
     }
@@ -862,24 +863,24 @@ function orbitThreadsView(doc: Document, state: OrbitState, actions: Actions): H
 
 function orbitDetailPanel(doc: Document, state: OrbitState, actions: Actions): HTMLElement {
   const panel = el(doc, "aside", "nur-orbit-detail");
-  panel.setAttribute("aria-label", "Orbit detail");
+  panel.setAttribute("aria-label", v197Copy("Orbit detail"));
   panel.setAttribute("role", "region");
 
   if (!state.selected) {
     panel.append(el(doc, "p", "nur-orbit-detail-empty",
-      "Select a person or group to explore its Orbit."));
+      v197Copy("Select a person or group to explore its Orbit.")));
     return panel;
   }
 
   if (state.selected.type === "GROUP") {
     const group = state.field.groups.find((g) => g.id === state.selected?.id);
     if (!group) {
-      panel.append(el(doc, "p", "nur-orbit-detail-empty", "That group is no longer here."));
+      panel.append(el(doc, "p", "nur-orbit-detail-empty", v197Copy("That group is no longer here.")));
       return panel;
     }
     panel.append(el(doc, "h2", "nur-orbit-detail-name", group.name));
     panel.append(el(doc, "p", "nur-orbit-detail-meta",
-      `${group.member_count} members · ${group.privacy_mode.replace(/_/g, " ").toLowerCase()}`));
+      v197Copy("{{0}} members · {{1}}", { 0: group.member_count, 1: group.privacy_mode.replace(/_/g, " ").toLowerCase() })));
     if (group.purpose) panel.append(el(doc, "p", "nur-orbit-note", group.purpose));
 
     const actionsRow = el(doc, "div", "nur-orbit-actions");
@@ -891,7 +892,7 @@ function orbitDetailPanel(doc: Document, state: OrbitState, actions: Actions): H
         "Group NUR is off for this circle. It needs a shared-context privacy mode, "
         + "because a shared assistant must not read context no member agreed to share.";
     } else {
-      openNur.title = "Group NUR workspace is not built yet.";
+      openNur.title = v197Copy("Group NUR workspace is not built yet.");
       openNur.disabled = true;
     }
     actionsRow.append(openNur);
@@ -905,7 +906,7 @@ function orbitDetailPanel(doc: Document, state: OrbitState, actions: Actions): H
 
   const person = state.field.people.find((p) => p.id === state.selected?.id);
   if (!person) {
-    panel.append(el(doc, "p", "nur-orbit-detail-empty", "That person is no longer here."));
+    panel.append(el(doc, "p", "nur-orbit-detail-empty", v197Copy("That person is no longer here.")));
     return panel;
   }
 
@@ -921,7 +922,7 @@ function orbitDetailPanel(doc: Document, state: OrbitState, actions: Actions): H
   if (person.orbit_level_suggestion) {
     const box = el(doc, "div", "nur-orbit-why");
     box.append(el(doc, "div", undefined,
-      `Suggested move to ${BAND_LABEL[person.orbit_level_suggestion]} Orbit.`));
+      v197Copy("Suggested move to {{0}} Orbit.", { 0: BAND_LABEL[person.orbit_level_suggestion] })));
     box.append(el(doc, "div", "nur-orbit-item-meta",
       person.orbit_level_suggestion_reason ?? ""));
     const row = el(doc, "div", "nur-orbit-actions");
@@ -987,13 +988,13 @@ function overviewTab(
   if (person.user_summary) {
     const box = el(doc, "div", "nur-orbit-item");
     box.append(el(doc, "div", undefined, person.user_summary));
-    box.append(el(doc, "div", "nur-orbit-item-meta", "Written by you"));
+    box.append(el(doc, "div", "nur-orbit-item-meta", v197Copy("Written by you")));
     wrap.append(box);
   }
   if (person.nur_summary) {
     const box = el(doc, "div", "nur-orbit-item");
     box.append(el(doc, "div", undefined, person.nur_summary));
-    box.append(el(doc, "div", "nur-orbit-item-meta", "NUR observation, not your words"));
+    box.append(el(doc, "div", "nur-orbit-item-meta", v197Copy("NUR observation, not your words")));
     wrap.append(box);
   }
 
@@ -1008,7 +1009,7 @@ function overviewTab(
     card.append(top);
 
     if (!best) {
-      card.append(el(doc, "div", "nur-orbit-item-meta", "Nothing recorded"));
+      card.append(el(doc, "div", "nur-orbit-item-meta", v197Copy("Nothing recorded")));
       wrap.append(card);
       continue;
     }
@@ -1041,12 +1042,12 @@ function overviewTab(
           }
           box.append(list);
         } else if (signal.basis === "USER_STATED") {
-          box.append(el(doc, "div", undefined, "You stated this directly."));
+          box.append(el(doc, "div", undefined, v197Copy("You stated this directly.")));
         }
         const against = signal.contradictory_evidence ?? [];
         if (against.length) {
           const doubt = el(doc, "div", "nur-orbit-why-doubt");
-          doubt.append(el(doc, "div", undefined, "Evidence against this reading:"));
+          doubt.append(el(doc, "div", undefined, v197Copy("Evidence against this reading:")));
           const list = el(doc, "ul");
           for (const item of against) list.append(el(doc, "li", undefined, JSON.stringify(item)));
           doubt.append(list);
@@ -1075,7 +1076,7 @@ function contextTab(doc: Document, state: OrbitState): HTMLElement {
   const wrap = el(doc, "div");
   if (state.context.length === 0) {
     wrap.append(el(doc, "p", "nur-orbit-note",
-      "No context is linked to this person yet."));
+      v197Copy("No context is linked to this person yet.")));
     return wrap;
   }
   for (const link of state.context) {
@@ -1095,7 +1096,7 @@ function contextTab(doc: Document, state: OrbitState): HTMLElement {
 function threadsTab(doc: Document, state: OrbitState): HTMLElement {
   const wrap = el(doc, "div");
   if (state.personThreads.length === 0) {
-    wrap.append(el(doc, "p", "nur-orbit-note", "No open threads with this person."));
+    wrap.append(el(doc, "p", "nur-orbit-note", v197Copy("No open threads with this person.")));
     return wrap;
   }
   for (const thread of state.personThreads) {
@@ -1104,7 +1105,7 @@ function threadsTab(doc: Document, state: OrbitState): HTMLElement {
     card.append(el(doc, "div", "nur-orbit-item-meta",
       `${thread.status.replace(/_/g, " ").toLowerCase()} · ${relativeDate(thread.last_event_at)}`));
     if (thread.next_action) {
-      card.append(el(doc, "div", "nur-orbit-item-meta", `Next: ${thread.next_action}`));
+      card.append(el(doc, "div", "nur-orbit-item-meta", v197Copy("Next: {{0}}", { 0: thread.next_action })));
     }
     wrap.append(card);
   }
@@ -1139,20 +1140,20 @@ function insightsTab(doc: Document, state: OrbitState): HTMLElement {
       card.append(list);
     }
     if (insight.confidence !== null && insight.confidence !== undefined) {
-      card.append(el(doc, "div", "nur-orbit-item-meta", `Confidence ${insight.confidence}`));
+      card.append(el(doc, "div", "nur-orbit-item-meta", v197Copy("Confidence {{0}}", { 0: insight.confidence })));
     }
     if (insight.alternative_interpretation) {
       card.append(el(doc, "div", "nur-orbit-item-meta",
-        `Alternative reading: ${insight.alternative_interpretation}`));
+        v197Copy("Alternative reading: {{0}}", { 0: insight.alternative_interpretation })));
     }
     if (insight.recommended_move) {
       card.append(el(doc, "div", "nur-orbit-item-meta",
-        `Suggested move: ${insight.recommended_move}`));
+        v197Copy("Suggested move: {{0}}", { 0: insight.recommended_move })));
     }
     // Always last and always present — the schema will not store an insight
     // without it, so it can be rendered unconditionally.
     card.append(el(doc, "div", "nur-orbit-why-doubt",
-      `What NUR may be wrong about: ${String(insight.may_be_wrong_about ?? "")}`));
+      v197Copy("What NUR may be wrong about: {{0}}", { 0: String(insight.may_be_wrong_about ?? "") })));
     wrap.append(card);
   }
   return wrap;

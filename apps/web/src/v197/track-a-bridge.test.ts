@@ -1,9 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { CORE_COPY, navigationCopyFor } from "../lib/i18n";
 import {
   V197_LOCALE_META,
   applyV197Locale,
   directionForPreference,
+  setActiveV197Catalog,
   ensureV197LanguageControls,
 } from "../bridge/v197I18n";
 import { renderPersistedGlow } from "../bridge/v197Rewards";
@@ -87,9 +89,10 @@ describe("Track A V197 translation bridge", () => {
 
     expect(document.documentElement.lang).toBe("ur");
     expect(document.documentElement.dir).toBe("ltr");
-    expect(document.querySelector('[data-page="today"] .clean-nav-title')?.textContent).toBe("Aaj");
-    expect(document.querySelector('[data-page="talk"] .clean-nav-title')?.textContent).toBe("Baat");
-    expect(document.querySelector("#talk-input")?.getAttribute("placeholder")).toBe("Seedha bolo...");
+    const urNavigation = navigationCopyFor("ur");
+    expect(document.querySelector('[data-page="today"] .clean-nav-title')?.textContent).toBe(urNavigation.today);
+    expect(document.querySelector('[data-page="talk"] .clean-nav-title')?.textContent).toBe(urNavigation.talk);
+    expect(document.querySelector("#talk-input")?.getAttribute("placeholder")).toBe(CORE_COPY.ur.askPlaceholder);
     expect(document.querySelector(".nur-holo-word")?.textContent).toBe("NUR");
   });
 
@@ -98,9 +101,9 @@ describe("Track A V197 translation bridge", () => {
     applyV197Locale(document, "ur", "roman");
 
     expect(document.querySelector('[data-world-tab="map"] .nur-exact-mini-host')?.textContent).toBe("STAR_GEOMETRY");
-    expect(document.querySelector('[data-world-tab="map"] .world-label')?.textContent).toBe("Naqsha");
+    expect(document.querySelector('[data-world-tab="map"] .world-label')?.textContent).toBe(navigationCopyFor("ur").map);
     expect(document.querySelector('.mobile-tabs [data-page="today"] .nur-exact-mini-host')?.textContent).toBe("MOBILE_STAR");
-    expect(document.querySelector('.mobile-tabs [data-page="today"] .mobile-label')?.textContent).toBe("Aaj");
+    expect(document.querySelector('.mobile-tabs [data-page="today"] .mobile-label')?.textContent).toBe(navigationCopyFor("ur").today);
   });
 
   it("mounts all locale slots inside the existing V197 scope chamber", async () => {
@@ -117,14 +120,24 @@ describe("Track A V197 translation bridge", () => {
     const locale = document.querySelector<HTMLSelectElement>("#nur-v197-locale");
     expect(locale?.options).toHaveLength(35);
     expect(locale?.selectedOptions[0]?.textContent).toContain("한국어");
+    const writing = document.querySelector<HTMLSelectElement>("#nur-v197-writing-preference");
+    expect(writing?.options).toHaveLength(1);
+    expect(locale).not.toBeNull();
+    expect(writing).not.toBeNull();
+    locale!.value = "ur";
+    locale!.dispatchEvent(new Event("change"));
+    expect([...writing!.options].map(option => option.value)).toEqual(["roman", "script"]);
+    writing!.value = "script";
     document.querySelector<HTMLButtonElement>("#nur-v197-language-save")?.click();
     await Promise.resolve();
-    expect(save).toHaveBeenCalledWith("ko", "default");
+    await Promise.resolve();
+    expect(save).toHaveBeenLastCalledWith("ur", "script");
   });
 });
 
 describe("Track A persisted Glow renderer", () => {
   it("replaces fake rows using only server-confirmed transactions and streaks", () => {
+    setActiveV197Catalog("en", "default");
     const document = fixture();
     const onReward = vi.fn();
 
