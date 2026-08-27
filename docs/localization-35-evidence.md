@@ -43,7 +43,7 @@ The visual reconciliation also made locale writing preference an end-to-end conc
 
 ## Exact-head GitHub Actions
 
-The corrected commit is `389691656d977a0a256ef86cc6d7bfc626e8eb0a`. Exact-head NUR Readiness run **33070264599** completed successfully with both required jobs green:
+The corrected final commit is `3a29c086806aa1778f1cb6f2958d63497d97436f`. Exact-head NUR Readiness run **33070955129** completed successfully with both required jobs green:
 
 | Job | Result |
 |---|---|
@@ -78,4 +78,4 @@ The machine-generated catalogs were prepared at build time with local Argos Tran
 
 ## Repository and PR state
 
-The final branch is `codex/nur-final-closure-20260820`. Local HEAD equals the remote branch HEAD and PR #5 HEAD at `389691656d977a0a256ef86cc6d7bfc626e8eb0a`. PR #5 remains **OPEN / DRAFT**. No merge and no tag were performed.
+The final branch is `codex/nur-final-closure-20260820`. Local HEAD equals the remote branch HEAD and PR #5 HEAD at `3a29c086806aa1778f1cb6f2958d63497d97436f`. PR #5 remains **OPEN / DRAFT**. No merge and no tag were performed.
