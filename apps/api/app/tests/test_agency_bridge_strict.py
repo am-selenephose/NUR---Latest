@@ -341,6 +341,316 @@ async def test_agency_step_dependency_state_persists_blocked(client: AsyncClient
         assert db_steps["step_b"].state == "BLOCKED"
 
 
+@pytest.mark.asyncio
+async def test_agency_bridge_preserves_executor_and_security_reviewer_roles(
+    client: AsyncClient,
+    super_engine,
+):
+    """The real Brain-to-Agency bridge must preserve execution and review roles exactly."""
+    res, _, _ = await register_user(client)
+    owner_user_id = uuid.UUID(res.json()["id"])
+
+    async with AsyncSession(super_engine) as db:
+        await set_user_context(db, owner_user_id)
+        db.add(AgentPolicy(
+            owner_user_id=owner_user_id,
+            initiative_level="DELEGATED",
+            max_risk_class="R1_PRIVATE_DRAFT",
+            permitted_tools=["create_draft_plan", "get_today_state"],
+            auto_run_tools=["get_today_state"],
+        ))
+        await db.flush()
+
+        proposal = WorkflowProposal(
+            task_id=uuid.uuid4(),
+            title="Implement then independently review",
+            rationale="The security reviewer must remain independent and read-only.",
+            steps=[
+                WorkflowStepProposal(
+                    key="implement",
+                    title="Draft the implementation plan",
+                    role="implementer",
+                    description="Create the bounded private draft.",
+                    tool_key="create_draft_plan",
+                    tool_version="1",
+                    arguments={"title": "Implementation", "steps": ["Ship safely"]},
+                ),
+                WorkflowStepProposal(
+                    key="security_review",
+                    title="Review the implementation",
+                    role="security_reviewer",
+                    description="Read current owner state after implementation.",
+                    tool_key="get_today_state",
+                    tool_version="1",
+                    arguments={},
+                    dependencies=["implement"],
+                ),
+            ],
+        )
+
+        workflow, compile_res = await submit_workflow_proposal(
+            db,
+            owner_user_id=owner_user_id,
+            proposal=proposal,
+        )
+
+        assert compile_res.ok is True
+        assert workflow is not None
+        assert [(step.key, step.role) for step in compile_res.steps] == [
+            ("implement", "implementer"),
+            ("security_review", "security_reviewer"),
+        ]
+
+        from sqlalchemy import select
+
+        rows = (
+            await db.execute(
+                select(AgentStep)
+                .where(AgentStep.workflow_id == workflow.id)
+                .order_by(AgentStep.ordinal)
+            )
+        ).scalars().all()
+        assert [(step.key, step.role) for step in rows] == [
+            ("implement", "implementer"),
+            ("security_review", "security_reviewer"),
+        ]
+
+
+@pytest.mark.asyncio
+async def test_agency_bridge_rejects_mutating_security_reviewer(
+    client: AsyncClient,
+    super_engine,
+):
+    """A verifier role must hit the compiler's read-only rule through the real bridge."""
+    res, _, _ = await register_user(client)
+    owner_user_id = uuid.UUID(res.json()["id"])
+
+    async with AsyncSession(super_engine) as db:
+        await set_user_context(db, owner_user_id)
+        db.add(AgentPolicy(
+            owner_user_id=owner_user_id,
+            initiative_level="SUGGEST",
+            max_risk_class="R1_PRIVATE_DRAFT",
+            permitted_tools=["create_draft_plan"],
+            auto_run_tools=[],
+        ))
+        await db.flush()
+
+        proposal = WorkflowProposal(
+            task_id=uuid.uuid4(),
+            title="Invalid mutating review",
+            rationale="The reviewer must not write the result it reviews.",
+            steps=[
+                WorkflowStepProposal(
+                    key="implement",
+                    title="Implement",
+                    role="implementer",
+                    description="Create the bounded draft.",
+                    tool_key="create_draft_plan",
+                    tool_version="1",
+                    arguments={"title": "Implementation", "steps": ["Draft"]},
+                ),
+                WorkflowStepProposal(
+                    key="security_review",
+                    title="Mutating review",
+                    role="security_reviewer",
+                    description="This invalid reviewer attempts a mutation.",
+                    tool_key="create_draft_plan",
+                    tool_version="1",
+                    arguments={"title": "Review", "steps": ["Mutate"]},
+                    dependencies=["implement"],
+                ),
+            ],
+        )
+
+        workflow, compile_res = await submit_workflow_proposal(
+            db,
+            owner_user_id=owner_user_id,
+            proposal=proposal,
+        )
+
+        assert workflow is None
+        assert compile_res.ok is False
+        assert any(
+            error.code == "VERIFIER_MUTATES" and error.step_key == "security_review"
+            for error in compile_res.errors
+        )
+
+
+@pytest.mark.asyncio
+async def test_agency_bridge_rejects_same_role_self_verification(
+    client: AsyncClient,
+    super_engine,
+):
+    """A reviewer cannot verify work performed by the same reviewer role."""
+    res, _, _ = await register_user(client)
+    owner_user_id = uuid.UUID(res.json()["id"])
+
+    async with AsyncSession(super_engine) as db:
+        await set_user_context(db, owner_user_id)
+        db.add(AgentPolicy(
+            owner_user_id=owner_user_id,
+            initiative_level="DELEGATED",
+            max_risk_class="R0_READ_ONLY",
+            permitted_tools=["get_today_state"],
+            auto_run_tools=["get_today_state"],
+        ))
+        await db.flush()
+
+        proposal = WorkflowProposal(
+            task_id=uuid.uuid4(),
+            title="Invalid self verification",
+            rationale="A security reviewer cannot review its own security-review step.",
+            steps=[
+                WorkflowStepProposal(
+                    key="operator_read",
+                    title="Read current state",
+                    role="operator",
+                    description="Read owner state.",
+                    tool_key="get_today_state",
+                    tool_version="1",
+                    arguments={},
+                ),
+                WorkflowStepProposal(
+                    key="first_review",
+                    title="First security review",
+                    role="security_reviewer",
+                    description="Review operator output.",
+                    tool_key="get_today_state",
+                    tool_version="1",
+                    arguments={},
+                    dependencies=["operator_read"],
+                ),
+                WorkflowStepProposal(
+                    key="second_review",
+                    title="Second security review",
+                    role="security_reviewer",
+                    description="Invalidly review the same role's work.",
+                    tool_key="get_today_state",
+                    tool_version="1",
+                    arguments={},
+                    dependencies=["first_review"],
+                ),
+            ],
+        )
+
+        workflow, compile_res = await submit_workflow_proposal(
+            db,
+            owner_user_id=owner_user_id,
+            proposal=proposal,
+        )
+
+        assert workflow is None
+        assert compile_res.ok is False
+        assert any(
+            error.code == "SELF_VERIFICATION" and error.step_key == "second_review"
+            for error in compile_res.errors
+        )
+
+
+@pytest.mark.asyncio
+async def test_agency_bridge_rejects_verifier_without_subject(
+    client: AsyncClient,
+    super_engine,
+):
+    """A verifier must depend on work produced by an independent role."""
+    res, _, _ = await register_user(client)
+    owner_user_id = uuid.UUID(res.json()["id"])
+
+    async with AsyncSession(super_engine) as db:
+        await set_user_context(db, owner_user_id)
+        db.add(AgentPolicy(
+            owner_user_id=owner_user_id,
+            initiative_level="DELEGATED",
+            max_risk_class="R0_READ_ONLY",
+            permitted_tools=["get_today_state"],
+            auto_run_tools=["get_today_state"],
+        ))
+        await db.flush()
+
+        proposal = WorkflowProposal(
+            task_id=uuid.uuid4(),
+            title="Invalid subjectless verification",
+            rationale="A review step cannot verify work that does not exist.",
+            steps=[
+                WorkflowStepProposal(
+                    key="security_review",
+                    title="Review without a subject",
+                    role="security_reviewer",
+                    description="Read owner state without an upstream execution step.",
+                    tool_key="get_today_state",
+                    tool_version="1",
+                    arguments={},
+                ),
+            ],
+        )
+
+        workflow, compile_res = await submit_workflow_proposal(
+            db,
+            owner_user_id=owner_user_id,
+            proposal=proposal,
+        )
+
+        assert workflow is None
+        assert compile_res.ok is False
+        assert any(
+            error.code == "VERIFIER_WITHOUT_SUBJECT" and error.step_key == "security_review"
+            for error in compile_res.errors
+        )
+
+
+@pytest.mark.asyncio
+async def test_agency_bridge_rejects_dangling_dependency(
+    client: AsyncClient,
+    super_engine,
+):
+    """A proposal cannot reference an upstream step that is absent from its DAG."""
+    res, _, _ = await register_user(client)
+    owner_user_id = uuid.UUID(res.json()["id"])
+
+    async with AsyncSession(super_engine) as db:
+        await set_user_context(db, owner_user_id)
+        db.add(AgentPolicy(
+            owner_user_id=owner_user_id,
+            initiative_level="DELEGATED",
+            max_risk_class="R0_READ_ONLY",
+            permitted_tools=["get_today_state"],
+            auto_run_tools=["get_today_state"],
+        ))
+        await db.flush()
+
+        proposal = WorkflowProposal(
+            task_id=uuid.uuid4(),
+            title="Invalid dangling dependency",
+            rationale="Every dependency must resolve inside the submitted proposal.",
+            steps=[
+                WorkflowStepProposal(
+                    key="operator_read",
+                    title="Read current state",
+                    role="operator",
+                    description="Read owner state after a missing predecessor.",
+                    tool_key="get_today_state",
+                    tool_version="1",
+                    arguments={},
+                    dependencies=["missing_step"],
+                ),
+            ],
+        )
+
+        workflow, compile_res = await submit_workflow_proposal(
+            db,
+            owner_user_id=owner_user_id,
+            proposal=proposal,
+        )
+
+        assert workflow is None
+        assert compile_res.ok is False
+        assert any(
+            error.code == "DANGLING_DEPENDENCY" and error.step_key == "operator_read"
+            for error in compile_res.errors
+        )
+
+
 def test_safe_refusal_code_mapping():
     """Prove that internal compiler errors are mapped to bounded safe codes without leakage."""
     from app.mind.agency_bridge import SAFE_REFUSAL_CODES, map_compile_error_to_safe_code
