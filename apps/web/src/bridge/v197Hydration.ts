@@ -12,6 +12,23 @@ import type {
 import { applyV197Locale } from "./v197I18n";
 import { hydrateReadOnlyV197 } from "./v197Mutations";
 import { renderPersistedGlow } from "./v197Rewards";
+import {
+  v197SystemDefinition,
+  v197SystemNextMove,
+  v197SystemPrediction,
+  v197SystemProgressFormula,
+  v197SystemQuestion,
+  v197SystemTitle,
+} from "./v197SystemCopy";
+import {
+  activeUiLocale,
+  markVerbatimUserContent,
+  setVerbatimUserText,
+  uiCopy,
+  uiFormat,
+  uiSource,
+  type UiCopyKey,
+} from "../lib/i18n";
 
 /**
  * The six Star Systems, in canonical order. This must match
@@ -26,7 +43,116 @@ const CORE_SYSTEMS = [
   "Introspection",
   "Connection",
 ] as const;
-const NO_RELIABLE_INSIGHT = "NUR doesn't have enough evidence for a reliable pattern yet.";
+type CoreSystemTitle = typeof CORE_SYSTEMS[number];
+const NO_RELIABLE_INSIGHT = uiSource("NUR doesn't have enough evidence for a reliable pattern yet.");
+const TOKEN_COPY: Record<string, UiCopyKey> = {
+  ACTIVE: uiSource("Active"),
+  AFTERNOON: uiSource("Afternoon"),
+  ARCHIVED: uiSource("Archived"),
+  BLOCKED: uiSource("Blocked"),
+  CANDIDATE: uiSource("Candidate"),
+  CHECKLIST_SUGGESTION: uiSource("Checklist suggestion"),
+  COMMUNITY: uiSource("Community"),
+  COMPLETED: uiSource("Completed"),
+  CONNECTED: uiSource("Connected"),
+  COUNCIL: uiSource("Council"),
+  DISABLED: uiSource("Disabled"),
+  ERROR: uiSource("Error"),
+  EVENT: uiSource("Event"),
+  EXPLICIT: uiSource("Explicit"),
+  GROUP: uiSource("Group"),
+  INACTIVE: uiSource("Inactive"),
+  INTROSPECTION_SYSTEM: uiSource("Introspection System"),
+  JOURNAL_ENTRY: uiSource("Journal entry"),
+  MEMBER: uiSource("Member"),
+  MISSED: uiSource("Missed"),
+  MORNING: uiSource("Morning"),
+  NIGHT: uiSource("Night"),
+  NOT_CONNECTED: uiSource("Not connected"),
+  OPEN: uiSource("Open"),
+  ORBIT: uiSource("Orbit"),
+  OUTCOME_REPORTED: uiSource("Outcome reported"),
+  OUTCOME_RETURNED: uiSource("Outcome returned"),
+  OWNER: uiSource("Owner"),
+  OWNER_CONFIRMED: uiSource("Owner confirmed"),
+  OWNER_REPORTED: uiSource("Owner reported"),
+  OWNER_WRITTEN: uiSource("Owner written"),
+  OWNER_CHECKIN_DERIVED_GUIDANCE: uiSource("Owner check-in derived guidance"),
+  PAST: uiSource("Past"),
+  PAUSED: uiSource("Paused"),
+  PENDING: uiSource("Pending"),
+  PERSON: uiSource("Person"),
+  PREDICTION: uiSource("Prediction"),
+  PRESENT: uiSource("Present"),
+  PROJECT: uiSource("Project"),
+  REJECTED: uiSource("Rejected"),
+  RESCHEDULED: uiSource("Rescheduled"),
+  RESEARCH_BRIEF: uiSource("Research brief"),
+  ROOM: uiSource("Room"),
+  SCHEDULED: uiSource("Scheduled"),
+  SCHEDULED_ACTION: uiSource("Scheduled action"),
+  STAGED: uiSource("Staged"),
+  SURFACED: uiSource("Surfaced"),
+  SYSTEM: uiSource("System"),
+  SYSTEM_ACTION: uiSource("System action"),
+  TODAY_CHECKIN: uiSource("Today check-in"),
+  READY: uiSource("Ready"),
+  WEEKLY: uiSource("Weekly"),
+  OWNER_LEDGER: uiSource("Owner ledger"),
+  OWNER_LEDGER_AGGREGATE: uiSource("Owner ledger aggregate"),
+  OWNER_LEDGER_CALCULATION: uiSource("Owner ledger calculation"),
+  DETERMINISTIC_OWNER_LEDGER_SYNTHESIS: uiSource("Deterministic owner-ledger synthesis"),
+  DETERMINISTIC_INFERENCE: uiSource("Deterministic inference"),
+  DETERMINISTIC_QUALITY_GATE: uiSource("Deterministic quality gate"),
+  OWNER_SUPPLIED_SOURCE: uiSource("Owner supplied source"),
+  AGENTIC_INSIGHT_OWNER_LEDGER: uiSource("Agentic Insight owner ledger"),
+  OMEGA_CANDIDATE: uiSource("Omega candidate"),
+  SUPPORTS: uiSource("Supports"),
+  CONTRADICTS: uiSource("Contradicts"),
+  PROVISIONAL: uiSource("Provisional"),
+  ACCEPTED: uiSource("Accepted"),
+  RETIRED: uiSource("Retired"),
+  SHORT: uiSource("Short term"),
+  MEDIUM: uiSource("Medium term"),
+  LONG: uiSource("Long term"),
+  AMBITION: uiSource("Ambition"),
+  REBUILD: uiSource("Rebuild"),
+  CREATION: uiSource("Creation"),
+  GROWTH: uiSource("Growth"),
+  INTROSPECTION: uiSource("Introspection"),
+  CONNECTION: uiSource("Connection"),
+};
+const WORLD_FOCUS_COPY: Record<string, UiCopyKey> = {
+  map: uiSource("Map"),
+  orbits: uiSource("Orbits"),
+  timeline: uiSource("Timeline"),
+  insights: uiSource("Insights"),
+  community: uiSource("Community"),
+  research: uiSource("Research"),
+  web: uiSource("Web signals"),
+};
+const CANONICAL_LINK_COPY: Record<string, UiCopyKey> = {
+  timeline: uiSource("Timeline"),
+  evidence: uiSource("Evidence"),
+  insight: uiSource("Insight"),
+  plan: uiSource("Plan"),
+  system: uiSource("System"),
+};
+
+function coreSystemCopy(title: string): string {
+  return CORE_SYSTEMS.includes(title as CoreSystemTitle)
+    ? v197SystemTitle(undefined, title)
+    : title;
+}
+
+function tokenCopy(value: unknown, fallback: UiCopyKey): string {
+  const normalized = typeof value === "string" ? value.trim().toUpperCase() : "";
+  return normalized && TOKEN_COPY[normalized] ? uiCopy(TOKEN_COPY[normalized]) : uiCopy(fallback);
+}
+
+export function formatV197ControlledToken(value: unknown, fallback: UiCopyKey): string {
+  return tokenCopy(value, fallback);
+}
 
 function empty(node: Element): void {
   while (node.firstChild) node.removeChild(node.firstChild);
@@ -77,8 +203,8 @@ function renderTalk(document: Document, rows: V197TalkThreadRow[]): void {
     message.dataset.nurTalkEmpty = "true";
     const meta = document.createElement("div");
     meta.className = "talk-meta";
-    meta.textContent = "NUR · private ledger";
-    message.append(meta, document.createTextNode("No persisted Talk turns yet. Say one true line to begin."));
+    meta.textContent = uiCopy("NUR · private ledger");
+    message.append(meta, document.createTextNode(uiCopy("No persisted Talk turns yet. Say one true line to begin.")));
     stream.append(message);
     return;
   }
@@ -90,13 +216,14 @@ function renderTalk(document: Document, rows: V197TalkThreadRow[]): void {
     if (row.who === "nur") {
       const meta = document.createElement("div");
       meta.className = "talk-meta";
-      meta.textContent = "NUR · model-generated";
+      meta.textContent = uiCopy("NUR · model-generated");
       message.append(meta);
     }
     const body = document.createElement("span");
     body.className = "talk-message-body";
     body.dataset.nurPersistedTalkText = row.id;
-    body.textContent = row.text || "Persisted response without display text.";
+    if (row.text) setVerbatimUserText(body, row.text);
+    else body.textContent = uiCopy("Persisted response without display text.");
     message.append(body);
     stream.append(message);
   });
@@ -119,51 +246,80 @@ function renderJournal(document: Document, snapshot: V197BridgeSnapshot): void {
   text(
     document.querySelector("#page-journal .page-sub"),
     count === 0
-      ? "Private by default. No persisted entries yet."
-      : `${count} private ${count === 1 ? "entry" : "entries"} persisted in your owner ledger.`,
+      ? uiCopy("Private by default. No persisted entries yet.")
+      : uiFormat("{0} private {1} persisted in your owner ledger.", [count, count === 1 ? uiCopy("entry") : uiCopy("entries")]),
   );
-  text(
-    document.querySelector("#page-journal .journal-prompt"),
-    latest ? `Last held: “${shorten(latest.body, 150)}”` : "What are you trying not to lose?",
-  );
+  const prompt = document.querySelector("#page-journal .journal-prompt");
+  text(prompt, latest ? uiFormat("Last held: “{0}”", [shorten(latest.body, 150)]) : uiCopy("What are you trying not to lose?"));
+  if (latest) markVerbatimUserContent(prompt);
 }
 
 function renderToday(document: Document, snapshot: V197BridgeSnapshot): void {
   const today = snapshot.today;
   if (!today) {
-    text(document.querySelector("#page-today .page-kicker"), "Today in NUR · owner ledger unavailable");
+    text(document.querySelector("#page-today .page-kicker"), uiCopy("Today in NUR · owner ledger unavailable"));
     return;
   }
   const parsed = new Date(`${today.date}T12:00:00`);
   const dateLabel = Number.isNaN(parsed.getTime())
     ? today.date
-    : parsed.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
-  text(document.querySelector("#page-today .page-kicker"), `Today in NUR · ${today.day_label}, ${dateLabel} · ${today.daypart}`);
+    : parsed.toLocaleDateString(activeUiLocale(), { month: "long", day: "numeric", year: "numeric" });
+  const dayLabel = Number.isNaN(parsed.getTime())
+    ? today.day_label
+    : parsed.toLocaleDateString(activeUiLocale(), { weekday: "long" });
+  text(
+    document.querySelector("#page-today .page-kicker"),
+    uiFormat("Today in NUR · {0}, {1} · {2}", [
+      dayLabel,
+      dateLabel,
+      formatV197ControlledToken(today.daypart, uiSource("Daypart unavailable")),
+    ]),
+  );
   text(
     document.querySelector("#page-today .page-sub"),
-    `${today.timezone} · ${today.active_goals.length} active goals · ${today.completed_today.length} completed · ${today.missed_today.length} missed · ${today.glow_today} Glow today.`,
+    uiFormat("{0} · {1} active goals · {2} completed · {3} missed · {4} Glow today.", [today.timezone, today.active_goals.length, today.completed_today.length, today.missed_today.length, today.glow_today]),
   );
 
   const dimensions = [today.body, today.mind, today.life];
-  const labels = ["Body", "Mind", "Life"];
+  const labels = [uiCopy("Body"), uiCopy("Mind"), uiCopy("Life")];
+  const dimensionCalculations = [
+    uiSource("65% today's body check-in + 35% persisted Introspection System progress when a check-in exists"),
+    uiSource("Check-in clarity and load blended with Ambition, Growth, and Rebuild"),
+    uiSource("Mean persisted progress of Connection, Creation, and Rebuild"),
+  ] as const;
   document.querySelectorAll<HTMLElement>("#page-today .reading-line").forEach((line, index) => {
     const dimension = dimensions[index];
     if (!dimension) return;
     text(line.querySelector(":scope > span:first-child"), labels[index]);
     const bar = line.querySelector<HTMLElement>(".reading-bar > i");
     if (bar) bar.style.width = `${Math.max(0, Math.min(100, dimension.score))}%`;
-    text(line.querySelector("strong"), `${dimension.score}% · persisted evidence`);
-    line.title = `${dimension.calculation}. Sources: ${JSON.stringify(dimension.sources)}`;
+    text(line.querySelector("strong"), uiFormat("{0}% · persisted evidence", [dimension.score]));
+    const sources = Object.entries(dimension.sources).map(([key, value]) => uiFormat(
+      "{0}: {1}",
+      [
+        formatV197ControlledToken(key, uiSource("Recorded source")),
+        value ?? uiCopy("Not recorded"),
+      ],
+    )).join(" · ");
+    line.title = uiFormat("{0}. Sources: {1}", [
+      uiCopy(dimensionCalculations[index] ?? uiSource("Persisted owner evidence calculation")),
+      sources,
+    ]);
   });
 
   const nextMove = today.next_move;
-  text(document.querySelector("#page-today .next-move .move-kicker"), nextMove ? "One real next move" : "No move is due");
-  text(document.querySelector("#page-today .next-move h3"), nextMove?.title ?? "Choose one capacity-matched move.");
+  text(document.querySelector("#page-today .next-move .move-kicker"), nextMove ? uiCopy("One real next move") : uiCopy("No move is due"));
+  const nextMoveTitle = document.querySelector("#page-today .next-move h3");
+  const nextMoveCopy = nextMove?.returning_from_missed
+    ? uiFormat("Return to: {0}", [nextMove.title.replace(/^Return to:\s*/u, "")])
+    : nextMove?.title;
+  text(nextMoveTitle, nextMoveCopy ?? uiCopy("Choose one capacity-matched move."));
+  if (nextMove?.title) markVerbatimUserContent(nextMoveTitle);
   text(
     document.querySelector("#page-today .next-move p:last-of-type"),
     nextMove
-      ? `${nextMove.kind.replaceAll("_", " ").toLowerCase()} · persisted owner ledger`
-      : "Create a System action or schedule; NUR will not invent one.",
+      ? uiFormat("{0} · persisted owner ledger", [formatV197ControlledToken(nextMove.kind, uiSource("Recorded move"))])
+      : uiCopy("Create a System action or schedule; NUR will not invent one."),
   );
   ensureTodayOperatingControls(document, snapshot);
 }
@@ -201,29 +357,29 @@ function ensureTodayOperatingControls(document: Document, snapshot: V197BridgeSn
     chamber.className = "nur-v197-checkin";
     chamber.hidden = true;
     const title = document.createElement("h3");
-    title.textContent = "Adjust today's real reading";
+    title.textContent = uiCopy("Adjust today's real reading");
     const note = document.createElement("p");
-    note.textContent = "0 is low, 10 is high. Pain and emotional load are inverse capacity signals.";
+    note.textContent = uiCopy("0 is low, 10 is high. Pain and emotional load are inverse capacity signals.");
     const fields = document.createElement("div");
     fields.className = "nur-v197-checkin-grid";
     fields.append(
-      checkInRange(document, "nur-checkin-energy", "Energy", 5),
-      checkInRange(document, "nur-checkin-pain", "Pain / load", 5),
-      checkInRange(document, "nur-checkin-sleep", "Sleep", 5),
-      checkInRange(document, "nur-checkin-nourishment", "Food / water", 5),
-      checkInRange(document, "nur-checkin-movement", "Movement", 5),
-      checkInRange(document, "nur-checkin-load", "Emotional load", 5),
-      checkInRange(document, "nur-checkin-clarity", "Clarity", 5),
+      checkInRange(document, "nur-checkin-energy", uiCopy("Energy"), 5),
+      checkInRange(document, "nur-checkin-pain", uiCopy("Pain / load"), 5),
+      checkInRange(document, "nur-checkin-sleep", uiCopy("Sleep"), 5),
+      checkInRange(document, "nur-checkin-nourishment", uiCopy("Food / water"), 5),
+      checkInRange(document, "nur-checkin-movement", uiCopy("Movement"), 5),
+      checkInRange(document, "nur-checkin-load", uiCopy("Emotional load"), 5),
+      checkInRange(document, "nur-checkin-clarity", uiCopy("Clarity"), 5),
     );
     const noteInput = document.createElement("input");
     noteInput.id = "nur-checkin-note";
-    noteInput.placeholder = "One private note, optional";
+    noteInput.placeholder = uiCopy("One private note, optional");
     noteInput.autocomplete = "off";
     const save = document.createElement("button");
     save.type = "button";
     save.className = "f4-primary compact";
     save.dataset.action = "save-today-checkin";
-    save.textContent = "Hold this reading →";
+    save.textContent = uiCopy("Hold this reading →");
     chamber.append(title, note, fields, noteInput, save);
     readingLines.after(chamber);
   }
@@ -235,15 +391,15 @@ function ensureTodayOperatingControls(document: Document, snapshot: V197BridgeSn
     actions.id = "nur-v197-today-actions";
     actions.className = "nur-v197-today-actions";
     ([
-      ["today-did-it", "I did it"],
-      ["today-missed-it", "I missed it"],
-      ["today-make-easier", "Make today easier"],
+      ["today-did-it", uiSource("I did it")],
+      ["today-missed-it", uiSource("I missed it")],
+      ["today-make-easier", uiSource("Make today easier")],
     ] as const).forEach(([action, label]) => {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "soft-button";
       button.dataset.action = action;
-      button.textContent = label;
+      button.textContent = uiCopy(label);
       actions?.append(button);
     });
     nextMove.append(actions);
@@ -253,7 +409,7 @@ function ensureTodayOperatingControls(document: Document, snapshot: V197BridgeSn
     button.dataset.todayActionId = actionable ? snapshot.today?.next_move?.id ?? "" : "";
     button.disabled = !actionable;
     button.setAttribute("aria-disabled", String(!actionable));
-    button.title = actionable ? "Persist this owner action." : "A persisted System action is required.";
+    button.title = actionable ? uiCopy("Persist this owner action.") : uiCopy("A persisted System action is required.");
   });
 }
 
@@ -266,18 +422,19 @@ function makeStep(document: Document, plan: V197Plan, step: V197PlanStep): HTMLE
   button.type = "button";
   button.className = "plan-check nur-v136-v89-mini-host";
   button.dataset.planStepId = step.id;
-  button.setAttribute("aria-label", step.done ? "Reopen step" : "Complete step");
+  button.setAttribute("aria-label", step.done ? uiCopy("Reopen step") : uiCopy("Complete step"));
   button.setAttribute("aria-pressed", String(step.done));
 
   const copy = document.createElement("div");
   const title = document.createElement("h3");
-  title.textContent = step.title;
+  setVerbatimUserText(title, step.title);
   const body = document.createElement("p");
-  body.textContent = step.body || "One persisted movement inside this Plan.";
+  if (step.body) setVerbatimUserText(body, step.body);
+  else body.textContent = uiCopy("One persisted movement inside this Plan.");
   copy.append(title, body);
 
   const state = document.createElement("time");
-  state.textContent = step.done ? "returned" : "open";
+  state.textContent = step.done ? uiCopy("returned") : uiCopy("open");
   row.append(button, copy, state);
   return row;
 }
@@ -294,12 +451,12 @@ function ensureOutcomeComposer(document: Document): void {
   const input = document.createElement("input");
   input.id = "nur-outcome-input";
   input.autocomplete = "off";
-  input.placeholder = "What changed in the real world?";
+  input.placeholder = uiCopy("What changed in the real world?");
   const button = document.createElement("button");
   button.type = "button";
   button.className = "thought-send-button send-holo-pill";
   button.dataset.action = "return-outcome";
-  button.textContent = "Return outcome →";
+  button.textContent = uiCopy("Return outcome →");
   shell.append(input, button);
   page.append(shell);
 }
@@ -307,10 +464,16 @@ function ensureOutcomeComposer(document: Document): void {
 function renderPlans(document: Document, plans: V197Plan[]): void {
   const current = plans[0];
   const list = document.querySelector<HTMLElement>("#page-plan .plan-list");
-  text(document.querySelector("#page-plan .panel-title"), current?.title ?? "No persisted Plan yet");
+  const planTitle = document.querySelector("#page-plan .panel-title");
+  text(planTitle, current?.title ?? uiCopy("No persisted Plan yet"));
+  if (current?.title) markVerbatimUserContent(planTitle);
   text(
     document.querySelector("#page-plan .panel-sub"),
-    current ? `${current.steps.length} persisted ${current.steps.length === 1 ? "step" : "steps"} · ${current.status.toLowerCase()}` : "Use the composer below to name one honest direction.",
+    current ? uiFormat("{0} persisted {1} · {2}", [
+      current.steps.length,
+      current.steps.length === 1 ? uiCopy("step") : uiCopy("steps"),
+      formatV197ControlledToken(current.status, uiSource("Plan status")),
+    ]) : uiCopy("Use the composer below to name one honest direction."),
   );
   if (list) {
     empty(list);
@@ -320,7 +483,7 @@ function renderPlans(document: Document, plans: V197Plan[]): void {
       state.className = "plan-step";
       const copy = document.createElement("div");
       const title = document.createElement("h3");
-      title.textContent = "A Plan begins after one direction is persisted.";
+      title.textContent = uiCopy("A Plan begins after one direction is persisted.");
       copy.append(title);
       state.append(copy);
       list.append(state);
@@ -371,7 +534,7 @@ function renderSystemRail(document: Document, nodes: V197MapNode[], activeOrbitI
     row.dataset.system = node.title;
     row.dataset.orbitId = node.id;
     row.dataset.page = "systems";
-    text(row.querySelector(":scope > span:not(.nur-exact-mini-host)"), node.title);
+    text(row.querySelector(":scope > span:not(.nur-exact-mini-host)"), coreSystemCopy(node.title));
     const active = node.id === activeOrbitId || (!activeOrbitId && index === 0);
     row.classList.toggle("active", active);
     row.setAttribute("aria-pressed", String(active));
@@ -413,17 +576,17 @@ function renderSystems(document: Document, snapshot: V197BridgeSnapshot): void {
       slot.hidden = true;
       return;
     }
-    const title = system?.title ?? node?.title ?? "System";
+    const title = system?.title ?? node?.title ?? uiCopy("System");
     const orbitId = system?.orbit_id ?? node?.id ?? "";
     slot.hidden = false;
     slot.dataset.system = title;
     slot.dataset.systemSlug = system?.slug ?? "";
     slot.dataset.orbitId = orbitId;
-    text(slot.querySelector(":scope > span:not(.nur-exact-mini-host) > b"), title);
+    text(slot.querySelector(":scope > span:not(.nur-exact-mini-host) > b"), coreSystemCopy(title));
     const held = node ? Object.values(node.counts).reduce((sum, value) => sum + value, 0) : 0;
     text(
       slot.querySelector(":scope > span:not(.nur-exact-mini-host) > small"),
-      system ? `${system.progress_percent}% · ${system.progress_sources.glow_points} Glow` : `${held} held`,
+      system ? uiFormat("{0}% · {1} Glow", [system.progress_percent, system.progress_sources.glow_points]) : uiFormat("{0} held", [held]),
     );
     const active = orbitId === activeOrbitId || (!activeOrbitId && index === 0);
     slot.classList.toggle("active", active);
@@ -444,12 +607,12 @@ function renderSystems(document: Document, snapshot: V197BridgeSnapshot): void {
   const stateCards = [...document.querySelectorAll<HTMLElement>(".universe-state-strip > article")];
   const state = snapshot.ownerState;
   const facts: Array<[string, string, string]> = [
-    ["Systems", number(state?.active_systems), "owner-owned"],
-    ["Plans", number(state?.plans_active), "persisted"],
-    ["Outcomes", number(state?.outcomes_returned), "returned"],
-    ["Questions", number(state?.open_questions), "open"],
-    ["Research", number(state?.research_staged), "saved locally"],
-    ["Insights", number(state?.insights_evolving), "owner review"],
+    [uiCopy("Systems"), number(state?.active_systems), uiCopy("owner-owned")],
+    [uiCopy("Plans"), number(state?.plans_active), uiCopy("persisted")],
+    [uiCopy("Outcomes"), number(state?.outcomes_returned), uiCopy("returned")],
+    [uiCopy("Questions"), number(state?.open_questions), uiCopy("open")],
+    [uiCopy("Research"), number(state?.research_staged), uiCopy("saved locally")],
+    [uiCopy("Insights"), number(state?.insights_evolving), uiCopy("owner review")],
   ];
   stateCards.forEach((card, index) => {
     const fact = facts[index];
@@ -474,13 +637,20 @@ function renderLiveUniverse(document: Document, snapshot: V197BridgeSnapshot): v
   if (!live) return;
 
   const coverage = Math.round(Math.max(0, Math.min(1, live.state.confidence)) * 100);
+  const stateSummary = live.next_moves[0] && typeof live.next_moves[0].title === "string"
+    ? uiFormat("The clearest persisted next move is: {0}", [live.next_moves[0].title])
+    : live.active_goals.length === 1
+      ? uiFormat("{0} active goal needs a persisted next move.", [live.active_goals.length])
+      : live.active_goals.length > 1
+        ? uiFormat("{0} active goals need a persisted next move.", [live.active_goals.length])
+        : uiCopy("No next move is persisted yet. NUR will not invent one.");
   text(
     document.querySelector("#page-systems .universe-hero-copy .page-sub"),
-    `${live.state.summary} ${live.state.source_count} owner-ledger sources · ${coverage}% source coverage, not truth probability.`,
+    uiFormat("{0} {1} owner-ledger sources · {2}% source coverage, not truth probability.", [stateSummary, live.state.source_count, coverage]),
   );
   text(
     document.querySelector(".universe-field-readout > span"),
-    `${live.active_systems.length} active Systems · ${live.open_loops.length} open loops · ${live.glow.today_points ?? 0} Glow today`,
+    uiFormat("{0} active Systems · {1} open loops · {2} Glow today", [live.active_systems.length, live.open_loops.length, live.glow.today_points ?? 0]),
   );
 
   const cards = [...document.querySelectorAll<HTMLElement>(".universe-state-strip > article")];
@@ -492,44 +662,44 @@ function renderLiveUniverse(document: Document, snapshot: V197BridgeSnapshot): v
   const orbitCount = live.people_orbits.length + live.group_orbits.length;
   const facts: Array<[string, string, string, string, string]> = [
     [
-      "What NUR sees now",
-      shorten(live.state.summary, 48),
-      `${live.state.source_count} persisted sources · ${coverage}% coverage`,
+      uiCopy("What NUR sees now"),
+      shorten(stateSummary, 48),
+      uiFormat("{0} persisted sources · {1}% coverage", [live.state.source_count, coverage]),
       "systems",
       "universe",
     ],
     [
-      "Future path",
-      recordTitle(firstGoal, `${live.active_goals.length} active goals`),
-      `${live.active_objectives.length} objectives · ${live.active_plans.length} plans`,
+      uiCopy("Future path"),
+      recordTitle(firstGoal, uiFormat("{0} active goals", [live.active_goals.length])),
+      uiFormat("{0} objectives · {1} plans", [live.active_objectives.length, live.active_plans.length]),
       "",
       "map",
     ],
     [
-      "People in your Orbit",
-      orbitCount ? `${orbitCount} active people / groups` : "No people or group Orbit yet",
-      orbitCount ? "Open the owner-scoped Orbit ledger" : "NUR will not invent social activity",
+      uiCopy("People in your Orbit"),
+      orbitCount ? uiFormat("{0} active people / groups", [orbitCount]) : uiCopy("No people or group Orbit yet"),
+      orbitCount ? uiCopy("Open the owner-scoped Orbit ledger") : uiCopy("NUR will not invent social activity"),
       "",
       "orbits",
     ],
     [
-      "Projects & open loops",
-      recordTitle(firstProject, `${live.open_loops.length} open loops`),
-      `${live.projects.length} projects · ${live.open_loops.length} unresolved`,
+      uiCopy("Projects & open loops"),
+      recordTitle(firstProject, uiFormat("{0} open loops", [live.open_loops.length])),
+      uiFormat("{0} projects · {1} unresolved", [live.projects.length, live.open_loops.length]),
       "",
       "orbits",
     ],
     [
-      "Next move",
-      recordTitle(nextMove, "No persisted next move"),
-      typeof nextMove?.why === "string" ? shorten(nextMove.why, 62) : "NUR will not invent one",
+      uiCopy("Next move"),
+      recordTitle(nextMove, uiCopy("No persisted next move")),
+      typeof nextMove?.why === "string" ? shorten(nextMove.why, 62) : uiCopy("NUR will not invent one"),
       "plan",
       "",
     ],
     [
-      "Signals & change",
-      recordTitle(firstSignal, recordTitle(firstChange, "No recent persisted signal")),
-      `${live.signals.length} signals · ${live.what_changed.length} recent changes`,
+      uiCopy("Signals & change"),
+      recordTitle(firstSignal, recordTitle(firstChange, uiCopy("No recent persisted signal"))),
+      uiFormat("{0} signals · {1} recent changes", [live.signals.length, live.what_changed.length]),
       "",
       "research",
     ],
@@ -552,23 +722,23 @@ function renderLiveUniverse(document: Document, snapshot: V197BridgeSnapshot): v
   const timeline = live.timeline_highlights[0];
   setLaneCard(
     laneCards[0],
-    "Latest insight",
-    recordTitle(insight, "No candidate insight yet"),
-    insight ? "Evidence-linked owner insight" : "NUR will not invent one",
+    uiCopy("Latest insight"),
+    recordTitle(insight, uiCopy("No candidate insight yet")),
+    insight ? uiCopy("Evidence-linked owner insight") : uiCopy("NUR will not invent one"),
   );
   setLaneCard(
     laneCards[1],
-    "Latest timeline",
-    recordTitle(timeline, "No Timeline event yet"),
-    timeline ? "Persisted owner event" : "Nothing has been persisted in this slot",
+    uiCopy("Latest timeline"),
+    recordTitle(timeline, uiCopy("No Timeline event yet")),
+    timeline ? uiCopy("Persisted owner event") : uiCopy("Nothing has been persisted in this slot"),
   );
   setLaneCard(
     laneCards[2],
-    "What changed",
-    recordTitle(firstChange, "No recent persisted change"),
-    firstChange ? "Recent owner ledger, not a verified last-visit diff" : "No invented change state",
+    uiCopy("What changed"),
+    recordTitle(firstChange, uiCopy("No recent persisted change")),
+    firstChange ? uiCopy("Recent owner ledger, not a verified last-visit diff") : uiCopy("No invented change state"),
   );
-  lane?.setAttribute("aria-label", "Live Universe owner-ledger highlights");
+  lane?.setAttribute("aria-label", uiCopy("Live Universe owner-ledger highlights"));
   document.body.dataset.nurLiveProvenance = live.provenance_label;
 }
 
@@ -584,42 +754,52 @@ function renderSelectedSystem(document: Document, snapshot: V197BridgeSnapshot):
 
   const panel = document.querySelector<HTMLElement>(".universe-insight-panel");
   if (panel) panel.dataset.nurLens = "system";
-  ownText(document.querySelector(".system-badge"), `${system.title} System`);
-  text(document.querySelector(".live-label"), "OWNER LEDGER");
-  text(document.querySelector(".universe-insight-title small"), "Definition");
-  text(document.querySelector(".universe-insight-title h2"), system.title);
-  text(document.querySelector(".universe-insight-copy"), system.definition);
+  ownText(document.querySelector(".system-badge"), uiFormat("{0} System", [coreSystemCopy(system.title)]));
+  text(document.querySelector(".live-label"), uiCopy("OWNER LEDGER"));
+  text(document.querySelector(".universe-insight-title small"), uiCopy("Definition"));
+  text(document.querySelector(".universe-insight-title h2"), v197SystemTitle(system.slug, system.title));
+  text(document.querySelector(".universe-insight-copy"), v197SystemDefinition(system));
   document.querySelectorAll<HTMLElement>(".signal-list span").forEach((slot, index) => {
-    slot.textContent = system.questions[index] ?? "No additional diagnostic question.";
+    slot.textContent = v197SystemQuestion(system, index);
   });
-  text(document.querySelector(".insight-opportunity small"), "Suggested next move");
-  text(document.querySelector(".insight-opportunity b"), system.next_move.title);
-  text(document.querySelector(".insight-uncertainty span"), "If ignored");
-  text(document.querySelector(".insight-uncertainty p"), system.prediction.if_ignored);
-  text(document.querySelector(".insight-strength span"), "Persisted progress");
-  text(document.querySelector(".insight-strength b"), `${system.progress_percent}%`);
+  text(document.querySelector(".insight-opportunity small"), uiCopy("Suggested next move"));
+  const nextMoveTitle = document.querySelector<HTMLElement>(".insight-opportunity b");
+  text(nextMoveTitle, v197SystemNextMove(system));
+  if (system.next_move.kind !== "CHECKLIST_SUGGESTION") markVerbatimUserContent(nextMoveTitle);
+  text(document.querySelector(".insight-uncertainty span"), uiCopy("If ignored"));
+  text(document.querySelector(".insight-uncertainty p"), v197SystemPrediction(system, "ignored"));
+  text(document.querySelector(".insight-strength span"), uiCopy("Persisted progress"));
+  text(document.querySelector(".insight-strength b"), uiFormat("{0}%", [system.progress_percent]));
   const decorativeStrengthBar = document.querySelector<HTMLElement>(".insight-strength i");
   if (decorativeStrengthBar) decorativeStrengthBar.hidden = true;
-  text(document.querySelector(".insight-evidence small"), "Evidence");
+  text(document.querySelector(".insight-evidence small"), uiCopy("Evidence"));
   text(
     document.querySelector(".insight-evidence b"),
-    `${system.progress_sources.completed_actions}/${system.progress_sources.total_actions} actions · ${system.progress_sources.glow_points} Glow`,
+    uiFormat("{0}/{1} actions · {2} Glow", [system.progress_sources.completed_actions, system.progress_sources.total_actions, system.progress_sources.glow_points]),
   );
-  text(document.querySelector(".insight-evidence span"), system.progress_sources.formula);
-  text(document.querySelector(".insight-revision span"), system.prediction.if_followed);
+  text(document.querySelector(".insight-evidence span"), v197SystemProgressFormula());
+  text(document.querySelector(".insight-revision span"), v197SystemPrediction(system, "followed"));
 
   const cards = [...document.querySelectorAll<HTMLElement>(".universe-state-strip > article")];
-  setLaneCard(cards[0], "System progress", `${system.progress_percent}%`, "calculated from owner evidence");
+  setLaneCard(cards[0], uiCopy("System progress"), uiFormat("{0}%", [system.progress_percent]), uiCopy("calculated from owner evidence"));
   setLaneCard(
     cards[1],
-    "Actions",
-    `${system.progress_sources.completed_actions}/${system.progress_sources.total_actions}`,
-    "completed / persisted",
+    uiCopy("Actions"),
+    uiFormat("{0}/{1}", [system.progress_sources.completed_actions, system.progress_sources.total_actions]),
+    uiCopy("completed / persisted"),
   );
-  setLaneCard(cards[2], "Active goals", String(system.active_goal_count), `${system.progress_sources.goal_progress_percent}% goal progress`);
-  setLaneCard(cards[3], "Glow", String(system.progress_sources.glow_points), "source-linked in this System");
-  setLaneCard(cards[4], "Next move", system.next_move.title, "capacity-matched owner action");
-  setLaneCard(cards[5], "Future path", system.prediction.if_followed, system.prediction.provenance_label.replaceAll("_", " ").toLowerCase());
+  setLaneCard(cards[2], uiCopy("Active goals"), String(system.active_goal_count), uiFormat("{0}% goal progress", [system.progress_sources.goal_progress_percent]));
+  setLaneCard(cards[3], uiCopy("Glow"), String(system.progress_sources.glow_points), uiCopy("source-linked in this System"));
+  setLaneCard(cards[4], uiCopy("Next move"), v197SystemNextMove(system), uiCopy("capacity-matched owner action"));
+  if (system.next_move.kind !== "CHECKLIST_SUGGESTION") {
+    markVerbatimUserContent(cards[4]?.querySelector(":scope > b") ?? null);
+  }
+  setLaneCard(
+    cards[5],
+    uiCopy("Future path"),
+    v197SystemPrediction(system, "followed"),
+    tokenCopy(system.prediction.provenance_label, uiSource("Owner ledger calculation")),
+  );
   cards.forEach(card => card.querySelectorAll<HTMLElement>(".sparkline").forEach(line => { line.hidden = true; }));
 
   // A selected System also owns the signal lane: its Glow scoreboard replaces
@@ -630,9 +810,9 @@ function renderSelectedSystem(document: Document, snapshot: V197BridgeSnapshot):
     const score = scoreboard[index];
     setLaneCard(
       card,
-      score ? `System rank ${score.rank}` : "System Glow",
-      score?.system_title ?? system.title,
-      `${score?.score ?? system.progress_sources.glow_points} persisted Glow`,
+      score ? uiFormat("System rank {0}", [score.rank]) : uiCopy("System Glow"),
+      score ? v197SystemTitle(score.system_slug, score.system_title) : v197SystemTitle(system.slug, system.title),
+      uiFormat("{0} persisted Glow", [score?.score ?? system.progress_sources.glow_points]),
     );
   });
 }
@@ -665,25 +845,25 @@ function ensureInsightControls(document: Document, claim: Record<string, unknown
     controls = document.createElement("section");
     controls.id = "nur-v197-insight-controls";
     controls.className = "nur-v197-insight-controls";
-    controls.setAttribute("aria-label", "Insight owner review controls");
+    controls.setAttribute("aria-label", uiCopy("Insight owner review controls"));
     const correction = document.createElement("input");
     correction.id = "nur-v197-insight-correction";
-    correction.placeholder = "Correct what NUR got wrong";
+    correction.placeholder = uiCopy("Correct what NUR got wrong");
     correction.autocomplete = "off";
     const actions = document.createElement("div");
     actions.className = "nur-v197-insight-actions";
     ([
-      ["insight-accept", "Accept"],
-      ["insight-reject", "Reject"],
-      ["insight-correct", "Correct"],
-      ["insight-plan", "Make a Plan"],
-      ["insight-timeline", "Add to Timeline"],
+      ["insight-accept", uiSource("Accept")],
+      ["insight-reject", uiSource("Reject")],
+      ["insight-correct", uiSource("Correct")],
+      ["insight-plan", uiSource("Make a Plan")],
+      ["insight-timeline", uiSource("Add to Timeline")],
     ] as const).forEach(([action, label]) => {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "soft-button";
       button.dataset.action = action;
-      button.textContent = label;
+      button.textContent = uiCopy(label);
       actions.append(button);
     });
     const status = document.createElement("small");
@@ -707,18 +887,21 @@ function ensureInsightControls(document: Document, claim: Record<string, unknown
     button.disabled = disabled;
     button.setAttribute("aria-disabled", String(disabled));
     button.title = !dedicated
-      ? "Generate a dedicated evidence-linked Insight before reviewing it here."
+      ? uiCopy("Generate a dedicated evidence-linked Insight before reviewing it here.")
       : requiresConfirmation && !ownerConfirmed
-        ? "Accept this Insight before converting it into a Plan."
-        : "Persist this owner review action.";
+        ? uiCopy("Accept this Insight before converting it into a Plan.")
+        : uiCopy("Persist this owner review action.");
   });
   const correction = controls.querySelector<HTMLInputElement>("#nur-v197-insight-correction");
   if (correction) correction.disabled = !dedicated;
   text(
     controls.querySelector(".nur-v197-insight-review-state"),
     dedicated
-      ? `${String(claim?.lifecycle_status ?? claim?.truth_status ?? "candidate").toLowerCase()} · owner-governed Insight`
-      : "Omega claim shown read-only · generate a dedicated Insight to act on it",
+      ? uiFormat("{0} · owner-governed Insight", [formatV197ControlledToken(
+          claim?.lifecycle_status ?? claim?.truth_status ?? "CANDIDATE",
+          uiSource("Candidate"),
+        )])
+      : uiCopy("Omega claim shown read-only · generate a dedicated Insight to act on it"),
   );
 }
 
@@ -736,14 +919,14 @@ export function renderInsightInspection(
     host = document.createElement("section");
     host.id = "nur-v197-insight-inspection";
     host.className = "nur-v197-insight-inspection";
-    host.setAttribute("aria-label", "Insight evidence and change history");
+    host.setAttribute("aria-label", uiCopy("Insight evidence and change history"));
     panel.append(host);
   }
   host.hidden = false;
   empty(host);
   if (failure || !detail || !evidence || !history) {
     const state = document.createElement("small");
-    state.textContent = failure ?? "No dedicated Insight is available for evidence inspection.";
+    state.textContent = failure ?? uiCopy("No dedicated Insight is available for evidence inspection.");
     host.append(state);
     return;
   }
@@ -754,44 +937,57 @@ export function renderInsightInspection(
   });
 
   const heading = document.createElement("strong");
-  heading.textContent = `${detail.epistemic_state} · ${detail.time_scale} · version ${detail.insight_version}`;
+  heading.textContent = uiFormat("{0} · {1} · version {2}", [
+    tokenCopy(detail.epistemic_state, uiSource("Unclear")),
+    tokenCopy(detail.time_scale, uiSource("Unclear")),
+    detail.insight_version,
+  ]);
   const sourceState = document.createElement("p");
   const support = evidence.relations.filter(row => row.relation === "SUPPORTS");
   const counter = evidence.relations.filter(row => row.relation === "CONTRADICTS");
-  sourceState.textContent = `${support.length} supporting · ${counter.length} counter · ${detail.source_diversity} source domains`;
+  sourceState.textContent = uiFormat("{0} supporting · {1} counter · {2} source domains", [support.length, counter.length, detail.source_diversity]);
   const uncertainty = document.createElement("p");
-  uncertainty.textContent = `What NUR may be wrong about: ${detail.what_nur_may_be_wrong_about}`;
+  uncertainty.textContent = uiFormat("What NUR may be wrong about: {0}", [detail.what_nur_may_be_wrong_about]);
   host.append(heading, sourceState, uncertainty);
 
   const evidenceList = document.createElement("ul");
-  evidenceList.setAttribute("aria-label", "Canonical Insight evidence");
+  evidenceList.setAttribute("aria-label", uiCopy("Canonical Insight evidence"));
   evidence.relations.slice(0, 8).forEach(row => {
     const item = document.createElement("li");
-    item.textContent = `${row.relation} · ${row.source_domain} · ${row.provenance_label} · ${row.source_exists ? "source present" : "source invalidated"}${row.evidence_summary ? ` · ${row.evidence_summary}` : ""}`;
+    item.textContent = uiFormat("{0} · {1} · {2} · {3}{4}", [
+      tokenCopy(row.relation, uiSource("Evidence")),
+      tokenCopy(row.source_domain, uiSource("Owner ledger")),
+      tokenCopy(row.provenance_label, uiSource("Owner ledger")),
+      row.source_exists ? uiCopy("source present") : uiCopy("source invalidated"),
+      row.evidence_summary ? uiFormat(" · {0}", [row.evidence_summary]) : "",
+    ]);
     evidenceList.append(item);
   });
   host.append(evidenceList);
 
   if (detail.alternative_explanations.length) {
     const alternatives = document.createElement("p");
-    alternatives.textContent = `Alternatives: ${detail.alternative_explanations.join(" · ")}`;
+    alternatives.textContent = uiFormat("Alternatives: {0}", [detail.alternative_explanations.join(" · ")]);
     host.append(alternatives);
   }
   const changes = document.createElement("p");
   changes.textContent = history.changes.length
-    ? `Why changed: ${history.changes.slice(-4).map(row => `${row.change_class}: ${row.trigger}`).join(" · ")}`
-    : "Why changed: no state transition has been recorded yet.";
+    ? uiFormat("Why changed: {0}", [history.changes.slice(-4).map(row => uiFormat("{0}: {1}", [
+        tokenCopy(row.change_class, uiSource("Change")),
+        tokenCopy(row.trigger, uiSource("Owner ledger event")),
+      ])).join(" · ")])
+    : uiCopy("Why changed: no state transition has been recorded yet.");
   host.append(changes);
 
   const routes = document.createElement("nav");
-  routes.setAttribute("aria-label", "Canonical Insight links");
+  routes.setAttribute("aria-label", uiCopy("Canonical Insight links"));
   Object.entries(detail.canonical_links).forEach(([label, route]) => {
     if (!route) return;
     const button = document.createElement("button");
     button.type = "button";
     button.className = "soft-button";
     button.dataset.ownerRoute = route;
-    button.textContent = label.replace(/_/g, " ");
+    button.textContent = uiCopy(CANONICAL_LINK_COPY[label] ?? uiSource("Open record"));
     routes.append(button);
   });
   host.append(routes);
@@ -806,12 +1002,15 @@ function renderVisibleLens(
   const panel = document.querySelector<HTMLElement>(".universe-insight-panel");
   if (!panel) return;
   panel.dataset.nurLens = focus;
-  ownText(panel.querySelector(".system-badge"), `${focus[0].toUpperCase()}${focus.slice(1)} lens`);
-  text(panel.querySelector(".live-label"), "OWNER LEDGER");
+  ownText(
+    panel.querySelector(".system-badge"),
+    uiFormat("{0} lens", [uiCopy(WORLD_FOCUS_COPY[focus] ?? uiSource("Universe"))]),
+  );
+  text(panel.querySelector(".live-label"), uiCopy("OWNER LEDGER"));
 
-  let title = "No persisted data yet";
-  let copy = "This lens will not invent content before owner-scoped records exist.";
-  let uncertainty = "Only persisted owner records are shown.";
+  let title = uiCopy("No persisted data yet");
+  let copy = uiCopy("This lens will not invent content before owner-scoped records exist.");
+  let uncertainty = uiCopy("Only persisted owner records are shown.");
   let count = 0;
   const signals: string[] = [];
 
@@ -821,11 +1020,20 @@ function renderVisibleLens(
       ? graphNodes.filter(node => node.kind !== "MASTER_STAR")
       : snapshot.map?.nodes.filter(node => node.kind !== "PERSONAL_BRIDGE") ?? [];
     count = nodes.length;
-    title = `${count} persisted Map nodes`;
+    title = uiFormat("{0} persisted Map nodes", [count]);
     copy = snapshot.mapGraph
-      ? `${snapshot.mapGraph.counts.systems} Systems · ${snapshot.mapGraph.counts.goals} goals · ${snapshot.mapGraph.counts.people ?? 0} people · ${snapshot.mapGraph.counts.social_orbits ?? 0} social Orbits · ${snapshot.mapGraph.counts.open_predictions} open predictions.`
-      : (snapshot.map?.counts ?? []).map(row => `${row.count} ${row.label}`).join(" · ") || "No owner map counts yet.";
-    uncertainty = "Map geometry is canonical V197; graph labels, edges, and paths come from the owner ledger.";
+      ? uiFormat("{0} Systems · {1} goals · {2} people · {3} social Orbits · {4} open predictions.", [
+          snapshot.mapGraph.counts.systems,
+          snapshot.mapGraph.counts.goals,
+          snapshot.mapGraph.counts.people ?? 0,
+          snapshot.mapGraph.counts.social_orbits ?? 0,
+          snapshot.mapGraph.counts.open_predictions,
+        ])
+      : (snapshot.map?.counts ?? []).map(row => uiFormat(
+          "{0} {1}",
+          [row.count, row.key === "orbits" ? uiCopy("owner-owned orbits") : uiCopy("map records")],
+        )).join(" · ") || uiCopy("No owner map counts yet.");
+    uncertainty = uiCopy("Map geometry is canonical V197; graph labels, edges, and paths come from the owner ledger.");
     signals.push(...nodes.slice(0, 3).map(node => "label" in node ? node.label : node.title));
   }
 
@@ -840,24 +1048,38 @@ function renderVisibleLens(
     const social = [...people, ...groups];
     count = orbits.length + projects.length + social.length;
     title = social.length
-      ? `${recordTitle(social[0], "Social Orbit")} · ${String(social[0].kind ?? "orbit").toLowerCase()}`
+      ? uiFormat("{0} · {1}", [recordTitle(social[0], uiCopy("Social Orbit")), tokenCopy(social[0].kind, uiSource("Orbit"))])
       : projects.length
-        ? `${projects[0].title} · AM Project`
-        : orbits.length ? `${orbits[0].title} + ${Math.max(0, orbits.length - 1)} Systems` : "No persisted Orbits yet";
+        ? uiFormat("{0} · AM Project", [projects[0].title])
+        : orbits.length
+          ? uiFormat("{0} + {1} Systems", [orbits[0].title, Math.max(0, orbits.length - 1)])
+          : uiCopy("No persisted Orbits yet");
     copy = social.length
-      ? `${people.length} Person Orbits · ${groups.length} Group/Council Orbits · ${social.reduce((sum, row) => sum + Number(row.unresolved_count ?? 0), 0)} unresolved threads · group memory remains separate.`
+      ? uiFormat("{0} Person Orbits · {1} Group/Council Orbits · {2} unresolved threads · group memory remains separate.", [
+          people.length,
+          groups.length,
+          social.reduce((sum, row) => sum + Number(row.unresolved_count ?? 0), 0),
+        ])
       : projects.length
-        ? `${projects.length} owner AM ${projects.length === 1 ? "Project" : "Projects"} · ${projects.reduce((sum, row) => sum + Object.values(row.task_counts).reduce((inner, value) => inner + value, 0), 0)} persisted tasks · ${projects.reduce((sum, row) => sum + row.verified_evidence, 0)} verified evidence.`
+        ? uiFormat("{0} owner AM {1} · {2} persisted tasks · {3} verified evidence.", [
+            projects.length,
+            projects.length === 1 ? uiCopy("Project") : uiCopy("Projects"),
+            projects.reduce((sum, row) => sum + Object.values(row.task_counts).reduce((inner, value) => inner + value, 0), 0),
+            projects.reduce((sum, row) => sum + row.verified_evidence, 0),
+          ])
       : orbits.length
-        ? `${orbits.length} owner-owned Orbits · ${orbits.reduce((sum, row) => sum + Object.values(row.counts).reduce((inner, value) => inner + value, 0), 0)} held objects.`
-      : "Create one System to open this lens.";
+        ? uiFormat("{0} owner-owned Orbits · {1} held objects.", [
+            orbits.length,
+            orbits.reduce((sum, row) => sum + Object.values(row.counts).reduce((inner, value) => inner + value, 0), 0),
+          ])
+        : uiCopy("Create one System to open this lens.");
     uncertainty = social.length
-      ? "No private Talk, Journal, Timeline, or Omega record is copied into a social Orbit."
+      ? uiCopy("No private Talk, Journal, Timeline, or Omega record is copied into a social Orbit.")
       : projects.length
-      ? `Runs remain proposal/approval records; NUR performs no external action from this lens · ${snapshot.projects?.counts.blocked_tasks ?? 0} blocked tasks.`
-      : "Only the signed-in owner's Orbits are queried.";
-    signals.push(...social.slice(0, 3).map(row => `${recordTitle(row, "Orbit")} · ${Number(row.unresolved_count ?? 0)} unresolved`));
-    signals.push(...projects.slice(0, 3).map(row => `${row.title} · ${row.status.toLowerCase()}`));
+        ? uiFormat("Runs remain proposal/approval records; NUR performs no external action from this lens · {0} blocked tasks.", [snapshot.projects?.counts.blocked_tasks ?? 0])
+        : uiCopy("Only the signed-in owner's Orbits are queried.");
+    signals.push(...social.slice(0, 3).map(row => uiFormat("{0} · {1} unresolved", [recordTitle(row, uiCopy("Orbit")), Number(row.unresolved_count ?? 0)])));
+    signals.push(...projects.slice(0, 3).map(row => uiFormat("{0} · {1}", [row.title, tokenCopy(row.status, uiSource("Project status"))])));
     if (signals.length < 3) signals.push(...orbits.slice(0, 3 - signals.length).map(row => row.title));
   }
 
@@ -869,12 +1091,22 @@ function renderVisibleLens(
     const latest = present[0] ?? future[0] ?? past[0];
     const latestOutcome = items.find(row => ["OUTCOME_REPORTED", "OUTCOME_RETURNED"].includes(row.kind));
     count = items.length;
-    title = latest?.title ?? "No persisted Timeline event yet";
+    title = latest?.title ?? uiCopy("No persisted Timeline event yet");
     copy = latest
-      ? `${past.length} past · ${present.length} present · ${future.length} future/prediction. ${latest.body}${latestOutcome && latestOutcome.id !== latest.id ? ` Latest returned outcome: ${latestOutcome.body}` : ""}`
-      : "Create or schedule one real action to open the future lane.";
-    uncertainty = latest ? `${latest.provenance_label} · ${latest.kind.replaceAll("_", " ")}` : "No event provenance exists yet.";
-    if (latestOutcome) signals.push(`Returned: ${shorten(latestOutcome.body, 72)}`);
+      ? uiFormat("{0} past · {1} present · {2} future/prediction. {3}{4}", [
+          past.length,
+          present.length,
+          future.length,
+          latest.body,
+          latestOutcome && latestOutcome.id !== latest.id
+            ? uiFormat(" Latest returned outcome: {0}", [latestOutcome.body])
+            : "",
+        ])
+      : uiCopy("Create or schedule one real action to open the future lane.");
+    uncertainty = latest
+      ? uiFormat("{0} · {1}", [formatV197ControlledToken(latest.provenance_label, uiSource("Owner ledger")), tokenCopy(latest.kind, uiSource("Event"))])
+      : uiCopy("No event provenance exists yet.");
+    if (latestOutcome) signals.push(uiFormat("Returned: {0}", [shorten(latestOutcome.body, 72)]));
     signals.push(...items.filter(item => item.id !== latestOutcome?.id).slice(0, 3 - signals.length).map(item => item.title));
   }
 
@@ -883,27 +1115,40 @@ function renderVisibleLens(
     const councils = rooms.filter(room => room.room_kind === "COUNCIL");
     count = rooms.length;
     title = rooms.length
-      ? `${rooms[0].title} · ${rooms[0].room_kind.toLowerCase()} room`
-      : "No bounded rooms yet";
+      ? uiFormat("{0} · {1} room", [rooms[0].title, tokenCopy(rooms[0].room_kind, uiSource("Room"))])
+      : uiCopy("No bounded rooms yet");
     copy = rooms.length
-      ? `${rooms.length} persisted ${rooms.length === 1 ? "room" : "rooms"} · ${councils.length} ${councils.length === 1 ? "Council" : "Councils"} · members see room content only.`
-      : "Create one bounded room to open Group NUR; no public feed is faked.";
-    uncertainty = "Private Talk, Journal, Timeline, and Omega never enter a room automatically.";
-    signals.push(...rooms.slice(0, 3).map(room => `${room.title} · ${room.current_user_role.toLowerCase()}${room.is_demo ? " · DEMO" : ""}`));
+      ? uiFormat("{0} persisted {1} · {2} {3} · members see room content only.", [
+          rooms.length,
+          rooms.length === 1 ? uiCopy("room") : uiCopy("rooms"),
+          councils.length,
+          councils.length === 1 ? uiCopy("Council") : uiCopy("Councils"),
+        ])
+      : uiCopy("Create one bounded room to open Group NUR; no public feed is faked.");
+    uncertainty = uiCopy("Private Talk, Journal, Timeline, and Omega never enter a room automatically.");
+    signals.push(...rooms.slice(0, 3).map(room => uiFormat("{0} · {1}{2}", [
+      room.title,
+      tokenCopy(room.current_user_role, uiSource("Member")),
+      room.is_demo ? uiCopy(" · DEMO") : "",
+    ])));
   }
 
   if (focus === "research") {
     const briefs = snapshot.researchBriefs;
     const latest = briefs[0];
     count = briefs.length;
-    title = latest?.question ?? "No persisted research question yet";
+    title = latest?.question ?? uiCopy("No persisted research question yet");
     copy = latest
-      ? `${briefs.length} owner-staged ${briefs.length === 1 ? "brief" : "briefs"} · latest status ${latest.status.toLowerCase()}.`
-      : "Stage one question; NUR will hold it without inventing a source.";
+      ? uiFormat("{0} owner-staged {1} · latest status {2}.", [
+          briefs.length,
+          briefs.length === 1 ? uiCopy("brief") : uiCopy("briefs"),
+          tokenCopy(latest.status, uiSource("Research status")),
+        ])
+      : uiCopy("Stage one question; NUR will hold it without inventing a source.");
     uncertainty = latest
-      ? `Provider status: ${latest.provider_status.toLowerCase()} · summaries remain empty until evidence is returned.`
-      : "No external research provider has returned evidence.";
-    signals.push(...briefs.slice(0, 3).map(row => `${row.question} · ${row.provider_status.toLowerCase()}`));
+      ? uiFormat("Provider status: {0} · summaries remain empty until evidence is returned.", [tokenCopy(latest.provider_status, uiSource("Provider state"))])
+      : uiCopy("No external research provider has returned evidence.");
+    signals.push(...briefs.slice(0, 3).map(row => uiFormat("{0} · {1}", [row.question, tokenCopy(row.provider_status, uiSource("Provider state"))])));
   }
 
   if (focus === "insights") {
@@ -912,35 +1157,41 @@ function renderVisibleLens(
     const claimText = typeof claim?.claim_text === "string" ? claim.claim_text : null;
     const claimTitle = typeof claim?.title === "string" ? claim.title : claimText;
     count = insight?.counts.claims ?? 0;
-    title = claimTitle ?? NO_RELIABLE_INSIGHT;
+    title = claimTitle ?? uiCopy(NO_RELIABLE_INSIGHT);
     copy = claimText
-      ? `${claimText} · ${Array.isArray(claim?.evidence) ? claim.evidence.length : 0} attached evidence records.`
-      : "More owner evidence across time or domains is required before NUR surfaces one.";
+      ? uiFormat("{0} · {1} attached evidence records.", [claimText, Array.isArray(claim?.evidence) ? claim.evidence.length : 0])
+      : uiCopy("More owner evidence across time or domains is required before NUR surfaces one.");
     uncertainty = typeof claim?.what_nur_may_be_wrong_about === "string"
       ? claim.what_nur_may_be_wrong_about
-      : `${insight?.counts.open_contradictions ?? 0} open contradictions · ${insight?.counts.review_queue ?? 0} awaiting review.`;
+      : uiFormat("{0} open contradictions · {1} awaiting review.", [insight?.counts.open_contradictions ?? 0, insight?.counts.review_queue ?? 0]);
     signals.push(
-      `${insight?.counts.claims ?? 0} candidate claims`,
-      `${insight?.counts.predictions ?? 0} predictions`,
-      `${insight?.counts.open_contradictions ?? 0} contradictions`,
-      `${insight?.counts.feasibility_assessments ?? 0} feasibility checks`,
+      uiFormat("{0} candidate claims", [insight?.counts.claims ?? 0]),
+      uiFormat("{0} predictions", [insight?.counts.predictions ?? 0]),
+      uiFormat("{0} contradictions", [insight?.counts.open_contradictions ?? 0]),
+      uiFormat("{0} feasibility checks", [insight?.counts.feasibility_assessments ?? 0]),
     );
   }
 
-  text(panel.querySelector(".universe-insight-title small"), "Persisted view");
+  text(panel.querySelector(".universe-insight-title small"), uiCopy("Persisted view"));
   text(panel.querySelector(".universe-insight-title h2"), title);
   text(panel.querySelector(".universe-insight-copy"), copy);
   text(panel.querySelector(".insight-uncertainty p"), uncertainty);
   const signalSlots = [...panel.querySelectorAll<HTMLElement>(".signal-list span")];
   signalSlots.forEach((slot, index) => {
-    slot.textContent = signals[index] ?? "No additional persisted signal";
+    slot.textContent = signals[index] ?? uiCopy("No additional persisted signal");
   });
-  text(panel.querySelector(".insight-strength span"), "Persisted records");
+  text(panel.querySelector(".insight-strength span"), uiCopy("Persisted records"));
   text(panel.querySelector(".insight-strength b"), String(count));
-  text(panel.querySelector(".insight-evidence small"), "Provenance");
-  text(panel.querySelector(".insight-evidence b"), snapshot.timeline?.provenance_label ?? snapshot.map?.provenance_label ?? "owner_ledger");
-  text(panel.querySelector(".insight-evidence span"), "No fake live metrics");
-  text(panel.querySelector(".insight-revision span"), "Updated from the latest persisted snapshot.");
+  text(panel.querySelector(".insight-evidence small"), uiCopy("Provenance"));
+  text(
+    panel.querySelector(".insight-evidence b"),
+    formatV197ControlledToken(
+      snapshot.timeline?.provenance_label ?? snapshot.map?.provenance_label,
+      uiSource("Owner ledger"),
+    ),
+  );
+  text(panel.querySelector(".insight-evidence span"), uiCopy("No fake live metrics"));
+  text(panel.querySelector(".insight-revision span"), uiCopy("Updated from the latest persisted snapshot."));
   const controls = document.querySelector<HTMLElement>("#nur-v197-insight-controls");
   const inspection = document.querySelector<HTMLElement>("#nur-v197-insight-inspection");
   if (focus === "insights") ensureInsightControls(document, primaryInsight(snapshot));
@@ -977,9 +1228,14 @@ export function renderWorldLens(
       : items.slice(0, 3);
     cards.forEach((card, index) => {
       const row = rows[index];
-      setLaneCard(card, row?.kind.replaceAll("_", " ") ?? "owner timeline", row?.title ?? "No event", row ? shorten(row.body, 80) : "No persisted event in this slot.");
+      setLaneCard(
+        card,
+        row ? formatV197ControlledToken(row.kind, uiSource("Owner timeline")) : uiCopy("owner timeline"),
+        row?.title ?? uiCopy("No event"),
+        row ? shorten(row.body, 80) : uiCopy("No persisted event in this slot."),
+      );
     });
-    lane.setAttribute("aria-label", "Owner timeline summary");
+    lane.setAttribute("aria-label", uiCopy("Owner timeline summary"));
     return;
   }
 
@@ -998,32 +1254,46 @@ export function renderWorldLens(
       if (socialOrbit) {
         setLaneCard(
           card,
-          `${String(socialOrbit.kind ?? "orbit").toLowerCase()} · owner social ledger`,
-          recordTitle(socialOrbit, "Social Orbit"),
-          `${Number(socialOrbit.unresolved_count ?? 0)} unresolved · ${Number(socialOrbit.shared_goal_count ?? 0)} shared goals`,
+          uiFormat("{0} · owner social ledger", [formatV197ControlledToken(
+            socialOrbit.kind ?? "ORBIT",
+            uiSource("Orbit"),
+          )]),
+          recordTitle(socialOrbit, uiCopy("Social Orbit")),
+          uiFormat("{0} unresolved · {1} shared goals", [Number(socialOrbit.unresolved_count ?? 0), Number(socialOrbit.shared_goal_count ?? 0)]),
         );
         return;
       }
       const project = projects[index - social.length];
       if (project) {
         const taskCount = Object.values(project.task_counts).reduce((sum, value) => sum + value, 0);
-        setLaneCard(card, `AM Project · ${project.status.toLowerCase()}`, project.title, `${taskCount} tasks · ${project.verified_evidence} verified evidence`);
+        setLaneCard(card, uiFormat("AM Project · {0}", [formatV197ControlledToken(
+          project.status,
+          uiSource("Project status"),
+        )]), project.title, uiFormat("{0} tasks · {1} verified evidence", [taskCount, project.verified_evidence]));
         return;
       }
       const row = rows[index - occupied];
       const held = row ? Object.values(row.counts).reduce((sum, value) => sum + value, 0) : 0;
-      setLaneCard(card, row?.kind ?? "project orbit", row?.title ?? "No Orbit", row ? `${held} held objects · ${row.status.toLowerCase()}` : "No persisted Orbit in this slot.");
+      setLaneCard(
+        card,
+        row ? formatV197ControlledToken(row.kind, uiSource("Project orbit")) : uiCopy("project orbit"),
+        row?.title ?? uiCopy("No Orbit"),
+        row ? uiFormat("{0} held objects · {1}", [held, formatV197ControlledToken(
+          row.status,
+          uiSource("Orbit status"),
+        )]) : uiCopy("No persisted Orbit in this slot."),
+      );
     });
-    lane.setAttribute("aria-label", "Owner Orbits summary");
+    lane.setAttribute("aria-label", uiCopy("Owner Orbits summary"));
     return;
   }
 
   if (focus === "insights") {
     const insight = snapshot.insights;
-    setLaneCard(cards[0], "candidate claims", number(insight?.counts.claims), "owner-only Omega ledger");
-    setLaneCard(cards[1], "open contradictions", number(insight?.counts.open_contradictions), "needs review");
-    setLaneCard(cards[2], "review queue", number(insight?.counts.review_queue), "no automatic promotion");
-    lane.setAttribute("aria-label", "Owner insight summary");
+    setLaneCard(cards[0], uiCopy("candidate claims"), number(insight?.counts.claims), uiCopy("owner-only Omega ledger"));
+    setLaneCard(cards[1], uiCopy("open contradictions"), number(insight?.counts.open_contradictions), uiCopy("needs review"));
+    setLaneCard(cards[2], uiCopy("review queue"), number(insight?.counts.review_queue), uiCopy("no automatic promotion"));
+    lane.setAttribute("aria-label", uiCopy("Owner insight summary"));
     return;
   }
 
@@ -1033,12 +1303,15 @@ export function renderWorldLens(
       const room = rooms[index];
       setLaneCard(
         card,
-        room ? `${room.room_kind.toLowerCase()} room` : "bounded rooms",
-        room ? `${room.title}${room.is_demo ? " · DEMO" : ""}` : "No room",
-        room ? `your role ${room.current_user_role.toLowerCase()} · member content only` : "No persisted room in this slot.",
+        room ? uiFormat("{0} room", [formatV197ControlledToken(room.room_kind, uiSource("Room"))]) : uiCopy("bounded rooms"),
+        room ? uiFormat("{0}{1}", [room.title, room.is_demo ? (" " + uiCopy("· DEMO") + "") : ""]) : uiCopy("No room"),
+        room ? uiFormat("your role {0} · member content only", [formatV197ControlledToken(
+          room.current_user_role,
+          uiSource("Member"),
+        )]) : uiCopy("No persisted room in this slot."),
       );
     });
-    lane.setAttribute("aria-label", "Persisted community rooms");
+    lane.setAttribute("aria-label", uiCopy("Persisted community rooms"));
     return;
   }
 
@@ -1048,16 +1321,21 @@ export function renderWorldLens(
       const row = briefs[index];
       setLaneCard(
         card,
-        focus === "research" ? row?.status ?? "owner research" : row?.provider_status ?? "web provider",
-        row?.question ?? (focus === "research" ? "No staged question" : "No fetched signal"),
         row
-          ? (row.summary || (focus === "research" ? "Held without invented sources." : "No external result is presented as fetched."))
-          : "No persisted record in this slot.",
+          ? formatV197ControlledToken(
+              focus === "research" ? row.status : row.provider_status,
+              focus === "research" ? uiSource("Research status") : uiSource("Provider state"),
+            )
+          : focus === "research" ? uiCopy("owner research") : uiCopy("web provider"),
+        row?.question ?? (focus === "research" ? uiCopy("No staged question") : uiCopy("No fetched signal")),
+        row
+          ? (row.summary || (focus === "research" ? uiCopy("Held without invented sources.") : uiCopy("No external result is presented as fetched.")))
+          : uiCopy("No persisted record in this slot."),
       );
     });
     lane.setAttribute(
       "aria-label",
-      focus === "research" ? "Owner research summary" : "Owner web-signal staging summary",
+      focus === "research" ? uiCopy("Owner research summary") : uiCopy("Owner web-signal staging summary"),
     );
     return;
   }
@@ -1069,12 +1347,12 @@ export function renderWorldLens(
     const row = counts[index];
     setLaneCard(
       card,
-      score ? `System rank ${score.rank}` : row?.label ?? "owner ledger",
-      score?.system_title ?? number(row?.count),
-      score ? `${score.score} persisted Glow` : row ? "persisted private data" : "No persisted count in this slot.",
+      score ? uiFormat("System rank {0}", [score.rank]) : row?.label ?? uiCopy("owner ledger"),
+      score ? coreSystemCopy(score.system_title) : number(row?.count),
+      score ? uiFormat("{0} persisted Glow", [score.score]) : row ? uiCopy("persisted private data") : uiCopy("No persisted count in this slot."),
     );
   });
-  lane.setAttribute("aria-label", "Owner map summary");
+  lane.setAttribute("aria-label", uiCopy("Owner map summary"));
 }
 
 function renderInsight(document: Document, snapshot: V197BridgeSnapshot): void {
@@ -1082,7 +1360,9 @@ function renderInsight(document: Document, snapshot: V197BridgeSnapshot): void {
   const claim = primaryInsight(snapshot);
   const contradiction = insights?.contradictions[0];
   const claimText = typeof claim?.claim_text === "string" ? claim.claim_text : null;
-  const confidence = typeof claim?.confidence === "number" ? `${Math.round(claim.confidence * 100)}% confidence` : "awaiting owner evidence";
+  const confidence = typeof claim?.confidence === "number"
+    ? uiFormat("{0}% confidence", [Math.round(claim.confidence * 100)])
+    : uiCopy("awaiting owner evidence");
   const claimCount = typeof insights?.counts.claims === "number" ? insights.counts.claims : insights?.claims.length ?? 0;
   const contradictionCount = typeof insights?.counts.open_contradictions === "number"
     ? insights.counts.open_contradictions
@@ -1096,44 +1376,49 @@ function renderInsight(document: Document, snapshot: V197BridgeSnapshot): void {
   const openStep = snapshot.plans.flatMap(plan => plan.steps).find(step => !step.done);
   const latestEvent = snapshot.timeline?.items[0];
 
-  ownText(document.querySelector(".system-badge"), "Candidate insight");
-  text(document.querySelector(".universe-insight-title small"), claimText ? "Candidate claim" : "Evidence state");
-  text(document.querySelector(".universe-insight-title h2"), claimText ?? NO_RELIABLE_INSIGHT);
+  ownText(document.querySelector(".system-badge"), uiCopy("Candidate insight"));
+  text(document.querySelector(".universe-insight-title small"), claimText ? uiCopy("Candidate claim") : uiCopy("Evidence state"));
+  text(document.querySelector(".universe-insight-title h2"), claimText ?? uiCopy(NO_RELIABLE_INSIGHT));
   text(
     document.querySelector(".universe-insight-copy"),
     claimText
-      ? `Inferred from the owner ledger · ${confidence}.`
-      : "More owner evidence across time or domains is required before NUR surfaces one.",
+      ? uiFormat("Inferred from the owner ledger · {0}.", [confidence])
+      : uiCopy("More owner evidence across time or domains is required before NUR surfaces one."),
   );
-  const contradictionText = typeof contradiction?.description === "string" ? contradiction.description : "No open contradiction is persisted.";
-  text(document.querySelector(".insight-uncertainty span"), "Open contradiction");
+  const contradictionText = typeof contradiction?.description === "string"
+    ? contradiction.description
+    : uiCopy("No open contradiction is persisted.");
+  text(document.querySelector(".insight-uncertainty span"), uiCopy("Open contradiction"));
   text(document.querySelector(".insight-uncertainty p"), contradictionText);
   const signals = [
-    `${claimCount} candidate ${claimCount === 1 ? "claim" : "claims"}`,
-    `${contradictionCount} open ${contradictionCount === 1 ? "contradiction" : "contradictions"}`,
-    `${predictionCount} unresolved ${predictionCount === 1 ? "prediction" : "predictions"}`,
+    uiFormat("{0} candidate {1}", [claimCount, claimCount === 1 ? uiCopy("claim") : uiCopy("claims")]),
+    uiFormat("{0} open {1}", [contradictionCount, contradictionCount === 1 ? uiCopy("contradiction") : uiCopy("contradictions")]),
+    uiFormat("{0} unresolved {1}", [predictionCount, predictionCount === 1 ? uiCopy("prediction") : uiCopy("predictions")]),
   ];
   document.querySelectorAll<HTMLElement>(".signal-list span").forEach((slot, index) => {
-    slot.textContent = signals[index] ?? "No additional persisted signal";
+    slot.textContent = signals[index] ?? uiCopy("No additional persisted signal");
   });
-  text(document.querySelector(".insight-opportunity small"), "Next persisted move");
-  text(document.querySelector(".insight-opportunity b"), openStep?.title ?? "No persisted next move yet.");
-  text(document.querySelector(".insight-strength span"), "Persisted claims");
+  text(document.querySelector(".insight-opportunity small"), uiCopy("Next persisted move"));
+  text(document.querySelector(".insight-opportunity b"), openStep?.title ?? uiCopy("No persisted next move yet."));
+  text(document.querySelector(".insight-strength span"), uiCopy("Persisted claims"));
   text(document.querySelector(".insight-strength b"), String(claimCount));
   const decorativeStrengthBar = document.querySelector<HTMLElement>(".insight-strength i");
   if (decorativeStrengthBar) {
     decorativeStrengthBar.hidden = true;
     decorativeStrengthBar.style.display = "none";
   }
-  text(document.querySelector(".insight-evidence small"), "Owner evidence");
-  text(document.querySelector(".insight-evidence b"), `${snapshot.timeline?.items.length ?? 0} persisted events`);
-  text(document.querySelector(".insight-evidence span"), insights?.provenance_label ?? "owner_ledger");
+  text(document.querySelector(".insight-evidence small"), uiCopy("Owner evidence"));
+  text(document.querySelector(".insight-evidence b"), uiFormat("{0} persisted events", [snapshot.timeline?.items.length ?? 0]));
+  text(
+    document.querySelector(".insight-evidence span"),
+    formatV197ControlledToken(insights?.provenance_label, uiSource("Owner ledger")),
+  );
   text(
     document.querySelector(".insight-revision span"),
-    latestEvent ? `Latest persisted change: ${latestEvent.title}.` : `No persisted revision yet · ${reviewCount} awaiting review.`,
+    latestEvent ? uiFormat("Latest persisted change: {0}.", [latestEvent.title]) : uiFormat("No persisted revision yet · {0} awaiting review.", [reviewCount]),
   );
-  text(document.querySelector(".live-label"), "OWNER LEDGER");
-  ensureUniversePortal(document, ".candidate-insight", "Review candidates", "insights");
+  text(document.querySelector(".live-label"), uiCopy("OWNER LEDGER"));
+  ensureUniversePortal(document, ".candidate-insight", uiCopy("Review candidates"), "insights");
 }
 
 function makeHonestResult(document: Document, mark: string, title: string, detail: string): HTMLElement {
@@ -1146,7 +1431,7 @@ function makeHonestResult(document: Document, mark: string, title: string, detai
   const body = document.createElement("span");
   body.textContent = detail;
   const status = document.createElement("small");
-  status.textContent = "Local owner ledger · no invented external data";
+  status.textContent = uiCopy("Local owner ledger · no invented external data");
   copy.append(heading, body, status);
   article.append(icon, copy);
   return article;
@@ -1159,19 +1444,19 @@ function ensureResearchStaging(document: Document, host: HTMLElement, results: H
   staging.setAttribute("aria-labelledby", "research-staging-title");
   const title = document.createElement("h3");
   title.id = "research-staging-title";
-  title.textContent = "Stage a local question";
+  title.textContent = uiCopy("Stage a local question");
   const note = document.createElement("p");
-  note.textContent = "Saved to your owner ledger. No external source or citation is invented.";
+  note.textContent = uiCopy("Saved to your owner ledger. No external source or citation is invented.");
   const input = document.createElement("textarea");
   input.id = "research-query";
   input.rows = 2;
   input.maxLength = 4000;
-  input.placeholder = "What should NUR hold for later evidence?";
-  input.setAttribute("aria-label", "Research question");
+  input.placeholder = uiCopy("What should NUR hold for later evidence?");
+  input.setAttribute("aria-label", uiCopy("Research question"));
   const submit = document.createElement("button");
   submit.type = "button";
   submit.dataset.researchSubmit = "true";
-  submit.textContent = "Save local question";
+  submit.textContent = uiCopy("Save local question");
   staging.append(title, note, input, submit);
   if (results) results.before(staging);
   else host.append(staging);
@@ -1197,7 +1482,7 @@ function renderResearch(document: Document, snapshot: V197BridgeSnapshot): void 
     }
   }
   if (!host) return;
-  text(host.querySelector(".universe-card-head h2"), "Research evidence, held honestly.");
+  text(host.querySelector(".universe-card-head h2"), uiCopy("Research evidence, held honestly."));
   const results = host.querySelector<HTMLElement>(".research-results");
   ensureResearchStaging(document, host, results);
   if (results) {
@@ -1206,21 +1491,24 @@ function renderResearch(document: Document, snapshot: V197BridgeSnapshot): void 
       results.append(makeHonestResult(
         document,
         "⌕",
-        "No persisted research question yet.",
-        "Stage a local question below; no external source is invented.",
+        uiCopy("No persisted research question yet."),
+        uiCopy("Stage a local question below; no external source is invented."),
       ));
     } else {
       snapshot.researchBriefs.slice(0, 2).forEach(row => {
         results.append(makeHonestResult(
           document,
-          "R",
+          uiCopy("R"),
           row.question,
-          row.summary || `Status: ${row.status.toLowerCase()} · provider ${row.provider_status.toLowerCase()}`,
+          row.summary || uiFormat("Status: {0} · provider {1}", [
+            formatV197ControlledToken(row.status, uiSource("Research status")),
+            formatV197ControlledToken(row.provider_status, uiSource("Provider state")),
+          ]),
         ));
       });
     }
   }
-  ensureUniversePortal(document, "#universe-research", "Open Research", "research");
+  ensureUniversePortal(document, "#universe-research", uiCopy("Open Research"), "research");
 }
 
 function ensureUniversePortal(
@@ -1241,7 +1529,7 @@ function ensureUniversePortal(
     head.append(control);
   }
   control.dataset.nurUniversePortal = "true";
-  control.textContent = `${label} →`;
+  control.textContent = uiFormat("{0} →", [label]);
   control.disabled = false;
   control.removeAttribute("aria-disabled");
   control.removeAttribute("data-action");
@@ -1273,8 +1561,8 @@ function renderCommunity(document: Document, snapshot: V197BridgeSnapshot): void
   text(
     host.querySelector(".universe-card-head h2"),
     rooms.length
-      ? `${rooms.length} bounded ${rooms.length === 1 ? "room" : "rooms"} · persisted Group NUR.`
-      : "No rooms yet. Create one bounded room to open Group NUR.",
+      ? uiFormat("{0} bounded {1} · persisted Group NUR.", [rooms.length, rooms.length === 1 ? uiCopy("room") : uiCopy("rooms")])
+      : uiCopy("No rooms yet. Create one bounded room to open Group NUR."),
   );
   const community = host.querySelector<HTMLElement>(".community-items");
   if (community) {
@@ -1283,39 +1571,42 @@ function renderCommunity(document: Document, snapshot: V197BridgeSnapshot): void
       community.append(makeHonestResult(
         document,
         "◎",
-        "No fake people, replies, or rooms.",
-        "Rooms hold only explicitly shared content; private Talk, Journal, Timeline, and Omega stay sealed.",
+        uiCopy("No fake people, replies, or rooms."),
+        uiCopy("Rooms hold only explicitly shared content; private Talk, Journal, Timeline, and Omega stay sealed."),
       ));
     }
     rooms.slice(0, 2).forEach(room => {
       community.append(makeHonestResult(
         document,
         room.room_kind === "COUNCIL" ? "⚖" : "◉",
-        `${room.title}${room.is_demo ? " · DEMO" : ""}`,
-        `${room.room_kind.toLowerCase()} room · your role ${room.current_user_role.toLowerCase()} · member content only`,
+        uiFormat("{0}{1}", [room.title, room.is_demo ? (" " + uiCopy("· DEMO") + "") : ""]),
+        uiFormat("{0} room · your role {1} · member content only", [
+          formatV197ControlledToken(room.room_kind, uiSource("Room")),
+          formatV197ControlledToken(room.current_user_role, uiSource("Member")),
+        ]),
       ));
     });
   }
   document.getElementById("nur-v197-community-controls")?.remove();
-  ensureUniversePortal(document, "#universe-community", "Open Community", "community");
+  ensureUniversePortal(document, "#universe-community", uiCopy("Open Community"), "community");
   document.querySelectorAll<HTMLElement>("[data-community-tab]").forEach(control => {
     control.setAttribute("aria-disabled", "true");
     if (control.tagName === "BUTTON") (control as HTMLButtonElement).disabled = true;
-    control.setAttribute("title", "Public community feeds stay disconnected; only your persisted rooms are shown.");
+    control.setAttribute("title", uiCopy("Public community feeds stay disconnected; only your persisted rooms are shown."));
   });
 
   const council = (snapshot.communityRooms ?? []).find(room => room.room_kind === "COUNCIL" && room.status === "ACTIVE");
   text(
     document.querySelector("#universe-consult .universe-card-head h2"),
-    council ? `Council: ${council.title}` : "No Consultation is open yet.",
+    council ? uiFormat("Council: {0}", [council.title]) : uiCopy("No Consultation is open yet."),
   );
   text(
     document.querySelector("#universe-consult .consultation-question p"),
     council
-      ? "This bounded Council can hold real positions, evidence and an owner-recorded return."
-      : "Open the Consultation chamber to gather real context, evidence and one owned return.",
+      ? uiCopy("This bounded Council can hold real positions, evidence and an owner-recorded return.")
+      : uiCopy("Open the Consultation chamber to gather real context, evidence and one owned return."),
   );
-  ensureUniversePortal(document, "#universe-consult", "Open Consultation", "consult");
+  ensureUniversePortal(document, "#universe-consult", uiCopy("Open Consultation"), "consult");
 }
 
 function renderHonestDisabledSurfaces(document: Document): void {
@@ -1328,9 +1619,10 @@ function renderHonestDisabledSurfaces(document: Document): void {
 }
 
 export function hydrateTrackAV197(document: Document, snapshot: V197BridgeSnapshot): void {
-  hydrateReadOnlyV197(document, snapshot);
   const locale = snapshot.preferences?.locale ?? snapshot.session.profile.locale ?? "en";
   const writingPreference = snapshot.preferences?.writing_preference ?? snapshot.session.profile.writing_preference ?? "default";
+  applyV197Locale(document, locale, writingPreference);
+  hydrateReadOnlyV197(document, snapshot);
   renderTalk(document, snapshot.talkThread);
   renderToday(document, snapshot);
   renderJournal(document, snapshot);
@@ -1346,11 +1638,9 @@ export function hydrateTrackAV197(document: Document, snapshot: V197BridgeSnapsh
   renderCommunity(document, snapshot);
   renderHonestDisabledSurfaces(document);
   renderPersistedGlow(document, snapshot.glow);
-  text(document.querySelector('[data-thread-action="glow"]'), "Glow this persisted Talk");
-  document.querySelectorAll<HTMLElement>(".quiet-chip").forEach(chip => {
-    if (chip.textContent?.toLowerCase().includes("live feed")) ownText(chip, "local owner ledger");
-  });
+  text(document.querySelector('[data-thread-action="glow"]'), uiCopy("Glow this persisted Talk"));
   const latestUserTalk = [...snapshot.talkThread].reverse().find(row => row.who === "user" && row.text);
-  text(document.querySelector("#page-today .mini-thread"), latestUserTalk?.text ? `“${shorten(latestUserTalk.text, 170)}”` : "No persisted Talk signal yet.");
-  applyV197Locale(document, locale, writingPreference);
+  const miniThread = document.querySelector("#page-today .mini-thread");
+  text(miniThread, latestUserTalk?.text ? uiFormat("“{0}”", [shorten(latestUserTalk.text, 170)]) : uiCopy("No persisted Talk signal yet."));
+  if (latestUserTalk?.text) markVerbatimUserContent(miniThread);
 }

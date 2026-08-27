@@ -71,6 +71,59 @@ async def test_profile_preferences_persist_and_reject_foreign_orbit(client):
     assert ra.json()["id"] != (await client.get("/api/v1/auth/me")).json()["id"]
 
 
+async def test_profile_locale_normalizes_and_persists_only_supported_writing_variants(client):
+    await register_user(client)
+
+    urdu = await client.patch(
+        "/api/v1/profile/preferences",
+        headers=H(client),
+        json={"locale": "ur-PK", "writing_preference": "script"},
+    )
+    assert urdu.status_code == 200
+    assert urdu.json()["locale"] == "ur"
+    assert urdu.json()["writing_preference"] == "script"
+
+    unsupported_locale = await client.patch(
+        "/api/v1/profile/preferences",
+        headers=H(client),
+        json={"locale": "xx-Unknown"},
+    )
+    assert unsupported_locale.status_code == 422
+
+    unsupported_variant = await client.patch(
+        "/api/v1/profile/preferences",
+        headers=H(client),
+        json={"locale": "fr", "writing_preference": "roman"},
+    )
+    assert unsupported_variant.status_code == 422
+
+    unchanged = (await client.get("/api/v1/profile/preferences")).json()
+    assert unchanged["locale"] == "ur"
+    assert unchanged["writing_preference"] == "script"
+
+
+async def test_profile_locale_change_canonicalizes_default_variant(client):
+    await register_user(client)
+
+    arabic = await client.patch(
+        "/api/v1/profile/preferences",
+        headers=H(client),
+        json={"locale": "ar"},
+    )
+    assert arabic.status_code == 200
+    assert arabic.json()["locale"] == "ar"
+    assert arabic.json()["writing_preference"] == "script"
+
+    roman_hindi = await client.patch(
+        "/api/v1/profile/preferences",
+        headers=H(client),
+        json={"locale": "hi", "writing_preference": "roman"},
+    )
+    assert roman_hindi.status_code == 200
+    assert roman_hindi.json()["locale"] == "hi"
+    assert roman_hindi.json()["writing_preference"] == "roman"
+
+
 async def test_journal_and_research_convert_to_orbit_sources(client):
     await register_user(client)
     orbit_id = (await client.get("/api/v1/orbits")).json()[0]["id"]
@@ -103,4 +156,3 @@ async def test_journal_and_research_convert_to_orbit_sources(client):
 
     sources = (await client.get(f"/api/v1/orbits/{orbit_id}/sources")).json()
     assert {row["id"] for row in sources} >= {converted["orbit_source_id"], converted_research["orbit_source_id"]}
-

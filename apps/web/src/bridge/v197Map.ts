@@ -40,6 +40,15 @@ import {
 import { createV197StarSeal } from "./v197StarSeal";
 import { claimV197SurfaceHost, releaseV197SurfaceHost } from "./v197SurfaceHost";
 import type { V197ApiClient } from "./v197ApiClient";
+import { v197SystemTitle } from "./v197SystemCopy";
+import {
+  structuralValue,
+  type UiCopyKey,
+  uiCopy,
+  uiFormat,
+  uiSource,
+  verbatimUserText,
+} from "../lib/i18n";
 
 const ROOT_ID = "nur-map-root";
 const STYLE_ID = "nur-map-style";
@@ -83,9 +92,53 @@ interface SystemRegion {
   state_reason: string;
   progress_percent: number;
   active_goal_count: number;
+  returned_outcome_count?: number;
   blocker_count: number;
   next_move: unknown;
   layout: { x: number; y: number; radius: number };
+}
+
+export function formatV197SystemStateReason(region: Pick<
+  SystemRegion,
+  "active_goal_count" | "returned_outcome_count" | "progress_percent" | "blocker_count"
+>): string {
+  const goals = region.active_goal_count === 0
+    ? uiCopy("No active goal")
+    : region.active_goal_count === 1
+      ? uiFormat("{0} active goal", [region.active_goal_count])
+      : uiFormat("{0} active goals", [region.active_goal_count]);
+  const outcomes = (region.returned_outcome_count ?? 0) === 0
+    ? uiCopy("no returned outcome yet")
+    : region.returned_outcome_count === 1
+      ? uiFormat("{0} returned outcome", [region.returned_outcome_count])
+      : uiFormat("{0} returned outcomes", [region.returned_outcome_count]);
+  const progress = uiFormat("{0}% verified progress", [region.progress_percent]);
+  const blockers = region.blocker_count === 0
+    ? uiCopy("no unresolved blocker")
+    : region.blocker_count === 1
+      ? uiFormat("{0} unresolved blocker", [region.blocker_count])
+      : uiFormat("{0} unresolved blockers", [region.blocker_count]);
+  return uiFormat("{0}, {1}, {2}. {3}.", [goals, outcomes, progress, blockers]);
+}
+
+const SMART_SECTION_REASON_COPY: Record<string, UiCopyKey> = {
+  current_focus: uiSource("Recorded in the current owner focus."),
+  needs_decision: uiSource("A persisted decision is still open."),
+  blocked: uiSource("A persisted blocker is unresolved."),
+  momentum: uiSource("Recent owner evidence shows movement."),
+  fragile_paths: uiSource("This path holds an unresolved dependency."),
+  recently_changed: uiSource("This owner record changed recently."),
+};
+
+export function formatV197SmartSectionReason(
+  sectionKey: string,
+  hasServerReason: boolean,
+): string {
+  if (!hasServerReason) return "";
+  return uiCopy(
+    SMART_SECTION_REASON_COPY[sectionKey]
+      ?? uiSource("This owner record needs attention."),
+  );
 }
 
 interface Suggestion {
@@ -126,15 +179,15 @@ const EMPTY_GRAPH: MapGraph = {
 };
 
 /** §10's state language. Each pairs a word with a glyph, never a score. */
-const STATE_WORD: Record<string, string> = {
-  STABLE: "Stable",
-  BUILDING: "Building",
-  ACTIVE: "Active",
-  STALLED: "Stalled",
-  RECOVERING: "Recovering",
-  AT_RISK: "At risk",
-  UNCLEAR: "Unclear",
-  DORMANT: "Dormant",
+const STATE_WORD: Record<string, UiCopyKey> = {
+  STABLE: uiSource("Stable"),
+  BUILDING: uiSource("Building"),
+  ACTIVE: uiSource("Active"),
+  STALLED: uiSource("Stalled"),
+  RECOVERING: uiSource("Recovering"),
+  AT_RISK: uiSource("At risk"),
+  UNCLEAR: uiSource("Unclear"),
+  DORMANT: uiSource("Dormant"),
 };
 
 const STATE_GLYPH: Record<string, string> = {
@@ -183,21 +236,21 @@ const EDGE_CLASS: Record<string, string> = {
 };
 
 /** Why two things are connected, in words. Hovering a line must answer this. */
-const EDGE_MEANING: Record<string, string> = {
-  DEPENDS_ON: "cannot move until the other does",
-  SUPPORTS: "helps the other along",
-  ENABLES: "makes the other possible",
-  BLOCKS: "is stopping the other",
-  CONTRADICTS: "argues against the other",
-  LEADS_TO: "leads to the other",
-  EVIDENCE_FOR: "is evidence for the other",
-  INVOLVES: "involves the other",
-  PART_OF: "is part of the other",
-  PREDICTED_TO_PRODUCE: "is predicted to produce the other",
-  MASTER_TO_SYSTEM: "is one of your Systems",
-  SYSTEM_TO_GOAL: "is a goal inside this System",
-  GOAL_TO_OBJECTIVE: "is a milestone of this goal",
-  LEADS_TO_OPTION: "is one option for this decision",
+const EDGE_MEANING: Record<string, UiCopyKey> = {
+  DEPENDS_ON: uiSource("cannot move until the other does"),
+  SUPPORTS: uiSource("helps the other along"),
+  ENABLES: uiSource("makes the other possible"),
+  BLOCKS: uiSource("is stopping the other"),
+  CONTRADICTS: uiSource("argues against the other"),
+  LEADS_TO: uiSource("leads to the other"),
+  EVIDENCE_FOR: uiSource("is evidence for the other"),
+  INVOLVES: uiSource("involves the other"),
+  PART_OF: uiSource("is part of the other"),
+  PREDICTED_TO_PRODUCE: uiSource("is predicted to produce the other"),
+  MASTER_TO_SYSTEM: uiSource("is one of your Systems"),
+  SYSTEM_TO_GOAL: uiSource("is a goal inside this System"),
+  GOAL_TO_OBJECTIVE: uiSource("is a milestone of this goal"),
+  LEADS_TO_OPTION: uiSource("is one option for this decision"),
 };
 
 /** Node radius per kind. Fixed, so no score can inflate a node. */
@@ -224,56 +277,215 @@ const NODE_RADIUS: Record<string, number> = {
   GLOW_MILESTONE: 6,
 };
 
-const KIND_WORD: Record<string, string> = {
-  MASTER_STAR: "You",
-  SYSTEM: "System",
-  GOAL: "Goal",
-  OBJECTIVE: "Objective",
-  PLAN: "Plan",
-  PLAN_STEP: "Plan step",
-  ACTION: "Action",
-  DECISION: "Decision",
-  DECISION_OPTION: "Option",
-  BLOCKER: "Blocker",
-  OUTCOME: "Outcome",
-  PREDICTION: "Prediction",
-  INSIGHT: "Insight",
-  PERSON: "Person",
-  PROJECT: "Project",
-  PROJECT_TASK: "Project task",
-  TIMELINE_EVENT: "Scheduled",
-  RESEARCH_SOURCE: "Research source",
-  WEB_SIGNAL: "Web signal",
-  GLOW_MILESTONE: "Glow milestone",
+const KIND_WORD: Record<string, UiCopyKey> = {
+  MASTER_STAR: uiSource("You"),
+  SYSTEM: uiSource("System"),
+  GOAL: uiSource("Goal"),
+  OBJECTIVE: uiSource("Objective"),
+  PLAN: uiSource("Plan"),
+  PLAN_STEP: uiSource("Plan step"),
+  ACTION: uiSource("Action"),
+  DECISION: uiSource("Decision"),
+  DECISION_OPTION: uiSource("Option"),
+  BLOCKER: uiSource("Blocker"),
+  OUTCOME: uiSource("Outcome"),
+  PREDICTION: uiSource("Prediction"),
+  INSIGHT: uiSource("Insight"),
+  PERSON: uiSource("Person"),
+  PROJECT: uiSource("Project"),
+  PROJECT_TASK: uiSource("Project task"),
+  TIMELINE_EVENT: uiSource("Scheduled"),
+  RESEARCH_SOURCE: uiSource("Research source"),
+  WEB_SIGNAL: uiSource("Web signal"),
+  GLOW_MILESTONE: uiSource("Glow milestone"),
 };
 
 /** §23's evidence classes → the word and hue shown on the card. */
-const BASIS_PRESENTATION: Record<string, { word: string; cls: string; glyph: string }> = {
-  DIRECT_FACT: { word: "Recorded fact", cls: "nur-map-basis-fact", glyph: "◆" },
-  USER_INTERPRETATION: { word: "You said", cls: "nur-map-basis-user", glyph: "✎" },
-  MODEL_INFERENCE: { word: "NUR inferred", cls: "nur-map-basis-inference", glyph: "◈" },
-  EXTERNAL_SOURCE: { word: "External source", cls: "nur-map-basis-external", glyph: "⌖" },
-  PREDICTION: { word: "Prediction", cls: "nur-map-basis-prediction", glyph: "◇" },
-  UNRESOLVED_CLAIM: { word: "Unresolved", cls: "nur-map-basis-inference", glyph: "?" },
+const BASIS_PRESENTATION: Record<string, { word: UiCopyKey; cls: string; glyph: string }> = {
+  DIRECT_FACT: { word: uiSource("Recorded fact"), cls: "nur-map-basis-fact", glyph: "◆" },
+  USER_INTERPRETATION: { word: uiSource("You said"), cls: "nur-map-basis-user", glyph: "✎" },
+  MODEL_INFERENCE: { word: uiSource("NUR inferred"), cls: "nur-map-basis-inference", glyph: "◈" },
+  EXTERNAL_SOURCE: { word: uiSource("External source"), cls: "nur-map-basis-external", glyph: "⌖" },
+  PREDICTION: { word: uiSource("Prediction"), cls: "nur-map-basis-prediction", glyph: "◇" },
+  UNRESOLVED_CLAIM: { word: uiSource("Unresolved"), cls: "nur-map-basis-inference", glyph: "?" },
 };
 
-const OBJECT_FILTERS: { key: string; label: string; kinds: string[] }[] = [
-  { key: "all", label: "All", kinds: [] },
-  { key: "goals", label: "Goals", kinds: ["GOAL", "OBJECTIVE"] },
-  { key: "plans", label: "Plans", kinds: ["PLAN", "PLAN_STEP", "ACTION"] },
-  { key: "decisions", label: "Decisions", kinds: ["DECISION", "DECISION_OPTION"] },
-  { key: "blockers", label: "Blockers", kinds: ["BLOCKER"] },
-  { key: "signals", label: "Signals", kinds: ["WEB_SIGNAL", "RESEARCH_SOURCE"] },
-  { key: "predictions", label: "Predictions", kinds: ["PREDICTION"] },
-  { key: "outcomes", label: "Outcomes", kinds: ["OUTCOME"] },
+const BLOCKER_CATEGORY_WORD: Readonly<Record<string, UiCopyKey>> = {
+  PRACTICAL: uiSource("Practical"),
+  TECHNICAL: uiSource("Technical"),
+  FINANCIAL: uiSource("Financial"),
+  TIME: uiSource("Time"),
+  KNOWLEDGE: uiSource("Knowledge"),
+  EMOTIONAL: uiSource("Emotional"),
+  PSYCHOLOGICAL: uiSource("Psychological"),
+  RELATIONAL: uiSource("Relational"),
+  HEALTH: uiSource("Health"),
+  EXTERNAL: uiSource("External"),
+};
+
+const BLOCKER_STATUS_WORD: Readonly<Record<string, UiCopyKey>> = {
+  PROPOSED: uiSource("Proposed"),
+  OPEN: uiSource("Open"),
+  RESOLVED: uiSource("Resolved"),
+  CHALLENGED: uiSource("Challenged"),
+  DISMISSED: uiSource("Dismissed"),
+};
+
+const SUGGESTION_TYPE_WORD: Readonly<Record<string, UiCopyKey>> = {
+  CONNECTION: uiSource("Connection"),
+  DEPENDENCY: uiSource("Dependency"),
+  BLOCKER: uiSource("Blocker"),
+  CONFLICTING_GOAL: uiSource("Conflicting goal"),
+  DUPLICATE_PLAN: uiSource("Duplicate plan"),
+  STALE_ASSUMPTION: uiSource("Stale assumption"),
+  PATH: uiSource("Path"),
+  SYSTEM_IMBALANCE: uiSource("System imbalance"),
+};
+
+const REVERSIBILITY_WORD: Readonly<Record<string, UiCopyKey>> = {
+  EASY: uiSource("Easy to undo"),
+  COSTLY: uiSource("Costly to undo"),
+  MOSTLY_IRREVERSIBLE: uiSource("Mostly irreversible"),
+  NOT_ASSESSED: uiSource("Not assessed"),
+};
+
+const PREDICTION_RESOLUTION_WORD: Readonly<Record<string, UiCopyKey>> = {
+  CONFIRMED: uiSource("Confirmed"),
+  PARTIALLY_CONFIRMED: uiSource("Partially confirmed"),
+  CONTRADICTED: uiSource("Contradicted"),
+};
+
+const EVIDENCE_SOURCE_WORD: Readonly<Record<string, UiCopyKey>> = {
+  YOUR_NOTE: uiSource("Your note"),
+  MAP_CONNECTION: uiSource("Map connection"),
+  BLOCKER: uiSource("Blocker"),
+  TIMELINE: uiSource("Timeline"),
+};
+
+const ACTIVITY_KIND_WORD: Readonly<Record<string, UiCopyKey>> = {
+  ACTION: uiSource("Action"),
+  EVENT: uiSource("Event"),
+  GOAL_MILESTONE: uiSource("Goal milestone"),
+  MILESTONE: uiSource("Milestone"),
+  DECISION: uiSource("Decision"),
+  TIME_BLOCK: uiSource("Time block"),
+  PLAN_STEP_DUE: uiSource("Plan step due"),
+  OUTCOME_REPORTED: uiSource("Outcome reported"),
+  OUTCOME_RETURNED: uiSource("Outcome returned"),
+  EASIER_NEXT_MOVE: uiSource("Easier next move"),
+  FEASIBILITY_NEXT_MOVE: uiSource("Feasibility next move"),
+  DAILY_CHECKIN: uiSource("Daily check-in"),
+  PLAN_CREATED: uiSource("Plan created"),
+  PLAN_STEP_COMPLETED: uiSource("Plan step completed"),
+  SCHEDULE_CREATED: uiSource("Schedule created"),
+  CONSULTATION_RETURN: uiSource("Consultation return"),
+  INSIGHT_REVIEW_DUE: uiSource("Insight review due"),
+  NOTE_ADDED: uiSource("Note added"),
+};
+
+const MAP_ERROR_CODE_WORD: Readonly<Record<string, UiCopyKey>> = {
+  CAPABILITY_DENIED: uiSource("This action is not available with the current permission."),
+  CSRF_MISSING: uiSource("Your NUR session needs to be renewed."),
+  SESSION_EXPIRED: uiSource("Your NUR session needs to be renewed."),
+  NOT_FOUND: uiSource("That record is no longer available."),
+  CONFLICT: uiSource("That record changed before NUR could save this action."),
+  RATE_LIMITED: uiSource("NUR is receiving too many requests. Try again shortly."),
+};
+
+const MAP_ERROR_STATUS_WORD: Readonly<Record<number, UiCopyKey>> = {
+  0: uiSource("NUR could not reach the service."),
+  200: uiSource("NUR returned an invalid response."),
+  400: uiSource("NUR could not use that request."),
+  401: uiSource("Your NUR session needs to be renewed."),
+  403: uiSource("This action is not available with the current permission."),
+  404: uiSource("That record is no longer available."),
+  409: uiSource("That record changed before NUR could save this action."),
+  422: uiSource("NUR could not use one of the submitted values."),
+  429: uiSource("NUR is receiving too many requests. Try again shortly."),
+  500: uiSource("NUR could not complete that request."),
+  502: uiSource("NUR could not reach the service."),
+  503: uiSource("NUR could not reach the service."),
+  504: uiSource("NUR could not reach the service."),
+};
+
+function controlledToken(value: unknown): string {
+  return typeof value === "string"
+    ? value.trim().replaceAll("-", "_").replaceAll(" ", "_").toUpperCase()
+    : "";
+}
+
+function controlledLabel(
+  words: Readonly<Record<string, UiCopyKey>>,
+  value: unknown,
+  fallback: UiCopyKey = uiSource("Unclear"),
+): string {
+  return uiCopy(words[controlledToken(value)] ?? fallback);
+}
+
+export function mapBlockerCategoryLabel(value: unknown): string {
+  return controlledLabel(BLOCKER_CATEGORY_WORD, value);
+}
+
+export function mapBlockerStatusLabel(value: unknown): string {
+  return controlledLabel(BLOCKER_STATUS_WORD, value);
+}
+
+export function mapSuggestionTypeLabel(value: unknown): string {
+  return controlledLabel(SUGGESTION_TYPE_WORD, value);
+}
+
+export function mapReversibilityLabel(value: unknown): string {
+  return controlledLabel(REVERSIBILITY_WORD, value);
+}
+
+export function mapPredictionResolutionLabel(value: unknown): string {
+  return controlledLabel(PREDICTION_RESOLUTION_WORD, value);
+}
+
+export function mapEvidenceSourceLabel(value: unknown): string {
+  return controlledLabel(EVIDENCE_SOURCE_WORD, value);
+}
+
+export function mapActivityKindLabel(value: unknown): string {
+  return controlledLabel(ACTIVITY_KIND_WORD, value, uiSource("Event"));
+}
+
+/** Visible errors are localized classifications; raw diagnostics stay in devtools. */
+export function mapVisibleFailure(
+  error: unknown,
+  fallback: UiCopyKey = uiSource("NUR could not complete that request."),
+  context = "request",
+): string {
+  console.error(`[NUR Map] ${context}`, error);
+  const detail = typeof error === "object" && error !== null
+    ? error as { code?: unknown; status?: unknown }
+    : null;
+  const code = controlledToken(detail?.code);
+  const status = typeof detail?.status === "number" ? detail.status : null;
+  const source = (code && MAP_ERROR_CODE_WORD[code])
+    || (status !== null && MAP_ERROR_STATUS_WORD[status])
+    || (status !== null && status >= 500 ? MAP_ERROR_STATUS_WORD[500] : undefined)
+    || fallback;
+  return uiCopy(source);
+}
+
+const OBJECT_FILTERS: { key: string; label: UiCopyKey; kinds: string[] }[] = [
+  { key: "all", label: uiSource("All"), kinds: [] },
+  { key: "goals", label: uiSource("Goals"), kinds: ["GOAL", "OBJECTIVE"] },
+  { key: "plans", label: uiSource("Plans"), kinds: ["PLAN", "PLAN_STEP", "ACTION"] },
+  { key: "decisions", label: uiSource("Decisions"), kinds: ["DECISION", "DECISION_OPTION"] },
+  { key: "blockers", label: uiSource("Blockers"), kinds: ["BLOCKER"] },
+  { key: "signals", label: uiSource("Signals"), kinds: ["WEB_SIGNAL", "RESEARCH_SOURCE"] },
+  { key: "predictions", label: uiSource("Predictions"), kinds: ["PREDICTION"] },
+  { key: "outcomes", label: uiSource("Outcomes"), kinds: ["OUTCOME"] },
 ];
 
-const HORIZONS: { key: string; label: string; days: number | null }[] = [
-  { key: "now", label: "Now", days: 0 },
-  { key: "30", label: "30 days", days: 30 },
-  { key: "90", label: "90 days", days: 90 },
-  { key: "365", label: "1 year", days: 365 },
-  { key: "all", label: "All", days: null },
+const HORIZONS: { key: string; label: UiCopyKey; days: number | null }[] = [
+  { key: "now", label: uiSource("Now"), days: 0 },
+  { key: "30", label: uiSource("30 days"), days: 30 },
+  { key: "90", label: uiSource("90 days"), days: 90 },
+  { key: "365", label: uiSource("1 year"), days: 365 },
+  { key: "all", label: uiSource("All"), days: null },
 ];
 
 interface MapState {
@@ -348,7 +560,7 @@ function chip(doc: Document, label: string, pressed: boolean, count?: number): H
   node.setAttribute("aria-pressed", pressed ? "true" : "false");
   node.append(doc.createTextNode(label));
   if (typeof count === "number") {
-    node.append(el(doc, "span", "nur-map-row-meta", ` ${count}`));
+    node.append(el(doc, "span", "nur-map-row-meta", (" " + uiFormat("{0}", [count]) + "")));
   }
   return node;
 }
@@ -370,8 +582,8 @@ function ensureStyle(doc: Document): void {
   doc.head.append(style);
 }
 
-function text(value: unknown, fallback = "Not recorded"): string {
-  if (typeof value === "string" && value.trim()) return value;
+function text(value: unknown, fallback = uiCopy("Not recorded")): string {
+  if (typeof value === "string" && value.trim()) return verbatimUserText(value);
   if (typeof value === "number") return String(value);
   return fallback;
 }
@@ -382,19 +594,30 @@ function nodeRefOf(nodeId: string): { type: string; id: string } {
   return { type: nodeId.slice(0, at).replace(/-/g, "_"), id: nodeId.slice(at + 1) };
 }
 
+function systemRegionTitle(region: Pick<SystemRegion, "slug" | "title">): string {
+  return v197SystemTitle(region.slug, region.title);
+}
+
+function mapNodeLabel(node: Pick<GraphNode, "id" | "kind" | "label" | "data">): string {
+  if (node.kind !== "SYSTEM") return node.label;
+  const dataSlug = typeof node.data.system_slug === "string" ? node.data.system_slug : "";
+  const slug = dataSlug || (node.id.startsWith("system:") ? node.id.slice("system:".length) : "");
+  return v197SystemTitle(slug, node.label);
+}
+
 function edgeClassOf(edge: GraphEdge): string {
   return EDGE_CLASS[edge.kind] ?? "nur-map-edge-contains";
 }
 
 /** The sentence a hovered line must be able to produce. */
 function edgeWhy(edge: GraphEdge, labelOf: (id: string) => string): string {
-  const meaning = EDGE_MEANING[edge.kind] ?? "is connected to";
-  const base = `${labelOf(edge.source)} ${meaning} ${labelOf(edge.target)}`;
+  const meaning = uiCopy(EDGE_MEANING[edge.kind] ?? uiSource("is connected to"));
+  const base = uiFormat("{0} {1} {2}", [labelOf(edge.source), meaning, labelOf(edge.target)]);
   if (edge.semantic && !edge.user_confirmed) {
-    return `${base}. NUR proposed this from ${text(edge.inference_source, "an unnamed source")} — it is not part of your Map until you accept it.`;
+    return uiFormat("{0}. NUR proposed this from {1} — it is not part of your Map until you accept it.", [base, text(edge.inference_source, uiCopy("an unnamed source"))]);
   }
-  if (edge.note) return `${base}. You noted: ${edge.note}`;
-  return `${base}.`;
+  if (edge.note) return uiFormat("{0}. You noted: {1}", [base, edge.note]);
+  return uiFormat("{0}.", [base]);
 }
 
 export async function renderV197Map(
@@ -464,11 +687,16 @@ export async function renderV197Map(
     } catch (error) {
       // §32: a failure must not replace the whole Map with an error card. The
       // last graph stays on screen and the notice is restrained.
-      state.error = error instanceof Error ? error.message : "Part of the Map could not update.";
+      state.error = mapVisibleFailure(
+        error,
+        uiSource("Part of the Map could not update."),
+        "load graph",
+      );
     }
     try {
       state.smart = await api.get<Record<string, unknown>>("/map/smart-sections");
-    } catch {
+    } catch (error) {
+      console.error("[NUR Map] load smart sections", error);
       state.smart = null;
     }
     state.loaded = true;
@@ -486,8 +714,9 @@ export async function renderV197Map(
       state.evidence = evidence ?? null;
       state.activity = activity ?? null;
       state.predictions = predictions ?? null;
-    } catch {
+    } catch (error) {
       // Detail is supplementary; a failure here must not blank the canvas.
+      console.error("[NUR Map] load selection detail", error);
       state.evidence = null;
     }
     paint();
@@ -501,9 +730,7 @@ export async function renderV197Map(
       state.notice = notice ?? null;
       await loadGraph();
     } catch (error) {
-      // The server's own refusal is shown: "Confirm it is real before it is
-      // treated as a blocker" is the useful sentence, not "request failed".
-      state.error = error instanceof Error ? error.message : "That did not work.";
+      state.error = mapVisibleFailure(error, uiSource("That did not work."), "mutation");
       paint();
     } finally {
       state.busy = false;
@@ -544,26 +771,26 @@ export async function renderV197Map(
     accept(id: string) {
       void mutate(
         () => api.post(`/map/suggestions/${id}/accept`, {}),
-        "Accepted. It is part of your Map now.",
+        uiCopy("Accepted. It is part of your Map now."),
       );
     },
     reject(id: string, suppress: boolean) {
       void mutate(
         () => api.post(`/map/suggestions/${id}/reject`, { suppress_kind: suppress }),
-        suppress ? "This kind will not be raised again." : "Rejected.",
+        suppress ? uiCopy("This kind will not be raised again.") : uiCopy("Rejected."),
       );
     },
     generate() {
       void mutate(
         () => api.post("/map/suggestions/generate", {}),
-        "Checked your own records for patterns. Nothing was changed.",
+        uiCopy("Checked your own records for patterns. Nothing was changed."),
       );
     },
     resetLayout() {
       if (!state.viewId) return;
       void mutate(
         () => api.put(`/map/views/${state.viewId}/layout`, { nodes: [] }),
-        "Layout left as it was; positions are cleared per node.",
+        uiCopy("Layout left as it was; positions are cleared per node."),
       );
     },
     /** Non-drag alternative for every drag action (§34). */
@@ -599,7 +826,11 @@ export async function renderV197Map(
       );
     } catch (error) {
       state.comparison = null;
-      state.error = error instanceof Error ? error.message : null;
+      state.error = mapVisibleFailure(
+        error,
+        uiSource("Path comparison could not update."),
+        "load path comparison",
+      );
     }
     paint();
   }
@@ -613,7 +844,8 @@ export async function renderV197Map(
       state.analysis = await api.post<Record<string, unknown>>(
         "/map/decision-analysis", { decision_id: nodeRefOf(decision.id).id },
       );
-    } catch {
+    } catch (error) {
+      console.error("[NUR Map] load decision analysis", error);
       state.analysis = null;
     }
     paint();
@@ -622,7 +854,8 @@ export async function renderV197Map(
   // ── derived ────────────────────────────────────────────────────────────────
 
   function labelOf(nodeId: string): string {
-    return state.graph.nodes.find((row) => row.id === nodeId)?.label ?? nodeId;
+    const node = state.graph.nodes.find((row) => row.id === nodeId);
+    return node ? mapNodeLabel(node) : nodeId;
   }
 
   function visibleNodes(): GraphNode[] {
@@ -656,20 +889,20 @@ export async function renderV197Map(
     const header = el(doc, "header", "nur-map-header");
 
     const title = el(doc, "div", "nur-map-title");
-    const heading = el(doc, "h1", undefined, "Map");
+    const heading = el(doc, "h1", undefined, uiCopy("Map"));
     markV197HolographicWordmark(heading);
     title.append(heading);
-    title.append(el(doc, "p", "nur-map-subtitle", "Systems, paths and possible futures"));
+    title.append(el(doc, "p", "nur-map-subtitle", uiCopy("Systems, paths and possible futures")));
     header.append(title);
 
     const modes = el(doc, "div", "nur-map-header-actions");
     modes.setAttribute("role", "tablist");
-    modes.setAttribute("aria-label", "Map view mode");
+    modes.setAttribute("aria-label", uiCopy("Map view mode"));
     ([
-      ["universe", "Universe"], ["focus", "Focus"],
-      ["paths", "Paths"], ["decisions", "Decisions"],
-    ] as [MapMode, string][]).forEach(([mode, label]) => {
-      const button = chip(doc, label, state.mode === mode);
+      ["universe", uiSource("Universe")], ["focus", uiSource("Focus")],
+      ["paths", uiSource("Paths")], ["decisions", uiSource("Decisions")],
+    ] as [MapMode, UiCopyKey][]).forEach(([mode, label]) => {
+      const button = chip(doc, uiCopy(label), state.mode === mode);
       button.setAttribute("role", "tab");
       button.setAttribute("aria-selected", state.mode === mode ? "true" : "false");
       button.dataset.mapMode = mode;
@@ -681,9 +914,9 @@ export async function renderV197Map(
     const tools = el(doc, "div", "nur-map-header-actions");
     const search = el(doc, "input", "nur-map-search");
     search.type = "search";
-    search.placeholder = "Search Systems, goals, plans, decisions or signals";
+    search.placeholder = uiCopy("Search Systems, goals, plans, decisions or signals");
     search.value = state.query;
-    search.setAttribute("aria-label", "Search the Map");
+    search.setAttribute("aria-label", uiCopy("Search the Map"));
     search.addEventListener("input", () => {
       scheduleV197SearchCommit(doc, SEARCH_KEY, search.value, actions.setQuery);
     });
@@ -693,18 +926,16 @@ export async function renderV197Map(
     // shadow it. Until the multi-field drawer exists this is honestly disabled
     // rather than pretending to work.
     tools.append(capsule(
-      doc, "Add Goal",
-      "Not built yet. Goals are created on the Systems page, which owns the full goal form.",
+      doc, uiCopy("Add Goal"),
+      uiCopy("Not built yet. Goals are created on the Systems page, which owns the full goal form."),
     ));
     tools.append(capsule(
-      doc, "Add Signal",
-      "Not built yet. Signals arrive from Talk, Journal, Today and Research.",
+      doc, uiCopy("Add Signal"),
+      uiCopy("Not built yet. Signals arrive from Talk, Journal, Today and Research."),
     ));
-    const ask = capsule(doc, "Ask NUR to Map");
+    const ask = capsule(doc, uiCopy("Ask NUR to Map"));
     ask.addEventListener("click", () => actions.generate());
-    ask.title =
-      "Checks your own records for patterns — duplicate plans, competing deadlines, "
-      + "unreviewed assumptions. Deterministic, and nothing is applied without you.";
+    ask.title = uiCopy("Checks your own records for patterns — duplicate plans, competing deadlines, unreviewed assumptions. Deterministic, and nothing is applied without you.");
     tools.append(ask);
     header.append(tools);
 
@@ -713,19 +944,19 @@ export async function renderV197Map(
 
   function mapNavigator(): HTMLElement {
     const pane = el(doc, "aside", "nur-map-pane nur-map-nav");
-    pane.setAttribute("aria-label", "Map navigator");
+    pane.setAttribute("aria-label", uiCopy("Map navigator"));
     const scroll = el(doc, "div", "nur-map-pane-scroll");
 
     // Systems, driven from what the server returned — never a hardcoded list.
     const systems = el(doc, "div", "nur-map-nav-group");
-    systems.append(el(doc, "p", "nur-map-nav-label", "Systems"));
+    systems.append(el(doc, "p", "nur-map-nav-label", uiCopy("Systems")));
     const systemChips = el(doc, "div", "nur-map-chips");
-    const all = chip(doc, "All Systems", state.systemFilter === "ALL");
+    const all = chip(doc, uiCopy("All Systems"), state.systemFilter === "ALL");
     all.addEventListener("click", () => actions.setSystemFilter("ALL"));
     systemChips.append(all);
     for (const region of state.graph.system_regions) {
-      const button = chip(doc, region.title, state.systemFilter === region.slug);
-      button.title = `${STATE_WORD[region.state] ?? region.state} — ${region.state_reason}`;
+      const button = chip(doc, systemRegionTitle(region), state.systemFilter === region.slug);
+      button.title = uiFormat("{0} — {1}", [uiCopy(STATE_WORD[region.state] ?? uiSource("Unclear")), formatV197SystemStateReason(region)]);
       button.dataset.mapSystem = region.slug;
       button.addEventListener("click", () => actions.setSystemFilter(region.slug));
       systemChips.append(button);
@@ -734,10 +965,10 @@ export async function renderV197Map(
     scroll.append(systems);
 
     const objects = el(doc, "div", "nur-map-nav-group");
-    objects.append(el(doc, "p", "nur-map-nav-label", "Objects"));
+    objects.append(el(doc, "p", "nur-map-nav-label", uiCopy("Objects")));
     const objectChips = el(doc, "div", "nur-map-chips");
     for (const row of OBJECT_FILTERS) {
-      const button = chip(doc, row.label, state.objectFilter === row.key);
+      const button = chip(doc, uiCopy(row.label), state.objectFilter === row.key);
       button.dataset.mapObjectFilter = row.key;
       button.addEventListener("click", () => actions.setObjectFilter(row.key));
       objectChips.append(button);
@@ -746,10 +977,10 @@ export async function renderV197Map(
     scroll.append(objects);
 
     const horizon = el(doc, "div", "nur-map-nav-group");
-    horizon.append(el(doc, "p", "nur-map-nav-label", "Time horizon"));
+    horizon.append(el(doc, "p", "nur-map-nav-label", uiCopy("Time horizon")));
     const horizonChips = el(doc, "div", "nur-map-chips");
     for (const row of HORIZONS) {
-      const button = chip(doc, row.label, state.horizon === row.key);
+      const button = chip(doc, uiCopy(row.label), state.horizon === row.key);
       button.addEventListener("click", () => actions.setHorizon(row.key));
       horizonChips.append(button);
     }
@@ -757,37 +988,38 @@ export async function renderV197Map(
     // This filters the Map; it is not the Timeline, and says so.
     horizon.append(el(
       doc, "p", "nur-map-empty",
-      "Filters what the Map shows. The full chronology lives on Timeline.",
+      uiCopy("Filters what the Map shows. The full chronology lives on Timeline."),
     ));
     scroll.append(horizon);
 
     // §13.7 smart sections, each from real rows or an honest empty line.
-    const sections: [string, string][] = [
-      ["current_focus", "Current focus"],
-      ["needs_decision", "Needs decision"],
-      ["blocked", "Blocked"],
-      ["momentum", "Momentum"],
-      ["fragile_paths", "Fragile paths"],
-      ["recently_changed", "Recently changed"],
+    const sections: [string, UiCopyKey][] = [
+      ["current_focus", uiSource("Current focus")],
+      ["needs_decision", uiSource("Needs decision")],
+      ["blocked", uiSource("Blocked")],
+      ["momentum", uiSource("Momentum")],
+      ["fragile_paths", uiSource("Fragile paths")],
+      ["recently_changed", uiSource("Recently changed")],
     ];
     for (const [key, label] of sections) {
       const rows = (state.smart?.[key] as { ref: string; label: string; reason?: string }[] | undefined) ?? [];
       const group = el(doc, "div", "nur-map-nav-group");
       group.dataset.mapSection = key;
-      group.append(el(doc, "p", "nur-map-nav-label", label));
+      group.append(el(doc, "p", "nur-map-nav-label", uiCopy(label)));
       if (!rows.length) {
-        group.append(el(doc, "p", "nur-map-empty", "Nothing here yet."));
+        group.append(el(doc, "p", "nur-map-empty", uiCopy("Nothing here yet.")));
       } else {
         const list = el(doc, "ul", "nur-map-nav-list");
         for (const row of rows.slice(0, 6)) {
+          const reason = formatV197SmartSectionReason(key, Boolean(row.reason));
           const item = el(doc, "li");
           const button = el(doc, "button", "nur-map-row");
           button.type = "button";
           if (state.selected === row.ref) button.classList.add("is-selected");
           button.append(el(doc, "span", undefined, "◦"));
           button.append(el(doc, "span", "nur-map-row-label", row.label));
-          button.append(el(doc, "span", "nur-map-row-meta", row.reason ? "why" : ""));
-          if (row.reason) button.title = row.reason;
+          button.append(el(doc, "span", "nur-map-row-meta", reason ? uiCopy("why") : ""));
+          if (reason) button.title = reason;
           button.addEventListener("click", () => actions.select(row.ref));
           item.append(button);
           list.append(item);
@@ -798,18 +1030,17 @@ export async function renderV197Map(
     }
 
     const create = el(doc, "div", "nur-map-nav-group");
-    create.append(el(doc, "p", "nur-map-nav-label", "Create"));
+    create.append(el(doc, "p", "nur-map-nav-label", uiCopy("Create")));
     const createChips = el(doc, "div", "nur-map-chips");
     createChips.append(capsule(
-      doc, "Map a Problem",
-      "Not built yet as a guided flow. POST /api/v1/map/problem is live and tested, "
-      + "but the six-step drawer that drives it is not.",
+      doc, uiCopy("Map a Problem"),
+      uiCopy("Not built yet as a guided flow. POST /api/v1/map/problem is live and tested, but the six-step drawer that drives it is not."),
     ));
     createChips.append(capsule(
-      doc, "Add Decision",
-      "Not built yet. Decisions are created against an Orbit; the Map adds their options.",
+      doc, uiCopy("Add Decision"),
+      uiCopy("Not built yet. Decisions are created against an Orbit; the Map adds their options."),
     ));
-    const suggest = capsule(doc, "Suggest a Path");
+    const suggest = capsule(doc, uiCopy("Suggest a Path"));
     suggest.addEventListener("click", () => actions.generate());
     createChips.append(suggest);
     create.append(createChips);
@@ -821,7 +1052,7 @@ export async function renderV197Map(
 
   function mapCanvas(): HTMLElement {
     const pane = el(doc, "section", "nur-map-pane nur-map-workspace");
-    pane.setAttribute("aria-label", "Living Map");
+    pane.setAttribute("aria-label", uiCopy("Living Map"));
     const wrap = el(doc, "div", "nur-map-canvas-wrap");
 
     const nodes = visibleNodes();
@@ -833,8 +1064,8 @@ export async function renderV197Map(
       // records that happens to be false.
       const loading = el(doc, "div", "nur-map-pane-scroll");
       loading.dataset.mapLoading = "true";
-      loading.append(el(doc, "p", "nur-map-detail-kind", "Map"));
-      loading.append(el(doc, "p", "nur-map-empty", "Assembling your Systems and routes…"));
+      loading.append(el(doc, "p", "nur-map-detail-kind", uiCopy("Map")));
+      loading.append(el(doc, "p", "nur-map-empty", uiCopy("Assembling your Systems and routes…")));
       wrap.append(loading);
       pane.append(wrap);
       return pane;
@@ -843,15 +1074,14 @@ export async function renderV197Map(
     if (!nodes.some((row) => row.kind !== "MASTER_STAR" && row.kind !== "SYSTEM")) {
       // §31: the empty Map is beautiful and useful, never "no data available".
       const empty = el(doc, "div", "nur-map-pane-scroll");
-      empty.append(el(doc, "p", "nur-map-detail-kind", "Your Map"));
+      empty.append(el(doc, "p", "nur-map-detail-kind", uiCopy("Your Map")));
       empty.append(el(
         doc, "h2", "nur-map-detail-title",
-        "Your Map begins with where you are and where you want to move.",
+        uiCopy("Your Map begins with where you are and where you want to move."),
       ));
       empty.append(el(
         doc, "p", "nur-map-field-value",
-        `Your ${state.graph.system_regions.length} Systems are here and waiting. `
-        + "Nothing else has been drawn, because nothing else has been recorded yet.",
+        uiFormat("Your {0} Systems are here and waiting. Nothing else has been drawn, because nothing else has been recorded yet.", [state.graph.system_regions.length]),
       ));
       const regionList = el(doc, "ul", "nur-map-nav-list");
       for (const region of state.graph.system_regions) {
@@ -859,9 +1089,9 @@ export async function renderV197Map(
         const button = el(doc, "button", "nur-map-row");
         button.type = "button";
         button.append(el(doc, "span", undefined, STATE_GLYPH[region.state] ?? "○"));
-        button.append(el(doc, "span", "nur-map-row-label", region.title));
-        button.append(el(doc, "span", "nur-map-row-meta", STATE_WORD[region.state] ?? region.state));
-        button.title = region.state_reason;
+        button.append(el(doc, "span", "nur-map-row-label", systemRegionTitle(region)));
+        button.append(el(doc, "span", "nur-map-row-meta", uiCopy(STATE_WORD[region.state] ?? uiSource("Unclear"))));
+        button.title = formatV197SystemStateReason(region);
         button.addEventListener("click", () => actions.select(region.node_id));
         item.append(button);
         regionList.append(button.parentElement === item ? button : item);
@@ -904,9 +1134,10 @@ export async function renderV197Map(
         `${mapCenterX - mapWidth / 2} ${mapCenterY - mapHeight / 2} ${mapWidth} ${mapHeight}`,
       preserveAspectRatio: "xMidYMid meet",
       role: "img",
-      "aria-label":
-        `Map with ${nodes.length} objects across ${state.graph.system_regions.length} Systems. `
-        + "A full outline is available through the Outline control.",
+      "aria-label": uiFormat(
+        "Map with {0} objects across {1} Systems. A full outline is available through the Outline control.",
+        [nodes.length, state.graph.system_regions.length],
+      ),
     });
     canvas.dataset.mapCamera = "owner-ledger-fit";
 
@@ -944,7 +1175,7 @@ export async function renderV197Map(
         "text-anchor": "middle", class: "nur-map-region-label",
         opacity: dim ? 0.3 : 1,
       });
-      label.textContent = region.title;
+      label.textContent = systemRegionTitle(region);
       regions.append(label);
       const stateLabel = svg(doc, "text", {
         x: region.layout.x, y: region.layout.y - 94,
@@ -953,7 +1184,7 @@ export async function renderV197Map(
       });
       // State word and glyph together: never colour alone.
       stateLabel.textContent =
-        `${STATE_GLYPH[region.state] ?? "○"} ${STATE_WORD[region.state] ?? region.state}`;
+        uiFormat("{0} {1}", [STATE_GLYPH[region.state] ?? "○", uiCopy(STATE_WORD[region.state] ?? uiSource("Unclear"))]);
       regions.append(stateLabel);
     }
     canvas.append(regions);
@@ -1089,8 +1320,9 @@ export async function renderV197Map(
       group.append(body);
 
       const tip = svg(doc, "title");
-      const kindWord = KIND_WORD[node.kind] ?? node.kind;
-      tip.textContent = `${node.label} — ${kindWord}, ${node.status.toLowerCase()}`;
+      const kindWord = uiCopy(KIND_WORD[node.kind] ?? uiSource("Object"));
+      const visibleLabel = mapNodeLabel(node);
+      tip.textContent = uiFormat("{0} — {1}, {2}", [visibleLabel, kindWord, uiCopy(STATE_WORD[node.status] ?? uiSource("Unclear"))]);
       group.append(tip);
 
       // §39: reduce labels while zoomed out. Every node keeps its name in the
@@ -1100,8 +1332,9 @@ export async function renderV197Map(
           x: layout.x, y: layout.y + radius + 13,
           "text-anchor": "middle", class: "nur-map-node-label",
         });
-        label.textContent =
-          node.label.length > 26 ? `${node.label.slice(0, 25)}…` : node.label;
+        label.textContent = visibleLabel.length > 26
+          ? uiFormat("{0}…", [visibleLabel.slice(0, 25)])
+          : visibleLabel;
         group.append(label);
       }
 
@@ -1197,25 +1430,25 @@ export async function renderV197Map(
     wrap.append(canvas);
 
     const controls = el(doc, "div", "nur-map-canvas-controls");
-    const labels = chip(doc, state.showLabels ? "Labels on" : "Labels off", state.showLabels);
+    const labels = chip(doc, state.showLabels ? uiCopy("Labels on") : uiCopy("Labels off"), state.showLabels);
     labels.addEventListener("click", () => actions.toggleLabels());
     controls.append(labels);
-    const edges = chip(doc, state.showEdges ? "Edges on" : "Edges off", state.showEdges);
+    const edges = chip(doc, state.showEdges ? uiCopy("Edges on") : uiCopy("Edges off"), state.showEdges);
     edges.addEventListener("click", () => actions.toggleEdges());
     controls.append(edges);
-    const outline = chip(doc, "Outline", state.showOutline);
+    const outline = chip(doc, uiCopy("Outline"), state.showOutline);
     outline.dataset.mapOutlineToggle = "true";
     outline.addEventListener("click", () => actions.toggleOutline());
     controls.append(outline);
-    const centre = capsule(doc, "Center on You");
+    const centre = capsule(doc, uiCopy("Center on You"));
     centre.classList.add("nur-map-capsule-sm");
     centre.addEventListener("click", () => actions.select("nur"));
     controls.append(centre);
     controls.append(capsule(
-      doc, "Fit all",
-      "Not built yet. The canvas has no pan or zoom transform to fit to; the view is fixed.",
+      doc, uiCopy("Fit all"),
+      uiCopy("Not built yet. The canvas has no pan or zoom transform to fit to; the view is fixed."),
     ));
-    const reset = capsule(doc, "Reset layout");
+    const reset = capsule(doc, uiCopy("Reset layout"));
     reset.classList.add("nur-map-capsule-sm");
     reset.addEventListener("click", () => actions.resetLayout());
     controls.append(reset);
@@ -1223,14 +1456,14 @@ export async function renderV197Map(
 
     const legend = el(doc, "div", "nur-map-canvas-legend");
     ([
-      ["Depends on", "nur-map-edge-depends"],
-      ["Blocks", "nur-map-edge-blocks"],
-      ["Contradicts", "nur-map-edge-contradicts"],
-      ["NUR suggests", "is-candidate"],
-    ] as [string, string][]).forEach(([label, cls]) => {
+      [uiSource("Depends on"), "nur-map-edge-depends"],
+      [uiSource("Blocks"), "nur-map-edge-blocks"],
+      [uiSource("Contradicts"), "nur-map-edge-contradicts"],
+      [uiSource("NUR suggests"), "is-candidate"],
+    ] as [UiCopyKey, string][]).forEach(([label, cls]) => {
       const row = el(doc, "div", "nur-map-legend-row");
       const swatch = el(doc, "span", `nur-map-legend-swatch ${cls}`);
-      row.append(swatch, el(doc, "span", undefined, label));
+      row.append(swatch, el(doc, "span", undefined, uiCopy(label)));
       legend.append(row);
     });
     wrap.append(legend);
@@ -1248,7 +1481,7 @@ export async function renderV197Map(
     wrap.style.position = "absolute";
     wrap.style.inset = "0";
     wrap.style.background = "rgba(0,0,0,0.94)";
-    wrap.append(el(doc, "p", "nur-map-nav-label", "Map outline"));
+    wrap.append(el(doc, "p", "nur-map-nav-label", uiCopy("Map outline")));
     const root = el(doc, "ul", "nur-map-outline");
     const childrenOf = (parentId: string | null): GraphNode[] =>
       visibleNodes().filter((row) => row.parent_id === parentId);
@@ -1257,11 +1490,12 @@ export async function renderV197Map(
       const item = el(doc, "li");
       const button = el(doc, "button", "nur-map-row");
       button.type = "button";
-      const kindWord = KIND_WORD[node.kind] ?? node.kind;
+      const kindWord = uiCopy(KIND_WORD[node.kind] ?? uiSource("Object"));
       // The screen-reader sentence §34 asks for, built from real counts.
-      const summary = `${node.label}. ${kindWord}. ${node.status.toLowerCase()}.`;
+      const visibleLabel = mapNodeLabel(node);
+      const summary = uiFormat("{0}. {1}. {2}.", [visibleLabel, kindWord, uiCopy(STATE_WORD[node.status] ?? uiSource("Unclear"))]);
       button.append(el(doc, "span", undefined, "·"));
-      button.append(el(doc, "span", "nur-map-row-label", node.label));
+      button.append(el(doc, "span", "nur-map-row-label", visibleLabel));
       button.append(el(doc, "span", "nur-map-row-meta", kindWord));
       button.setAttribute("aria-label", summary);
       button.addEventListener("click", () => actions.select(node.id));
@@ -1278,7 +1512,7 @@ export async function renderV197Map(
     const anchor = visibleNodes().find((row) => row.kind === "MASTER_STAR");
     if (anchor) render(anchor, root);
     wrap.append(root);
-    const close = capsule(doc, "Close outline");
+    const close = capsule(doc, uiCopy("Close outline"));
     close.addEventListener("click", () => actions.toggleOutline());
     wrap.append(close);
     return wrap;
@@ -1295,26 +1529,31 @@ export async function renderV197Map(
    */
   function mapMobileFocusList(): HTMLElement {
     const pane = el(doc, "section", "nur-map-pane nur-map-workspace");
-    pane.setAttribute("aria-label", "Focus list");
+    pane.setAttribute("aria-label", uiCopy("Focus list"));
     const scroll = el(doc, "div", "nur-map-pane-scroll");
     scroll.dataset.mapFocusList = "true";
 
-    const section = (label: string, rows: { ref: string; label: string; reason?: string }[]): void => {
+    const section = (
+      key: string,
+      label: string,
+      rows: { ref: string; label: string; reason?: string }[],
+    ): void => {
       const group = el(doc, "div", "nur-map-nav-group");
       group.append(el(doc, "p", "nur-map-nav-label", label));
       if (!rows.length) {
-        group.append(el(doc, "p", "nur-map-empty", "Nothing here yet."));
+        group.append(el(doc, "p", "nur-map-empty", uiCopy("Nothing here yet.")));
       } else {
         const list = el(doc, "ul", "nur-map-nav-list");
         for (const row of rows) {
+          const reason = formatV197SmartSectionReason(key, Boolean(row.reason));
           const item = el(doc, "li");
           const button = el(doc, "button", "nur-map-row");
           button.type = "button";
           if (state.selected === row.ref) button.classList.add("is-selected");
           button.append(el(doc, "span", undefined, "◦"));
           button.append(el(doc, "span", "nur-map-row-label", row.label));
-          button.append(el(doc, "span", "nur-map-row-meta", row.reason ? "why" : ""));
-          if (row.reason) button.title = row.reason;
+          button.append(el(doc, "span", "nur-map-row-meta", reason ? uiCopy("why") : ""));
+          if (reason) button.title = reason;
           button.addEventListener("click", () => actions.select(row.ref));
           item.append(button);
           list.append(item);
@@ -1327,26 +1566,26 @@ export async function renderV197Map(
     const read = (key: string): { ref: string; label: string; reason?: string }[] =>
       (state.smart?.[key] as { ref: string; label: string; reason?: string }[] | undefined) ?? [];
 
-    section("Current focus", read("current_focus"));
-    section("Needs decision", read("needs_decision"));
-    section("Blocked", read("blocked"));
-    section("Momentum", read("momentum"));
-    section("Fragile paths", read("fragile_paths"));
+    section("current_focus", uiCopy("Current focus"), read("current_focus"));
+    section("needs_decision", uiCopy("Needs decision"), read("needs_decision"));
+    section("blocked", uiCopy("Blocked"), read("blocked"));
+    section("momentum", uiCopy("Momentum"), read("momentum"));
+    section("fragile_paths", uiCopy("Fragile paths"), read("fragile_paths"));
 
     // Systems stay reachable on a phone, with their state and its reason.
     const systems = el(doc, "div", "nur-map-nav-group");
-    systems.append(el(doc, "p", "nur-map-nav-label", "Systems"));
+    systems.append(el(doc, "p", "nur-map-nav-label", uiCopy("Systems")));
     const list = el(doc, "ul", "nur-map-nav-list");
     for (const region of state.graph.system_regions) {
       const item = el(doc, "li");
       const button = el(doc, "button", "nur-map-row");
       button.type = "button";
       button.append(el(doc, "span", undefined, STATE_GLYPH[region.state] ?? "○"));
-      button.append(el(doc, "span", "nur-map-row-label", region.title));
+      button.append(el(doc, "span", "nur-map-row-label", systemRegionTitle(region)));
       button.append(el(
-        doc, "span", "nur-map-row-meta", STATE_WORD[region.state] ?? region.state,
+        doc, "span", "nur-map-row-meta", uiCopy(STATE_WORD[region.state] ?? uiSource("Unclear")),
       ));
-      button.title = region.state_reason;
+      button.title = formatV197SystemStateReason(region);
       button.addEventListener("click", () => actions.select(region.node_id));
       item.append(button);
       list.append(item);
@@ -1357,7 +1596,7 @@ export async function renderV197Map(
     // The candidate strip, on the surface rather than behind a hidden panel.
     const pending = state.graph.suggested_changes.suggestions;
     if (pending.length) {
-      scroll.append(el(doc, "p", "nur-map-nav-label", "NUR suggests"));
+      scroll.append(el(doc, "p", "nur-map-nav-label", uiCopy("NUR suggests")));
       for (const suggestion of pending) scroll.append(candidateCard(suggestion));
     }
 
@@ -1369,21 +1608,21 @@ export async function renderV197Map(
     const pane = el(doc, "section", "nur-map-pane nur-map-workspace");
     const scroll = el(doc, "div", "nur-map-pane-scroll");
     scroll.dataset.mapPaths = "true";
-    scroll.append(el(doc, "p", "nur-map-detail-kind", "Paths"));
+    scroll.append(el(doc, "p", "nur-map-detail-kind", uiCopy("Paths")));
 
     const comparison = state.comparison;
     if (!comparison) {
-      scroll.append(el(doc, "h2", "nur-map-detail-title", "Nothing to compare yet"));
+      scroll.append(el(doc, "h2", "nur-map-detail-title", uiCopy("Nothing to compare yet")));
       scroll.append(el(
         doc, "p", "nur-map-empty",
-        "Select a goal, then Paths compares the routes that actually exist toward it.",
+        uiCopy("Select a goal, then Paths compares the routes that actually exist toward it."),
       ));
       pane.append(scroll);
       return pane;
     }
 
     const goal = comparison.goal as { title: string } | undefined;
-    scroll.append(el(doc, "h2", "nur-map-detail-title", text(goal?.title, "This goal")));
+    scroll.append(el(doc, "h2", "nur-map-detail-title", text(goal?.title, uiCopy("This goal"))));
     scroll.append(el(doc, "p", "nur-map-lane-strategy", text(comparison.association_basis, "")));
 
     const lanes = (comparison.paths as Record<string, unknown>[] | undefined) ?? [];
@@ -1396,32 +1635,34 @@ export async function renderV197Map(
     const holder = el(doc, "div", "nur-map-lanes");
     for (const lane of lanes) {
       const card = el(doc, "article", "nur-map-lane");
-      card.append(el(doc, "h3", "nur-map-lane-name", text(lane.name, "Route")));
+      card.append(el(doc, "h3", "nur-map-lane-name", text(lane.name, uiCopy("Route"))));
       card.append(el(doc, "p", "nur-map-lane-strategy", text(lane.strategy, "")));
 
       const dims = el(doc, "div", "nur-map-lane-dims");
       const add = (label: string, value: unknown) => {
         const cell = el(doc, "div");
         cell.append(el(doc, "div", "nur-map-dim-label", label));
-        const shown = text(value, "Not assessed");
+        const notAssessed = uiCopy("Not assessed");
+        const notRecorded = uiCopy("Not recorded");
+        const shown = text(value, notAssessed);
         const body = el(doc, "div", "nur-map-dim-value", shown);
         // §19: an unmeasured dimension is styled as absent, not as a value.
-        if (shown === "Not assessed" || shown === "Not recorded") {
+        if (shown === notAssessed || shown === notRecorded) {
           body.classList.add("is-unmeasured");
         }
         cell.append(body);
         dims.append(cell);
       };
-      add("First step", lane.first_step);
-      add("Effort", lane.effort);
-      add("Time horizon", lane.time_horizon);
-      add("Reversibility", lane.reversibility);
-      add("Evidence", lane.evidence_strength);
-      add("Expected outcome", lane.expected_outcome);
-      add("Fallback", lane.fallback);
+      add(uiCopy("First step"), lane.first_step);
+      add(uiCopy("Effort"), lane.effort);
+      add(uiCopy("Time horizon"), lane.time_horizon);
+      add(uiCopy("Reversibility"), mapReversibilityLabel(lane.reversibility));
+      add(uiCopy("Evidence"), lane.evidence_strength);
+      add(uiCopy("Expected outcome"), lane.expected_outcome);
+      add(uiCopy("Fallback"), lane.fallback);
       card.append(dims);
 
-      card.append(field(doc, "Uncertainty", text(lane.uncertainty, "")));
+      card.append(field(doc, uiCopy("Uncertainty"), text(lane.uncertainty, "")));
 
       const milestones = (lane.milestones as { title: string; done: boolean }[] | undefined) ?? [];
       if (milestones.length) {
@@ -1438,8 +1679,11 @@ export async function renderV197Map(
       const blockers = (lane.blockers as { title: string; status: string }[] | undefined) ?? [];
       if (blockers.length) {
         card.append(field(
-          doc, "Blockers",
-          blockers.map((row) => `${row.title} (${row.status.toLowerCase()})`).join(" · "),
+          doc, uiCopy("Blockers"),
+          blockers.map((row) => uiFormat("{0} ({1})", [
+            row.title,
+            mapBlockerStatusLabel(row.status),
+          ])).join(" · "),
         ));
       }
       holder.append(card);
@@ -1454,22 +1698,21 @@ export async function renderV197Map(
     const pane = el(doc, "section", "nur-map-pane nur-map-workspace");
     const scroll = el(doc, "div", "nur-map-pane-scroll");
     scroll.dataset.mapDecisions = "true";
-    scroll.append(el(doc, "p", "nur-map-detail-kind", "Decisions"));
+    scroll.append(el(doc, "p", "nur-map-detail-kind", uiCopy("Decisions")));
 
     const analysis = state.analysis;
     if (!analysis) {
-      scroll.append(el(doc, "h2", "nur-map-detail-title", "No open decision"));
+      scroll.append(el(doc, "h2", "nur-map-detail-title", uiCopy("No open decision")));
       scroll.append(el(
         doc, "p", "nur-map-empty",
-        "Unresolved forks appear here with their options, trade-offs and what each "
-        + "would cost to walk back.",
+        uiCopy("Unresolved forks appear here with their options, trade-offs and what each would cost to walk back."),
       ));
       pane.append(scroll);
       return pane;
     }
 
     const decision = analysis.decision as { statement: string } | undefined;
-    scroll.append(el(doc, "h2", "nur-map-detail-title", text(decision?.statement, "Decision")));
+    scroll.append(el(doc, "h2", "nur-map-detail-title", text(decision?.statement, uiCopy("Decision"))));
 
     const options = (analysis.options as Record<string, unknown>[] | undefined) ?? [];
     const matrix = (analysis.comparison_matrix as {
@@ -1481,9 +1724,9 @@ export async function renderV197Map(
       const table = el(doc, "table", "nur-map-matrix");
       const head = el(doc, "thead");
       const headRow = el(doc, "tr");
-      headRow.append(el(doc, "th", undefined, "Dimension"));
+      headRow.append(el(doc, "th", undefined, uiCopy("Dimension")));
       for (const option of options) {
-        headRow.append(el(doc, "th", undefined, text(option.label, "Option")));
+        headRow.append(el(doc, "th", undefined, text(option.label, uiCopy("Option"))));
       }
       head.append(headRow);
       table.append(head);
@@ -1506,7 +1749,7 @@ export async function renderV197Map(
     } | null;
     if (recommendation) {
       const card = el(doc, "div", "nur-map-doubt");
-      card.append(el(doc, "p", "nur-map-doubt-label", "NUR's reading"));
+      card.append(el(doc, "p", "nur-map-doubt-label", uiCopy("NUR's reading")));
       card.append(el(doc, "p", "nur-map-field-value", recommendation.because));
       // The assumption is always visible next to the recommendation.
       card.append(el(doc, "p", "nur-map-field-value", recommendation.changes_if));
@@ -1517,17 +1760,16 @@ export async function renderV197Map(
 
     const actionsRow = el(doc, "div", "nur-map-candidate-actions");
     actionsRow.append(capsule(
-      doc, "Choose an option",
-      "Not built yet as a drawer. POST /map/decisions/{id}/choose/{option} is live and "
-      + "tested; only the owner can call it.",
+      doc, uiCopy("Choose an option"),
+      uiCopy("Not built yet as a drawer. POST /map/decisions/{id}/choose/{option} is live and tested; only the owner can call it."),
     ));
     actionsRow.append(capsule(
-      doc, "Run an experiment first",
-      "Not built yet. Experiments exist in the backend but are not wired to decisions.",
+      doc, uiCopy("Run an experiment first"),
+      uiCopy("Not built yet. Experiments exist in the backend but are not wired to decisions."),
     ));
     actionsRow.append(capsule(
-      doc, "Ask a consultation",
-      "Not built yet. Consultations are a separate surface.",
+      doc, uiCopy("Ask a consultation"),
+      uiCopy("Not built yet. Consultations are a separate surface."),
     ));
     scroll.append(actionsRow);
 
@@ -1537,21 +1779,21 @@ export async function renderV197Map(
 
   function mapDetailPanel(): HTMLElement {
     const pane = el(doc, "aside", "nur-map-pane nur-map-detail");
-    pane.setAttribute("aria-label", "Selection detail");
+    pane.setAttribute("aria-label", uiCopy("Selection detail"));
     const scroll = el(doc, "div", "nur-map-pane-scroll");
 
     const node = state.graph.nodes.find((row) => row.id === state.selected);
     if (!node) {
-      scroll.append(el(doc, "p", "nur-map-detail-kind", "Nothing selected"));
+      scroll.append(el(doc, "p", "nur-map-detail-kind", uiCopy("Nothing selected")));
       scroll.append(el(
         doc, "p", "nur-map-empty",
-        "Select something on the Map to understand its role, evidence and possible movement.",
+        uiCopy("Select something on the Map to understand its role, evidence and possible movement."),
       ));
       // Candidates remain reachable with nothing selected: they are the one thing
       // waiting on the owner rather than on work.
       const pending = state.graph.suggested_changes.suggestions;
       if (pending.length) {
-        scroll.append(el(doc, "p", "nur-map-nav-label", "NUR suggests"));
+        scroll.append(el(doc, "p", "nur-map-nav-label", uiCopy("NUR suggests")));
         for (const suggestion of pending) scroll.append(candidateCard(suggestion));
       }
       pane.append(scroll);
@@ -1561,18 +1803,18 @@ export async function renderV197Map(
     const header = el(doc, "div", "nur-map-detail-header");
     header.append(el(
       doc, "p", "nur-map-detail-kind",
-      `${KIND_WORD[node.kind] ?? node.kind} · ${node.status.toLowerCase()}`,
+      uiFormat("{0} · {1}", [uiCopy(KIND_WORD[node.kind] ?? uiSource("Object")), uiCopy(STATE_WORD[node.status] ?? uiSource("Unclear"))]),
     ));
-    header.append(el(doc, "h2", "nur-map-detail-title", node.label));
+    header.append(el(doc, "h2", "nur-map-detail-title", mapNodeLabel(node)));
     scroll.append(header);
 
     const tabs = el(doc, "div", "nur-map-tabs");
     tabs.setAttribute("role", "tablist");
     ([
-      ["overview", "Overview"], ["path", "Path"], ["evidence", "Evidence"],
-      ["activity", "Activity"], ["nur", "NUR View"],
-    ] as [DetailTab, string][]).forEach(([tab, label]) => {
-      const button = el(doc, "button", "nur-map-tab", label);
+      ["overview", uiSource("Overview")], ["path", uiSource("Path")], ["evidence", uiSource("Evidence")],
+      ["activity", uiSource("Activity")], ["nur", uiSource("NUR View")],
+    ] as [DetailTab, UiCopyKey][]).forEach(([tab, label]) => {
+      const button = el(doc, "button", "nur-map-tab", uiCopy(label));
       button.type = "button";
       button.setAttribute("role", "tab");
       button.setAttribute("aria-selected", state.tab === tab ? "true" : "false");
@@ -1612,53 +1854,57 @@ export async function renderV197Map(
 
       into.dataset.mapCurrentPosition = "true";
       into.append(field(
-        doc, "Active priorities",
-        focus.length ? focus.map((row) => row.label).join(" · ") : "None recorded",
+        doc, uiCopy("Active priorities"),
+        focus.length ? focus.map((row) => row.label).join(" · ") : uiCopy("None recorded"),
         focus.length === 0,
       ));
       into.append(field(
-        doc, "Open decisions",
+        doc, uiCopy("Open decisions"),
         decisions.length
-          ? `${decisions.length} waiting on you — ${decisions[0].label}`
-          : "None waiting on you",
+          ? uiFormat("{0} waiting on you — {1}", [decisions.length, decisions[0].label])
+          : uiCopy("None waiting on you"),
         decisions.length === 0,
       ));
       into.append(field(
-        doc, "Current constraints",
+        doc, uiCopy("Current constraints"),
         blocked.length
-          ? `${blocked.length} goal${blocked.length === 1 ? "" : "s"} blocked`
-          : "Nothing is blocked",
+          ? blocked.length === 1
+            ? uiFormat("{0} goal blocked", [blocked.length])
+            : uiFormat("{0} goals blocked", [blocked.length])
+          : uiCopy("Nothing is blocked"),
         blocked.length === 0,
       ));
       into.append(field(
-        doc, "Recent movement",
+        doc, uiCopy("Recent movement"),
         momentum.length
-          ? `${momentum.length} outcome${momentum.length === 1 ? "" : "s"} in the last 14 days`
-          : "No outcome recorded in the last 14 days",
+          ? momentum.length === 1
+            ? uiFormat("{0} outcome in the last 14 days", [momentum.length])
+            : uiFormat("{0} outcomes in the last 14 days", [momentum.length])
+          : uiCopy("No outcome recorded in the last 14 days"),
         momentum.length === 0,
       ));
       into.append(field(
-        doc, "Major risks",
+        doc, uiCopy("Major risks"),
         fragile.length
-          ? `${fragile.length} assumption${fragile.length === 1 ? "" : "s"} past review`
-          : "No assumption is past its review date",
+          ? fragile.length === 1
+            ? uiFormat("{0} assumption past review", [fragile.length])
+            : uiFormat("{0} assumptions past review", [fragile.length])
+          : uiCopy("No assumption is past its review date"),
         fragile.length === 0,
       ));
       const states = state.graph.system_regions
-        .map((row) => `${row.title}: ${STATE_WORD[row.state] ?? row.state}`)
+        .map((row) => uiFormat("{0}: {1}", [systemRegionTitle(row), uiCopy(STATE_WORD[row.state] ?? uiSource("Unclear"))]))
         .join(" · ");
-      into.append(field(doc, "Systems", states || "No Systems"));
+      into.append(field(doc, uiCopy("Systems"), states || uiCopy("No Systems")));
       // Confidence in words, and only from what is actually observable. A number
       // here would be the fake precision §10 forbids.
       const recorded = (counts.goals ?? 0) + (counts.decisions ?? 0)
         + (counts.blockers ?? 0) + (counts.semantic_edges ?? 0);
       into.append(field(
-        doc, "How much of this NUR can see",
+        doc, uiCopy("How much of this NUR can see"),
         recorded === 0
-          ? "Almost nothing is recorded yet, so NUR's model of your position is "
-            + "close to empty. Anything it says now rests on very little."
-          : `${recorded} recorded objects and connections. Anything you have not `
-            + "written down is invisible here.",
+          ? uiCopy("Almost nothing is recorded yet, so NUR's model of your position is close to empty. Anything it says now rests on very little.")
+          : uiFormat("{0} recorded objects and connections. Anything you have not written down is invisible here.", [recorded]),
         recorded === 0,
       ));
       return;
@@ -1667,69 +1913,71 @@ export async function renderV197Map(
       const region = state.graph.system_regions.find((row) => row.node_id === node.id);
       if (region) {
         into.append(field(
-          doc, "State",
-          `${STATE_GLYPH[region.state] ?? ""} ${STATE_WORD[region.state] ?? region.state}`,
+          doc, uiCopy("State"),
+          uiFormat("{0} {1}", [STATE_GLYPH[region.state] ?? "", uiCopy(STATE_WORD[region.state] ?? uiSource("Unclear"))]),
         ));
-        into.append(field(doc, "Why", region.state_reason));
-        into.append(field(doc, "Active goals", String(region.active_goal_count)));
-        into.append(field(doc, "Unresolved blockers", String(region.blocker_count)));
+        into.append(field(doc, uiCopy("Why"), formatV197SystemStateReason(region)));
+        into.append(field(doc, uiCopy("Active goals"), String(region.active_goal_count)));
+        into.append(field(doc, uiCopy("Unresolved blockers"), String(region.blocker_count)));
       }
     }
     if (node.kind === "BLOCKER") {
-      into.append(field(doc, "Category", text(data.category)));
+      into.append(field(doc, uiCopy("Category"), mapBlockerCategoryLabel(data.category)));
       into.append(field(
-        doc, "Basis",
-        BASIS_PRESENTATION[
+        doc, uiCopy("Basis"),
+        uiCopy(BASIS_PRESENTATION[
           data.basis === "NUR_INFERRED" ? "MODEL_INFERENCE"
             : data.basis === "OBSERVED" ? "DIRECT_FACT" : "USER_INTERPRETATION"
-        ]?.word ?? text(data.basis),
+        ]?.word ?? uiSource("Unresolved")),
       ));
       // A blocker NUR only proposed is never presented as established.
       if (data.confirmed_by_owner === false) {
         const notice = el(doc, "div", "nur-map-doubt");
-        notice.append(el(doc, "p", "nur-map-doubt-label", "Not confirmed"));
+        notice.append(el(doc, "p", "nur-map-doubt-label", uiCopy("Not confirmed")));
         notice.append(el(
           doc, "p", "nur-map-field-value",
-          "NUR proposed this. It is not treated as a real blocker until you say it is.",
+          uiCopy("NUR proposed this. It is not treated as a real blocker until you say it is."),
         ));
         into.append(notice);
       }
       const affects = (data.affects as { type?: string; id?: string }[] | undefined) ?? [];
       into.append(field(
-        doc, "What it affects",
+        doc, uiCopy("What it affects"),
         affects.length
           ? affects.map((ref) => labelOf(`${ref.type}:${ref.id}`)).join(" · ")
-          : "Nothing linked yet",
+          : uiCopy("Nothing linked yet"),
         affects.length === 0,
       ));
-      into.append(field(doc, "Evidence items", String(data.evidence_count ?? 0)));
+      into.append(field(doc, uiCopy("Evidence items"), String(data.evidence_count ?? 0)));
     }
     if (node.kind === "DECISION") {
-      into.append(field(doc, "Options recorded", String(data.option_count ?? 0)));
+      into.append(field(doc, uiCopy("Options recorded"), String(data.option_count ?? 0)));
       into.append(field(
-        doc, "Resolved",
-        data.chosen_option_id ? labelOf(`decision-option:${data.chosen_option_id}`) : "Not yet",
+        doc, uiCopy("Resolved"),
+        data.chosen_option_id
+          ? labelOf(structuralValue(`decision-option:${data.chosen_option_id}`))
+          : uiCopy("Not yet"),
         !data.chosen_option_id,
       ));
-      into.append(field(doc, "Rationale", text(data.rationale, "None recorded")));
+      into.append(field(doc, uiCopy("Rationale"), text(data.rationale, uiCopy("None recorded"))));
     }
     if (node.kind === "GOAL") {
-      into.append(field(doc, "Progress", `${text(data.progress_percent, "0")}% verified`));
-      into.append(field(doc, "Target date", text(data.target_date, "No target date")));
-      into.append(field(doc, "Why it matters", text(data.why, "Not recorded")));
+      into.append(field(doc, uiCopy("Progress"), uiFormat("{0}% verified", [text(data.progress_percent, "0")])));
+      into.append(field(doc, uiCopy("Target date"), text(data.target_date, uiCopy("No target date"))));
+      into.append(field(doc, uiCopy("Why it matters"), text(data.why, uiCopy("Not recorded"))));
     }
     if (node.kind === "DECISION_OPTION") {
-      into.append(field(doc, "Reversibility", text(data.reversibility)));
-      into.append(field(doc, "Time horizon", text(data.time_horizon, "Not stated"), !data.time_horizon));
-      into.append(field(doc, "Risks recorded", String(data.risk_count ?? 0)));
+      into.append(field(doc, uiCopy("Reversibility"), mapReversibilityLabel(data.reversibility)));
+      into.append(field(doc, uiCopy("Time horizon"), text(data.time_horizon, uiCopy("Not stated")), !data.time_horizon));
+      into.append(field(doc, uiCopy("Risks recorded"), String(data.risk_count ?? 0)));
     }
     if (typeof data.annotation_count === "number") {
-      into.append(field(doc, "Your notes", String(data.annotation_count)));
+      into.append(field(doc, uiCopy("Your notes"), String(data.annotation_count)));
     }
     if (!into.childElementCount) {
       into.append(el(
         doc, "p", "nur-map-empty",
-        "This object carries no recorded detail beyond its name and place.",
+        uiCopy("This object carries no recorded detail beyond its name and place."),
       ));
     }
   }
@@ -1744,26 +1992,26 @@ export async function renderV197Map(
     const children = state.graph.nodes.filter((row) => row.parent_id === node.id);
 
     into.append(field(
-      doc, "Depends on",
+      doc, uiCopy("Depends on"),
       dependencies.length
         ? dependencies.map((edge) => labelOf(edge.source)).join(" · ")
-        : "Nothing recorded",
+        : uiCopy("Nothing recorded"),
       dependencies.length === 0,
     ));
     into.append(field(
-      doc, "Blocked by",
-      blocks.length ? blocks.map((edge) => labelOf(edge.source)).join(" · ") : "Nothing",
+      doc, uiCopy("Blocked by"),
+      blocks.length ? blocks.map((edge) => labelOf(edge.source)).join(" · ") : uiCopy("Nothing"),
       blocks.length === 0,
     ));
     into.append(field(
-      doc, "Contains",
-      children.length ? children.map((row) => row.label).join(" · ") : "Nothing yet",
+      doc, uiCopy("Contains"),
+      children.length ? children.map((row) => row.label).join(" · ") : uiCopy("Nothing yet"),
       children.length === 0,
     ));
 
     const row = el(doc, "div", "nur-map-candidate-actions");
     if (node.kind === "GOAL") {
-      const compare = capsule(doc, "Compare paths");
+      const compare = capsule(doc, uiCopy("Compare paths"));
       compare.addEventListener("click", () => {
         state.selected = node.id;
         actions.setMode("paths");
@@ -1771,12 +2019,12 @@ export async function renderV197Map(
       row.append(compare);
     }
     row.append(capsule(
-      doc, "Continue Plan",
-      "Not built yet. Plan execution lives on the Plan page, which owns the step flow.",
+      doc, uiCopy("Continue Plan"),
+      uiCopy("Not built yet. Plan execution lives on the Plan page, which owns the step flow."),
     ));
     row.append(capsule(
-      doc, "Add to Timeline",
-      "Not built yet from Map. Timeline owns scheduling; POST /timeline/from-goal exists.",
+      doc, uiCopy("Add to Timeline"),
+      uiCopy("Not built yet from Map. Timeline owns scheduling; POST /timeline/from-goal exists."),
     ));
     into.append(row);
   }
@@ -1784,7 +2032,7 @@ export async function renderV197Map(
   function evidenceTab(into: HTMLElement): void {
     const evidence = state.evidence;
     if (!evidence) {
-      into.append(el(doc, "p", "nur-map-empty", "Loading the evidence for this object…"));
+      into.append(el(doc, "p", "nur-map-empty", uiCopy("Loading the evidence for this object…")));
       return;
     }
     const supporting = (evidence.supporting as Record<string, unknown>[] | undefined) ?? [];
@@ -1799,25 +2047,25 @@ export async function renderV197Map(
         const presentation = BASIS_PRESENTATION[cls] ?? BASIS_PRESENTATION.USER_INTERPRETATION;
         // Basis is always visible, in words and with a glyph — never hue alone.
         const badge = el(doc, "p", `nur-map-card-basis ${presentation.cls}`);
-        badge.textContent = `${presentation.glyph} ${presentation.word}`;
+        badge.textContent = uiFormat("{0} {1}", [presentation.glyph, uiCopy(presentation.word)]);
         card.append(badge);
         card.append(el(doc, "p", "nur-map-field-value", text(row.body, "")));
-        card.append(el(doc, "p", "nur-map-row-meta", `Source: ${text(row.source, "unknown")}`));
+        card.append(el(doc, "p", "nur-map-row-meta", uiFormat("Source: {0}", [mapEvidenceSourceLabel(row.source)])));
         into.append(card);
       }
     };
 
-    into.append(el(doc, "p", "nur-map-nav-label", "Supporting"));
+    into.append(el(doc, "p", "nur-map-nav-label", uiCopy("Supporting")));
     if (supporting.length) render(supporting, false);
-    else into.append(el(doc, "p", "nur-map-empty", "Nothing supports this yet."));
+    else into.append(el(doc, "p", "nur-map-empty", uiCopy("Nothing supports this yet.")));
 
-    into.append(el(doc, "p", "nur-map-nav-label", "Contradicting"));
+    into.append(el(doc, "p", "nur-map-nav-label", uiCopy("Contradicting")));
     if (contradicting.length) render(contradicting, true);
-    else into.append(el(doc, "p", "nur-map-empty", "Nothing argues against this yet."));
+    else into.append(el(doc, "p", "nur-map-empty", uiCopy("Nothing argues against this yet.")));
 
     // Naming what is absent is part of the evidence picture.
     if (missing.length) {
-      into.append(el(doc, "p", "nur-map-nav-label", "Missing information"));
+      into.append(el(doc, "p", "nur-map-nav-label", uiCopy("Missing information")));
       for (const line of missing) {
         into.append(el(doc, "p", "nur-map-empty", line));
       }
@@ -1828,13 +2076,13 @@ export async function renderV197Map(
     const activity = state.activity;
     const items = (activity?.items as Record<string, unknown>[] | undefined) ?? [];
     if (!items.length) {
-      into.append(el(doc, "p", "nur-map-empty", "Nothing has happened to this object yet."));
+      into.append(el(doc, "p", "nur-map-empty", uiCopy("Nothing has happened to this object yet.")));
       return;
     }
     const list = el(doc, "ul", "nur-map-nav-list");
     for (const row of items) {
       const item = el(doc, "li", "nur-map-card");
-      item.append(el(doc, "p", "nur-map-card-basis", text(row.kind, "event")));
+      item.append(el(doc, "p", "nur-map-card-basis", mapActivityKindLabel(row.kind)));
       item.append(el(doc, "p", "nur-map-field-value", text(row.title, "")));
       item.append(el(doc, "p", "nur-map-row-meta", text(row.at, "")));
       list.append(item);
@@ -1845,52 +2093,51 @@ export async function renderV197Map(
   function nurViewTab(into: HTMLElement, node: GraphNode): void {
     const predictions = (state.predictions?.items as Record<string, unknown>[] | undefined) ?? [];
     if (predictions.length) {
-      into.append(el(doc, "p", "nur-map-nav-label", "Predictions"));
+      into.append(el(doc, "p", "nur-map-nav-label", uiCopy("Predictions")));
       for (const row of predictions) {
         const card = el(doc, "div", "nur-map-card");
         const badge = el(doc, "p", "nur-map-card-basis nur-map-basis-prediction");
-        badge.textContent = "◇ Prediction";
+        badge.textContent = uiCopy("◇ Prediction");
         card.append(badge);
         card.append(el(doc, "p", "nur-map-field-value", text(row.statement, "")));
         // Confidence is shown as a range word, and certainty is impossible.
         card.append(el(
           doc, "p", "nur-map-row-meta",
           row.confidence === null || row.confidence === undefined
-            ? "No confidence recorded · never certain"
-            : `Confidence ${row.confidence} · never certain`,
+            ? uiCopy("No confidence recorded · never certain")
+            : uiFormat("Confidence {0} · never certain", [row.confidence]),
         ));
         const assumptions = (row.assumptions as string[] | undefined) ?? [];
         if (assumptions.length) {
-          card.append(el(doc, "p", "nur-map-row-meta", `Rests on: ${assumptions.join("; ")}`));
+          card.append(el(doc, "p", "nur-map-row-meta", uiFormat("Rests on: {0}", [assumptions.join("; ")])));
         }
         if (row.overdue_for_review) {
           card.append(el(
             doc, "p", "nur-map-row-meta",
-            "Past its review date — anything resting on this rests on an unchecked assumption.",
+            uiCopy("Past its review date — anything resting on this rests on an unchecked assumption."),
           ));
         }
         if (row.resolution) {
-          card.append(el(doc, "p", "nur-map-row-meta", `Outcome: ${String(row.resolution)}`));
+          card.append(el(doc, "p", "nur-map-row-meta", uiFormat("Outcome: {0}", [
+            mapPredictionResolutionLabel(row.resolution),
+          ])));
         }
         into.append(card);
       }
     } else {
-      into.append(el(doc, "p", "nur-map-empty", "NUR has made no prediction about this."));
+      into.append(el(doc, "p", "nur-map-empty", uiCopy("NUR has made no prediction about this.")));
     }
 
     // §17: this section is required and is never omitted.
     const doubt = el(doc, "div", "nur-map-doubt");
     doubt.dataset.mapDoubt = "true";
-    doubt.append(el(doc, "p", "nur-map-doubt-label", "What NUR may be wrong about"));
-    const kindWord = (KIND_WORD[node.kind] ?? node.kind).toLowerCase();
+    doubt.append(el(doc, "p", "nur-map-doubt-label", uiCopy("What NUR may be wrong about")));
+    const kindWord = uiCopy(KIND_WORD[node.kind] ?? uiSource("Object"));
     doubt.append(el(
       doc, "p", "nur-map-field-value",
       node.kind === "BLOCKER" && node.data.basis === "NUR_INFERRED"
-        ? "This blocker was inferred, not stated. NUR may have read a delay as an "
-          + "obstacle when it was a choice."
-        : `NUR sees this ${kindWord} only through what has been recorded. Anything you `
-          + "have not written down is invisible here, so its place on the Map may be "
-          + "more confident than the evidence deserves.",
+        ? uiCopy("This blocker was inferred, not stated. NUR may have read a delay as an obstacle when it was a choice.")
+        : uiFormat("NUR sees this {0} only through what has been recorded. Anything you have not written down is invisible here, so its place on the Map may be more confident than the evidence deserves.", [kindWord]),
     ));
     into.append(doubt);
   }
@@ -1900,25 +2147,27 @@ export async function renderV197Map(
     card.dataset.mapCandidate = suggestion.id;
     const mark = el(doc, "p", "nur-map-candidate-mark");
     // A candidate is marked as a candidate, in words as well as by its dashes.
-    mark.textContent = `◈ NUR suggests · ${suggestion.suggestion_type.replace(/_/g, " ").toLowerCase()}`;
+    mark.textContent = uiFormat("◈ NUR suggests · {0}", [
+      mapSuggestionTypeLabel(suggestion.suggestion_type),
+    ]);
     card.append(mark);
     card.append(el(doc, "p", "nur-map-field-value", suggestion.explanation));
 
     const doubt = el(doc, "div", "nur-map-doubt");
-    doubt.append(el(doc, "p", "nur-map-doubt-label", "May be wrong about"));
+    doubt.append(el(doc, "p", "nur-map-doubt-label", uiCopy("May be wrong about")));
     doubt.append(el(doc, "p", "nur-map-field-value", suggestion.may_be_wrong_about));
     card.append(doubt);
 
     const row = el(doc, "div", "nur-map-candidate-actions");
-    const accept = capsule(doc, "Accept");
+    const accept = capsule(doc, uiCopy("Accept"));
     accept.classList.add("nur-map-capsule-sm");
     accept.dataset.mapAccept = suggestion.id;
     accept.addEventListener("click", () => actions.accept(suggestion.id));
-    const reject = capsule(doc, "Reject");
+    const reject = capsule(doc, uiCopy("Reject"));
     reject.classList.add("nur-map-capsule-sm");
     reject.dataset.mapReject = suggestion.id;
     reject.addEventListener("click", () => actions.reject(suggestion.id, false));
-    const never = capsule(doc, "Never suggest this kind");
+    const never = capsule(doc, uiCopy("Never suggest this kind"));
     never.classList.add("nur-map-capsule-sm");
     never.addEventListener("click", () => actions.reject(suggestion.id, true));
     row.append(accept, reject, never);
@@ -1946,7 +2195,7 @@ export async function renderV197Map(
       const banner = el(doc, "div", "nur-map-banner");
       banner.dataset.mapError = "true";
       banner.textContent = state.error;
-      const retry = capsule(doc, "Retry");
+      const retry = capsule(doc, uiCopy("Retry"));
       retry.classList.add("nur-map-capsule-sm");
       retry.addEventListener("click", () => { void loadGraph(); });
       banner.append(doc.createTextNode(" "));

@@ -1,3 +1,5 @@
+import { uiFormat } from "../lib/i18n";
+
 export const V197_SELECTORS = {
   entryStage: "#nur-entry-stage",
   universeStage: "#nur-universe-stage",
@@ -8,13 +10,13 @@ export const V197_SELECTORS = {
   fieldReadout: ".universe-field-readout > span",
   contextTitle: "[data-context-title]",
   boundaryName: ".v172-boundary-current b",
-  liveFeed: ".page-kicker",
+  liveFeed: "#page-systems .page-kicker",
   ownerStar: ".universe-top-tools > .nur-user",
   mapNodes: ".universe-system-node",
 } as const;
 
 export function selectRequired<T extends Element>(document: Document, selector: string): T {
   const node = document.querySelector<T>(selector);
-  if (!node) throw new Error(`Canonical V197 selector is missing: ${selector}`);
+  if (!node) throw new Error(uiFormat("Canonical V197 selector is missing: {0}", [selector]));
   return node;
 }

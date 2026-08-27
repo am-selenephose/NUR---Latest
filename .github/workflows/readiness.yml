@@ -24,9 +24,11 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ripgrep
       - run: npm run release:naming-scan
       - run: npm run secret-scan
+      - run: npm run web:i18n-source
+      - run: npm run web:i18n-catalogs
+      - run: npm run web:i18n-extraction
       - run: npm run web:typecheck
       - run: npm run web:test
-      - run: npm run web:i18n-extraction
       - run: npm run web:build
       - name: Upload exact built NUR web bundle
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -36,6 +38,7 @@ jobs:
           if-no-files-found: error
           retention-days: 1
       - run: npm run web:e2e:mocked
+      - run: npm run web:i18n-matrix
       - name: Upload Playwright failure artifacts
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

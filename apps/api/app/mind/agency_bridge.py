@@ -185,7 +185,7 @@ async def submit_workflow_proposal(
         proposed_steps.append(
             ProposedStep(
                 key=step_key,
-                role="SPECIALIST",
+                role=step.role.value,
                 tool_key=tool_key,
                 depends_on=dependencies,
                 input_refs=input_refs,

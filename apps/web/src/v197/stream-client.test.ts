@@ -1,5 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("../lib/i18n", () => ({
+  uiCopy: (source: string) => source,
+  uiFormat: (source: string, values: readonly unknown[]) => source.replace(
+    /\{(\d+)\}/gu,
+    (_match, index) => String(values[Number(index)]),
+  ),
+}));
+
+import { V197ApiError } from "../bridge/v197ApiClient";
 import { V197StreamClient } from "../bridge/v197StreamClient";
 
 function result() {
@@ -109,5 +118,28 @@ describe("V197 semantic Talk stream", () => {
     expect(fetch).toHaveBeenCalledTimes(2);
     expect(fetch.mock.calls[1]?.[1]?.headers).toMatchObject({ "Last-Event-ID": "2" });
     expect(JSON.parse(String(fetch.mock.calls[1]?.[1]?.body))).toMatchObject({ request_id: "request-2" });
+  });
+
+  it("retains a backend diagnostic internally for classification instead of treating it as an answer", async () => {
+    document.cookie = "nur_csrf=csrf-test; path=/";
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(response([
+      {
+        id: 1,
+        event: "talk.error",
+        data: { code: "provider_disabled", message: "OPENAI_API_KEY is absent on host api-1" },
+      },
+    ]));
+    const client = new V197StreamClient();
+
+    const failure = await client.talk({
+      request_id: "request-failure",
+      message: "Answer",
+      locale: "en",
+      writing_preference: "default",
+    }).catch(error => error);
+
+    expect(failure).toBeInstanceOf(V197ApiError);
+    expect(failure).toMatchObject({ code: "provider_disabled" });
+    expect(failure.message).toContain("api-1");
   });
 });

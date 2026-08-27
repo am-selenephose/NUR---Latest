@@ -1,0 +1,2641 @@
+[
+  {
+    "frame": "entry",
+    "selector": "head:nth-of-type(1) > title:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "NUR — Neural Upgrade Rewiring"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"gn\"]",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "0"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"gc\"] > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "GLOWS"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"iNur\"] > div:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "NUR"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"]",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "NUR front page"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-brand\"]",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "NUR home"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-brand\"] > span:nth-of-type(2) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "NUR"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-brand\"] > span:nth-of-type(2) > span:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Neural Upgrade Rewiring"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-signin\"]",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "I already have an Orbit"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > section:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "the thoughts you repeat become your destiny."
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > section:nth-of-type(1) > h1:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "There is a universe"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > section:nth-of-type(1) > h1:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 1,
+    "source": "inside your"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > section:nth-of-type(1) > h1:nth-of-type(1) > em:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "mind."
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > section:nth-of-type(1) > p:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Every thought leaves a trace. Every spark can become a pathway. NUR helps you notice the patterns shaping your life — then move one real thing with clarity."
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-begin\"]",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Begin your Orbit"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-what\"]",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "how does NUR work?"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > section:nth-of-type(1) > p:nth-of-type(3) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Nothing becomes shared, remembered, or used for learning unless you choose it."
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > section:nth-of-type(1) > p:nth-of-type(3) > span:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Your inner universe is private by default."
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > aside:nth-of-type(1) > span:nth-of-type(4)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "signal"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > aside:nth-of-type(1) > span:nth-of-type(5)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "memory"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > aside:nth-of-type(1) > span:nth-of-type(6)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "intention"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > aside:nth-of-type(1) > span:nth-of-type(7)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "action"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > aside:nth-of-type(1) > span:nth-of-type(8) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "talk"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > aside:nth-of-type(1) > span:nth-of-type(8) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "turn a signal into language"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > aside:nth-of-type(1) > span:nth-of-type(9) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "journal"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > aside:nth-of-type(1) > span:nth-of-type(9) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "let a thought leave a trace"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > aside:nth-of-type(1) > span:nth-of-type(10) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "plan"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > aside:nth-of-type(1) > span:nth-of-type(10) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "make a pattern into movement"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > aside:nth-of-type(1) > span:nth-of-type(11) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "systems"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > aside:nth-of-type(1) > span:nth-of-type(11) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "let sparks become shared knowledge"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > aside:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "A universe inside your mind."
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > aside:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 1,
+    "source": "is where its signals become visible."
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > main:nth-of-type(1) > aside:nth-of-type(1) > p:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Your Orbit"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > footer:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Not a feed. Not a performance. A place to notice the patterns inside you — then move with them."
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"nur-front-v61\"] > footer:nth-of-type(1) > span:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Built for conscious rewiring."
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-sheet\"]",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Create or enter your Orbit"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-kicker\"]",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "first signal"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-title\"]",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Create your Orbit."
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-close\"]",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Close this panel"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-close\"]",
+    "kind": "attribute",
+    "attribute": "title",
+    "source": "Close"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-sheet\"] > section:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Start with one private place where thoughts can become patterns instead of noise. Choose a name that feels like yours."
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-signup-form\"] > div:nth-of-type(1) > label:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "chosen name"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-name\"]",
+    "kind": "attribute",
+    "attribute": "placeholder",
+    "source": "what should NUR call you?"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-signup-form\"] > div:nth-of-type(2) > label:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "email"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-email\"]",
+    "kind": "attribute",
+    "attribute": "placeholder",
+    "source": "you@example.com"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-signup-form\"] > div:nth-of-type(3) > label:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "password"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-password\"]",
+    "kind": "attribute",
+    "attribute": "placeholder",
+    "source": "at least 8 characters"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-signup-form\"] > label:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "I understand that my inner world remains private by default, and I choose what becomes shared or contributes to learning."
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-signup-form\"] > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Create my Orbit"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-sheet\"] > section:nth-of-type(1) > p:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Already began?"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-sheet\"] > section:nth-of-type(1) > p:nth-of-type(2) > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Enter your Orbit"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-sheet\"] > section:nth-of-type(2) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Your Orbit returns exactly where you left it."
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-signin-form\"] > div:nth-of-type(1) > label:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "email"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-signin-email\"]",
+    "kind": "attribute",
+    "attribute": "placeholder",
+    "source": "you@example.com"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-signin-form\"] > div:nth-of-type(2) > label:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "password"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-signin-password\"]",
+    "kind": "attribute",
+    "attribute": "placeholder",
+    "source": "your password"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-signin-form\"] > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Enter my Orbit"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-sheet\"] > section:nth-of-type(2) > p:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "New here?"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-sheet\"] > section:nth-of-type(2) > p:nth-of-type(2) > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Begin your Orbit"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-sheet\"] > section:nth-of-type(3) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Begin with one honest direction. We do not need to solve your whole life; we only need to notice the first signal clearly."
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-chips\"]",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Choose your first direction"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-chips\"] > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "my mind"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-chips\"] > button:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "my work"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-chips\"] > button:nth-of-type(3)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "my body"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-chips\"] > button:nth-of-type(4)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "my money"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-chips\"] > button:nth-of-type(5)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "my life direction"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-finish\"]",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Sketch my first Orbit"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-sheet\"] > section:nth-of-type(4) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "NUR is a private neural cosmos: a way to make thoughts visible without reducing you to a dashboard."
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-sheet\"] > section:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "turn a signal into language."
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-sheet\"] > section:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Talk"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-sheet\"] > section:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "let a thought leave a trace."
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-sheet\"] > section:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Journal"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-sheet\"] > section:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(3) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "make a pattern into movement."
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-sheet\"] > section:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(3) > span:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Plan"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-sheet\"] > section:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(4) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "let lived sparks become shared knowledge."
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-sheet\"] > section:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(4) > span:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Systems"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-about-begin\"]",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Begin your Orbit"
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-success\"] > h3:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Your first constellation is waiting."
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-success\"] > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Your first direction is held privately."
+  },
+  {
+    "frame": "entry",
+    "selector": "[id=\"f4-return\"]",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Return to the sky"
+  },
+  {
+    "frame": "universe",
+    "selector": "head:nth-of-type(1) > title:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "NUR — Systems Universe · V90 Front DNA"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Primary"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > section:nth-of-type(1)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Personal Orbit"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > section:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Personal Orbit"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > section:nth-of-type(1) > nav:nth-of-type(1)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Personal Orbit navigation"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > section:nth-of-type(1) > nav:nth-of-type(1) > button:nth-of-type(1) > span:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Today"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > section:nth-of-type(1) > nav:nth-of-type(1) > button:nth-of-type(1) > span:nth-of-type(3)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "land"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > section:nth-of-type(1) > nav:nth-of-type(1) > button:nth-of-type(2) > span:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Talk"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > section:nth-of-type(1) > nav:nth-of-type(1) > button:nth-of-type(2) > span:nth-of-type(3)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "ask NUR"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > section:nth-of-type(1) > nav:nth-of-type(1) > button:nth-of-type(3) > span:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Journal"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > section:nth-of-type(1) > nav:nth-of-type(1) > button:nth-of-type(3) > span:nth-of-type(3)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "keep"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > section:nth-of-type(1) > nav:nth-of-type(1) > button:nth-of-type(4) > span:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Plan"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > section:nth-of-type(1) > nav:nth-of-type(1) > button:nth-of-type(4) > span:nth-of-type(3)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "move"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > section:nth-of-type(1) > nav:nth-of-type(1) > button:nth-of-type(5) > span:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Systems"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > section:nth-of-type(1) > nav:nth-of-type(1) > button:nth-of-type(5) > span:nth-of-type(3)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "together"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > section:nth-of-type(2)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Star Systems"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > section:nth-of-type(2) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Star Systems"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Quiet Ambition"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(2) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Rebuild"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(3) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Study"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > section:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(4) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Connection"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Private by default"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > div:nth-of-type(2) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Your Orbit"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Nothing leaves this space without a choice you can see."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > main:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Universe view"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > main:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Universe"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > main:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(2) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Map"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > main:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(3) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Orbits"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > main:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(4) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Timeline"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > main:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(5) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Insights"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"scope-open\"]",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "✦ Private"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"burst-btn\"]",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "wake sky"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"burst-btn\"]",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Wake the sky"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > main:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(1)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Amina Rahman"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Your personal orbit"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"today-title\"]",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "You are here."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"today-title\"] > em:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Start from what is real."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Not a dashboard. Not a performance. One quiet place to see where you are, and choose one honest movement."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(1) > div:nth-of-type(2)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "NUR master star"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "mind"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "intention"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(3)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "one move"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > article:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > h2:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Where are you right now?"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > article:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "A private reading. No score. No judgment."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > article:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "adjust reading"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Body"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > strong:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "asking gently"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Mind"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > strong:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "very awake"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Life"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > strong:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "in motion"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > article:nth-of-type(1) > div:nth-of-type(3) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "One real next move"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > article:nth-of-type(1) > div:nth-of-type(3) > h3:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Make the NUR interior feel like the same universe."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > article:nth-of-type(1) > div:nth-of-type(3) > p:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Keep the visual language exact, then move the rest of the interface into this quieter, more coherent body."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > article:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Open the plan"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > article:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > button:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Think with NUR"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > h2:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Recent Glows"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Evidence of movement, not points."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "quietly held"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "You kept building after the first version broke."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > time:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "today"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > span:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "You named the part that did not feel like you."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > time:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "yesterday"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > span:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "You came back to the work."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > time:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "2 days"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > article:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > h2:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Say it plainly."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > article:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "NUR can help you separate signal, feeling, constraint, and next move."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > article:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "open chamber →"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > article:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "“I am trying to build something beautiful without losing the thing that made it beautiful.”"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"today-input\"]",
+    "kind": "attribute",
+    "attribute": "placeholder",
+    "source": "What is most alive in you right now?"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > article:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(1)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Send reflection"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-today\"] > article:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Send"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-talk\"] > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Ask NUR"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"talk-title\"]",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Talk in a room"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"talk-title\"] > em:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "that stays yours."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-talk\"] > p:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "NUR does not carry this anywhere unless you ask it to. This thread is private."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"talk-stream\"] > div:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Start where the pressure is, not where the explanation is. What is the part of this build you refuse to flatten?"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"talk-stream\"] > div:nth-of-type(1) > div:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "NUR"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"talk-stream\"] > div:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "The front page. The star. The feeling that it is a real place, not a product demo."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"talk-stream\"] > div:nth-of-type(3)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Then that is the constraint. We keep the visual DNA intact, and only add structures that belong to it. No purple dashboard. No generic cards. No strange new language."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"talk-stream\"] > div:nth-of-type(3) > div:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "NUR"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"talk-input\"]",
+    "kind": "attribute",
+    "attribute": "placeholder",
+    "source": "Say it plainly..."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-talk\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(1)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Send to NUR"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-talk\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Send"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-talk\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "· only this Orbit"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-talk\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > span:nth-of-type(1) > strong:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Private"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"talk-scope\"]",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "change boundary"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-talk\"] > div:nth-of-type(1) > aside:nth-of-type(1) > div:nth-of-type(1) > h3:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Current thread"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-talk\"] > div:nth-of-type(1) > aside:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Design continuity without burying the product under a generic dashboard."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-talk\"] > div:nth-of-type(1) > aside:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Thread actions"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-talk\"] > div:nth-of-type(1) > aside:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Keep private"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-talk\"] > div:nth-of-type(1) > aside:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Save to Journal"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-talk\"] > div:nth-of-type(1) > aside:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(3)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Make a Plan"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-talk\"] > div:nth-of-type(1) > aside:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(4)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Glow this persisted Talk"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-talk\"] > div:nth-of-type(1) > aside:nth-of-type(1) > div:nth-of-type(2) > h3:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "What NUR is holding"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-talk\"] > div:nth-of-type(1) > aside:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "V105 is visual ground truth. The interior should inherit its fonts, star language, galaxy behavior, and warmth."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-journal\"] > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Keep"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"journal-title\"]",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Let the thought"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"journal-title\"] > em:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "leave a trace."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-journal\"] > p:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Writing is the hero here. No dashboard asking you to perform wellness."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-journal\"] > div:nth-of-type(1) > article:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "What are you trying not to lose?"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"journal-input\"]",
+    "kind": "attribute",
+    "attribute": "placeholder",
+    "source": "Write without making it useful yet..."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-journal\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "private"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-journal\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "no analysis"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-journal\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(3)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "today"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"journal-save\"]",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Keep this"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-journal\"] > div:nth-of-type(1) > aside:nth-of-type(1) > h2:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Gentle doors"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-journal\"] > div:nth-of-type(1) > aside:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Use one only if it opens something real."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-journal\"] > div:nth-of-type(1) > aside:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "What happened?"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-journal\"] > div:nth-of-type(1) > aside:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "What do I need?"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-journal\"] > div:nth-of-type(1) > aside:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(3)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "What am I avoiding?"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-journal\"] > div:nth-of-type(1) > aside:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(4)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "What am I proud of?"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-journal\"] > div:nth-of-type(1) > aside:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(5)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Do not analyze it."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Move"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"plan-title\"]",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Make one pattern"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"plan-title\"] > em:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "into movement."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > p:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "No task avalanche. This plan exists to reduce friction around one honest direction."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > h2:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Interior continuity pass"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "A short plan for the current NUR build."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "edit direction"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(1)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Complete"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > h3:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Lock the front page as visual truth"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Use the exact wordmark, star and galaxy language as non-negotiable design DNA."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > time:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "held"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > button:nth-of-type(1)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Complete"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > h3:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Make the Personal Orbit page feel like the same place"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "One open field, warm low-light rails, privacy that is visible at the moment of choice."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > time:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "now"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > button:nth-of-type(1)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Complete"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1) > h3:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Open Systems without turning NUR into a social feed"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > div:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Shared thought, returned outcomes, visible uncertainty, not ragebait."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(3) > time:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "next"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(3) > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Make this easier"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(3) > button:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "See systems map"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > aside:nth-of-type(1) > h2:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Blocker"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > aside:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "The original front visual language is fragile. We do not fix it by replacing it with something unrelated."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > aside:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Ease the move"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > aside:nth-of-type(1) > div:nth-of-type(1) > h3:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Build fresh interiors, not patch piles."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-plan\"] > div:nth-of-type(1) > aside:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Use the front page as the aesthetic source, then grow each interior page as a clean sibling."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Systems universe"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 1,
+    "source": "live feed"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"systems-title\"]",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "A living universe for"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"systems-title\"] > em:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "what you are becoming."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "A private Orbit when you need stillness. A chosen System when people, evidence, and outcomes can make the next move clearer."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Current system state"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "active systems"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "07"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "outcomes returned"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(2) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "19"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(3)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "insights evolving"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > header:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(3) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "04"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(1)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Universe modes"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "✦ Live universe"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "✧ Candidate insights"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "NUR systems constellation map"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(6) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "NUR"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(6) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Neural Upgrade Rewiring"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(7)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "V90 master star"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"iSpark\"]",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Wake the NUR star"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"enter-system\"] > span:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Quiet Ambition"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"enter-system\"] > span:nth-of-type(1) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Build without noise"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > button:nth-of-type(2) > span:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Public Resonance"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > button:nth-of-type(2) > span:nth-of-type(1) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Be seen. Be clear."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > button:nth-of-type(3) > span:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Wealth Architecture"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > button:nth-of-type(3) > span:nth-of-type(1) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Build freedom on purpose"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > button:nth-of-type(4) > span:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Embodied Edge"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > button:nth-of-type(4) > span:nth-of-type(1) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Power in your presence"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > button:nth-of-type(5) > span:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Relational Gravity"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > button:nth-of-type(5) > span:nth-of-type(1) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Meet without shrinking"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > button:nth-of-type(6) > span:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Social Constellation"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > button:nth-of-type(6) > span:nth-of-type(1) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Belong. Contribute. Co-create."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > button:nth-of-type(7) > span:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Neural Upgrade"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > button:nth-of-type(7) > span:nth-of-type(1) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Rewire. Reframe. Become."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > button:nth-of-type(8) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Add system"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > button:nth-of-type(8) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "When a life problem needs its own sky."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(14)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "We map the unseen."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(14) > em:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "You become the inevitable."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(15) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "private orbit"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(15) > span:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "shared system"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(15) > span:nth-of-type(3)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "learning candidate"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(16)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "System field status"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(16) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "System field ·"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(16) > b:nth-of-type(1) > em:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "live"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(16) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "7 active systems · 12 real-world experiments"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(21)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Universe signals"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(21) > article:nth-of-type(1) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "active people"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(21) > article:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "1,284"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(21) > article:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "moving now"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(21) > article:nth-of-type(1) > span:nth-of-type(1) > em:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "+46"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(21) > article:nth-of-type(2) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "open questions"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(21) > article:nth-of-type(2) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "23"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(21) > article:nth-of-type(2) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "waiting for witness"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(21) > article:nth-of-type(3) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "returned outcomes"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(21) > article:nth-of-type(3) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "89"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > div:nth-of-type(21) > article:nth-of-type(3) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "this lunar cycle"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Candidate Insight"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "✦ Candidate insight"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "LIVE"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(2) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Theme"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(2) > h2:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Identity expansion"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "You are stepping into a larger version of your leadership. The edge is integration, not effort."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(3) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Increased discerning"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(3) > span:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Strong creative pull"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(3) > span:nth-of-type(3)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Restlessness with old structures"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(4) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Possible move"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(4) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Build the container before the audience arrives."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(5) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "What NUR may be wrong about"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(5) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Whether this is expansion or simply a need for rest before commitment."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Open full analysis"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(6) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Current strength"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(6) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "78%"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(7) > div:nth-of-type(1) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Evidence pulse"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(7) > div:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "34 lived returns"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(7) > div:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Conditions still mixed"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"page-systems\"] > section:nth-of-type(1) > div:nth-of-type(2) > aside:nth-of-type(1) > div:nth-of-type(8) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Revised today after 6 counterexamples."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"mobile-composer\"]",
+    "kind": "attribute",
+    "attribute": "placeholder",
+    "source": "Say it plainly..."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > main:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Send"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > main:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Send"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > main:nth-of-type(1) > nav:nth-of-type(1)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Mobile navigation"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > main:nth-of-type(1) > nav:nth-of-type(1) > button:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Today"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > main:nth-of-type(1) > nav:nth-of-type(1) > button:nth-of-type(2) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Talk"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > main:nth-of-type(1) > nav:nth-of-type(1) > button:nth-of-type(3) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Journal"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > main:nth-of-type(1) > nav:nth-of-type(1) > button:nth-of-type(4) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Plan"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > main:nth-of-type(1) > nav:nth-of-type(1) > button:nth-of-type(5) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Systems"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Orbit context"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > header:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "YOUR ORBIT"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > header:nth-of-type(1) > div:nth-of-type(1) > h2:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Context, held gently."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > header:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "LIVE"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > header:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Context is live"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > div:nth-of-type(1)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Orbit context views"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Boundary"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Continuity"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(3)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Glows"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Current boundary"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "choose"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Private Orbit"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Held for you. Nothing moves without a clear choice."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(3) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Scope check"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(1) > div:nth-of-type(3) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Every share begins with a visible boundary. You choose whether a thought stays, travels, or becomes evidence."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Where this can live"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "see all"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(2) > button:nth-of-type(1) > span:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Private Orbit"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(2) > button:nth-of-type(1) > span:nth-of-type(1) > em:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Only you can return here."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(2) > button:nth-of-type(2) > span:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Ephemeral"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(2) > button:nth-of-type(2) > span:nth-of-type(1) > em:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Used for this moment only."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(2) > button:nth-of-type(3) > span:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "System Shared"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(2) > button:nth-of-type(3) > span:nth-of-type(1) > em:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Shared pseudonymously in one System."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(2) > button:nth-of-type(4) > span:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Learning Candidate"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(2) > button:nth-of-type(4) > span:nth-of-type(1) > em:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Reviewed evidence for a Candidate Insight."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(3) > div:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Available to this moment"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(3) > div:nth-of-type(1) > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "why?"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(3) > div:nth-of-type(2) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Thread"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(3) > div:nth-of-type(2) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Today / private reflection"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(3) > div:nth-of-type(3) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Recall"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(3) > div:nth-of-type(3) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Selected only"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(3) > div:nth-of-type(4) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Sharing"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(1) > article:nth-of-type(3) > div:nth-of-type(4) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Ask first"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(2) > article:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "What is being held"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(2) > article:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "open journal"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(2) > article:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "I do not need to solve everything tonight."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(2) > article:nth-of-type(1) > div:nth-of-type(3) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Private note"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(2) > article:nth-of-type(1) > div:nth-of-type(3) > time:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "today"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(2) > article:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Next return"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(2) > article:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(2)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "IN MOTION"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(2) > article:nth-of-type(2) > h3:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Make one visible pass on the interior."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(2) > article:nth-of-type(2) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Small enough to return to. Clear enough to prove movement."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(2) > article:nth-of-type(2) > div:nth-of-type(2)",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Route progress"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(2) > article:nth-of-type(2) > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Open route"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(2) > article:nth-of-type(3) > div:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Continuity fragments"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(2) > article:nth-of-type(3) > div:nth-of-type(1) > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "use in Talk"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(2) > article:nth-of-type(3) > button:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "One honest return changes the direction more than a perfect plan."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(2) > article:nth-of-type(3) > button:nth-of-type(2) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Quiet Ambition is open when you want a shared room, not a performance stage."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(3) > article:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "QUIET EVIDENCE"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(3) > article:nth-of-type(1) > div:nth-of-type(2) > h3:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "3 glows are still warm."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(3) > article:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Nothing to maintain. Just proof that something moved."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(3) > article:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Recent glows"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(3) > article:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "view Orbit"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(3) > article:nth-of-type(2) > button:nth-of-type(1) > div:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Returned instead of disappearing."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(3) > article:nth-of-type(2) > button:nth-of-type(1) > div:nth-of-type(1) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Personal · today"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(3) > article:nth-of-type(2) > button:nth-of-type(2) > div:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "A useful condition was added."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(3) > article:nth-of-type(2) > button:nth-of-type(2) > div:nth-of-type(1) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Shared · Quiet Ambition"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(3) > article:nth-of-type(2) > button:nth-of-type(3) > div:nth-of-type(1) > b:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "An outcome changed the map."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(3) > article:nth-of-type(2) > button:nth-of-type(3) > div:nth-of-type(1) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "System · candidate insight"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(3) > article:nth-of-type(3) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Glows are not points."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > section:nth-of-type(3) > article:nth-of-type(3) > small:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "They are quiet evidence: you noticed, moved, returned, or helped the room become more precise."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"nur-front-v61\"] > div:nth-of-type(1) > aside:nth-of-type(2) > footer:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Private by default. Shared only by choice."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"scope-close\"]",
+    "kind": "attribute",
+    "attribute": "aria-label",
+    "source": "Close"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"scope-title\"]",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Choose the boundary."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"scope-modal\"] > div:nth-of-type(1) > p:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Nothing crosses a wall because an interface made it convenient. The scope is always visible, and always yours to change."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"scope-modal\"] > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1) > span:nth-of-type(2) > strong:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Ephemeral"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"scope-modal\"] > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1) > span:nth-of-type(2) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "NUR uses it only for the current response."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"scope-modal\"] > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(2) > span:nth-of-type(2) > strong:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Private"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"scope-modal\"] > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(2) > span:nth-of-type(2) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Save it only inside your Personal Orbit."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"scope-modal\"] > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(3) > span:nth-of-type(2) > strong:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "System Shared"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"scope-modal\"] > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(3) > span:nth-of-type(2) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Share pseudonymously in one selected Star System."
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"scope-modal\"] > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(4) > span:nth-of-type(2) > strong:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Learning Candidate"
+  },
+  {
+    "frame": "universe",
+    "selector": "[id=\"scope-modal\"] > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(4) > span:nth-of-type(2) > span:nth-of-type(1)",
+    "kind": "text",
+    "textIndex": 0,
+    "source": "Contribute a reviewed piece of evidence to a Candidate Insight."
+  }
+]

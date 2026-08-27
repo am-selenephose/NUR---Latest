@@ -5,6 +5,7 @@ import {
   V197_CELESTIAL_ENGINE,
   V197_SPECTRUM_NAMES,
 } from "./v197CelestialRuntime";
+import { uiCopy } from "../lib/i18n";
 
 export const V197_STAR_BRAIN_CANVAS_ID = "nur-brain-canvas";
 export const V197_STAR_BRAIN_HOST_ID = "front-nur-star";
@@ -118,10 +119,10 @@ export function placeV197StarBrainHost(document: Document): HTMLElement | null {
   brainHost.dataset.nurHaloContract = surface === "entry" || surface === "universe"
     ? "entry-f4-ring-exact"
     : "surface-native";
-  brainHost.title = "drag to spin the mind - click: it dissolves into stardust and reforms - double-click: neural storm - scroll to zoom";
+  brainHost.title = uiCopy("drag to spin the mind - click: it dissolves into stardust and reforms - double-click: neural storm - scroll to zoom");
   brainHost.setAttribute(
     "aria-label",
-    "A living brain made of stars. Drag to spin it. Click and it dissolves into tiny star glitter, then flows back together.",
+    uiCopy("A living brain made of stars. Drag to spin it. Click and it dissolves into tiny star glitter, then flows back together."),
   );
   brainHost.setAttribute("role", "button");
   brainHost.tabIndex = 0;

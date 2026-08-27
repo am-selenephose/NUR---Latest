@@ -33,6 +33,8 @@
  * the way out, so `check-v197-integrity.sh` is unaffected.
  */
 
+import { structuralValue } from "../lib/i18n";
+
 const STYLE_ID = "nur-surface-host-style";
 const HOST_ID = "nur-surface-host";
 const BODY_CLASS = "nur-surface-hosted";
@@ -79,7 +81,7 @@ function ensureHostStyle(doc: Document): void {
   if (doc.getElementById(STYLE_ID)) return;
   const style = doc.createElement("style");
   style.id = STYLE_ID;
-  style.textContent = HOST_CSS;
+  style.textContent = structuralValue(HOST_CSS);
   doc.head.append(style);
 }
 

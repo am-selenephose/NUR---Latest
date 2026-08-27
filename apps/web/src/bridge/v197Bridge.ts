@@ -22,6 +22,9 @@ import {
 import { cancelAllV197SearchCommits } from "./v197SearchInput";
 import { consumeImmediateLogoutReturn, markImmediateLogoutReturn } from "./v197LogoutReturn";
 import { selectRequired, V197_SELECTORS } from "./v197Selectors";
+import { uiCopy, uiFormat, uiSource } from "../lib/i18n";
+import { applyV197Locale } from "./v197I18n";
+import { visibleV197Failure } from "./v197FailureCopy";
 
 /** Routes a bridge-native surface owns end to end.
  *
@@ -93,7 +96,7 @@ async function waitForFrameDocument(frame: HTMLIFrameElement, requiredSelector: 
     if (document?.readyState === "complete" && document.querySelector(requiredSelector)) return document;
     await pause(25);
   }
-  throw new Error(`${label} did not initialize.`);
+  throw new Error(uiFormat("{0} did not initialize.", [label]));
 }
 
 async function waitForUniversePresentation(
@@ -113,7 +116,7 @@ async function waitForUniversePresentation(
     ) return;
     await pause(25);
   }
-  throw new Error("Canonical V197 Universe presentation did not settle.");
+  throw new Error(uiCopy("Canonical V197 Universe presentation did not settle."));
 }
 
 async function waitForEntryPresentation(
@@ -133,7 +136,7 @@ async function waitForEntryPresentation(
     ) return;
     await pause(25);
   }
-  throw new Error("Canonical V197 Entry presentation did not settle.");
+  throw new Error(uiCopy("Canonical V197 Entry presentation did not settle."));
 }
 
 function suspendEntryStage(frame: HTMLIFrameElement): void {
@@ -169,10 +172,10 @@ export class V197Bridge {
 
   async start(): Promise<void> {
     const hostApi = this.hostWindow.NURConsolidated;
-    if (!hostApi) throw new Error("Canonical V197 host did not initialize.");
+    if (!hostApi) throw new Error(uiCopy("Canonical V197 host did not initialize."));
 
     const integrity = await hostApi.verifySources();
-    if (!integrity.pass) throw new Error("Canonical V197 source verification failed.");
+    if (!integrity.pass) throw new Error(uiCopy("Canonical V197 source verification failed."));
     const entryFrame = selectRequired<HTMLIFrameElement>(this.hostDocument, V197_SELECTORS.entryStage);
     resumeEntryStage(entryFrame);
     const entryDocument = await waitForFrameDocument(entryFrame, "#nur-front-v61", "Canonical V197 entry");
@@ -188,8 +191,11 @@ export class V197Bridge {
     try {
       session = await this.api.session();
     } catch (error) {
+      console.error("NUR could not verify the local session.", error);
       const status = entryDocument.querySelector<HTMLElement>("#f4-status");
-      const diagnostic = `NUR could not verify the local session. ${error instanceof Error ? error.message : "Check API readiness."}`;
+      const diagnostic = uiFormat("NUR could not verify the local session. {0}", [
+        visibleV197Failure(error, uiSource("Check API readiness.")),
+      ]);
       const showDiagnostic = () => {
         if (!status) return;
         status.textContent = diagnostic;
@@ -236,6 +242,11 @@ export class V197Bridge {
 
   async applyCurrentRoute(): Promise<void> {
     if (!this.universeDocument || !this.session) return;
+    const locale = this.snapshot?.preferences?.locale ?? this.session.profile.locale ?? "en";
+    const writingPreference = this.snapshot?.preferences?.writing_preference
+      ?? this.session.profile.writing_preference
+      ?? "default";
+    applyV197Locale(this.universeDocument, locale, writingPreference);
     const route = nativeRoute(window.location.pathname);
     const revision = ++this.routeRevision;
     const stillCurrent = (): boolean => (
@@ -432,9 +443,9 @@ export class V197Bridge {
 
   private async ensureFullSnapshot(): Promise<V197BridgeSnapshot> {
     const hostApi = this.hostWindow.NURConsolidated;
-    if (!hostApi) throw new Error("Canonical V197 host did not initialize.");
-    if (!this.session) throw new Error("Your local Orbit session ended. Sign in again.");
-    if (!this.universeDocument) throw new Error("Canonical V197 Universe is not ready.");
+    if (!hostApi) throw new Error(uiCopy("Canonical V197 host did not initialize."));
+    if (!this.session) throw new Error(uiCopy("Your local Orbit session ended. Sign in again."));
+    if (!this.universeDocument) throw new Error(uiCopy("Canonical V197 Universe is not ready."));
     const snapshot = await this.loadFullSnapshot(this.session);
     if (this.fullSnapshotHydrated) return snapshot;
     hydrateTrackAV197(this.universeDocument, snapshot);
@@ -446,7 +457,7 @@ export class V197Bridge {
       snapshot,
       async () => {
         const currentSession = await this.api.session();
-        if (!currentSession) throw new Error("Your local Orbit session ended. Sign in again.");
+        if (!currentSession) throw new Error(uiCopy("Your local Orbit session ended. Sign in again."));
         const next = await this.api.snapshot(currentSession);
         this.snapshot = next;
         return next;
@@ -584,7 +595,13 @@ export class V197Bridge {
       renderInsightInspection(this.universeDocument, null, null, null);
       return;
     }
-    renderInsightInspection(this.universeDocument, null, null, null, "Loading canonical evidence and change history…");
+    renderInsightInspection(
+      this.universeDocument,
+      null,
+      null,
+      null,
+      uiCopy("Loading canonical evidence and change history…"),
+    );
     try {
       const [detail, evidence, history] = await Promise.all([
         this.api.insightDetail(insightId),
@@ -593,7 +610,8 @@ export class V197Bridge {
       ]);
       renderInsightInspection(this.universeDocument, detail, evidence, history);
     } catch (error) {
-      const detail = error instanceof Error ? error.message : "The Insight could not be inspected.";
+      console.error("NUR Insight inspection failed.", error);
+      const detail = visibleV197Failure(error, uiSource("The Insight could not be inspected."));
       renderInsightInspection(this.universeDocument, null, null, null, detail);
     }
   }
@@ -629,7 +647,7 @@ export class V197Bridge {
 
   private async refreshSnapshot(): Promise<V197BridgeSnapshot> {
     const currentSession = await this.api.session();
-    if (!currentSession) throw new Error("Your local Orbit session ended. Sign in again.");
+    if (!currentSession) throw new Error(uiCopy("Your local Orbit session ended. Sign in again."));
     const next = await this.api.snapshot(currentSession);
     this.snapshot = next;
     return next;

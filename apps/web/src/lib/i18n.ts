@@ -1,3 +1,14 @@
+import canonicalSlots from "./i18n/v197-canonical-slots.json";
+import {
+  UI_CATALOGS,
+  type UiCatalog,
+  type UiCatalogId,
+  type UiCopyKey,
+} from "./i18n/catalogs.generated";
+
+export { UI_CATALOGS };
+export type { UiCatalog, UiCatalogId, UiCopyKey };
+
 export const SUPPORTED_LOCALES = [
   "en", "ur", "hi", "bn", "pa", "ar", "fa", "tr", "id", "ms",
   "zh-Hans", "zh-Hant", "ja", "ko", "vi", "th", "fil", "ta", "te",
@@ -5,9 +16,16 @@ export const SUPPORTED_LOCALES = [
   "it", "nl", "sv", "ro", "sw",
 ] as const;
 export type SupportedLocale = typeof SUPPORTED_LOCALES[number];
+export type WritingPreference = "default" | "roman" | "script";
 
-const RTL = new Set(["ur", "fa", "ar"]);
-export const POLISHED_BETA_LOCALES = ["en", "ur", "hi", "fa", "ar", "es", "fr", "zh-Hans"] as const;
+export type UiWritingVariant = {
+  preference: WritingPreference;
+  catalog: UiCatalogId;
+  script: string;
+  dir: "ltr" | "rtl";
+};
+
+export const POLISHED_BETA_LOCALES = ["en"] as const;
 const POLISHED = new Set<string>(POLISHED_BETA_LOCALES);
 
 export type LocaleMeta = {
@@ -17,62 +35,138 @@ export type LocaleMeta = {
   dir: "ltr" | "rtl";
 };
 
-const LABELS: Record<string, string> = {
+// Language selectors use stable autonyms so every option remains recognizable
+// before and after the active interface catalog changes.
+const LOCALE_AUTONYMS: Record<SupportedLocale, string> = {
   en: "English",
-  ur: "Urdu",
-  hi: "Hindi",
-  bn: "Bangla",
-  pa: "Punjabi",
-  ar: "Arabic",
-  fa: "Persian",
-  tr: "Turkish",
-  id: "Indonesian",
-  ms: "Malay",
-  "zh-Hans": "Chinese Simplified",
-  "zh-Hant": "Chinese Traditional",
-  ja: "Japanese",
+  ur: "اردو",
+  hi: "हिन्दी",
+  bn: "বাংলা",
+  pa: "ਪੰਜਾਬੀ",
+  ar: "العربية",
+  fa: "فارسی",
+  tr: "Türkçe",
+  id: "Bahasa Indonesia",
+  ms: "Bahasa Melayu",
+  "zh-Hans": "简体中文",
+  "zh-Hant": "繁體中文",
+  ja: "日本語",
   ko: "한국어",
-  vi: "Vietnamese",
-  th: "Thai",
+  vi: "Tiếng Việt",
+  th: "ไทย",
   fil: "Filipino",
-  ta: "Tamil",
-  te: "Telugu",
-  mr: "Marathi",
-  gu: "Gujarati",
-  kn: "Kannada",
-  ml: "Malayalam",
-  ru: "Russian",
-  uk: "Ukrainian",
-  pl: "Polish",
-  de: "German",
-  fr: "French",
-  es: "Spanish",
-  pt: "Portuguese",
-  it: "Italian",
-  nl: "Dutch",
-  sv: "Swedish",
-  ro: "Romanian",
-  sw: "Swahili",
+  ta: "தமிழ்",
+  te: "తెలుగు",
+  mr: "मराठी",
+  gu: "ગુજરાતી",
+  kn: "ಕನ್ನಡ",
+  ml: "മലയാളം",
+  ru: "Русский",
+  uk: "Українська",
+  pl: "Polski",
+  de: "Deutsch",
+  fr: "Français",
+  es: "Español",
+  pt: "Português",
+  it: "Italiano",
+  nl: "Nederlands",
+  sv: "Svenska",
+  ro: "Română",
+  sw: "Kiswahili",
+};
+
+const variant = (
+  preference: WritingPreference,
+  catalog: UiCatalogId,
+  script: string,
+  dir: "ltr" | "rtl" = "ltr",
+): UiWritingVariant => ({ preference, catalog, script, dir });
+
+export const UI_VARIANTS: Record<SupportedLocale, readonly UiWritingVariant[]> = {
+  en: [variant("default", "en", "Latn")],
+  ur: [variant("roman", "ur-roman", "Latn"), variant("script", "ur-script", "Arab", "rtl")],
+  hi: [variant("roman", "hi-roman", "Latn"), variant("script", "hi-script", "Deva")],
+  bn: [variant("script", "bn", "Beng")],
+  pa: [variant("script", "pa", "Guru")],
+  ar: [variant("script", "ar", "Arab", "rtl")],
+  fa: [variant("script", "fa", "Arab", "rtl")],
+  tr: [variant("default", "tr", "Latn")],
+  id: [variant("default", "id", "Latn")],
+  ms: [variant("default", "ms", "Latn")],
+  "zh-Hans": [variant("script", "zh-Hans", "Hans")],
+  "zh-Hant": [variant("script", "zh-Hant", "Hant")],
+  ja: [variant("script", "ja", "Jpan")],
+  ko: [variant("script", "ko", "Kore")],
+  vi: [variant("default", "vi", "Latn")],
+  th: [variant("script", "th", "Thai")],
+  fil: [variant("default", "fil", "Latn")],
+  ta: [variant("script", "ta", "Taml")],
+  te: [variant("script", "te", "Telu")],
+  mr: [variant("script", "mr", "Deva")],
+  gu: [variant("script", "gu", "Gujr")],
+  kn: [variant("script", "kn", "Knda")],
+  ml: [variant("script", "ml", "Mlym")],
+  ru: [variant("script", "ru", "Cyrl")],
+  uk: [variant("script", "uk", "Cyrl")],
+  pl: [variant("default", "pl", "Latn")],
+  de: [variant("default", "de", "Latn")],
+  fr: [variant("default", "fr", "Latn")],
+  es: [variant("default", "es", "Latn")],
+  pt: [variant("default", "pt", "Latn")],
+  it: [variant("default", "it", "Latn")],
+  nl: [variant("default", "nl", "Latn")],
+  sv: [variant("default", "sv", "Latn")],
+  ro: [variant("default", "ro", "Latn")],
+  sw: [variant("default", "sw", "Latn")],
 };
 
 export function resolveLocale(raw: string | null | undefined): SupportedLocale {
-  const value = (raw || "en").trim();
-  if (SUPPORTED_LOCALES.includes(value as SupportedLocale)) return value as SupportedLocale;
-  const base = value.split("-")[0];
-  if (base === "zh") return "zh-Hans";
-  if (SUPPORTED_LOCALES.includes(base as SupportedLocale)) return base as SupportedLocale;
+  const value = (raw || "en").trim().replaceAll("_", "-");
+  const lower = value.toLowerCase();
+  const exact = SUPPORTED_LOCALES.find(locale => locale.toLowerCase() === lower);
+  if (exact) return exact;
+  if (["zh-hant", "zh-tw", "zh-hk"].includes(lower)) return "zh-Hant";
+  if (lower === "zh" || lower.startsWith("zh-")) return "zh-Hans";
+  const base = lower.split("-")[0];
+  const supportedBase = SUPPORTED_LOCALES.find(locale => locale.toLowerCase() === base);
+  if (supportedBase) return supportedBase;
   return "en";
 }
 
 export function dirForLocale(locale: string): "ltr" | "rtl" {
-  return RTL.has(resolveLocale(locale)) ? "rtl" : "ltr";
+  return UI_VARIANTS[resolveLocale(locale)][0].dir;
 }
 
 export function writingPreferenceForLocale(locale: string): "roman" | "script" | "default" {
-  const resolved = resolveLocale(locale);
-  if (resolved === "ur") return "roman";
-  if (RTL.has(resolved)) return "script";
-  return "default";
+  return UI_VARIANTS[resolveLocale(locale)][0].preference;
+}
+
+export function resolveWritingVariant(
+  rawLocale: string | null | undefined,
+  preference: WritingPreference | string | null | undefined = "default",
+): UiWritingVariant {
+  const locale = resolveLocale(rawLocale);
+  const variants = UI_VARIANTS[locale];
+  const requested = preference?.trim().toLowerCase() || "default";
+  if (requested === "default") return variants[0];
+  const matched = variants.find(row => row.preference === requested);
+  if (!matched) throw new Error(`Unsupported writing preference ${JSON.stringify(preference)} for ${locale}.`);
+  return matched;
+}
+
+export function catalogFor(
+  rawLocale: string | null | undefined,
+  preference: WritingPreference | string | null | undefined = "default",
+): UiCatalog {
+  const { catalog } = resolveWritingVariant(rawLocale, preference);
+  return UI_CATALOGS[catalog] as UiCatalog;
+}
+
+export function coreCopyFor(
+  rawLocale: string | null | undefined,
+  preference: WritingPreference | string | null | undefined = "default",
+): { privateBoundary: string; askPlaceholder: string } {
+  return translateTree(CORE_COPY.en, catalogFor(rawLocale, preference));
 }
 
 const LOCALE_META_ORDER = [
@@ -82,20 +176,13 @@ const LOCALE_META_ORDER = [
 
 export const LOCALE_META: LocaleMeta[] = LOCALE_META_ORDER.map(locale => ({
   locale,
-  label: LABELS[locale],
+  label: LOCALE_AUTONYMS[locale],
   status: POLISHED.has(locale) ? "polished_beta" : "draft_unreviewed",
   dir: dirForLocale(locale),
 }));
 
 export const CORE_COPY: Record<string, { privateBoundary: string; askPlaceholder: string }> = {
   en: { privateBoundary: "Private Orbit", askPlaceholder: "Say it plainly..." },
-  ur: { privateBoundary: "Private Orbit", askPlaceholder: "Seedha bolo..." },
-  hi: { privateBoundary: "Private Orbit", askPlaceholder: "Seedha bolo..." },
-  fa: { privateBoundary: "مدار خصوصی", askPlaceholder: "روشن بگو..." },
-  ar: { privateBoundary: "مدار خاص", askPlaceholder: "قلها بوضوح..." },
-  es: { privateBoundary: "Orbita privada", askPlaceholder: "Dilo claramente..." },
-  fr: { privateBoundary: "Orbite privee", askPlaceholder: "Dis-le simplement..." },
-  "zh-Hans": { privateBoundary: "私人轨道", askPlaceholder: "直接说..." },
 };
 
 export type NavigationCopy = {
@@ -128,46 +215,6 @@ const enNavigation: NavigationCopy = {
   research: "Research",
   community: "Community",
   send: "Send",
-};
-
-const navigationOverrides: Partial<Record<SupportedLocale, NavigationCopy>> = {
-  en: enNavigation,
-  ur: {
-    today: "Aaj",
-    talk: "Baat",
-    journal: "Journal",
-    plan: "Plan",
-    systems: "Systems",
-    universe: "Kainaat",
-    map: "Naqsha",
-    orbits: "Orbits",
-    timeline: "Waqt ki lakeer",
-    insights: "Samajh",
-    research: "Tehqeeq",
-    community: "Community",
-    send: "Bhej",
-  },
-  ko: {
-    today: "오늘",
-    talk: "대화",
-    journal: "저널",
-    plan: "계획",
-    systems: "시스템",
-    universe: "우주",
-    map: "지도",
-    orbits: "궤도",
-    timeline: "타임라인",
-    insights: "인사이트",
-    research: "리서치",
-    community: "커뮤니티",
-    send: "보내기",
-  },
-  hi: { ...enNavigation, today: "आज", talk: "बात", journal: "जर्नल", plan: "योजना", systems: "सिस्टम" },
-  ar: { ...enNavigation, today: "اليوم", talk: "تحدث", journal: "اليوميات", plan: "الخطة", systems: "الأنظمة" },
-  fa: { ...enNavigation, today: "امروز", talk: "گفتگو", journal: "یادداشت", plan: "برنامه", systems: "سامانه ها" },
-  es: { ...enNavigation, today: "Hoy", talk: "Hablar", journal: "Diario", plan: "Plan", systems: "Sistemas" },
-  fr: { ...enNavigation, today: "Aujourd'hui", talk: "Parler", journal: "Journal", plan: "Plan", systems: "Systemes" },
-  "zh-Hans": { ...enNavigation, today: "今天", talk: "对话", journal: "日志", plan: "计划", systems: "系统" },
 };
 
 export type LanguageControlCopy = {
@@ -221,12 +268,18 @@ const enLanguageControls: LanguageControlCopy = {
 export const V197_NAV_COPY: Record<string, NavigationCopy> = {};
 export const LANGUAGE_CONTROL_COPY: Record<string, LanguageControlCopy> = {};
 
-export function navigationCopyFor(rawLocale: string | null | undefined): NavigationCopy {
-  return V197_NAV_COPY[resolveLocale(rawLocale)] ?? enNavigation;
+export function navigationCopyFor(
+  rawLocale: string | null | undefined,
+  preference: WritingPreference = "default",
+): NavigationCopy {
+  return translateTree(enNavigation, catalogFor(rawLocale, preference));
 }
 
-export function languageControlCopyFor(rawLocale: string | null | undefined): LanguageControlCopy {
-  return LANGUAGE_CONTROL_COPY[resolveLocale(rawLocale)] ?? enLanguageControls;
+export function languageControlCopyFor(
+  rawLocale: string | null | undefined,
+  preference: WritingPreference = "default",
+): LanguageControlCopy {
+  return languageControlsFromCatalog(catalogFor(rawLocale, preference));
 }
 
 export type CriticalCopy = {
@@ -371,7 +424,9 @@ const enCritical: CriticalCopy = {
     onlyThisOrbit: "only this Orbit",
     changeBoundary: "change boundary",
     whatNurHolding: "What NUR is holding",
-    holdingPopulated: count => `${count} persisted Talk turns are available in this private ledger.`,
+    holdingPopulated: count => count === 1
+      ? `${count} persisted Talk turn is available in this private ledger.`
+      : `${count} persisted Talk turns are available in this private ledger.`,
     holdingEmpty: "No persisted Talk turns yet. Say one true line to begin.",
     correctModel: "Correct the model",
     correctionSub: "Corrections are saved as owner-scoped evidence, not hidden prompt magic.",
@@ -428,7 +483,9 @@ const enCritical: CriticalCopy = {
     in30Days: "In 30 days",
     includedSources: "Included sources",
     emptySources: "Nothing shareable yet — capture a decision or reference below.",
-    excludedNote: count => `${count} source${count === 1 ? "" : "s"} stay${count === 1 ? "s" : ""} excluded — the recipient sees the boundary, never the content.`,
+    excludedNote: count => count === 1
+      ? `${count} source stays excluded — the recipient sees the boundary, never the content.`
+      : `${count} sources stay excluded — the recipient sees the boundary, never the content.`,
     captureIntoOrbit: "Capture into this Orbit",
     decisionPlaceholder: "a decision already made…",
     referencePlaceholder: "a reference or constraint…",
@@ -451,97 +508,211 @@ const enCritical: CriticalCopy = {
   },
 };
 
-export const CRITICAL_COPY: Record<string, CriticalCopy> = {
-  en: enCritical,
-  ur: {
-    ...enCritical,
-    talk: {
-      ...enCritical.talk,
-      kicker: "NUR se baat",
-      title: "Apne kamray mein baat",
-      titleEmphasis: "jo tera rehta hai.",
-      subtitle: "NUR isay kahin nahi le jata jab tak tu khud na chahay.",
-      seed: "Jahan pressure hai wahan se shuru kar, plan wali acting se nahi.",
-      send: "Bhej",
-      holding: "Hold ho raha",
-      modeTalk: "baat",
-      thinkDeeper: "Aur gehra soch",
-      challenge: "challenge kar",
-      summarize: "summary bana",
-      observed: "Jo dekha",
-      inferred: "Jo infer hua",
-      hypotheses: "Imkan",
-      uncertainty: "Jo unsure hai",
-      nextMove: "Agla qadam",
-      useMoveInPlan: "Is qadam ko Plan mein daal",
-      currentThread: "Current thread",
-      currentThreadSub: "Continuity bana, magar awaaz ko daba ke nahi.",
-      keepPrivate: "Private rakho",
-      saveToJournal: "Journal mein rakho",
-      makePlan: "Plan banao",
-      recordWhatChanged: "Record what changed",
-      outcomePlaceholder: "Asal duniya mein kya badla?",
-      outcomeSave: "Outcome return karo",
-      outcomeSaving: "Return ho raha",
-      onlyThisOrbit: "sirf yeh Orbit",
-      changeBoundary: "boundary badlo",
-      whatNurHolding: "NUR kya hold kar raha hai",
-      holdingPopulated: count => `${count} persisted Talk turns is private ledger mein hain.`,
-      holdingEmpty: "Abhi koi persisted Talk turn nahi. Aik sachchi line bol ke shuru kar.",
-      correctModel: "Model ko correct kar",
-      correctionSub: "Corrections owner-scoped evidence hain, chhupa hua prompt magic nahi.",
-      correctionPlaceholder: "NUR kya assume na kare?",
-      saveCorrection: "Correction save karo",
-      intentionalMixedRomanUrdu: "Roman Urdu preference: product terms jaise NUR, Orbit, Talk, Plan intentional mixed writing mein rehte hain.",
-    },
-    systems: { ...enCritical.systems, kicker: "Systems universe", title: "Zinda universe", titleEmphasis: "jo tu ban rahi hai.", addSystem: "System add kar", shareOrbit: "Yeh Orbit share kar" },
-    capsule: { ...enCritical.capsule, kicker: "Approved Context Capsule", activeLine: "khula hai, jaan-boojh kar.", revokedLine: "revoke ho chuka hai.", expiredLine: "expire ho chuka hai.", ask: "Pooch", shareTitle: "Yeh Orbit jaan-boojh kar share kar.", purposeLabel: "maqsad", emailLabel: "kis ko access hai", createContextCapsule: "Context Capsule banao", revoked: "revoke ho gaya", audit: "audit", revoke: "revoke" },
-  },
-  hi: {
-    ...enCritical,
-    talk: { ...enCritical.talk, kicker: "NUR se baat", title: "Apne room mein baat", titleEmphasis: "jo tumhara rehta hai.", send: "Bhejo", thinkDeeper: "Aur gehra socho" },
-    systems: { ...enCritical.systems, title: "Ek zinda universe", titleEmphasis: "jo tum ban rahe ho.", addSystem: "System jodo" },
-    capsule: { ...enCritical.capsule, activeLine: "khula hai, jaan-boojh kar.", ask: "Poochho", shareTitle: "Is Orbit ko jaan-boojh kar share karo.", createContextCapsule: "Context Capsule banao" },
-  },
-  fa: {
-    ...enCritical,
-    talk: { ...enCritical.talk, kicker: "از NUR بپرس", title: "در اتاقی حرف بزن", titleEmphasis: "که برای تو می‌ماند.", send: "ارسال", holding: "در حال نگه‌داشتن", thinkDeeper: "عمیق‌تر فکر کن" },
-    systems: { ...enCritical.systems, title: "یک جهان زنده برای", titleEmphasis: "آنچه می‌شوی.", activeSystems: "سیستم فعال", addSystem: "افزودن سیستم", shareOrbit: "اشتراک این مدار" },
-    capsule: { ...enCritical.capsule, kicker: "کپسول زمینه تاییدشده", activeLine: "آگاهانه باز نگه داشته شده.", revokedLine: "لغو شده است.", expiredLine: "منقضی شده است.", ask: "بپرس", shareTitle: "این مدار را آگاهانه به اشتراک بگذار.", purposeLabel: "هدف", emailLabel: "چه کسی دسترسی دارد", createContextCapsule: "ساخت کپسول زمینه", revoked: "لغو شده", audit: "بازرسی", revoke: "لغو" },
-  },
-  ar: {
-    ...enCritical,
-    talk: { ...enCritical.talk, kicker: "اسأل NUR", title: "تحدث في غرفة", titleEmphasis: "تبقى لك.", send: "إرسال", holding: "جار الحفظ", thinkDeeper: "فكر بعمق" },
-    systems: { ...enCritical.systems, title: "كون حي لما", titleEmphasis: "تصير إليه.", activeSystems: "أنظمة نشطة", addSystem: "أضف نظاما", shareOrbit: "شارك هذا المدار" },
-    capsule: { ...enCritical.capsule, kicker: "كبسولة سياق معتمدة", activeLine: "مفتوحة عمدا.", revokedLine: "تم إلغاؤها.", expiredLine: "انتهت صلاحيتها.", ask: "اسأل", shareTitle: "شارك هذا المدار بوضوح.", purposeLabel: "الغرض", emailLabel: "من يمكنه الوصول", createContextCapsule: "أنشئ كبسولة سياق", revoked: "ملغى", audit: "تدقيق", revoke: "إلغاء" },
-  },
-  es: {
-    ...enCritical,
-    talk: { ...enCritical.talk, kicker: "Pregunta a NUR", title: "Habla en una sala", titleEmphasis: "que sigue siendo tuya.", send: "Enviar", holding: "Guardando", thinkDeeper: "Pensar mas profundo" },
-    systems: { ...enCritical.systems, title: "Un universo vivo para", titleEmphasis: "lo que estas llegando a ser.", activeSystems: "sistemas activos", addSystem: "Agregar sistema", shareOrbit: "Compartir este Orbit" },
-    capsule: { ...enCritical.capsule, kicker: "Capsula de contexto aprobada", activeLine: "abierta deliberadamente.", revokedLine: "ha sido revocada.", expiredLine: "ha expirado.", ask: "Preguntar", shareTitle: "Comparte este Orbit deliberadamente.", purposeLabel: "proposito", emailLabel: "quien puede acceder", createContextCapsule: "Crear Context Capsule", revoked: "revocada", audit: "auditoria", revoke: "revocar" },
-  },
-  fr: {
-    ...enCritical,
-    talk: { ...enCritical.talk, kicker: "Demander a NUR", title: "Parle dans une piece", titleEmphasis: "qui reste a toi.", send: "Envoyer", holding: "En cours", thinkDeeper: "Penser plus loin" },
-    systems: { ...enCritical.systems, title: "Un univers vivant pour", titleEmphasis: "ce que tu deviens.", activeSystems: "systemes actifs", addSystem: "Ajouter un systeme", shareOrbit: "Partager cet Orbit" },
-    capsule: { ...enCritical.capsule, kicker: "Capsule de contexte approuvee", activeLine: "ouverte deliberement.", revokedLine: "a ete revoquee.", expiredLine: "a expire.", ask: "Demander", shareTitle: "Partager cet Orbit deliberement.", purposeLabel: "objectif", emailLabel: "qui peut acceder", createContextCapsule: "Creer Context Capsule", revoked: "revoquee", audit: "audit", revoke: "revoquer" },
-  },
-  "zh-Hans": {
-    ...enCritical,
-    talk: { ...enCritical.talk, kicker: "询问 NUR", title: "在一个房间里说", titleEmphasis: "它仍属于你。", send: "发送", holding: "正在保存", thinkDeeper: "深入思考" },
-    systems: { ...enCritical.systems, title: "一个活的宇宙", titleEmphasis: "承载你正在成为的样子。", activeSystems: "活跃系统", addSystem: "添加系统", shareOrbit: "分享此轨道" },
-    capsule: { ...enCritical.capsule, kicker: "已批准的上下文胶囊", activeLine: "被有意保持开放。", revokedLine: "已被撤销。", expiredLine: "已过期。", ask: "询问", shareTitle: "有意分享此轨道。", purposeLabel: "目的", emailLabel: "谁可以访问", createContextCapsule: "创建上下文胶囊", revoked: "已撤销", audit: "审计", revoke: "撤销" },
-  },
+export const CRITICAL_COPY: Record<string, CriticalCopy> = { en: enCritical };
+
+export function criticalCopyFor(
+  rawLocale: string | null | undefined,
+  preference: WritingPreference = "default",
+): CriticalCopy {
+  return criticalFromCatalog(catalogFor(rawLocale, preference));
+}
+
+function catalogLookup(catalog: UiCatalog, source: string): string {
+  const translated = catalog[source as UiCopyKey];
+  if (typeof translated !== "string" || !translated.trim()) {
+    throw new Error(`Missing NUR UI copy key: ${JSON.stringify(source)}`);
+  }
+  return translated;
+}
+
+function catalogFormat(catalog: UiCatalog, source: string, values: readonly unknown[]): string {
+  const translated = catalogLookup(catalog, source);
+  return translated.replace(/\{(\d+)\}/gu, (_match, rawIndex: string) => {
+    const index = Number(rawIndex);
+    if (index >= values.length) throw new Error(`Missing NUR UI copy value {${index}} for ${JSON.stringify(source)}`);
+    return String(values[index]);
+  });
+}
+
+function translateTree<T>(value: T, catalog: UiCatalog): T {
+  if (typeof value === "string") return catalogLookup(catalog, value) as T;
+  if (typeof value === "function" || value === null || value === undefined) return value;
+  if (Array.isArray(value)) return value.map(row => translateTree(row, catalog)) as T;
+  if (typeof value !== "object") return value;
+  return Object.fromEntries(
+    Object.entries(value).map(([key, row]) => [key, translateTree(row, catalog)]),
+  ) as T;
+}
+
+function languageControlsFromCatalog(catalog: UiCatalog): LanguageControlCopy {
+  const copy = translateTree(enLanguageControls, catalog);
+  copy.saved = label => catalogFormat(catalog, "Saved: {0}.", [label]);
+  return copy;
+}
+
+function criticalFromCatalog(catalog: UiCatalog): CriticalCopy {
+  const copy = translateTree(enCritical, catalog);
+  copy.talk.holdingPopulated = count => catalogFormat(
+    catalog,
+    count === 1
+      ? "{0} persisted Talk turn is available in this private ledger."
+      : "{0} persisted Talk turns are available in this private ledger.",
+    [count],
+  );
+  copy.capsule.excludedNote = count => catalogFormat(
+    catalog,
+    count === 1
+      ? "{0} source stays excluded — the recipient sees the boundary, never the content."
+      : "{0} sources stay excluded — the recipient sees the boundary, never the content.",
+    [count],
+  );
+  return copy;
+}
+
+let activeVariant: UiWritingVariant = UI_VARIANTS.en[0];
+let activeLocale: SupportedLocale = "en";
+
+export function activateUiLocale(
+  rawLocale: string | null | undefined,
+  preference: WritingPreference | string | null | undefined = "default",
+): UiWritingVariant {
+  activeLocale = resolveLocale(rawLocale);
+  activeVariant = resolveWritingVariant(activeLocale, preference);
+  return activeVariant;
+}
+
+export function activeUiLocale(): SupportedLocale {
+  return activeLocale;
+}
+
+export function activeUiCatalog(): UiCatalog {
+  return UI_CATALOGS[activeVariant.catalog] as UiCatalog;
+}
+
+/** Marks deferred product copy while keeping translation lookup at render time. */
+export function uiSource(source: string): UiCopyKey {
+  return source as UiCopyKey;
+}
+
+export function uiCopy(source: UiCopyKey): string {
+  return catalogLookup(activeUiCatalog(), source);
+}
+
+export function uiFormat(source: UiCopyKey, values: readonly unknown[]): string {
+  return catalogFormat(activeUiCatalog(), source, values);
+}
+
+export function verbatimUserText<T extends string>(value: T): T {
+  return value;
+}
+
+/**
+ * Writes owner-authored or externally sourced content without ever passing it
+ * through the UI catalog. The marker also protects the node from later
+ * canonical V197 copy passes during route changes and language switches.
+ */
+export function setVerbatimUserText(node: Element | null, value: string): void {
+  if (!node) return;
+  markVerbatimUserContent(node);
+  node.textContent = verbatimUserText(value);
+}
+
+export function markVerbatimUserContent(node: Element | null): void {
+  if (node && "dataset" in node) (node as HTMLElement).dataset.nurUserContent = "true";
+}
+
+/** Marks an internal state token that is never intended as interface copy. */
+export function structuralValue<T extends string>(value: T): T {
+  return value;
+}
+
+type CanonicalSlot = {
+  frame: "entry" | "universe";
+  selector: string;
+  kind: "text" | "attribute";
+  textIndex?: number;
+  attribute?: string;
+  source: string;
 };
 
-export function criticalCopyFor(rawLocale: string | null | undefined): CriticalCopy {
-  return CRITICAL_COPY[resolveLocale(rawLocale)] ?? enCritical;
+export type CanonicalCopyResult = {
+  frame: "entry" | "universe" | "unknown";
+  applied: number;
+  missing: number;
+};
+
+export function applyCanonicalV197Copy(
+  document: Document,
+  rawLocale: string | null | undefined,
+  preference: WritingPreference | string | null | undefined = "default",
+): CanonicalCopyResult {
+  const resolved = resolveLocale(rawLocale);
+  const selected = activateUiLocale(resolved, preference);
+  const catalog = UI_CATALOGS[selected.catalog] as UiCatalog;
+  const frame = document.querySelector("#page-systems")
+    ? "universe"
+    : document.querySelector("#nur-front-v61")
+      ? "entry"
+      : "unknown";
+  let applied = 0;
+  let missing = 0;
+  if (frame !== "unknown") {
+    for (const slot of (canonicalSlots as unknown as CanonicalSlot[]).filter(row => row.frame === frame)) {
+      const element = document.querySelector<HTMLElement>(slot.selector);
+      if (!element) {
+        missing += 1;
+        continue;
+      }
+      const translated = catalogLookup(catalog, slot.source);
+      if (element.closest('[data-nur-user-content="true"]')) continue;
+      const previousCatalogId = element.dataset.nurCopyCatalog as UiCatalogId | undefined;
+      const previousCatalog = previousCatalogId && previousCatalogId in UI_CATALOGS
+        ? UI_CATALOGS[previousCatalogId] as UiCatalog
+        : null;
+      const expected = previousCatalog
+        ? catalogLookup(previousCatalog, slot.source)
+        : slot.source;
+      if (slot.kind === "attribute" && slot.attribute) {
+        const current = element.getAttribute(slot.attribute) ?? "";
+        if (current !== expected && current !== translated) {
+          element.dataset.nurUserContent = "true";
+          continue;
+        }
+        element.setAttribute(slot.attribute, translated);
+      } else {
+        const textNodes = [...element.childNodes].filter(node => node.nodeType === 3);
+        const node = textNodes[slot.textIndex ?? -1];
+        if (!node) {
+          missing += 1;
+          continue;
+        }
+        const original = node.nodeValue ?? "";
+        const leading = original.match(/^\s*/u)?.[0] ?? "";
+        const trailing = original.match(/\s*$/u)?.[0] ?? "";
+        const contentEnd = trailing.length ? original.length - trailing.length : original.length;
+        const current = original.slice(leading.length, contentEnd);
+        if (current !== expected && current !== translated) {
+          element.dataset.nurUserContent = "true";
+          continue;
+        }
+        node.nodeValue = `${leading}${translated}${trailing}`;
+      }
+      element.dataset.nurCopyCatalog = selected.catalog;
+      applied += 1;
+    }
+  }
+  document.documentElement.lang = resolved;
+  document.documentElement.dir = selected.dir;
+  document.body.dataset.nurLocale = resolved;
+  document.body.dataset.nurWritingPreference = selected.preference;
+  document.body.dataset.nurCatalog = selected.catalog;
+  return { frame, applied, missing };
 }
 
 for (const locale of SUPPORTED_LOCALES) {
-  CORE_COPY[locale] ??= CORE_COPY.en;
-  CRITICAL_COPY[locale] ??= enCritical;
-  V197_NAV_COPY[locale] = navigationOverrides[locale] ?? enNavigation;
-  LANGUAGE_CONTROL_COPY[locale] = enLanguageControls;
+  const catalog = catalogFor(locale, writingPreferenceForLocale(locale));
+  CORE_COPY[locale] = translateTree(CORE_COPY.en, catalog);
+  CRITICAL_COPY[locale] = criticalFromCatalog(catalog);
+  V197_NAV_COPY[locale] = translateTree(enNavigation, catalog);
+  LANGUAGE_CONTROL_COPY[locale] = languageControlsFromCatalog(catalog);
 }

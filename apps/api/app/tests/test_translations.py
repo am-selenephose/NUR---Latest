@@ -58,6 +58,12 @@ async def test_locale_catalog_has_35_truthful_slots_and_priority_writing_variant
     }
 
     by_locale = {row["locale"]: row for row in body["locales"]}
+    assert by_locale["ur"]["label"] == "اردو"
+    assert by_locale["hi"]["label"] == "हिन्दी"
+    assert by_locale["bn"]["label"] == "বাংলা"
+    assert by_locale["ar"]["label"] == "العربية"
+    assert by_locale["zh-Hans"]["label"] == "简体中文"
+    assert by_locale["ko"]["label"] == "한국어"
     assert by_locale["ur"]["variants"] == [
         {
             "preference": "roman",

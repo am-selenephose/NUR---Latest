@@ -1,18 +1,21 @@
 import type { V197BridgeSnapshot } from "./v197ApiClient";
 import { V197_SELECTORS } from "./v197Selectors";
+import { uiCopy, uiFormat, uiSource, type UiCopyKey } from "../lib/i18n";
+
+const BOUNDARY_COPY: Record<string, UiCopyKey> = {
+  EPHEMERAL: uiSource("Ephemeral"),
+  PRIVATE_ORBIT: uiSource("Private Orbit"),
+  SYSTEM_SHARED: uiSource("System Shared"),
+  LEARNING_CANDIDATE: uiSource("Learning Candidate"),
+};
 
 function text(node: Element | null, value: string): void {
   if (node) node.textContent = value;
 }
 
 function humanBoundary(value: string | undefined): string | null {
-  const labels: Record<string, string> = {
-    EPHEMERAL: "Ephemeral",
-    PRIVATE_ORBIT: "Private Orbit",
-    SYSTEM_SHARED: "System Shared",
-    LEARNING_CANDIDATE: "Learning Candidate",
-  };
-  return value ? labels[value] ?? null : null;
+  const source = value ? BOUNDARY_COPY[value] : null;
+  return source ? uiCopy(source) : null;
 }
 
 /**
@@ -29,24 +32,26 @@ export function hydrateReadOnlyV197(document: Document, snapshot: V197BridgeSnap
     text(stats[2]?.querySelector("b") ?? null, String(state.insights_evolving ?? 0).padStart(2, "0"));
     text(
       document.querySelector(V197_SELECTORS.fieldReadout),
-      `${state.active_systems ?? 0} active systems · ${state.outcomes_returned ?? 0} returned outcomes`,
+      uiFormat("{0} active systems · {1} returned outcomes", [state.active_systems ?? 0, state.outcomes_returned ?? 0]),
     );
   }
 
   const name = snapshot.session.profile.chosen_name?.trim();
-  if (name) text(document.querySelector(V197_SELECTORS.contextTitle), `${name}'s Orbit, held gently.`);
+  if (name) text(document.querySelector(V197_SELECTORS.contextTitle), uiFormat("{0}'s Orbit, held gently.", [name]));
   // The canonical owner star ships a placeholder identity; announce the real
   // session owner instead of a person who does not exist.
   if (name) {
     document.querySelector(V197_SELECTORS.ownerStar)
-      ?.setAttribute("aria-label", `${name} — owner session`);
+      ?.setAttribute("aria-label", uiFormat("{0} — owner session", [name]));
   }
 
   const boundary = humanBoundary(snapshot.preferences?.default_boundary ?? snapshot.session.profile.default_boundary);
   if (boundary) text(document.querySelector(V197_SELECTORS.boundaryName), boundary);
 
   const kicker = document.querySelector(V197_SELECTORS.liveFeed);
-  if (kicker?.textContent?.includes("live feed")) {
-    kicker.textContent = kicker.textContent.replace(/live feed/i, "owner ledger");
+  if (kicker) {
+    const textNodes = [...kicker.childNodes].filter(node => node.nodeType === 3);
+    const trailing = textNodes[textNodes.length - 1];
+    if (trailing) trailing.nodeValue = ` ${uiCopy("owner ledger")}`;
   }
 }

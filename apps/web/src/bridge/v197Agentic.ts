@@ -18,6 +18,8 @@
  *   drawer is appended DOM with its own classes.
  */
 
+import { uiCopy, uiFormat, uiSource, type UiCopyKey } from "../lib/i18n";
+
 export type AgenticWorkflowState =
   | "DRAFT" | "PLANNING" | "PLAN_READY" | "POLICY_REVIEW" | "WAITING_APPROVAL"
   | "APPROVED" | "QUEUED" | "RUNNING" | "PAUSED" | "VERIFYING"
@@ -144,6 +146,26 @@ export type V197ApprovalEditor =
   | { mode: "SCHEMA"; schema: V197AgenticApprovalInputSchema; reason: null }
   | { mode: "RAW_JSON"; schema: null; reason: string };
 
+const AGENTIC_COPY = {
+  schemaUnavailable: uiSource("The API did not expose an input schema for this approval."),
+  waitingForYou: uiSource("Waiting for you"),
+  nurIsWorking: uiSource("NUR is working"),
+  scheduled: uiSource("Scheduled"),
+  completed: uiSource("Completed"),
+  failed: uiSource("Failed"),
+  readsOnly: uiSource("Reads your records. Changes nothing."),
+  privateDraft: uiSource("Creates a private draft you can discard."),
+  changesRecords: uiSource("Changes your own records."),
+  external: uiSource("Leaves NUR and reaches someone or something else."),
+  irreversible: uiSource("Cannot be undone."),
+  canUndo: uiSource("This can be undone."),
+  cannotUndo: uiSource("This cannot be undone."),
+  noCost: uiSource("No cost"),
+  orbitOnly: uiSource("This Orbit only"),
+  noExpectedResult: uiSource("NUR did not state an expected result."),
+  requestExpired: uiSource("This request expired. NUR will ask again rather than assume you still agree."),
+} as const;
+
 export function resolveApprovalEditor(approval: V197AgenticApproval): V197ApprovalEditor {
   if (approval.input_schema?.type === "object") {
     return { mode: "SCHEMA", schema: approval.input_schema, reason: null };
@@ -151,7 +173,17 @@ export function resolveApprovalEditor(approval: V197AgenticApproval): V197Approv
   return {
     mode: "RAW_JSON",
     schema: null,
-    reason: "The API did not expose an input schema for this approval.",
+    reason: uiCopy(AGENTIC_COPY.schemaUnavailable),
+  };
+}
+
+function drawerSection<T extends string>(id: T, label: UiCopyKey, blocking: boolean) {
+  return {
+    id,
+    get label(): string {
+      return uiCopy(label);
+    },
+    blocking,
   };
 }
 
@@ -161,11 +193,11 @@ export function resolveApprovalEditor(approval: V197AgenticApproval): V197Approv
  * is blocking and the second is not.
  */
 export const DRAWER_SECTIONS = [
-  { id: "waiting", label: "Waiting for you", blocking: true },
-  { id: "working", label: "NUR is working", blocking: false },
-  { id: "scheduled", label: "Scheduled", blocking: false },
-  { id: "completed", label: "Completed", blocking: false },
-  { id: "failed", label: "Failed", blocking: false },
+  drawerSection("waiting", AGENTIC_COPY.waitingForYou, true),
+  drawerSection("working", AGENTIC_COPY.nurIsWorking, false),
+  drawerSection("scheduled", AGENTIC_COPY.scheduled, false),
+  drawerSection("completed", AGENTIC_COPY.completed, false),
+  drawerSection("failed", AGENTIC_COPY.failed, false),
 ] as const;
 
 export type DrawerSectionId = (typeof DRAWER_SECTIONS)[number]["id"];
@@ -206,22 +238,25 @@ export function groupWorkflows(
 
 /** Owner-facing risk wording. The enum name is not an explanation. */
 export function describeRisk(risk: AgenticRiskClass, reversible: boolean): string {
-  const base: Record<AgenticRiskClass, string> = {
-    R0_READ_ONLY: "Reads your records. Changes nothing.",
-    R1_PRIVATE_DRAFT: "Creates a private draft you can discard.",
-    R2_DURABLE_PRIVATE: "Changes your own records.",
-    R3_EXTERNAL: "Leaves NUR and reaches someone or something else.",
-    R4_IRREVERSIBLE: "Cannot be undone.",
+  const base: Record<AgenticRiskClass, UiCopyKey> = {
+    R0_READ_ONLY: AGENTIC_COPY.readsOnly,
+    R1_PRIVATE_DRAFT: AGENTIC_COPY.privateDraft,
+    R2_DURABLE_PRIVATE: AGENTIC_COPY.changesRecords,
+    R3_EXTERNAL: AGENTIC_COPY.external,
+    R4_IRREVERSIBLE: AGENTIC_COPY.irreversible,
   };
   // Reversibility is stated separately because it is the question an owner
   // actually asks, and it does not follow from the risk class alone —
   // create_capsule is R2 and irreversible.
-  return `${base[risk]} ${reversible ? "This can be undone." : "This cannot be undone."}`;
+  return uiFormat("{0} {1}", [
+    uiCopy(base[risk]),
+    uiCopy(reversible ? AGENTIC_COPY.canUndo : AGENTIC_COPY.cannotUndo),
+  ]);
 }
 
 export function formatCost(cents: number): string {
-  if (!cents) return "No cost";
-  return `Up to ${(cents / 100).toFixed(2)}`;
+  if (!cents) return uiCopy(AGENTIC_COPY.noCost);
+  return uiFormat("Up to {0}", [(cents / 100).toFixed(2)]);
 }
 
 /**
@@ -263,18 +298,18 @@ export function buildApprovalCard(
   return {
     what: approval.tool_key.replace(/_/g, " "),
     why: approval.rationale,
-    scope: approval.scope_summary ?? "This Orbit only",
+    scope: approval.scope_summary ?? uiCopy(AGENTIC_COPY.orbitOnly),
     toolLabel: `${approval.tool_key} v${approval.tool_version}`,
     arguments: Object.entries(approval.redacted_arguments).map(([key, value]) => ({
       key: key.replace(/_/g, " "),
       value: typeof value === "string" ? value : JSON.stringify(value),
     })),
     risk: describeRisk(approval.risk_class, approval.reversible),
-    expected: approval.expected_result ?? "NUR did not state an expected result.",
+    expected: approval.expected_result ?? uiCopy(AGENTIC_COPY.noExpectedResult),
     cost: formatCost(approval.cost_ceiling_cents),
     actionable,
     expiryNote: actionable
       ? null
-      : "This request expired. NUR will ask again rather than assume you still agree.",
+      : uiCopy(AGENTIC_COPY.requestExpired),
   };
 }

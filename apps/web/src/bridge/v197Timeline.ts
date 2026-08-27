@@ -32,6 +32,14 @@ import {
 import { createV197StarSeal } from "./v197StarSeal";
 import { claimV197SurfaceHost, releaseV197SurfaceHost } from "./v197SurfaceHost";
 import type { V197ApiClient } from "./v197ApiClient";
+import {
+  activeUiLocale,
+  type UiCopyKey,
+  uiCopy,
+  uiFormat,
+  uiSource,
+  verbatimUserText,
+} from "../lib/i18n";
 
 const ROOT_ID = "nur-timeline-root";
 const STYLE_ID = "nur-timeline-style";
@@ -100,49 +108,194 @@ const EMPTY_FLOW = {
 };
 
 /** §5's truth states, each with a word and a glyph — never colour alone. */
-const STATUS_PRESENTATION: Record<string, { word: string; glyph: string }> = {
-  PLANNED: { word: "Planned", glyph: "○" },
-  SCHEDULED: { word: "Scheduled", glyph: "◔" },
-  IN_PROGRESS: { word: "In progress", glyph: "◐" },
-  DUE: { word: "Due", glyph: "◑" },
-  COMPLETED: { word: "Completed", glyph: "◆" },
-  PARTIALLY_COMPLETED: { word: "Partially completed", glyph: "◒" },
-  MISSED: { word: "Missed", glyph: "△" },
-  RESCHEDULED: { word: "Rescheduled", glyph: "↻" },
-  CANCELLED: { word: "Cancelled", glyph: "×" },
-  OBSERVED: { word: "Observed", glyph: "◆" },
-  PREDICTED: { word: "Predicted", glyph: "◇" },
-  INFERRED: { word: "Inferred", glyph: "◈" },
-  IMPORTED: { word: "Imported", glyph: "⇩" },
-  ARCHIVED: { word: "Archived", glyph: "·" },
+const STATUS_PRESENTATION: Record<string, { word: UiCopyKey; glyph: string }> = {
+  PLANNED: { word: uiSource("Planned"), glyph: "○" },
+  SCHEDULED: { word: uiSource("Scheduled"), glyph: "◔" },
+  IN_PROGRESS: { word: uiSource("In progress"), glyph: "◐" },
+  DUE: { word: uiSource("Due"), glyph: "◑" },
+  COMPLETED: { word: uiSource("Completed"), glyph: "◆" },
+  PARTIALLY_COMPLETED: { word: uiSource("Partially completed"), glyph: "◒" },
+  MISSED: { word: uiSource("Missed"), glyph: "△" },
+  RESCHEDULED: { word: uiSource("Rescheduled"), glyph: "↻" },
+  CANCELLED: { word: uiSource("Cancelled"), glyph: "×" },
+  OBSERVED: { word: uiSource("Observed"), glyph: "◆" },
+  PREDICTED: { word: uiSource("Predicted"), glyph: "◇" },
+  INFERRED: { word: uiSource("Inferred"), glyph: "◈" },
+  IMPORTED: { word: uiSource("Imported"), glyph: "⇩" },
+  ARCHIVED: { word: uiSource("Archived"), glyph: "·" },
 };
 
-const HORIZON_LABEL: Record<string, string> = {
-  NOW: "Now",
-  THIS_WEEK: "This Week",
-  THIRTY_DAYS: "30 Days",
-  NINETY_DAYS: "90 Days",
-  SIX_MONTHS: "6 Months",
-  ONE_YEAR: "1 Year",
-  SOMEDAY: "Someday",
+const HORIZON_LABEL: Record<string, UiCopyKey> = {
+  NOW: uiSource("Now"),
+  THIS_WEEK: uiSource("This Week"),
+  THIRTY_DAYS: uiSource("30 Days"),
+  NINETY_DAYS: uiSource("90 Days"),
+  SIX_MONTHS: uiSource("6 Months"),
+  ONE_YEAR: uiSource("1 Year"),
+  SOMEDAY: uiSource("Someday"),
 };
 
-const OBJECT_FILTERS: { key: string; label: string; types: string[] }[] = [
-  { key: "all", label: "All", types: [] },
-  { key: "actions", label: "Actions", types: ["ACTION"] },
-  { key: "events", label: "Events", types: ["EVENT"] },
-  { key: "milestones", label: "Milestones", types: ["GOAL_MILESTONE", "MILESTONE"] },
-  { key: "decisions", label: "Decisions", types: ["DECISION"] },
-  { key: "time_blocks", label: "Time Blocks", types: ["TIME_BLOCK"] },
+const EVENT_TYPE_WORD: Readonly<Record<string, UiCopyKey>> = {
+  ACTION: uiSource("Action"),
+  EVENT: uiSource("Event"),
+  GOAL_MILESTONE: uiSource("Goal milestone"),
+  MILESTONE: uiSource("Milestone"),
+  DECISION: uiSource("Decision"),
+  TIME_BLOCK: uiSource("Time block"),
+  PLAN_STEP_DUE: uiSource("Plan step due"),
+  OUTCOME_REPORTED: uiSource("Outcome reported"),
+  OUTCOME_RETURNED: uiSource("Outcome returned"),
+  EASIER_NEXT_MOVE: uiSource("Easier next move"),
+  FEASIBILITY_NEXT_MOVE: uiSource("Feasibility next move"),
+  DAILY_CHECKIN: uiSource("Daily check-in"),
+  PLAN_CREATED: uiSource("Plan created"),
+  PLAN_STEP_COMPLETED: uiSource("Plan step completed"),
+  SCHEDULE_CREATED: uiSource("Schedule created"),
+  CONSULTATION_RETURN: uiSource("Consultation return"),
+  CONSULTATION_RETURN_COMPLETED: uiSource("Consultation return completed"),
+  INSIGHT_REVIEW_DUE: uiSource("Insight review due"),
+};
+
+const SOURCE_TYPE_WORD: Readonly<Record<string, UiCopyKey>> = {
+  OWNER: uiSource("Owner"),
+  OWNER_NOTE: uiSource("Owner note"),
+  PLAN_STEP: uiSource("Plan step"),
+  GOAL: uiSource("Goal"),
+  SCHEDULED_ACTION: uiSource("Scheduled action"),
+  TIMELINE_EVENT: uiSource("Timeline event"),
+  OUTCOME: uiSource("Outcome"),
+  INSIGHT: uiSource("Insight"),
+  FEASIBILITY: uiSource("Feasibility"),
+  AGENT: uiSource("Agent"),
+  ORBIT: uiSource("Orbit"),
+  CONSULTATION: uiSource("Consultation"),
+  PROJECT: uiSource("Project"),
+  RESEARCH_SOURCE: uiSource("Research source"),
+  WEB_SIGNAL: uiSource("Web signal"),
+};
+
+const DATE_PRECISION_WORD: Readonly<Record<string, UiCopyKey>> = {
+  EXACT: uiSource("Exact time"),
+  DATE_ONLY: uiSource("Date only"),
+  WINDOW: uiSource("Time window"),
+  BEFORE_DATE: uiSource("Before date"),
+  AFTER_DEPENDENCY: uiSource("After dependency"),
+  FLEXIBLE_WEEK: uiSource("Flexible week"),
+  HORIZON: uiSource("Horizon"),
+  UNSCHEDULED: uiSource("Unscheduled"),
+};
+
+const COMPLETION_STATE_WORD: Readonly<Record<string, UiCopyKey>> = {
+  SUCCESSFUL: uiSource("Successful"),
+  PARTIALLY_SUCCESSFUL: uiSource("Partially successful"),
+  COMPLETED_BUT_INEFFECTIVE: uiSource("Completed but ineffective"),
+  ABANDONED_INTENTIONALLY: uiSource("Intentionally stopped"),
+  FAILED: uiSource("Failed"),
+  UNKNOWN: uiSource("Not assessed"),
+};
+
+const REVIEW_TYPE_WORD: Readonly<Record<string, UiCopyKey>> = {
+  DAILY: uiSource("Daily review"),
+  WEEKLY: uiSource("Weekly review"),
+  MONTHLY: uiSource("Monthly review"),
+  PROJECT: uiSource("Project review"),
+  PREDICTION: uiSource("Prediction review"),
+};
+
+const TIMELINE_ERROR_CODE_WORD: Readonly<Record<string, UiCopyKey>> = {
+  CAPABILITY_DENIED: uiSource("This action is not available with the current permission."),
+  CSRF_MISSING: uiSource("Your NUR session needs to be renewed."),
+  SESSION_EXPIRED: uiSource("Your NUR session needs to be renewed."),
+  NOT_FOUND: uiSource("That Timeline record is no longer available."),
+  CONFLICT: uiSource("That Timeline record changed before NUR could save this action."),
+  RATE_LIMITED: uiSource("NUR is receiving too many requests. Try again shortly."),
+};
+
+const TIMELINE_ERROR_STATUS_WORD: Readonly<Record<number, UiCopyKey>> = {
+  0: uiSource("NUR could not reach the service."),
+  200: uiSource("NUR returned an invalid response."),
+  400: uiSource("NUR could not use that request."),
+  401: uiSource("Your NUR session needs to be renewed."),
+  403: uiSource("This action is not available with the current permission."),
+  404: uiSource("That Timeline record is no longer available."),
+  409: uiSource("That Timeline record changed before NUR could save this action."),
+  422: uiSource("NUR could not use one of the submitted values."),
+  429: uiSource("NUR is receiving too many requests. Try again shortly."),
+  500: uiSource("NUR could not complete that Timeline request."),
+  502: uiSource("NUR could not reach the service."),
+  503: uiSource("NUR could not reach the service."),
+  504: uiSource("NUR could not reach the service."),
+};
+
+function controlledToken(value: unknown): string {
+  return typeof value === "string"
+    ? value.trim().replaceAll("-", "_").replaceAll(" ", "_").toUpperCase()
+    : "";
+}
+
+function controlledLabel(
+  words: Readonly<Record<string, UiCopyKey>>,
+  value: unknown,
+  fallback: UiCopyKey = uiSource("Unclear"),
+): string {
+  return uiCopy(words[controlledToken(value)] ?? fallback);
+}
+
+export function timelineEventTypeLabel(value: unknown): string {
+  return controlledLabel(EVENT_TYPE_WORD, value, uiSource("Event"));
+}
+
+export function timelineSourceTypeLabel(value: unknown): string {
+  return controlledLabel(SOURCE_TYPE_WORD, value);
+}
+
+export function timelineDatePrecisionLabel(value: unknown): string {
+  return controlledLabel(DATE_PRECISION_WORD, value);
+}
+
+export function timelineCompletionStateLabel(value: unknown): string {
+  return controlledLabel(COMPLETION_STATE_WORD, value, uiSource("Not assessed"));
+}
+
+export function timelineReviewTypeLabel(value: unknown): string {
+  return controlledLabel(REVIEW_TYPE_WORD, value);
+}
+
+/** Visible errors are localized classifications; raw diagnostics stay in devtools. */
+export function timelineVisibleFailure(
+  error: unknown,
+  fallback: UiCopyKey = uiSource("NUR could not complete that Timeline request."),
+  context = "request",
+): string {
+  console.error(`[NUR Timeline] ${context}`, error);
+  const detail = typeof error === "object" && error !== null
+    ? error as { code?: unknown; status?: unknown }
+    : null;
+  const code = controlledToken(detail?.code);
+  const status = typeof detail?.status === "number" ? detail.status : null;
+  const source = (code && TIMELINE_ERROR_CODE_WORD[code])
+    || (status !== null && TIMELINE_ERROR_STATUS_WORD[status])
+    || (status !== null && status >= 500 ? TIMELINE_ERROR_STATUS_WORD[500] : undefined)
+    || fallback;
+  return uiCopy(source);
+}
+
+const OBJECT_FILTERS: { key: string; label: UiCopyKey; types: string[] }[] = [
+  { key: "all", label: uiSource("All"), types: [] },
+  { key: "actions", label: uiSource("Actions"), types: ["ACTION"] },
+  { key: "events", label: uiSource("Events"), types: ["EVENT"] },
+  { key: "milestones", label: uiSource("Milestones"), types: ["GOAL_MILESTONE", "MILESTONE"] },
+  { key: "decisions", label: uiSource("Decisions"), types: ["DECISION"] },
+  { key: "time_blocks", label: uiSource("Time Blocks"), types: ["TIME_BLOCK"] },
 ];
 
-const STATUS_FILTERS: { key: string; label: string; statuses: string[] }[] = [
-  { key: "all", label: "All", statuses: [] },
-  { key: "active", label: "Active", statuses: ["IN_PROGRESS", "DUE", "SCHEDULED"] },
-  { key: "upcoming", label: "Upcoming", statuses: ["PLANNED", "PREDICTED"] },
-  { key: "overdue", label: "Overdue", statuses: [] },
-  { key: "completed", label: "Completed", statuses: ["COMPLETED", "OBSERVED"] },
-  { key: "rescheduled", label: "Rescheduled", statuses: ["RESCHEDULED", "MISSED"] },
+const STATUS_FILTERS: { key: string; label: UiCopyKey; statuses: string[] }[] = [
+  { key: "all", label: uiSource("All"), statuses: [] },
+  { key: "active", label: uiSource("Active"), statuses: ["IN_PROGRESS", "DUE", "SCHEDULED"] },
+  { key: "upcoming", label: uiSource("Upcoming"), statuses: ["PLANNED", "PREDICTED"] },
+  { key: "overdue", label: uiSource("Overdue"), statuses: [] },
+  { key: "completed", label: uiSource("Completed"), statuses: ["COMPLETED", "OBSERVED"] },
+  { key: "rescheduled", label: uiSource("Rescheduled"), statuses: ["RESCHEDULED", "MISSED"] },
 ];
 
 interface TimelineState {
@@ -220,17 +373,32 @@ function ensureStyle(doc: Document): void {
   doc.head.append(style);
 }
 
-function text(value: unknown, fallback = "Not recorded"): string {
-  if (typeof value === "string" && value.trim()) return value;
+function text(value: unknown, fallback = uiCopy("Not recorded")): string {
+  if (typeof value === "string" && value.trim()) return verbatimUserText(value);
   if (typeof value === "number") return String(value);
   return fallback;
 }
 
+export function formatV197RescheduleReason(row: {
+  source?: unknown;
+  reason?: unknown;
+}): string {
+  const source = typeof row.source === "string" ? row.source.trim().toUpperCase() : "";
+  const reason = typeof row.reason === "string" ? row.reason.trim() : "";
+  if (!reason) return uiCopy("No reason given");
+  if (source === "OWNER") return verbatimUserText(reason);
+  if (source === "RIPPLE") {
+    const match = /^Ripple from\s+(.+)$/u.exec(reason);
+    if (match?.[1]) return uiFormat("Ripple from {0}", [verbatimUserText(match[1])]);
+  }
+  return uiCopy("Rescheduled by a recorded dependency change.");
+}
+
 function fmt(iso: string | null): string {
-  if (!iso) return "No time set";
+  if (!iso) return uiCopy("No time set");
   const parsed = new Date(iso);
   if (Number.isNaN(parsed.getTime())) return iso;
-  return parsed.toLocaleString(undefined, {
+  return parsed.toLocaleString(activeUiLocale(), {
     month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
   });
 }
@@ -261,10 +429,10 @@ function dayLabel(key: string, now: Date): string {
   if (key === "unscheduled") return "";
   const date = new Date(`${key}T00:00:00Z`);
   const days = Math.round((date.getTime() - new Date(now.toDateString()).getTime()) / 86_400_000);
-  if (days === 0) return "Today";
-  if (days === 1) return "Tomorrow";
-  if (days === -1) return "Yesterday";
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  if (days === 0) return uiCopy("Today");
+  if (days === 1) return uiCopy("Tomorrow");
+  if (days === -1) return uiCopy("Yesterday");
+  return date.toLocaleDateString(activeUiLocale(), { month: "short", day: "numeric" });
 }
 
 export async function renderV197Timeline(
@@ -325,11 +493,16 @@ export async function renderV197Timeline(
     } catch (error) {
       // §52: a failure must not remove the whole Timeline. The last-known state
       // stays on screen and the notice is restrained.
-      state.error = error instanceof Error ? error.message : "Part of the Timeline could not update.";
+      state.error = timelineVisibleFailure(
+        error,
+        uiSource("Part of the Timeline could not update."),
+        "load flow",
+      );
     }
     try {
       state.smart = await api.get<Record<string, unknown>>("/timeline/smart-sections");
-    } catch {
+    } catch (error) {
+      console.error("[NUR Timeline] load smart sections", error);
       state.smart = null;
     }
     state.loaded = true;
@@ -339,7 +512,8 @@ export async function renderV197Timeline(
   async function loadHorizons(): Promise<void> {
     try {
       state.horizons = await api.get<Record<string, unknown>>("/timeline/horizons");
-    } catch {
+    } catch (error) {
+      console.error("[NUR Timeline] load horizons", error);
       state.horizons = null;
     }
     paint();
@@ -348,7 +522,8 @@ export async function renderV197Timeline(
   async function loadReview(): Promise<void> {
     try {
       state.review = await api.get<Record<string, unknown>>("/timeline/review");
-    } catch {
+    } catch (error) {
+      console.error("[NUR Timeline] load review", error);
       state.review = null;
     }
     paint();
@@ -357,7 +532,8 @@ export async function renderV197Timeline(
   async function loadCalendar(): Promise<void> {
     try {
       state.calendar = await api.get<Record<string, unknown>>("/timeline/calendar?view=week");
-    } catch {
+    } catch (error) {
+      console.error("[NUR Timeline] load calendar", error);
       state.calendar = null;
     }
     paint();
@@ -381,7 +557,8 @@ export async function renderV197Timeline(
         state.dependencies = null;
         state.rescheduleHistory = [];
       }
-    } catch {
+    } catch (error) {
+      console.error("[NUR Timeline] load selection detail", error);
       state.dependencies = null;
       state.rescheduleHistory = [];
     }
@@ -395,7 +572,7 @@ export async function renderV197Timeline(
       state.notice = notice ?? null;
       await loadFlow();
     } catch (error) {
-      state.error = error instanceof Error ? error.message : "That did not work.";
+      state.error = timelineVisibleFailure(error, uiSource("That did not work."), "mutation");
       paint();
     }
   }
@@ -431,31 +608,31 @@ export async function renderV197Timeline(
     start(entryId: string) {
       void mutate(
         () => api.post(`/timeline/entries/${entryId}/start`, {}),
-        "Marked in progress.",
+        uiCopy("Marked in progress."),
       );
     },
     complete(entryId: string) {
       void mutate(
         () => api.post(`/timeline/entries/${entryId}/complete`, {}),
-        "Completed.",
+        uiCopy("Completed."),
       );
     },
     miss(entryId: string) {
       void mutate(
         () => api.post(`/timeline/entries/${entryId}/miss`, {}),
-        "Marked missed.",
+        uiCopy("Marked missed."),
       );
     },
     archive(entryId: string) {
       void mutate(
         () => api.post(`/timeline/entries/${entryId}/archive`, {}),
-        "Archived.",
+        uiCopy("Archived."),
       );
     },
     confirmObserved(entryId: string) {
       void mutate(
         () => api.post(`/timeline/entries/${entryId}/confirm-observed`, {}),
-        "Confirmed as observed.",
+        uiCopy("Confirmed as observed."),
       );
     },
     /** Opens the ripple dialog. Never writes anything by itself. */
@@ -471,7 +648,11 @@ export async function renderV197Timeline(
         };
         paint();
       } catch (error) {
-        state.error = error instanceof Error ? error.message : "Could not preview that move.";
+        state.error = timelineVisibleFailure(
+          error,
+          uiSource("Could not preview that move."),
+          "preview reschedule",
+        );
         paint();
       }
     },
@@ -485,8 +666,8 @@ export async function renderV197Timeline(
           entry_id: entryId, new_start_at: proposedStartAt, mode,
         }),
         mode === "MOVE_ONLY"
-          ? "Moved. Nothing downstream was touched."
-          : "Moved, and downstream items were updated with a recorded reason.",
+          ? uiCopy("Moved. Nothing downstream was touched.")
+          : uiCopy("Moved, and downstream items were updated with a recorded reason."),
       );
     },
     /** The non-drag alternative: nudge by whole days, keyboard-reachable. */
@@ -533,20 +714,20 @@ export async function renderV197Timeline(
     const header = el(doc, "header", "nur-timeline-header");
 
     const title = el(doc, "div", "nur-timeline-title");
-    const heading = el(doc, "h1", undefined, "Timeline");
+    const heading = el(doc, "h1", undefined, uiCopy("Timeline"));
     markV197HolographicWordmark(heading);
     title.append(heading);
-    title.append(el(doc, "p", "nur-timeline-subtitle", "Past, present and possible futures"));
+    title.append(el(doc, "p", "nur-timeline-subtitle", uiCopy("Past, present and possible futures")));
     header.append(title);
 
     const modes = el(doc, "div", "nur-timeline-header-actions");
     modes.setAttribute("role", "tablist");
-    modes.setAttribute("aria-label", "Timeline view mode");
+    modes.setAttribute("aria-label", uiCopy("Timeline view mode"));
     ([
-      ["flow", "Flow"], ["calendar", "Calendar"],
-      ["horizons", "Horizons"], ["review", "Review"],
-    ] as [TimelineMode, string][]).forEach(([mode, label]) => {
-      const button = chip(doc, label, state.mode === mode);
+      ["flow", uiSource("Flow")], ["calendar", uiSource("Calendar")],
+      ["horizons", uiSource("Horizons")], ["review", uiSource("Review")],
+    ] as [TimelineMode, UiCopyKey][]).forEach(([mode, label]) => {
+      const button = chip(doc, uiCopy(label), state.mode === mode);
       button.setAttribute("role", "tab");
       button.setAttribute("aria-selected", state.mode === mode ? "true" : "false");
       button.dataset.timelineMode = mode;
@@ -556,29 +737,27 @@ export async function renderV197Timeline(
     header.append(modes);
 
     const tools = el(doc, "div", "nur-timeline-header-actions");
-    const jump = capsule(doc, "Jump to Today");
+    const jump = capsule(doc, uiCopy("Jump to Today"));
     jump.dataset.timelineJumpToday = "true";
     jump.addEventListener("click", () => actions.jumpToToday());
     tools.append(jump);
     const search = el(doc, "input", "nur-timeline-search");
     search.type = "search";
-    search.placeholder = "Search events, actions, milestones or memories";
+    search.placeholder = uiCopy("Search events, actions, milestones or memories");
     search.value = state.query;
-    search.setAttribute("aria-label", "Search the Timeline");
+    search.setAttribute("aria-label", uiCopy("Search the Timeline"));
     search.style.width = "220px";
     search.addEventListener("input", () => {
       scheduleV197SearchCommit(doc, SEARCH_KEY, search.value, actions.setQuery);
     });
     tools.append(search);
     tools.append(capsule(
-      doc, "Add",
-      "Not built yet as a guided flow. The creation endpoint (POST /timeline/events) "
-      + "is live and tested; the celestial action menu is not.",
+      doc, uiCopy("Add"),
+      uiCopy("Not built yet as a guided flow. The creation endpoint (POST /timeline/events) is live and tested; the celestial action menu is not."),
     ));
     tools.append(capsule(
-      doc, "Ask NUR to Schedule",
-      "Not built. There is no model provider connected in this deployment, so "
-      + "Timeline never proposes a schedule it did not read from your own rows.",
+      doc, uiCopy("Ask NUR to Schedule"),
+      uiCopy("Not built. There is no model provider connected in this deployment, so Timeline never proposes a schedule it did not read from your own rows."),
     ));
     header.append(tools);
     return header;
@@ -586,14 +765,14 @@ export async function renderV197Timeline(
 
   function timelineNavigator(): HTMLElement {
     const pane = el(doc, "aside", "nur-timeline-pane nur-timeline-nav");
-    pane.setAttribute("aria-label", "Time navigator");
+    pane.setAttribute("aria-label", uiCopy("Time navigator"));
     const scroll = el(doc, "div", "nur-timeline-pane-scroll");
 
     const modeGroup = el(doc, "div", "nur-timeline-nav-group");
-    modeGroup.append(el(doc, "p", "nur-timeline-nav-label", "Objects"));
+    modeGroup.append(el(doc, "p", "nur-timeline-nav-label", uiCopy("Objects")));
     const objectChips = el(doc, "div", "nur-timeline-chips");
     for (const row of OBJECT_FILTERS) {
-      const button = chip(doc, row.label, state.objectFilter === row.key);
+      const button = chip(doc, uiCopy(row.label), state.objectFilter === row.key);
       button.addEventListener("click", () => actions.setObjectFilter(row.key));
       objectChips.append(button);
     }
@@ -601,28 +780,28 @@ export async function renderV197Timeline(
     scroll.append(modeGroup);
 
     const statusGroup = el(doc, "div", "nur-timeline-nav-group");
-    statusGroup.append(el(doc, "p", "nur-timeline-nav-label", "Status"));
+    statusGroup.append(el(doc, "p", "nur-timeline-nav-label", uiCopy("Status")));
     const statusChips = el(doc, "div", "nur-timeline-chips");
     for (const row of STATUS_FILTERS) {
-      const button = chip(doc, row.label, state.statusFilter === row.key);
+      const button = chip(doc, uiCopy(row.label), state.statusFilter === row.key);
       button.addEventListener("click", () => actions.setStatusFilter(row.key));
       statusChips.append(button);
     }
     statusGroup.append(statusChips);
     scroll.append(statusGroup);
 
-    const sections: [string, string][] = [
-      ["now", "Now"], ["next", "Next"], ["overdue", "Overdue"],
-      ["awaiting_dependency", "Awaiting Dependency"], ["needs_review", "Needs Review"],
-      ["unscheduled", "Unscheduled"], ["repeating", "Repeating"],
+    const sections: [string, UiCopyKey][] = [
+      ["now", uiSource("Now")], ["next", uiSource("Next")], ["overdue", uiSource("Overdue")],
+      ["awaiting_dependency", uiSource("Awaiting Dependency")], ["needs_review", uiSource("Needs Review")],
+      ["unscheduled", uiSource("Unscheduled")], ["repeating", uiSource("Repeating")],
     ];
     for (const [key, label] of sections) {
       const rows = (state.smart?.[key] as { ref: string; label: string }[] | undefined) ?? [];
       const group = el(doc, "div", "nur-timeline-nav-group");
       group.dataset.timelineSection = key;
-      group.append(el(doc, "p", "nur-timeline-nav-label", label));
+      group.append(el(doc, "p", "nur-timeline-nav-label", uiCopy(label)));
       if (!rows.length) {
-        group.append(el(doc, "p", "nur-timeline-empty", "Nothing here yet."));
+        group.append(el(doc, "p", "nur-timeline-empty", uiCopy("Nothing here yet.")));
       } else {
         const list = el(doc, "ul", "nur-timeline-nav-list");
         for (const row of rows.slice(0, 6)) {
@@ -647,8 +826,8 @@ export async function renderV197Timeline(
   }
 
   function truthBadge(entry: Entry): string {
-    const presentation = STATUS_PRESENTATION[entry.status] ?? { word: entry.status, glyph: "○" };
-    return `${presentation.glyph} ${presentation.word}`;
+    const presentation = STATUS_PRESENTATION[entry.status] ?? { word: uiSource("Unclear"), glyph: "○" };
+    return uiFormat("{0} {1}", [presentation.glyph, uiCopy(presentation.word)]);
   }
 
   function entryRow(entry: Entry, lane: string, branchIndex: number | null = null): HTMLElement {
@@ -668,7 +847,7 @@ export async function renderV197Timeline(
     body.append(el(doc, "p", "nur-timeline-entry-title", entry.title));
     body.append(el(
       doc, "p", "nur-timeline-entry-meta",
-      `${fmt(entry.scheduled_for)} · ${STATUS_PRESENTATION[entry.status]?.word ?? entry.status}`,
+      uiFormat("{0} · {1}", [fmt(entry.scheduled_for), uiCopy(STATUS_PRESENTATION[entry.status]?.word ?? uiSource("Unclear"))]),
     ));
     row.append(body);
 
@@ -728,13 +907,13 @@ export async function renderV197Timeline(
 
   function timelineFlowView(): HTMLElement {
     const pane = el(doc, "section", "nur-timeline-pane nur-timeline-workspace");
-    pane.setAttribute("aria-label", "Living Timeline");
+    pane.setAttribute("aria-label", uiCopy("Living Timeline"));
     const wrap = el(doc, "div", "nur-timeline-flow-wrap");
 
     if (!state.loaded) {
       const loading = el(doc, "div", "nur-timeline-pane-scroll");
       loading.dataset.timelineLoading = "true";
-      loading.append(el(doc, "p", "nur-timeline-empty", "Assembling your history and horizon…"));
+      loading.append(el(doc, "p", "nur-timeline-empty", uiCopy("Assembling your history and horizon…")));
       wrap.append(loading);
       pane.append(wrap);
       return pane;
@@ -744,11 +923,10 @@ export async function renderV197Timeline(
     if (!entries.length && !state.flow.unscheduled.length) {
       const empty = el(doc, "div", "nur-timeline-pane-scroll");
       empty.dataset.timelineEmpty = "true";
-      empty.append(el(doc, "h2", "nur-timeline-detail-title", "Your Timeline begins where memory meets intention."));
+      empty.append(el(doc, "h2", "nur-timeline-detail-title", uiCopy("Your Timeline begins where memory meets intention.")));
       empty.append(el(
         doc, "p", "nur-timeline-empty",
-        "Nothing has been recorded yet. Once something is scheduled or logged, it "
-        + "appears here in its place in time.",
+        uiCopy("Nothing has been recorded yet. Once something is scheduled or logged, it appears here in its place in time."),
       ));
       wrap.append(empty);
       pane.append(wrap);
@@ -767,7 +945,7 @@ export async function renderV197Timeline(
       horizon.append(el(doc, "span", "nur-timeline-now-sigil"));
       horizon.append(el(
         doc, "span", "nur-timeline-now-label",
-        now.toLocaleString(undefined, {
+        now.toLocaleString(activeUiLocale(), {
           month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
         }),
       ));
@@ -814,7 +992,7 @@ export async function renderV197Timeline(
     if (state.flow.unscheduled.length) {
       const holding = el(doc, "div", "nur-timeline-unscheduled");
       holding.dataset.timelineUnscheduled = "true";
-      holding.append(el(doc, "p", "nur-timeline-nav-label", "Unscheduled"));
+      holding.append(el(doc, "p", "nur-timeline-nav-label", uiCopy("Unscheduled")));
       for (const entry of state.flow.unscheduled) {
         holding.append(entryRow(entry, "future"));
       }
@@ -824,7 +1002,7 @@ export async function renderV197Timeline(
     wrap.append(scroll);
 
     const controls = el(doc, "div", "nur-timeline-canvas-controls");
-    const outline = chip(doc, "Outline", state.showOutline);
+    const outline = chip(doc, uiCopy("Outline"), state.showOutline);
     outline.dataset.timelineOutlineToggle = "true";
     outline.addEventListener("click", () => actions.toggleOutline());
     controls.append(outline);
@@ -843,24 +1021,29 @@ export async function renderV197Timeline(
     box.style.position = "absolute";
     box.style.inset = "0";
     box.style.background = "rgba(0,0,0,0.94)";
-    box.append(el(doc, "p", "nur-timeline-nav-label", "Timeline outline"));
+    box.append(el(doc, "p", "nur-timeline-nav-label", uiCopy("Timeline outline")));
     const list = el(doc, "ul", "nur-timeline-outline");
     for (const entry of entries) {
       const item = el(doc, "li");
       const button = el(doc, "button", "nur-timeline-row");
       button.type = "button";
-      const presentation = STATUS_PRESENTATION[entry.status] ?? { word: entry.status };
-      const summary = `${entry.title}. ${text(entry.event_type)}. Due ${fmt(entry.scheduled_for)}. ${presentation.word}.`;
+      const presentation = STATUS_PRESENTATION[entry.status] ?? { word: uiSource("Unclear") };
+      const summary = uiFormat("{0}. {1}. Due {2}. {3}.", [
+        entry.title,
+        timelineEventTypeLabel(entry.event_type),
+        fmt(entry.scheduled_for),
+        uiCopy(presentation.word),
+      ]);
       button.setAttribute("aria-label", summary);
       button.append(el(doc, "span", undefined, "·"));
       button.append(el(doc, "span", "nur-timeline-row-label", entry.title));
-      button.append(el(doc, "span", "nur-timeline-row-meta", presentation.word));
+      button.append(el(doc, "span", "nur-timeline-row-meta", uiCopy(presentation.word)));
       button.addEventListener("click", () => actions.select(entry.ref));
       item.append(button);
       list.append(item);
     }
     box.append(list);
-    const close = capsule(doc, "Close outline");
+    const close = capsule(doc, uiCopy("Close outline"));
     close.addEventListener("click", () => actions.toggleOutline());
     box.append(close);
     return box;
@@ -872,41 +1055,41 @@ export async function renderV197Timeline(
     dialog.setAttribute("role", "dialog");
     dialog.setAttribute("aria-modal", "true");
     const card = el(doc, "div", "nur-timeline-ripple-card");
-    card.append(el(doc, "h2", "nur-timeline-ripple-title", `Move "${state.ripple!.entryTitle}"?`));
+    card.append(el(doc, "h2", "nur-timeline-ripple-title", uiFormat("Move \"{0}\"?", [state.ripple!.entryTitle])));
     card.append(el(
       doc, "p", "nur-timeline-ripple-move",
-      `From ${fmt(state.ripple!.currentStartAt)} to ${fmt(state.ripple!.proposedStartAt)}.`,
+      uiFormat("From {0} to {1}.", [fmt(state.ripple!.currentStartAt), fmt(state.ripple!.proposedStartAt)]),
     ));
     card.append(el(doc, "p", "nur-timeline-ripple-move", state.ripple!.note));
 
     if (state.ripple!.affected.length) {
       const list = el(doc, "ul", "nur-timeline-ripple-affected");
       for (const item of state.ripple!.affected) {
-        list.append(el(doc, "li", undefined, `${item.title} → ${fmt(item.proposed_start_at)}`));
+        list.append(el(doc, "li", undefined, uiFormat("{0} → {1}", [item.title, fmt(item.proposed_start_at)])));
       }
       card.append(list);
     }
 
     const actionsBox = el(doc, "div", "nur-timeline-ripple-actions");
-    const moveOnly = capsule(doc, "Move this only");
+    const moveOnly = capsule(doc, uiCopy("Move this only"));
     moveOnly.dataset.timelineRippleMode = "MOVE_ONLY";
     moveOnly.addEventListener("click", () => void actions.applyRipple("MOVE_ONLY"));
     actionsBox.append(moveOnly);
     if (state.ripple!.affected.length) {
-      const shift = capsule(doc, "Shift dependent actions");
+      const shift = capsule(doc, uiCopy("Shift dependent actions"));
       shift.dataset.timelineRippleMode = "SHIFT_DEPENDENTS";
       shift.addEventListener("click", () => void actions.applyRipple("SHIFT_DEPENDENTS"));
       actionsBox.append(shift);
-      const compress = capsule(doc, "Compress later work");
+      const compress = capsule(doc, uiCopy("Compress later work"));
       compress.dataset.timelineRippleMode = "COMPRESS_LATER";
       compress.addEventListener("click", () => void actions.applyRipple("COMPRESS_LATER"));
       actionsBox.append(compress);
-      const flag = capsule(doc, "Keep dates and flag risk");
+      const flag = capsule(doc, uiCopy("Keep dates and flag risk"));
       flag.dataset.timelineRippleMode = "KEEP_AND_FLAG";
       flag.addEventListener("click", () => void actions.applyRipple("KEEP_AND_FLAG"));
       actionsBox.append(flag);
     }
-    const cancel = capsule(doc, "Cancel");
+    const cancel = capsule(doc, uiCopy("Cancel"));
     cancel.dataset.timelineRippleCancel = "true";
     cancel.addEventListener("click", () => actions.cancelRipple());
     actionsBox.append(cancel);
@@ -919,11 +1102,11 @@ export async function renderV197Timeline(
     const pane = el(doc, "section", "nur-timeline-pane nur-timeline-workspace");
     const scroll = el(doc, "div", "nur-timeline-pane-scroll");
     scroll.dataset.timelineCalendar = "true";
-    scroll.append(el(doc, "p", "nur-timeline-detail-kind", "Calendar · This week"));
+    scroll.append(el(doc, "p", "nur-timeline-detail-kind", uiCopy("Calendar · This week")));
 
     const entries = (state.calendar?.entries as Entry[] | undefined) ?? [];
     if (!entries.length) {
-      scroll.append(el(doc, "p", "nur-timeline-empty", "Nothing exact-timed this week."));
+      scroll.append(el(doc, "p", "nur-timeline-empty", uiCopy("Nothing exact-timed this week.")));
       pane.append(scroll);
       return pane;
     }
@@ -941,8 +1124,7 @@ export async function renderV197Timeline(
     }
     scroll.append(el(
       doc, "p", "nur-timeline-empty",
-      "A grouped agenda, not a pixel-grid calendar — the exact-time scheduling "
-      + "surface, simplified deliberately.",
+      uiCopy("A grouped agenda, not a pixel-grid calendar — the exact-time scheduling surface, simplified deliberately."),
     ));
     pane.append(scroll);
     return pane;
@@ -952,10 +1134,10 @@ export async function renderV197Timeline(
     const pane = el(doc, "section", "nur-timeline-pane nur-timeline-workspace");
     const scroll = el(doc, "div", "nur-timeline-pane-scroll");
     scroll.dataset.timelineHorizons = "true";
-    scroll.append(el(doc, "p", "nur-timeline-detail-kind", "Horizons"));
+    scroll.append(el(doc, "p", "nur-timeline-detail-kind", uiCopy("Horizons")));
 
     if (!state.horizons) {
-      scroll.append(el(doc, "p", "nur-timeline-empty", "Loading horizons…"));
+      scroll.append(el(doc, "p", "nur-timeline-empty", uiCopy("Loading horizons…")));
       pane.append(scroll);
       return pane;
     }
@@ -965,10 +1147,10 @@ export async function renderV197Timeline(
     for (const key of ["NOW", "THIS_WEEK", "THIRTY_DAYS", "NINETY_DAYS", "SIX_MONTHS", "ONE_YEAR", "SOMEDAY"]) {
       const col = el(doc, "div", "nur-timeline-horizon-col");
       col.dataset.timelineHorizonBucket = key;
-      col.append(el(doc, "p", "nur-timeline-horizon-label", HORIZON_LABEL[key]));
+      col.append(el(doc, "p", "nur-timeline-horizon-label", uiCopy(HORIZON_LABEL[key] ?? uiSource("Someday"))));
       const rows = buckets[key] ?? [];
       if (!rows.length) {
-        col.append(el(doc, "p", "nur-timeline-empty", "Nothing here."));
+        col.append(el(doc, "p", "nur-timeline-empty", uiCopy("Nothing here.")));
       } else {
         for (const row of rows) {
           const item = el(doc, "div", "nur-timeline-horizon-item", row.label);
@@ -984,7 +1166,9 @@ export async function renderV197Timeline(
     if (drift.length) {
       const banner = el(doc, "div", "nur-timeline-drift");
       banner.dataset.timelineDrift = "true";
-      banner.textContent = `${drift.length} item${drift.length === 1 ? "" : "s"} moved outward more than once — worth a look, not a judgement.`;
+      banner.textContent = drift.length === 1
+        ? uiFormat("{0} item moved outward more than once — worth a look, not a judgement.", [drift.length])
+        : uiFormat("{0} items moved outward more than once — worth a look, not a judgement.", [drift.length]);
       scroll.append(banner);
     }
     pane.append(scroll);
@@ -995,16 +1179,16 @@ export async function renderV197Timeline(
     const pane = el(doc, "section", "nur-timeline-pane nur-timeline-workspace");
     const scroll = el(doc, "div", "nur-timeline-pane-scroll");
     scroll.dataset.timelineReview = "true";
-    scroll.append(el(doc, "p", "nur-timeline-detail-kind", "Review"));
+    scroll.append(el(doc, "p", "nur-timeline-detail-kind", uiCopy("Review")));
 
     if (!state.review) {
-      scroll.append(el(doc, "p", "nur-timeline-empty", "Loading this week's comparison…"));
+      scroll.append(el(doc, "p", "nur-timeline-empty", uiCopy("Loading this week's comparison…")));
       pane.append(scroll);
       return pane;
     }
 
     const findings = state.review.live_findings as Record<string, unknown>;
-    scroll.append(el(doc, "h2", "nur-timeline-detail-title", "This week: planned versus actual"));
+    scroll.append(el(doc, "h2", "nur-timeline-detail-title", uiCopy("This week: planned versus actual")));
 
     const grid = el(doc, "div", "nur-timeline-review-grid");
     const stat = (label: string, value: string) => {
@@ -1013,46 +1197,46 @@ export async function renderV197Timeline(
       box.append(el(doc, "p", "nur-timeline-stat-value", value));
       grid.append(box);
     };
-    stat("Entries", String(findings.period_entry_count ?? 0));
-    stat("Completed", String(findings.completed_count ?? 0));
-    stat("Missed", String(findings.missed_count ?? 0));
-    stat("Rescheduled", String(findings.reschedule_count ?? 0));
+    stat(uiCopy("Entries"), String(findings.period_entry_count ?? 0));
+    stat(uiCopy("Completed"), String(findings.completed_count ?? 0));
+    stat(uiCopy("Missed"), String(findings.missed_count ?? 0));
+    stat(uiCopy("Rescheduled"), String(findings.reschedule_count ?? 0));
     scroll.append(grid);
 
     const distribution = findings.system_time_distribution as Record<string, string> | undefined;
     if (distribution && Object.keys(distribution).length) {
       scroll.append(field(
-        doc, "System time distribution",
+        doc, uiCopy("System time distribution"),
         Object.entries(distribution).map(([slug, pct]) => `${slug}: ${pct}`).join(" · "),
       ));
     }
 
-    const generate = capsule(doc, "Generate this week's review");
+    const generate = capsule(doc, uiCopy("Generate this week's review"));
     generate.dataset.timelineGenerateReview = "true";
     generate.addEventListener("click", () => {
       const now = new Date();
       const start = new Date(now.getTime() - 7 * 86_400_000);
       void mutate(() => api.post("/timeline/reviews/generate", {
         review_type: "WEEKLY", period_start: start.toISOString(), period_end: now.toISOString(),
-      }), "Review generated from your own recorded rows.");
+      }), uiCopy("Review generated from your own recorded rows."));
       void loadReview();
     });
     scroll.append(generate);
 
     const recent = (state.review.recent_reviews as Record<string, unknown>[] | undefined) ?? [];
     if (recent.length) {
-      scroll.append(el(doc, "p", "nur-timeline-nav-label", "Recent reviews"));
+      scroll.append(el(doc, "p", "nur-timeline-nav-label", uiCopy("Recent reviews")));
       for (const row of recent) {
         const card = el(doc, "div", "nur-timeline-card");
-        card.append(el(doc, "p", "nur-timeline-field-value", text(row.review_type)));
-        card.append(el(doc, "p", "nur-timeline-row-meta", text(row.summary, "Computed, not written")));
+        card.append(el(doc, "p", "nur-timeline-field-value", timelineReviewTypeLabel(row.review_type)));
+        card.append(el(doc, "p", "nur-timeline-row-meta", text(row.summary, uiCopy("Computed, not written"))));
         scroll.append(card);
       }
     }
 
     scroll.append(el(
       doc, "p", "nur-timeline-empty",
-      "Deterministic — computed from your own recorded timestamps, no model consulted.",
+      uiCopy("Deterministic — computed from your own recorded timestamps, no model consulted."),
     ));
     pane.append(scroll);
     return pane;
@@ -1060,32 +1244,35 @@ export async function renderV197Timeline(
 
   function timelineDetailPanel(): HTMLElement {
     const pane = el(doc, "aside", "nur-timeline-pane nur-timeline-detail");
-    pane.setAttribute("aria-label", "Selection detail");
+    pane.setAttribute("aria-label", uiCopy("Selection detail"));
     const scroll = el(doc, "div", "nur-timeline-pane-scroll");
 
     const entry = state.selected ? entryByRef(state.selected) : undefined;
     if (!entry) {
-      scroll.append(el(doc, "p", "nur-timeline-detail-kind", "Nothing selected"));
+      scroll.append(el(doc, "p", "nur-timeline-detail-kind", uiCopy("Nothing selected")));
       scroll.append(el(
         doc, "p", "nur-timeline-empty",
-        "Select something in time to explore its meaning, dependencies and outcome.",
+        uiCopy("Select something in time to explore its meaning, dependencies and outcome."),
       ));
       pane.append(scroll);
       return pane;
     }
 
     const header = el(doc, "div", "nur-timeline-detail-header");
-    header.append(el(doc, "p", "nur-timeline-detail-kind", `${text(entry.event_type)} · ${truthBadge(entry)}`));
+    header.append(el(doc, "p", "nur-timeline-detail-kind", uiFormat("{0} · {1}", [
+      timelineEventTypeLabel(entry.event_type),
+      truthBadge(entry),
+    ])));
     header.append(el(doc, "h2", "nur-timeline-detail-title", entry.title));
     scroll.append(header);
 
     const tabs = el(doc, "div", "nur-timeline-tabs");
     tabs.setAttribute("role", "tablist");
     ([
-      ["overview", "Overview"], ["time", "Time"], ["links", "Links"],
-      ["activity", "Activity"], ["nur", "NUR View"],
-    ] as [DetailTab, string][]).forEach(([tab, label]) => {
-      const button = el(doc, "button", "nur-timeline-tab", label);
+      ["overview", uiSource("Overview")], ["time", uiSource("Time")], ["links", uiSource("Links")],
+      ["activity", uiSource("Activity")], ["nur", uiSource("NUR View")],
+    ] as [DetailTab, UiCopyKey][]).forEach(([tab, label]) => {
+      const button = el(doc, "button", "nur-timeline-tab", uiCopy(label));
       button.type = "button";
       button.setAttribute("role", "tab");
       button.setAttribute("aria-selected", state.tab === tab ? "true" : "false");
@@ -1110,33 +1297,33 @@ export async function renderV197Timeline(
   }
 
   function overviewTab(into: HTMLElement, entry: Entry): void {
-    into.append(field(doc, "Description", text(entry.description, "None recorded"), !entry.description));
-    into.append(field(doc, "System", text(entry.system_slug, "Not linked"), !entry.system_slug));
-    into.append(field(doc, "Priority", `${entry.importance}/100`));
-    into.append(field(doc, "Source", text(entry.source_type)));
+    into.append(field(doc, uiCopy("Description"), text(entry.description, uiCopy("None recorded")), !entry.description));
+    into.append(field(doc, uiCopy("System"), text(entry.system_slug, uiCopy("Not linked")), !entry.system_slug));
+    into.append(field(doc, uiCopy("Priority"), uiFormat("{0}/100", [entry.importance])));
+    into.append(field(doc, uiCopy("Source"), timelineSourceTypeLabel(entry.source_type)));
 
     const row = el(doc, "div", "nur-timeline-nav-group");
     const controls = el(doc, "div", "nur-timeline-chips");
     if (entry.kind === "timeline_event") {
       if (["PLANNED", "SCHEDULED"].includes(entry.status)) {
-        const start = capsule(doc, "Start");
+        const start = capsule(doc, uiCopy("Start"));
         start.addEventListener("click", () => actions.start(entry.id));
         controls.append(start);
       }
       if (!["COMPLETED", "CANCELLED", "ARCHIVED"].includes(entry.status)) {
-        const complete = capsule(doc, "Complete");
+        const complete = capsule(doc, uiCopy("Complete"));
         complete.addEventListener("click", () => actions.complete(entry.id));
         controls.append(complete);
-        const miss = capsule(doc, "Mark missed");
+        const miss = capsule(doc, uiCopy("Mark missed"));
         miss.addEventListener("click", () => actions.miss(entry.id));
         controls.append(miss);
       }
       if (["PREDICTED", "INFERRED", "IMPORTED"].includes(entry.status)) {
-        const confirm = capsule(doc, "Confirm observed");
+        const confirm = capsule(doc, uiCopy("Confirm observed"));
         confirm.addEventListener("click", () => actions.confirmObserved(entry.id));
         controls.append(confirm);
       }
-      const archive = capsule(doc, "Archive");
+      const archive = capsule(doc, uiCopy("Archive"));
       archive.addEventListener("click", () => actions.archive(entry.id));
       controls.append(archive);
     }
@@ -1145,18 +1332,18 @@ export async function renderV197Timeline(
   }
 
   function timeTab(into: HTMLElement, entry: Entry): void {
-    into.append(field(doc, "Precision", entry.date_precision.replace(/_/g, " ").toLowerCase()));
-    into.append(field(doc, "Planned", fmt(entry.scheduled_for)));
-    into.append(field(doc, "Ends", fmt(entry.ends_at), !entry.ends_at));
-    into.append(field(doc, "Actual start", fmt(entry.actual_start_at), !entry.actual_start_at));
-    into.append(field(doc, "Actual end", fmt(entry.actual_end_at), !entry.actual_end_at));
+    into.append(field(doc, uiCopy("Precision"), timelineDatePrecisionLabel(entry.date_precision)));
+    into.append(field(doc, uiCopy("Planned"), fmt(entry.scheduled_for)));
+    into.append(field(doc, uiCopy("Ends"), fmt(entry.ends_at), !entry.ends_at));
+    into.append(field(doc, uiCopy("Actual start"), fmt(entry.actual_start_at), !entry.actual_start_at));
+    into.append(field(doc, uiCopy("Actual end"), fmt(entry.actual_end_at), !entry.actual_end_at));
     into.append(field(
-      doc, "Completion quality",
-      text(entry.completion_state, "Not assessed"), !entry.completion_state,
+      doc, uiCopy("Completion quality"),
+      timelineCompletionStateLabel(entry.completion_state), !entry.completion_state,
     ));
 
     if (entry.kind === "timeline_event" && entry.scheduled_for) {
-      const reschedule = capsule(doc, "Reschedule");
+      const reschedule = capsule(doc, uiCopy("Reschedule"));
       reschedule.dataset.timelineReschedule = "true";
       reschedule.addEventListener("click", () => {
         // The keyboard/pointer-free path: proposes one day forward, opening the
@@ -1171,45 +1358,44 @@ export async function renderV197Timeline(
 
     const history = state.rescheduleHistory ?? [];
     if (history.length) {
-      into.append(el(doc, "p", "nur-timeline-nav-label", "Reschedule history"));
+      into.append(el(doc, "p", "nur-timeline-nav-label", uiCopy("Reschedule history")));
       for (const row of history) {
         const card = el(doc, "div", "nur-timeline-card");
         card.append(el(
           doc, "p", "nur-timeline-field-value",
-          `${fmt(row.previous_start_at as string | null)} → ${fmt(row.new_start_at as string | null)}`,
+          uiFormat("{0} → {1}", [fmt(row.previous_start_at as string | null), fmt(row.new_start_at as string | null)]),
         ));
-        card.append(el(doc, "p", "nur-timeline-row-meta", text(row.reason, "No reason given")));
+        card.append(el(doc, "p", "nur-timeline-row-meta", formatV197RescheduleReason(row)));
         into.append(card);
       }
     }
   }
 
   function linksTab(into: HTMLElement, entry: Entry): void {
-    into.append(field(doc, "Goal", entry.goal_id ? entry.goal_id : "None", !entry.goal_id));
-    into.append(field(doc, "Plan", entry.plan_id ? entry.plan_id : "None", !entry.plan_id));
-    into.append(field(doc, "Orbit", entry.orbit_id ? entry.orbit_id : "None", !entry.orbit_id));
+    into.append(field(doc, uiCopy("Goal"), entry.goal_id ? entry.goal_id : uiCopy("None"), !entry.goal_id));
+    into.append(field(doc, uiCopy("Plan"), entry.plan_id ? entry.plan_id : uiCopy("None"), !entry.plan_id));
+    into.append(field(doc, uiCopy("Orbit"), entry.orbit_id ? entry.orbit_id : uiCopy("None"), !entry.orbit_id));
 
     const deps = state.dependencies;
     into.append(field(
-      doc, "Depends on",
+      doc, uiCopy("Depends on"),
       deps?.predecessors.length
         ? deps.predecessors.map((row) => row.predecessor_ref).join(" · ")
-        : "Nothing recorded",
+        : uiCopy("Nothing recorded"),
       !deps?.predecessors.length,
     ));
     into.append(field(
-      doc, "Blocks",
+      doc, uiCopy("Blocks"),
       deps?.successors.length
         ? deps.successors.map((row) => row.successor_ref).join(" · ")
-        : "Nothing recorded",
+        : uiCopy("Nothing recorded"),
       !deps?.successors.length,
     ));
 
     const row = el(doc, "div", "nur-timeline-chips");
     row.append(capsule(
-      doc, "Open on Map",
-      "Not built yet as an in-panel jump. The object exists on Map through the "
-      + "same dependency edges shown here.",
+      doc, uiCopy("Open on Map"),
+      uiCopy("Not built yet as an in-panel jump. The object exists on Map through the same dependency edges shown here."),
     ));
     into.append(row);
   }
@@ -1217,23 +1403,19 @@ export async function renderV197Timeline(
   function activityTab(into: HTMLElement): void {
     into.append(el(
       doc, "p", "nur-timeline-empty",
-      "Activity for this entry is not yet composed into one feed here; its "
-      + "reschedule history is on the Time tab.",
+      uiCopy("Activity for this entry is not yet composed into one feed here; its reschedule history is on the Time tab."),
     ));
   }
 
   function nurViewTab(into: HTMLElement, entry: Entry): void {
     const doubt = el(doc, "div", "nur-timeline-doubt");
     doubt.dataset.timelineDoubt = "true";
-    doubt.append(el(doc, "p", "nur-timeline-doubt-label", "What NUR may be wrong about"));
+    doubt.append(el(doc, "p", "nur-timeline-doubt-label", uiCopy("What NUR may be wrong about")));
     doubt.append(el(
       doc, "p", "nur-timeline-field-value",
       entry.status === "PREDICTED"
-        ? "This is a prediction, not a confirmed fact. NUR only sees what you have "
-          + "recorded, and a horizon passing quietly is not the same as it happening."
-        : `NUR reads this ${text(entry.event_type).toLowerCase()} only from what has been `
-          + "recorded. Anything you have not written down is invisible here, so its "
-          + "urgency or importance may be more confident than the evidence deserves.",
+        ? uiCopy("This is a prediction, not a confirmed fact. NUR only sees what you have recorded, and a horizon passing quietly is not the same as it happening.")
+        : uiFormat("NUR reads this {0} only from what has been recorded. Anything you have not written down is invisible here, so its urgency or importance may be more confident than the evidence deserves.", [timelineEventTypeLabel(entry.event_type)]),
     ));
     into.append(doubt);
   }
@@ -1256,7 +1438,7 @@ export async function renderV197Timeline(
       const banner = el(doc, "div", "nur-timeline-banner");
       banner.dataset.timelineError = "true";
       banner.textContent = state.error;
-      const retry = capsule(doc, "Retry");
+      const retry = capsule(doc, uiCopy("Retry"));
       retry.classList.add("nur-timeline-capsule-sm");
       retry.addEventListener("click", () => { void loadFlow(); });
       banner.append(doc.createTextNode(" "));

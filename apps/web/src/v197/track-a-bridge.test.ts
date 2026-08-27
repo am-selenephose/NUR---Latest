@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { UI_CATALOGS } from "../lib/i18n";
 
 import {
   V197_LOCALE_META,
@@ -87,9 +88,9 @@ describe("Track A V197 translation bridge", () => {
 
     expect(document.documentElement.lang).toBe("ur");
     expect(document.documentElement.dir).toBe("ltr");
-    expect(document.querySelector('[data-page="today"] .clean-nav-title')?.textContent).toBe("Aaj");
-    expect(document.querySelector('[data-page="talk"] .clean-nav-title')?.textContent).toBe("Baat");
-    expect(document.querySelector("#talk-input")?.getAttribute("placeholder")).toBe("Seedha bolo...");
+    expect(document.querySelector('[data-page="today"] .clean-nav-title')?.textContent).toBe(UI_CATALOGS["ur-roman"].Today);
+    expect(document.querySelector('[data-page="talk"] .clean-nav-title')?.textContent).toBe(UI_CATALOGS["ur-roman"].Talk);
+    expect(document.querySelector("#talk-input")?.getAttribute("placeholder")).toBe(UI_CATALOGS["ur-roman"]["Say it plainly..."]);
     expect(document.querySelector(".nur-holo-word")?.textContent).toBe("NUR");
   });
 
@@ -98,9 +99,9 @@ describe("Track A V197 translation bridge", () => {
     applyV197Locale(document, "ur", "roman");
 
     expect(document.querySelector('[data-world-tab="map"] .nur-exact-mini-host')?.textContent).toBe("STAR_GEOMETRY");
-    expect(document.querySelector('[data-world-tab="map"] .world-label')?.textContent).toBe("Naqsha");
+    expect(document.querySelector('[data-world-tab="map"] .world-label')?.textContent).toBe(UI_CATALOGS["ur-roman"].Map);
     expect(document.querySelector('.mobile-tabs [data-page="today"] .nur-exact-mini-host')?.textContent).toBe("MOBILE_STAR");
-    expect(document.querySelector('.mobile-tabs [data-page="today"] .mobile-label')?.textContent).toBe("Aaj");
+    expect(document.querySelector('.mobile-tabs [data-page="today"] .mobile-label')?.textContent).toBe(UI_CATALOGS["ur-roman"].Today);
   });
 
   it("mounts all locale slots inside the existing V197 scope chamber", async () => {
@@ -115,11 +116,33 @@ describe("Track A V197 translation bridge", () => {
 
     ensureV197LanguageControls(document, "ko", "default", save);
     const locale = document.querySelector<HTMLSelectElement>("#nur-v197-locale");
+    const writing = document.querySelector<HTMLSelectElement>("#nur-v197-writing-preference");
     expect(locale?.options).toHaveLength(35);
     expect(locale?.selectedOptions[0]?.textContent).toContain("한국어");
+    expect([...writing!.options].map(option => option.value)).toEqual(["default"]);
+
+    locale!.value = "ur";
+    locale!.dispatchEvent(new Event("change"));
+    expect([...writing!.options].map(option => option.value)).toEqual(["roman", "script"]);
+    expect(writing?.value).toBe("roman");
+
+    locale!.value = "ko";
+    locale!.dispatchEvent(new Event("change"));
     document.querySelector<HTMLButtonElement>("#nur-v197-language-save")?.click();
-    await Promise.resolve();
-    expect(save).toHaveBeenCalledWith("ko", "default");
+    await vi.waitFor(() => {
+      expect(save).toHaveBeenCalledWith("ko", "default");
+      expect(document.documentElement.lang).toBe("ko");
+      expect(document.body.dataset.nurCatalog).toBe("ko");
+      expect(document.querySelector("#nur-v197-language-title")?.textContent).toBe(
+        UI_CATALOGS.ko["Language and writing"],
+      );
+      expect(document.querySelector("#nur-v197-language-save")?.textContent).toBe(
+        UI_CATALOGS.ko["Save language"],
+      );
+      expect(document.querySelector("#nur-v197-language-status")?.textContent).toBe(
+        UI_CATALOGS.ko["Saved: {0}."].replace("{0}", "한국어"),
+      );
+    });
   });
 });
 

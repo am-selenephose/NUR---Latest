@@ -7,6 +7,7 @@ import { lockV197BrandIdentity } from "./v197Brand";
 import { V197_FONT_FACE_CSS } from "./v197Fonts";
 import { ensureV197BlackGalaxy, ensureV197StarBrain } from "./v197StarBrain";
 import { installV197StarSeals, V197_STAR_SEAL_CLASS } from "./v197StarSeal";
+import { uiCopy } from "../lib/i18n";
 
 export const V197_PREMIUM_POLISH_STYLE_ID = "nur-v197-track-a-premium-polish";
 export const V197_STABLE_WORDMARK_CLASS = "nur-v197-stable-wordmark";
@@ -38,7 +39,7 @@ function ensureStableMapWordmark(document: Document): HTMLElement | null {
     });
   source.dataset.nurStableSource = "true";
   source.classList.add(V197_STABLE_WORDMARK_CLASS);
-  source.textContent = "NUR";
+  source.textContent = uiCopy("NUR");
   return source;
 }
 
@@ -72,7 +73,7 @@ function labelOwnerSignOutControl(document: Document): void {
   if (!control || control.dataset.nurSignOutLabelled === "true") return;
   control.dataset.nurSignOutLabelled = "true";
   control.setAttribute("role", "button");
-  control.setAttribute("aria-label", "Sign out of NUR");
+  control.setAttribute("aria-label", uiCopy("Sign out of NUR"));
   control.tabIndex = 0;
 
   // A real text node rather than a ::after. The pseudo-element resolved its
@@ -81,7 +82,7 @@ function labelOwnerSignOutControl(document: Document): void {
   if (!control.querySelector(".nur-signout-label")) {
     const label = control.ownerDocument.createElement("span");
     label.className = "nur-signout-label";
-    label.textContent = "\u23FB Sign out";
+    label.textContent = uiCopy("⏻ Sign out");
     label.style.setProperty("font", '500 12.5px/1 "Crimson Pro", serif', "important");
     label.style.setProperty("letter-spacing", "0.06em", "important");
     label.style.setProperty("color", "rgba(255, 240, 212, 0.92)", "important");
@@ -116,8 +117,8 @@ function labelCompactTopbarControls(document: Document): void {
 
   const scope = document.querySelector<HTMLButtonElement>("#scope-open");
   if (scope) {
-    scope.setAttribute("aria-label", "Privacy boundary");
-    scope.title = "Privacy boundary";
+    scope.setAttribute("aria-label", uiCopy("Privacy boundary"));
+    scope.title = uiCopy("Privacy boundary");
   }
 }
 

@@ -1,4 +1,5 @@
 import { V197ApiError, type V197TalkResult } from "./v197ApiClient";
+import { uiCopy, uiFormat } from "../lib/i18n";
 
 export interface V197TalkStreamPayload {
   request_id: string;
@@ -48,7 +49,7 @@ async function readWithIdleTimeout(
       reader.read(),
       new Promise<never>((_, reject) => {
         timeout = window.setTimeout(
-          () => reject(new V197ApiError("The live Talk stream stopped responding.", 0)),
+          () => reject(new V197ApiError(uiCopy("The live Talk stream stopped responding."), 0)),
           STREAM_IDLE_TIMEOUT_MS,
         );
       }),
@@ -77,7 +78,7 @@ function parseEvent(block: string): V197StreamEvent | null {
     try {
       payload = JSON.parse(data.join("\n")) as Record<string, unknown>;
     } catch {
-      throw new V197ApiError("NUR received a malformed live Talk event.", 0);
+      throw new V197ApiError(uiCopy("NUR received a malformed live Talk event."), 0);
     }
   }
   return { id, event, data: payload };
@@ -96,9 +97,9 @@ export class V197StreamClient {
     hooks: V197TalkStreamHooks = {},
     signal?: AbortSignal,
   ): Promise<V197TalkResult> {
-    if (this.active) throw new V197ApiError("NUR is already answering this Talk turn.", 409);
+    if (this.active) throw new V197ApiError(uiCopy("NUR is already answering this Talk turn."), 409);
     const csrf = cookie("nur_csrf");
-    if (!csrf) throw new V197ApiError("The local session is missing its CSRF token.", 401);
+    if (!csrf) throw new V197ApiError(uiCopy("The local session is missing its CSRF token."), 401);
     const controller = new AbortController();
     this.controller = controller;
     this.currentRequestId = payload.request_id;
@@ -122,9 +123,12 @@ export class V197StreamClient {
         });
         if (!response.ok) {
           const raw = await response.text();
-          throw new V197ApiError(errorDetail(raw, `Talk stream returned ${response.status}.`), response.status);
+          throw new V197ApiError(
+            errorDetail(raw, uiFormat("Talk stream returned {0}.", [response.status])),
+            response.status,
+          );
         }
-        if (!response.body) throw new V197ApiError("NUR Talk streaming is unavailable in this browser.", 0);
+        if (!response.body) throw new V197ApiError(uiCopy("NUR Talk streaming is unavailable in this browser."), 0);
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
@@ -159,8 +163,8 @@ export class V197StreamClient {
                   typeof message === "string" && message
                     ? message
                     : streamEvent.event === "talk.cancelled"
-                      ? "The Talk turn was cancelled."
-                      : "The Talk stream failed closed.",
+                      ? uiCopy("The Talk turn was cancelled.")
+                      : uiCopy("The Talk stream failed closed."),
                   streamEvent.event === "talk.conflict" ? 409 : 0,
                   code,
                 );
@@ -172,13 +176,13 @@ export class V197StreamClient {
           reader.releaseLock();
         }
         if (connection === 0 && !controller.signal.aborted) continue;
-        throw new V197ApiError("The Talk stream ended before a durable response arrived.", 0);
+        throw new V197ApiError(uiCopy("The Talk stream ended before a durable response arrived."), 0);
       }
-      throw new V197ApiError("The Talk stream could not be resumed.", 0);
+      throw new V197ApiError(uiCopy("The Talk stream could not be resumed."), 0);
     } catch (error) {
       if (error instanceof V197ApiError) throw error;
-      if (controller.signal.aborted) throw new V197ApiError("The Talk turn was cancelled.", 0);
-      throw new V197ApiError("NUR lost the live Talk connection before completion.", 0);
+      if (controller.signal.aborted) throw new V197ApiError(uiCopy("The Talk turn was cancelled."), 0);
+      throw new V197ApiError(uiCopy("NUR lost the live Talk connection before completion."), 0);
     } finally {
       signal?.removeEventListener("abort", abortFromCaller);
       if (this.controller === controller) this.controller = null;

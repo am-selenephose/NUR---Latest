@@ -1,4 +1,5 @@
-/**
+
+import { uiCopy, uiFormat } from "../lib/i18n";/**
  * On-screen galaxy diagnostic, opt-in via `?nur-diagnose=1`.
  *
  * The star field renders on every browser configuration reachable from this
@@ -30,7 +31,10 @@ type Probe = Record<string, unknown>;
 function probeGalaxy(doc: Document): Probe {
   const view = doc.defaultView;
   const canvas = doc.querySelector<HTMLCanvasElement>("#space3d");
-  if (!canvas || !view) return { stage: doc === document ? "host" : "frame", canvas: "MISSING" };
+  if (!canvas || !view) return {
+    stage: doc === document ? "host" : "frame",
+    canvas: uiCopy("MISSING"),
+  };
 
   const rect = canvas.getBoundingClientRect();
   const style = view.getComputedStyle(canvas);
@@ -40,7 +44,7 @@ function probeGalaxy(doc: Document): Probe {
   try {
     const context = canvas.getContext("2d", { willReadFrequently: true });
     if (!context) {
-      litPixels = "NO 2D CONTEXT";
+      litPixels = uiCopy("NO 2D CONTEXT");
     } else {
       const w = Math.min(canvas.width, 900);
       const h = Math.min(canvas.height, 600);
@@ -54,14 +58,14 @@ function probeGalaxy(doc: Document): Probe {
       litPixels = lit;
     }
   } catch (error) {
-    litPixels = `READBACK FAILED: ${String(error).slice(0, 60)}`;
+    litPixels = uiFormat("READBACK FAILED: {0}", [String(error).slice(0, 60)]);
   }
 
   // What is actually on top of the canvas at a point the field should occupy?
-  let coveredBy = "n/a";
+  let coveredBy = uiCopy("n/a");
   try {
     const hit = doc.elementFromPoint(view.innerWidth / 2, view.innerHeight / 3);
-    coveredBy = hit ? `${hit.tagName}.${String(hit.className).split(" ")[0]}` : "nothing";
+    coveredBy = hit ? `${hit.tagName}.${String(hit.className).split(" ")[0]}` : uiCopy("nothing");
   } catch { /* cross-document hit test can throw */ }
 
   const galaxy = (view as unknown as { __nurGalaxy?: Record<string, () => unknown> }).__nurGalaxy
@@ -110,15 +114,15 @@ function collect(): Probe {
 
   for (const id of ["nur-entry-stage", "nur-universe-stage"]) {
     const frame = document.querySelector<HTMLIFrameElement>(`#${id}`);
-    if (!frame) { report[id] = "STAGE NOT PRESENT"; continue; }
+    if (!frame) { report[id] = uiCopy("STAGE NOT PRESENT"); continue; }
     const rect = frame.getBoundingClientRect();
     const style = getComputedStyle(frame);
     let inner: Probe | string;
     try {
       const doc = frame.contentDocument;
-      inner = doc ? probeGalaxy(doc) : "NO CONTENT DOCUMENT";
+      inner = doc ? probeGalaxy(doc) : uiCopy("NO CONTENT DOCUMENT");
     } catch (error) {
-      inner = `FRAME UNREADABLE: ${String(error).slice(0, 60)}`;
+      inner = uiFormat("FRAME UNREADABLE: {0}", [String(error).slice(0, 60)]);
     }
     report[id] = {
       stageBox: [Math.round(rect.width), Math.round(rect.height)],
@@ -137,11 +141,11 @@ export function installV197Diagnostics(): void {
   if (!new URLSearchParams(location.search).has(PARAM)) return;
   if (document.getElementById(PANEL_ID)) return;
 
-  document.title = `NUR DIAG RM:${matchMedia("(prefers-reduced-motion: reduce)").matches ? "1" : "0"}`;
+  document.title = uiFormat("NUR DIAG RM:{0}", [matchMedia("(prefers-reduced-motion: reduce)").matches ? "1" : "0"]);
   const panel = document.createElement("div");
   panel.id = PANEL_ID;
   panel.setAttribute("role", "region");
-  panel.setAttribute("aria-label", "NUR galaxy diagnostics");
+  panel.setAttribute("aria-label", uiCopy("NUR galaxy diagnostics"));
   panel.style.cssText = [
     "position:fixed", "inset:auto 12px 12px auto", "width:min(560px,92vw)",
     "max-height:76vh", "overflow:auto", "z-index:2147483647",
@@ -171,17 +175,17 @@ export function installV197Diagnostics(): void {
     const bar = document.createElement("div");
     bar.style.cssText = "display:flex;gap:8px;margin-bottom:8px";
     const copy = document.createElement("button");
-    copy.textContent = "Copy report";
+    copy.textContent = uiCopy("Copy report");
     const again = document.createElement("button");
-    again.textContent = "Re-read";
+    again.textContent = uiCopy("Re-read");
     for (const button of [copy, again]) {
       button.style.cssText = "font:inherit;color:#0c0a06;background:#f6d98e;border:0;"
         + "border-radius:999px;padding:5px 12px;cursor:pointer";
     }
     copy.addEventListener("click", () => {
       void navigator.clipboard.writeText(text)
-        .then(() => { copy.textContent = "Copied"; })
-        .catch(() => { copy.textContent = "Select and copy manually"; });
+        .then(() => { copy.textContent = uiCopy("Copied"); })
+        .catch(() => { copy.textContent = uiCopy("Select and copy manually"); });
     });
     again.addEventListener("click", render);
     bar.append(copy, again);

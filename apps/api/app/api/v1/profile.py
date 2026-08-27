@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 
 from app.api.deps import Identity, Scoped, require_csrf
+from app.i18n.catalog import normalize_locale, resolve_variant
 from app.models import Orbit, Profile
 from app.models._mixins import now_utc
 
@@ -59,12 +60,22 @@ async def patch_preferences(payload: PreferencesPatch, db: Scoped, identity: Ide
             except ZoneInfoNotFoundError as exc:
                 raise HTTPException(422, "Unknown IANA timezone.") from exc
         profile.timezone = payload.timezone
-    if payload.locale is not None:
-        profile.locale = payload.locale
-    if payload.writing_preference is not None:
-        if payload.writing_preference not in {"default", "roman", "script"}:
-            raise HTTPException(422, "writing_preference must be default, roman, or script.")
-        profile.writing_preference = payload.writing_preference
+    if payload.locale is not None or payload.writing_preference is not None:
+        try:
+            canonical_locale = normalize_locale(payload.locale or profile.locale)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+
+        requested_preference = payload.writing_preference or profile.writing_preference
+        try:
+            variant = resolve_variant(canonical_locale, requested_preference)
+        except ValueError as exc:
+            if payload.writing_preference is not None:
+                raise HTTPException(422, str(exc)) from exc
+            variant = resolve_variant(canonical_locale, None)
+
+        profile.locale = canonical_locale
+        profile.writing_preference = variant.preference
     if payload.sound_enabled is not None:
         profile.sound_enabled = payload.sound_enabled
     if payload.reduced_effects is not None:

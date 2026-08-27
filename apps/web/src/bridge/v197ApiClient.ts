@@ -1,4 +1,5 @@
 import type { V197GlowAward, V197GlowSummary } from "./v197Rewards";
+import { structuralValue, uiCopy, uiFormat } from "../lib/i18n";
 import type {
   V197AgenticApproval,
   V197AgenticPolicy,
@@ -287,7 +288,13 @@ export interface V197TodaySnapshot {
   completed_today: Array<Record<string, unknown>>;
   missed_today: Array<Record<string, unknown>>;
   daily_quest: Record<string, unknown>;
-  next_move: { kind: string; id: string; title: string; scheduled_for?: string | null } | null;
+  next_move: {
+    kind: string;
+    id: string;
+    title: string;
+    scheduled_for?: string | null;
+    returning_from_missed?: boolean;
+  } | null;
   latest_insight: Record<string, unknown> | null;
   latest_timeline_event: Record<string, unknown> | null;
   return_check: Record<string, unknown> | null;
@@ -1103,10 +1110,13 @@ export class V197ApiClient {
       });
     } catch (error) {
       if (timedOut.value) {
-        throw new V197ApiError(`NUR API did not respond within ${REQUEST_TIMEOUT_MS / 1000} seconds. Check API readiness.`, 0);
+        throw new V197ApiError(uiFormat(
+          "NUR API did not respond within {0} seconds. Check API readiness.",
+          [REQUEST_TIMEOUT_MS / 1000],
+        ), 0);
       }
-      if (init.signal?.aborted) throw new V197ApiError("The NUR request was cancelled.", 0);
-      throw new V197ApiError("NUR API is unreachable. Check that RUN_NUR.sh reports API ready.", 0);
+      if (init.signal?.aborted) throw new V197ApiError(uiCopy("The NUR request was cancelled."), 0);
+      throw new V197ApiError(uiCopy("NUR API is unreachable. Check that RUN_NUR.sh reports API ready."), 0);
     } finally {
       window.clearTimeout(timeout);
       init.signal?.removeEventListener("abort", abortFromCaller);
@@ -1122,12 +1132,12 @@ export class V197ApiClient {
       try {
         body = raw ? JSON.parse(raw) : undefined;
       } catch {
-        throw new V197ApiError(`NUR API returned an invalid response for ${path}.`, response.status);
+        throw new V197ApiError(uiFormat("NUR API returned an invalid response for {0}.", [path]), response.status);
       }
       if (!response.ok) {
         const detail = typeof body === "object" && body && "detail" in body
           ? String((body as { detail: unknown }).detail)
-          : `${path} returned ${response.status}`;
+          : uiFormat("{0} returned {1}", [path, response.status]);
         throw new V197ApiError(detail, response.status);
       }
       return body as T;
@@ -1139,7 +1149,7 @@ export class V197ApiClient {
 
   private writeHeaders(extra: Record<string, string> = {}): HeadersInit {
     const csrf = cookie("nur_csrf");
-    if (!csrf) throw new V197ApiError("The local session is missing its CSRF token.", 401);
+    if (!csrf) throw new V197ApiError(uiCopy("The local session is missing its CSRF token."), 401);
     return { "X-CSRF-Token": csrf, ...extra };
   }
 
@@ -1183,15 +1193,15 @@ export class V197ApiClient {
   async register(payload: { chosen_name: string; email: string; password: string; consent: boolean }): Promise<V197Session> {
     const created = await this.post<V197Session>("/auth/register", payload, false);
     const session = await this.session();
-    if (!session) throw new V197ApiError("Your Orbit was created, but the browser session could not be verified. Please sign in.", 401);
-    if (created.id !== session.id) throw new V197ApiError("The active browser session does not match the Orbit that was just created.", 409);
+    if (!session) throw new V197ApiError(uiCopy("Your Orbit was created, but the browser session could not be verified. Please sign in."), 401);
+    if (created.id !== session.id) throw new V197ApiError(uiCopy("The active browser session does not match the Orbit that was just created."), 409);
     return session;
   }
 
   async login(payload: { email: string; password: string }): Promise<V197Session> {
     await this.post<{ ok: boolean }>("/auth/login", payload, false);
     const session = await this.session();
-    if (!session) throw new V197ApiError("The session was not established.", 401);
+    if (!session) throw new V197ApiError(uiCopy("The session was not established."), 401);
     return session;
   }
 
@@ -1226,7 +1236,10 @@ export class V197ApiClient {
     });
     if (!response.ok) {
       const body = await response.json().catch(() => ({})) as { detail?: unknown };
-      throw new V197ApiError(body.detail ? String(body.detail) : `Account export returned ${response.status}.`, response.status);
+      throw new V197ApiError(
+        body.detail ? String(body.detail) : uiFormat("Account export returned {0}.", [response.status]),
+        response.status,
+      );
     }
     const disposition = response.headers.get("content-disposition") ?? "";
     const filename = disposition.match(/filename="?([^";]+)"?/i)?.[1] ?? "nur-owner-export-v1.json";
@@ -1271,7 +1284,7 @@ export class V197ApiClient {
       credentials: "include",
       headers: { accept: "application/json" },
     });
-    if (!response.ok) throw new V197ApiError(`healthz returned ${response.status}`, response.status);
+    if (!response.ok) throw new V197ApiError(uiFormat("healthz returned {0}", [response.status]), response.status);
     return response.json() as Promise<V197Health>;
   }
 
@@ -1848,9 +1861,9 @@ export class V197ApiClient {
 
   async uploadProjectFile(projectId: string, file: File, taskId?: string | null): Promise<Record<string, unknown>> {
     const csrf = cookie("nur_csrf");
-    if (!csrf) throw new V197ApiError("The local session is missing its CSRF token.", 401);
+    if (!csrf) throw new V197ApiError(uiCopy("The local session is missing its CSRF token."), 401);
     const form = new FormData();
-    form.append("upload", file, file.name);
+    form.append(structuralValue("upload"), file, file.name);
     const query = taskId ? `?task_id=${encodeURIComponent(taskId)}` : "";
     const response = await fetch(`/api/v1/projects/${encodeURIComponent(projectId)}/files${query}`, {
       method: "POST",
@@ -1863,12 +1876,12 @@ export class V197ApiClient {
     try {
       body = raw ? JSON.parse(raw) : undefined;
     } catch {
-      throw new V197ApiError("NUR returned an invalid upload response.", response.status);
+      throw new V197ApiError(uiCopy("NUR returned an invalid upload response."), response.status);
     }
     if (!response.ok) {
       const detail = typeof body === "object" && body && "detail" in body
         ? String((body as { detail: unknown }).detail)
-        : `Upload failed (${response.status}).`;
+        : uiFormat("Upload failed ({0}).", [response.status]);
       throw new V197ApiError(detail, response.status);
     }
     return body as Record<string, unknown>;
@@ -1896,7 +1909,7 @@ export class V197ApiClient {
       headers: { accept: "application/octet-stream" },
     });
     if (!response.ok) {
-      let detail = `Download failed (${response.status}).`;
+      let detail = uiFormat("Download failed ({0}).", [response.status]);
       try {
         const body = await response.json() as { detail?: unknown };
         if (body?.detail) detail = String(body.detail);
@@ -2097,8 +2110,12 @@ export class V197ApiClient {
       try {
         return await this.get<T>(path);
       } catch (error) {
-        const detail = error instanceof Error ? error.message : "Owner data could not be read.";
-        throw new Error(`NUR could not load the signed-in owner state from ${path}. ${detail}`);
+        const detail = error instanceof Error ? error.message : uiCopy("Owner data could not be read.");
+        throw new V197ApiError(
+          uiFormat("NUR could not load the signed-in owner state from {0}. {1}", [path, detail]),
+          error instanceof V197ApiError ? error.status : 0,
+          error instanceof V197ApiError ? error.code : null,
+        );
       }
     };
 

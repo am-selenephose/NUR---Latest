@@ -1,4 +1,5 @@
-export const V197_LOCKUP_CLASS = "nur-v197-lockup";
+
+import { uiCopy } from "../lib/i18n";export const V197_LOCKUP_CLASS = "nur-v197-lockup";
 export const V197_WORDMARK_CLASS = "nur-v197-wordmark";
 export const V197_LOCKUP_SUBTITLE_CLASS = "nur-v197-lockup-subtitle";
 
@@ -17,7 +18,7 @@ export function markV197HolographicWordmark(element: HTMLElement): void {
   element.dataset.nurHolographicWordmark = "animated";
   element.dataset.nurWordmarkText = "NUR";
   if (element.closest(".universe-map-title")) {
-    element.setAttribute("aria-label", "NUR");
+    element.setAttribute("aria-label", uiCopy("NUR"));
   }
 }
 

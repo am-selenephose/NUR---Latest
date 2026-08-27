@@ -23,6 +23,8 @@ import {
   type V197TalkStreamHooks,
   type V197TalkStreamPayload,
 } from "./v197StreamClient";
+import { type UiCopyKey, uiCopy, uiFormat, uiSource } from "../lib/i18n";
+import { visibleV197Failure } from "./v197FailureCopy";
 
 export type V197ActionApi = Pick<
   V197ApiClient,
@@ -76,7 +78,8 @@ function setInputValue(document: Document, selector: string, value: string): voi
 }
 
 function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "The action could not be persisted.";
+  console.error("NUR action failed.", error);
+  return visibleV197Failure(error, uiSource("The action could not be persisted."));
 }
 
 // The honest, in-thread failure line. NUR never invents an assistant answer:
@@ -84,13 +87,23 @@ function errorMessage(error: unknown): string {
 // server's own reason, so a failed turn can never read as a real response.
 function talkFailureMessage(error: unknown): string {
   if (error instanceof V197ApiError && error.code === "provider_disabled") {
-    return "Live AI is not connected on this server, so NUR did not answer this turn. Your message was kept; nothing was invented.";
+    return uiCopy("Live AI is not connected on this server, so NUR did not answer this turn. Your message was kept; nothing was invented.");
   }
-  const reason = errorMessage(error);
-  return `NUR could not answer this turn: ${reason} Your message was kept; nothing was invented.`;
+  console.error("NUR Talk turn failed.", error);
+  return uiCopy("NUR could not answer this turn. Your message was kept; nothing was invented.");
 }
 
 export type V197TalkAction = "talk" | "reflect" | "plan" | "challenge" | "explore" | "summarize";
+
+const TALK_MODE_COPY: Record<V197TalkAction | "ask", UiCopyKey> = {
+  talk: uiSource("talk"),
+  ask: uiSource("ask"),
+  reflect: uiSource("reflect"),
+  plan: uiSource("plan"),
+  challenge: uiSource("challenge"),
+  explore: uiSource("explore"),
+  summarize: uiSource("summarize"),
+};
 
 export type V197TalkActionSemantics = Pick<
   V197TalkStreamPayload,
@@ -162,29 +175,29 @@ export class V197ActionBindings {
     chamber.className = "nur-v197-system-dialog__chamber";
     const kicker = this.document.createElement("p");
     kicker.className = "nur-v197-system-dialog__kicker";
-    kicker.textContent = "Private system";
+    kicker.textContent = uiCopy("Private system");
     const title = this.document.createElement("h2");
     title.id = "nur-v197-system-create-title";
-    title.textContent = "Name the field.";
+    title.textContent = uiCopy("Name the field.");
     const note = this.document.createElement("p");
     note.className = "nur-v197-system-dialog__note";
-    note.textContent = "One life area with its own evidence, actions, and return path.";
+    note.textContent = uiCopy("One life area with its own evidence, actions, and return path.");
     const input = this.document.createElement("input");
     input.id = "nur-v197-system-title";
     input.autocomplete = "off";
     input.maxLength = 80;
-    input.placeholder = "e.g. Quiet Ambition";
-    input.setAttribute("aria-label", "System name");
+    input.placeholder = uiCopy("e.g. Quiet Ambition");
+    input.setAttribute("aria-label", uiCopy("System name"));
     const actions = this.document.createElement("div");
     actions.className = "nur-v197-system-dialog__actions";
     const cancel = this.document.createElement("button");
     cancel.type = "button";
     cancel.dataset.action = "system-create-cancel";
-    cancel.textContent = "Cancel";
+    cancel.textContent = uiCopy("Cancel");
     const create = this.document.createElement("button");
     create.type = "button";
     create.dataset.action = "system-create-submit";
-    create.textContent = "Create system";
+    create.textContent = uiCopy("Create system");
     actions.append(cancel, create);
     chamber.append(kicker, title, note, input, actions);
     dialog.append(chamber);
@@ -215,34 +228,34 @@ export class V197ActionBindings {
     const menu = this.document.createElement("aside");
     menu.id = "nur-v197-owner-auth-menu";
     menu.hidden = true;
-    menu.setAttribute("aria-label", "Owner session");
+    menu.setAttribute("aria-label", uiCopy("Owner session"));
     const note = this.document.createElement("p");
-    note.textContent = "Your private session is active on this device.";
+    note.textContent = uiCopy("Your private session is active on this device.");
     const navigation = this.document.createElement("nav");
     navigation.className = "nur-owner-menu-routes";
-    navigation.setAttribute("aria-label", "Owner spaces");
+    navigation.setAttribute("aria-label", uiCopy("Owner spaces"));
     for (const [label, route] of [
-      ["Settings", "/settings"],
-      ["Memory", "/memory"],
-      ["Teach NUR", "/teach-nur"],
-      ["Billing", "/billing"],
-      ["Capsules", "/capsules"],
-      ["Agents", "/agents"],
-      ["Projects", "/projects"],
-      ["Notifications", "/notifications"],
-      ["Glow", "/glow"],
-      ["Omega", "/universe/omega"],
-    ] as const) {
+      [uiSource("Settings"), "/settings"],
+      [uiSource("Memory"), "/memory"],
+      [uiSource("Teach NUR"), "/teach-nur"],
+      [uiSource("Billing"), "/billing"],
+      [uiSource("Capsules"), "/capsules"],
+      [uiSource("Agents"), "/agents"],
+      [uiSource("Projects"), "/projects"],
+      [uiSource("Notifications"), "/notifications"],
+      [uiSource("Glow"), "/glow"],
+      [uiSource("Omega"), "/universe/omega"],
+    ] as readonly (readonly [UiCopyKey, string])[]) {
       const routeButton = this.document.createElement("button");
       routeButton.type = "button";
       routeButton.dataset.ownerRoute = route;
-      routeButton.textContent = label;
+      routeButton.textContent = uiCopy(label);
       navigation.append(routeButton);
     }
     const logout = this.document.createElement("button");
     logout.type = "button";
     logout.dataset.action = "auth-logout";
-    logout.textContent = "Sign out of NUR";
+    logout.textContent = uiCopy("Sign out of NUR");
     menu.append(note, navigation, logout);
     this.document.body.append(menu);
   }
@@ -335,27 +348,27 @@ export class V197ActionBindings {
   private async saveJournal(): Promise<void> {
     const body = inputValue(this.document, "#journal-input");
     if (!body) {
-      this.toast("Write one honest line first.");
+      this.toast(uiCopy("Write one honest line first."));
       return;
     }
     const row: V197JournalEntry = await this.api.createJournal(body, this.activeOrbitId());
     await this.award("journal_saved", "JOURNAL_ENTRY", row.id, `journal:${row.id}:saved`);
     setInputValue(this.document, "#journal-input", "");
     await this.refresh();
-    this.toast("Journal persisted privately.");
+    this.toast(uiCopy("Journal persisted privately."));
   }
 
   private async saveResearchBrief(): Promise<void> {
     const question = inputValue(this.document, "#research-query");
     if (!question) {
-      this.toast("Enter one research question first.");
+      this.toast(uiCopy("Enter one research question first."));
       this.document.querySelector<HTMLTextAreaElement>("#research-query")?.focus();
       return;
     }
     await this.api.createResearchBrief(question, this.activeOrbitId());
     setInputValue(this.document, "#research-query", "");
     await this.refresh();
-    this.toast("Research question saved locally. No external source was fetched.");
+    this.toast(uiCopy("Research question saved locally. No external source was fetched."));
   }
 
   private async sendTalk(source: "talk" | "today" | "mobile", resetCapability = true): Promise<void> {
@@ -366,7 +379,7 @@ export class V197ActionBindings {
         : "#talk-input";
     const message = inputValue(this.document, inputSelector);
     if (!message) {
-      this.toast("Give NUR one real sentence.");
+      this.toast(uiCopy("Give NUR one real sentence."));
       return;
     }
 
@@ -400,7 +413,9 @@ export class V197ActionBindings {
       setInputValue(this.document, inputSelector, "");
       await this.refresh();
       transient.remove();
-      this.toast(result.provider_available ? "NUR answered and persisted this turn." : result.provider_reason || "AI is not connected; the honest disabled response was persisted.");
+      this.toast(result.provider_available
+        ? uiCopy("NUR answered and persisted this turn.")
+        : uiCopy("AI is not connected; the honest disabled response was persisted."));
     } catch (error) {
       // Never leave a silent user-only bubble. Convert the pending NUR bubble
       // into a visible, honest failure in place (the user turn stays; no
@@ -432,15 +447,15 @@ export class V197ActionBindings {
     response.setAttribute("aria-busy", "true");
     const meta = this.document.createElement("div");
     meta.className = "talk-meta";
-    meta.textContent = "NUR · opening live model stream ";
+    meta.textContent = ("" + uiCopy("NUR · opening live model stream") + " ");
     const cancel = this.document.createElement("button");
     cancel.type = "button";
     cancel.className = "tiny-link";
     cancel.dataset.action = "talk-cancel";
-    cancel.textContent = "cancel";
+    cancel.textContent = uiCopy("cancel");
     const body = this.document.createElement("span");
     body.dataset.nurStreamText = requestId;
-    body.textContent = "Holding your context…";
+    body.textContent = uiCopy("Holding your context…");
     meta.append(cancel);
     response.append(meta, body);
     stream.append(user, response);
@@ -453,14 +468,14 @@ export class V197ActionBindings {
           hasDelta = true;
         }
         body.append(this.document.createTextNode(value));
-        meta.firstChild!.textContent = "NUR · live model stream ";
+        meta.firstChild!.textContent = ("" + uiCopy("NUR · live model stream") + " ");
         stream.scrollTop = stream.scrollHeight;
       },
       event: value => {
-        if (value.event === "talk.accepted") meta.firstChild!.textContent = "NUR · private turn accepted ";
-        if (value.event === "provider.created") meta.firstChild!.textContent = "NUR · model is responding ";
+        if (value.event === "talk.accepted") meta.firstChild!.textContent = ("" + uiCopy("NUR · private turn accepted") + " ");
+        if (value.event === "provider.created") meta.firstChild!.textContent = ("" + uiCopy("NUR · model is responding") + " ");
         if (value.event === "talk.validated") {
-          meta.firstChild!.textContent = "NUR · validating and persisting ";
+          meta.firstChild!.textContent = ("" + uiCopy("NUR · validating and persisting") + " ");
           response.setAttribute("aria-busy", "false");
         }
       },
@@ -472,7 +487,7 @@ export class V197ActionBindings {
         response.classList.add("is-error");
         response.dataset.nurTalkError = "true";
         cancel.remove();
-        meta.textContent = "NUR · could not answer";
+        meta.textContent = uiCopy("NUR · could not answer");
         body.textContent = honest;
         stream.scrollTop = stream.scrollHeight;
       },
@@ -486,14 +501,14 @@ export class V197ActionBindings {
   private async createPlan(titleOverride?: string): Promise<void> {
     const title = titleOverride?.trim() || this.lastUserTalk();
     if (!title) {
-      this.toast("Name one honest direction before creating a Plan.");
+      this.toast(uiCopy("Name one honest direction before creating a Plan."));
       return;
     }
     const plan: V197Plan = await this.api.createPlan(title, this.activeOrbitId());
     await this.award("plan_created", "PLAN", plan.id, `plan:${plan.id}:created`);
     await this.refresh();
     this.universeWindow()?.nurOpenPage?.("plan");
-    this.toast("Plan persisted with its first move.");
+    this.toast(uiCopy("Plan persisted with its first move."));
   }
 
   private async savePlanFromPreview(): Promise<void> {
@@ -502,15 +517,19 @@ export class V197ActionBindings {
       return;
     }
     if (this.capabilityState.workflowId || this.capabilityState.workflowState === "WAITING_APPROVAL") {
-      this.toast("This Plan proposal is already waiting for owner approval.");
+      this.toast(uiCopy("This Plan proposal is already waiting for owner approval."));
       return;
     }
     const source = this.lastUserTalk();
     if (!source) {
-      this.toast("The Plan preview has no source conversation to save.");
+      this.toast(uiCopy("The Plan preview has no source conversation to save."));
       return;
     }
-    setInputValue(this.document, "#talk-input", `Draft a plan to save this reviewed preview: ${source}`);
+    setInputValue(
+      this.document,
+      "#talk-input",
+      uiFormat("Draft a plan to save this reviewed preview: {0}", [source]),
+    );
     await this.sendTalk("talk", false);
   }
 
@@ -547,7 +566,7 @@ export class V197ActionBindings {
       panel.className = "talk-capability-panel";
       panel.setAttribute("aria-live", "polite");
       const title = this.document.createElement("h3");
-      title.textContent = "Plan from Conversation";
+      title.textContent = uiCopy("Plan from Conversation");
       const copy = this.document.createElement("p");
       copy.dataset.f5PreviewCopy = "true";
       const state = this.document.createElement("p");
@@ -556,14 +575,14 @@ export class V197ActionBindings {
       stream.append(panel);
     }
     const copy = panel.querySelector<HTMLElement>("[data-f5-preview-copy]");
-    if (copy) copy.textContent = this.capabilityState.preview?.directResponse ?? "The reviewed Plan proposal is held for owner approval.";
+    if (copy) copy.textContent = this.capabilityState.preview?.directResponse ?? uiCopy("The reviewed Plan proposal is held for owner approval.");
     const state = panel.querySelector<HTMLElement>("[data-f5-workflow-state]");
     if (state) {
       state.textContent = this.capabilityState.workflowState === "WAITING_APPROVAL"
-        ? "Workflow proposed · Owner approval required"
+        ? uiCopy("Workflow proposed · Owner approval required")
         : this.capabilityState.workflowState === "PROPOSED"
-          ? "Workflow proposed · awaiting approval details"
-          : "Conversational preview · nothing has been saved";
+          ? uiCopy("Workflow proposed · awaiting approval details")
+          : uiCopy("Conversational preview · nothing has been saved");
     }
     let reviewButton = panel.querySelector<HTMLButtonElement>("[data-f5-agent-review]");
     if (hasWorkflow && !reviewButton) {
@@ -576,15 +595,15 @@ export class V197ActionBindings {
     }
     if (reviewButton) {
       reviewButton.hidden = !hasWorkflow;
-      reviewButton.textContent = "Review in Agency";
-      reviewButton.setAttribute("aria-label", "Review this Plan proposal in Agency");
+      reviewButton.textContent = uiCopy("Review in Agency");
+      reviewButton.setAttribute("aria-label", uiCopy("Review this Plan proposal in Agency"));
     }
     const saveButton = this.document.querySelector<HTMLElement>('[data-thread-action="plan"]');
     if (saveButton) {
       saveButton.textContent = this.capabilityState.workflowId
-        ? "Save submitted · approval pending"
-        : "Save this Plan";
-      saveButton.setAttribute("aria-label", this.capabilityState.workflowId ? "Plan save submitted" : "Save this Plan");
+        ? uiCopy("Save submitted · approval pending")
+        : uiCopy("Save this Plan");
+      saveButton.setAttribute("aria-label", this.capabilityState.workflowId ? uiCopy("Plan save submitted") : uiCopy("Save this Plan"));
     }
   }
 
@@ -595,20 +614,23 @@ export class V197ActionBindings {
     const step: V197PlanStep = await this.api.patchPlanStep(stepId, { done });
     if (done) await this.award("plan_step_completed", "PLAN_STEP", step.id, `plan-step:${step.id}:completed`);
     await this.refresh();
-    this.toast(done ? "Step completed and persisted." : "Step reopened.");
+    this.toast(done ? uiCopy("Step completed and persisted.") : uiCopy("Step reopened."));
   }
 
   private async makeEasier(): Promise<void> {
     const step = this.snapshot.plans[0]?.steps.find(row => !row.done);
     if (!step) {
-      this.toast("There is no open persisted step to make smaller.");
+      this.toast(uiCopy("There is no open persisted step to make smaller."));
       return;
     }
-    const title = step.title.startsWith("Make it smaller:") ? step.title : `Make it smaller: ${step.title}`;
+    const smallerPrefix = uiCopy("Make it smaller:");
+    const title = step.title.startsWith(smallerPrefix)
+      ? step.title
+      : uiFormat("Make it smaller: {0}", [step.title]);
     const updated = await this.api.patchPlanStep(step.id, { title });
     await this.award("task_made_smaller", "PLAN_STEP", updated.id, `plan-step:${updated.id}:made-smaller`);
     await this.refresh();
-    this.toast("The move is smaller and persisted.");
+    this.toast(uiCopy("The move is smaller and persisted."));
   }
 
   private async returnOutcome(): Promise<void> {
@@ -616,20 +638,20 @@ export class V197ActionBindings {
     const stepId = composer?.dataset.planStepId;
     const result = inputValue(this.document, "#nur-outcome-input");
     if (!stepId || !result) {
-      this.toast("Complete one Plan step, then name what changed.");
+      this.toast(uiCopy("Complete one Plan step, then name what changed."));
       return;
     }
     const outcome = await this.api.createOutcome(result, stepId);
     await this.award("outcome_returned", "OUTCOME", outcome.id, `outcome:${outcome.id}:returned`);
     setInputValue(this.document, "#nur-outcome-input", "");
     await this.refresh();
-    this.toast("Outcome returned. The ledger and Glow balance moved together.");
+    this.toast(uiCopy("Outcome returned. The ledger and Glow balance moved together."));
   }
 
   private async createSystem(): Promise<void> {
     const title = inputValue(this.document, "#nur-v197-system-title");
     if (!title) {
-      this.toast("Name the System first.");
+      this.toast(uiCopy("Name the System first."));
       this.document.querySelector<HTMLInputElement>("#nur-v197-system-title")?.focus();
       return;
     }
@@ -637,7 +659,7 @@ export class V197ActionBindings {
     setInputValue(this.document, "#nur-v197-system-title", "");
     this.closeSystemCreateDialog();
     await this.refresh();
-    this.toast("System persisted in your private universe.");
+    this.toast(uiCopy("System persisted in your private universe."));
   }
 
   private lastUserTalk(): string {
@@ -652,7 +674,10 @@ export class V197ActionBindings {
       button.classList.toggle("active", button === control);
       button.setAttribute("aria-pressed", String(button === control));
     });
-    this.toast(mode === "plan" ? "Plan mode selected. Send one direction." : `${mode} mode selected.`);
+    const modeCopy = TALK_MODE_COPY[mode as keyof typeof TALK_MODE_COPY] ?? TALK_MODE_COPY.talk;
+    this.toast(mode === "plan"
+      ? uiCopy("Plan mode selected. Send one direction.")
+      : uiFormat("{0} mode selected.", [uiCopy(modeCopy)]));
   }
 
   private selectSystem(control: HTMLElement): void {
@@ -669,7 +694,7 @@ export class V197ActionBindings {
       await this.api.patchPreferences({ active_orbit_id: orbitId });
       this.snapshot.preferences = { ...(this.snapshot.preferences ?? {}), active_orbit_id: orbitId };
       hydrateTrackAV197(this.document, this.snapshot);
-      this.toast(`${system} is now the active persisted System.`);
+      this.toast(uiFormat("{0} is now the active persisted System.", [system]));
     });
   }
 
@@ -697,7 +722,7 @@ export class V197ActionBindings {
     const chamber = this.document.querySelector<HTMLElement>("#nur-v197-today-checkin");
     if (chamber) chamber.hidden = true;
     await this.refresh();
-    this.toast("Today's reading persisted. Body, Mind, Life, Glow, and Timeline recalculated.");
+    this.toast(uiCopy("Today's reading persisted. Body, Mind, Life, Glow, and Timeline recalculated."));
   }
 
   private todayActionId(control: HTMLElement): string | null {
@@ -707,35 +732,35 @@ export class V197ActionBindings {
   private async completeTodayAction(control: HTMLElement): Promise<void> {
     const actionId = this.todayActionId(control);
     if (!actionId || this.snapshot.today?.next_move?.kind !== "SYSTEM_ACTION") {
-      this.toast("Create or select a persisted System action first.");
+      this.toast(uiCopy("Create or select a persisted System action first."));
       return;
     }
     await this.api.completeTodayAction(actionId);
     await this.refresh();
-    this.toast("Action completed. Today, Timeline, System progress, and Glow moved together.");
+    this.toast(uiCopy("Action completed. Today, Timeline, System progress, and Glow moved together."));
   }
 
   private async missTodayAction(control: HTMLElement): Promise<void> {
     const actionId = this.todayActionId(control);
     if (!actionId || this.snapshot.today?.next_move?.kind !== "SYSTEM_ACTION") {
-      this.toast("Create or select a persisted System action first.");
+      this.toast(uiCopy("Create or select a persisted System action first."));
       return;
     }
     await this.api.missTodayAction(actionId);
     await this.refresh();
-    this.toast("Miss recorded without erasure. The action can still be returned.");
+    this.toast(uiCopy("Miss recorded without erasure. The action can still be returned."));
   }
 
   private async makeTodayActionEasier(control: HTMLElement): Promise<void> {
     const actionId = this.todayActionId(control);
     const current = this.snapshot.today?.next_move;
     if (!actionId || current?.kind !== "SYSTEM_ACTION") {
-      this.toast("Create or select a persisted System action first.");
+      this.toast(uiCopy("Create or select a persisted System action first."));
       return;
     }
-    await this.api.makeTodayActionEasier(actionId, `Five-minute version: ${current.title}`, 5);
+    await this.api.makeTodayActionEasier(actionId, uiFormat("Five-minute version: {0}", [current.title]), 5);
     await this.refresh();
-    this.toast("A five-minute replacement now carries the same lineage.");
+    this.toast(uiCopy("A five-minute replacement now carries the same lineage."));
   }
 
   private insightId(control: HTMLElement): string | null {
@@ -745,7 +770,7 @@ export class V197ActionBindings {
   private async actOnInsight(control: HTMLElement, action: string): Promise<void> {
     const insightId = this.insightId(control);
     if (!insightId) {
-      this.toast("This candidate is not a persisted dedicated Insight yet.");
+      this.toast(uiCopy("This candidate is not a persisted dedicated Insight yet."));
       return;
     }
     if (action === "insight-accept") await this.api.acceptInsight(insightId);
@@ -753,7 +778,7 @@ export class V197ActionBindings {
     if (action === "insight-correct") {
       const correction = inputValue(this.document, "#nur-v197-insight-correction");
       if (!correction) {
-        this.toast("Write the correction first.");
+        this.toast(uiCopy("Write the correction first."));
         return;
       }
       await this.api.correctInsight(insightId, correction);
@@ -763,10 +788,10 @@ export class V197ActionBindings {
     await this.refresh();
     this.toast(
       action === "insight-plan"
-        ? "Insight converted to a persisted Plan."
+        ? uiCopy("Insight converted to a persisted Plan.")
         : action === "insight-timeline"
-          ? "Insight review added to Timeline."
-          : "Insight review persisted to the owner ledger.",
+          ? uiCopy("Insight review added to Timeline.")
+          : uiCopy("Insight review persisted to the owner ledger."),
     );
   }
 
@@ -778,7 +803,7 @@ export class V197ActionBindings {
       async (locale, writingPreference) => {
         await this.api.patchPreferences({ locale, writing_preference: writingPreference });
         this.snapshot.preferences = { ...(this.snapshot.preferences ?? {}), locale, writing_preference: writingPreference };
-        this.toast("Language preference persisted privately.");
+        await this.refresh();
       },
       this.snapshot.health?.ai_provider ?? "disabled",
     );
@@ -798,7 +823,7 @@ export class V197ActionBindings {
     void this.perform(option, async () => {
       await this.api.patchPreferences({ default_boundary: boundary });
       this.snapshot.preferences = { ...(this.snapshot.preferences ?? {}), default_boundary: boundary };
-      this.toast("Boundary persisted privately.");
+      this.toast(uiCopy("Boundary persisted privately."));
     });
   }
 
@@ -806,7 +831,7 @@ export class V197ActionBindings {
     const disabled = closest(event.target, "[aria-disabled=\"true\"], button:disabled");
     if (disabled) {
       this.blockNative(event);
-      this.toast(disabled.getAttribute("title") || "This control is honestly unavailable in Track A.");
+      this.toast(disabled.getAttribute("title") || uiCopy("This control is honestly unavailable in Track A."));
       return;
     }
 
@@ -848,7 +873,9 @@ export class V197ActionBindings {
       this.blockNative(event);
       void this.perform(cancelTalk, async () => {
         const requested = await this.talkTransport.cancel();
-        this.toast(requested ? "Cancelling this Talk turn." : "No live Talk turn is running.");
+        this.toast(requested
+          ? uiCopy("Cancelling this Talk turn.")
+          : uiCopy("No live Talk turn is running."));
       });
       return;
     }
@@ -896,18 +923,18 @@ export class V197ActionBindings {
       if (action === "journal") {
         setInputValue(this.document, "#journal-input", this.lastUserTalk());
         this.universeWindow()?.nurOpenPage?.("journal");
-        this.toast("Latest persisted Talk moved into a Journal draft.");
+        this.toast(uiCopy("Latest persisted Talk moved into a Journal draft."));
       } else if (action === "plan") {
         void this.perform(thread, () => this.savePlanFromPreview());
       } else if (action === "glow") {
         const row = [...this.snapshot.talkThread].reverse().find(item => item.who === "user");
-        if (!row) this.toast("There is no persisted Talk turn to Glow yet.");
+        if (!row) this.toast(uiCopy("There is no persisted Talk turn to Glow yet."));
         else void this.perform(thread, async () => {
           await this.award("talk_meaningful", "COGNITIVE_EVENT", row.id, `talk:${row.id}:meaningful`);
           await this.refresh();
         });
       } else {
-        this.toast("This persisted thread remains private.");
+        this.toast(uiCopy("This persisted thread remains private."));
       }
       return;
     }
@@ -981,7 +1008,7 @@ export class V197ActionBindings {
       return;
     }
     this.blockNative(event);
-    this.toast("This control is honestly unavailable in the Track A vertical slice.");
+    this.toast(uiCopy("This control is honestly unavailable in the Track A vertical slice."));
   }
 
   private onKeyDown(event: KeyboardEvent): void {
@@ -1045,8 +1072,8 @@ function bindV197PasswordRecovery(
   const openButton = document.createElement("button");
   openButton.type = "button";
   openButton.dataset.passwordRecoveryOpen = "true";
-  openButton.textContent = "Reset your password";
-  switchRow.append("Cannot enter? ", openButton);
+  openButton.textContent = uiCopy("Reset your password");
+  switchRow.append(("" + uiCopy("Cannot enter?") + " "), openButton);
   signInForm.insertAdjacentElement("afterend", switchRow);
 
   const dialog = document.createElement("dialog");
@@ -1078,21 +1105,21 @@ function bindV197PasswordRecovery(
     closeButton.type = "button";
     closeButton.className = "nur-v197-recovery-close";
     closeButton.dataset.passwordRecoveryClose = "true";
-    closeButton.setAttribute("aria-label", "Close password recovery");
-    closeButton.textContent = "Close";
+    closeButton.setAttribute("aria-label", uiCopy("Close password recovery"));
+    closeButton.textContent = uiCopy("Close");
     const title = document.createElement("h2");
     title.id = "nur-v197-recovery-title";
-    title.textContent = token ? "Choose a new password." : "Return to your Orbit.";
+    title.textContent = token ? uiCopy("Choose a new password.") : uiCopy("Return to your Orbit.");
     const copy = document.createElement("p");
     copy.textContent = token
-      ? "Set a new password for this one-time recovery link."
-      : "Enter your account email. NUR will send instructions if an Orbit matches it.";
+      ? uiCopy("Set a new password for this one-time recovery link.")
+      : uiCopy("Enter your account email. NUR will send instructions if an Orbit matches it.");
     const form = document.createElement("form");
     form.id = token ? "nur-v197-reset-form" : "nur-v197-forgot-form";
     const field = document.createElement("label");
     field.className = "nur-v197-recovery-field";
     const fieldName = document.createElement("span");
-    fieldName.textContent = token ? "new password" : "email";
+    fieldName.textContent = token ? uiCopy("new password") : uiCopy("email");
     const input = document.createElement("input");
     input.required = true;
     if (token) {
@@ -1113,7 +1140,7 @@ function bindV197PasswordRecovery(
       const confirmationField = document.createElement("label");
       confirmationField.className = "nur-v197-recovery-field";
       const confirmationName = document.createElement("span");
-      confirmationName.textContent = "confirm password";
+      confirmationName.textContent = uiCopy("confirm password");
       const confirmation = document.createElement("input");
       confirmation.id = "nur-v197-reset-confirmation";
       confirmation.type = "password";
@@ -1127,7 +1154,7 @@ function bindV197PasswordRecovery(
     const submit = document.createElement("button");
     submit.type = "submit";
     submit.className = "f4-primary";
-    submit.textContent = token ? "Set new password" : "Send reset instructions";
+    submit.textContent = token ? uiCopy("Set new password") : uiCopy("Send reset instructions");
     const status = document.createElement("p");
     status.className = "nur-v197-recovery-status";
     status.dataset.passwordRecoveryStatus = "true";
@@ -1160,7 +1187,7 @@ function bindV197PasswordRecovery(
     submit?.setAttribute("aria-busy", "true");
     if (submit) submit.disabled = true;
     if (status) {
-      status.textContent = "Working…";
+      status.textContent = uiCopy("Working…");
       status.className = "nur-v197-recovery-status";
       status.setAttribute("role", "status");
     }
@@ -1170,12 +1197,12 @@ function bindV197PasswordRecovery(
       : (() => {
           const password = inputValue(document, "#nur-v197-reset-password");
           const confirmation = inputValue(document, "#nur-v197-reset-confirmation");
-          if (password !== confirmation) return Promise.reject(new Error("The two passwords do not match."));
-          if (!activeToken) return Promise.reject(new Error("This recovery link is missing its one-time token."));
+          if (password !== confirmation) return Promise.reject(new Error(uiCopy("The two passwords do not match.")));
+          if (!activeToken) return Promise.reject(new Error(uiCopy("This recovery link is missing its one-time token.")));
           return api.resetPassword(activeToken, password).then(() => {
             window.history.replaceState({}, "", "/auth");
             activeToken = null;
-            return "Password changed. Sign in to return to your Orbit.";
+            return uiCopy("Password changed. Sign in to return to your Orbit.");
           });
         })();
 
@@ -1226,15 +1253,15 @@ export function bindV197EntryAuth(
     const status = document.querySelector<HTMLElement>("#f4-status");
     const submit = form.querySelector<HTMLElement>('button[type="submit"]');
     const waitMessage = form.id === "f4-signup-form"
-      ? "NUR is creating your private Orbit"
-      : "NUR is opening your Orbit";
+      ? uiCopy("NUR is creating your private Orbit")
+      : uiCopy("NUR is opening your Orbit");
     form.setAttribute("aria-busy", "true");
     submit?.setAttribute("aria-busy", "true");
     waitLayer.querySelector<HTMLElement>("[data-nur-auth-wait-message]")!.textContent = waitMessage;
     waitLayer.querySelector<HTMLElement>("[data-nur-auth-wait-star]")
       ?.replaceChildren(createV197StartupStar(document));
     waitLayer.hidden = false;
-    if (status) status.textContent = form.id === "f4-signup-form" ? "Creating your private Orbit…" : "Returning to your Orbit…";
+    if (status) status.textContent = form.id === "f4-signup-form" ? uiCopy("Creating your private Orbit…") : uiCopy("Returning to your Orbit…");
 
     const task = form.id === "f4-signup-form"
       ? api.register({
@@ -1250,13 +1277,15 @@ export function bindV197EntryAuth(
 
     void task.then(onAuthenticated).catch(error => {
       const detail = errorMessage(error);
-      const duplicateOrbit = form.id === "f4-signup-form" && /could not create/i.test(detail);
+      const duplicateOrbit = form.id === "f4-signup-form"
+        && error instanceof V197ApiError
+        && error.status === 409;
       const hint = duplicateOrbit
-        ? " This email already has an Orbit. Your details are ready in Sign in."
-        : /too many attempts/i.test(detail)
-          ? " Wait a few minutes, then try once."
+        ? uiCopy(" This email already has an Orbit. Your details are ready in Sign in.")
+        : error instanceof V197ApiError && error.status === 429
+          ? uiCopy(" Wait a few minutes, then try once.")
           : "";
-      const showFailure = (message = `⚠ ${detail}${hint}`) => {
+      const showFailure = (message = uiFormat("⚠ {0}{1}", [detail, hint])) => {
         if (!status) return;
         status.textContent = message;
         status.classList.add("nur-v197-auth-error");
@@ -1275,7 +1304,7 @@ export function bindV197EntryAuth(
           const signInPassword = document.querySelector<HTMLInputElement>("#f4-signin-password");
           if (signInEmail) signInEmail.value = email;
           if (signInPassword) signInPassword.value = password;
-          showFailure("This email already has an Orbit. Enter it with the password below.");
+          showFailure(uiCopy("This email already has an Orbit. Enter it with the password below."));
           signInPassword?.focus();
         }, 0);
       } else if (status) {
@@ -1313,12 +1342,12 @@ function ensureV197AuthWaitLayer(document: Document): HTMLElement {
   starHost.dataset.nurAuthWaitStar = "true";
   const word = document.createElement("div");
   word.className = "nur-v197-auth-wait-word";
-  word.textContent = "NUR";
+  word.textContent = uiCopy("NUR");
   const message = document.createElement("p");
   message.dataset.nurAuthWaitMessage = "true";
   const note = document.createElement("p");
   note.className = "nur-v197-auth-wait-note";
-  note.textContent = "Your private context stays inside its boundary while the universe opens.";
+  note.textContent = uiCopy("Your private context stays inside its boundary while the universe opens.");
   inner.append(starHost, word, message, note);
   layer.append(inner);
   document.body.append(layer);

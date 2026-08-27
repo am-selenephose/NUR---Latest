@@ -882,6 +882,7 @@ async def _map_snapshot(
                 "state_reason": _system_state_reason(row, blockers),
                 "progress_percent": row["progress_percent"],
                 "active_goal_count": row["active_goal_count"],
+                "returned_outcome_count": row["progress_sources"]["outcomes_returned"],
                 "blocker_count": sum(
                     1
                     for blocker in blockers

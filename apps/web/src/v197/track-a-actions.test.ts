@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { V197ApiError, type V197BridgeSnapshot } from "../bridge/v197ApiClient";
+import { UI_CATALOGS } from "../lib/i18n";
 import {
   bindV197Actions,
   bindV197EntryAuth,
@@ -279,6 +280,46 @@ describe("Track A V197 write bindings", () => {
 
     expect(order).toEqual(["persist", "snapshot", "route"]);
     expect(afterHydrate).toHaveBeenCalledOnce();
+  });
+
+  it("re-hydrates and re-renders the active route after a language change", async () => {
+    const document = window.document.implementation.createHTMLDocument("Language settings");
+    document.body.innerHTML = `
+      <div id="scope-modal"><div class="scope-modal"></div></div>
+      <button id="scope-open" type="button">Scope</button>
+    `;
+    const fake = api();
+    fake.patchPreferences.mockResolvedValue(undefined);
+    const korean = snapshot();
+    korean.preferences = {
+      ...(korean.preferences ?? {}),
+      locale: "ko",
+      writing_preference: "default",
+    };
+    const refresh = vi.fn().mockResolvedValue(korean);
+    const afterHydrate = vi.fn().mockResolvedValue(undefined);
+
+    bindV197Actions(
+      document,
+      fake as unknown as V197ActionApi,
+      snapshot(),
+      refresh,
+      () => undefined,
+      talkTransport(fake),
+      afterHydrate,
+    );
+    const locale = document.querySelector<HTMLSelectElement>("#nur-v197-locale");
+    locale!.value = "ko";
+    locale!.dispatchEvent(new Event("change"));
+    document.querySelector<HTMLButtonElement>("#nur-v197-language-save")?.click();
+    await settle();
+
+    expect(fake.patchPreferences).toHaveBeenCalledWith({ locale: "ko", writing_preference: "default" });
+    expect(refresh).toHaveBeenCalledOnce();
+    expect(afterHydrate).toHaveBeenCalledOnce();
+    expect(document.documentElement.lang).toBe("ko");
+    expect(document.body.dataset.nurCatalog).toBe("ko");
+    expect(document.querySelector("#nur-v197-language-save")?.textContent).toBe(UI_CATALOGS.ko["Save language"]);
   });
 });
 

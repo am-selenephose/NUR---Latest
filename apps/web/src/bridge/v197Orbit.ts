@@ -30,6 +30,14 @@ import {
 import { createV197StartupStar } from "./v197StarSeal";
 import { claimV197SurfaceHost, releaseV197SurfaceHost } from "./v197SurfaceHost";
 import type { V197ApiClient } from "./v197ApiClient";
+import {
+  activeUiLocale,
+  structuralValue,
+  type UiCopyKey,
+  uiCopy,
+  uiFormat,
+  uiSource,
+} from "../lib/i18n";
 
 const ROOT_ID = "nur-orbit-root";
 const STYLE_ID = "nur-orbit-style";
@@ -61,30 +69,173 @@ const BAND_NODE_RADIUS: Record<OrbitBand, number> = {
   DORMANT: 8,
 };
 
-const BAND_LABEL: Record<OrbitBand, string> = {
-  INNER: "Inner",
-  NEAR: "Near",
-  OUTER: "Outer",
-  PERIPHERAL: "Peripheral",
-  DORMANT: "Dormant",
+const BAND_LABEL: Record<OrbitBand, UiCopyKey> = {
+  INNER: uiSource("Inner"),
+  NEAR: uiSource("Near"),
+  OUTER: uiSource("Outer"),
+  PERIPHERAL: uiSource("Peripheral"),
+  DORMANT: uiSource("Dormant"),
 };
 
 const SIGNAL_KINDS = ["CONNECTION", "TRUST", "MOMENTUM", "TENSION"] as const;
 
-const BASIS_WORD: Record<string, string> = {
-  USER_STATED: "You said this",
-  OBSERVED: "Measured from activity",
-  NUR_INFERRED: "NUR inferred this",
+const BASIS_WORD: Record<string, UiCopyKey> = {
+  USER_STATED: uiSource("You said this"),
+  OBSERVED: uiSource("Measured from activity"),
+  NUR_INFERRED: uiSource("NUR inferred this"),
 };
 
-const THREAD_GROUPS: { status: string; label: string }[] = [
-  { status: "ACTIVE", label: "Active" },
-  { status: "WAITING_ON_YOU", label: "Waiting on you" },
-  { status: "WAITING_ON_OTHERS", label: "Waiting on others" },
-  { status: "CONSULTATION", label: "Consultation" },
-  { status: "RESOLVED", label: "Resolved" },
-  { status: "DORMANT", label: "Dormant" },
+const THREAD_GROUPS: { status: string; label: UiCopyKey }[] = [
+  { status: "ACTIVE", label: uiSource("Active") },
+  { status: "WAITING_ON_YOU", label: uiSource("Waiting on you") },
+  { status: "WAITING_ON_OTHERS", label: uiSource("Waiting on others") },
+  { status: "CONSULTATION", label: uiSource("Consultation") },
+  { status: "RESOLVED", label: uiSource("Resolved") },
+  { status: "DORMANT", label: uiSource("Dormant") },
 ];
+
+const RELATIONAL_STATE_WORD: Readonly<Record<string, UiCopyKey>> = {
+  STABLE: uiSource("Stable"),
+  DEEPENING: uiSource("Deepening"),
+  RECONNECTING: uiSource("Reconnecting"),
+  DRIFTING: uiSource("Drifting"),
+  UNCLEAR: uiSource("Unclear"),
+  TENSE: uiSource("Tense"),
+  REPAIRING: uiSource("Repairing"),
+  DORMANT: uiSource("Dormant"),
+};
+
+const GROUP_TYPE_WORD: Readonly<Record<string, UiCopyKey>> = {
+  CIRCLE: uiSource("Circle"),
+};
+
+const GROUP_PRIVACY_WORD: Readonly<Record<string, UiCopyKey>> = {
+  PRIVATE_ORGANIZER: uiSource("Private organizer"),
+  SHARED_CONTEXT: uiSource("Shared context"),
+  GROUP_NUR: uiSource("Group NUR"),
+  WITNESS_ONLY: uiSource("Witness only"),
+};
+
+const SIGNAL_KIND_WORD: Readonly<Record<string, UiCopyKey>> = {
+  CONNECTION: uiSource("Connection"),
+  TRUST: uiSource("Trust"),
+  MOMENTUM: uiSource("Momentum"),
+  TENSION: uiSource("Tension"),
+};
+
+const THREAD_STATUS_WORD: Readonly<Record<string, UiCopyKey>> = Object.fromEntries(
+  THREAD_GROUPS.map(row => [row.status, row.label]),
+);
+
+const CONTEXT_VISIBILITY_WORD: Readonly<Record<string, UiCopyKey>> = {
+  PRIVATE: uiSource("Private"),
+  ORBIT_SHARED: uiSource("Shared with Orbit"),
+  GROUP_SHARED: uiSource("Shared with group"),
+  CAPSULE_SHARED: uiSource("Shared by capsule"),
+  SYSTEM_SHARED: uiSource("Shared with System"),
+};
+
+const CONTEXT_SOURCE_WORD: Readonly<Record<string, UiCopyKey>> = {
+  CONTEXT: uiSource("Context"),
+  TALK: uiSource("Talk"),
+  JOURNAL: uiSource("Journal"),
+  PLAN: uiSource("Plan"),
+  SYSTEM: uiSource("System"),
+  TIMELINE_EVENT: uiSource("Timeline event"),
+  PROJECT: uiSource("Project"),
+  RESEARCH_SOURCE: uiSource("Research source"),
+  WEB_SIGNAL: uiSource("Web signal"),
+  ORBIT: uiSource("Orbit"),
+  INSIGHT: uiSource("Insight"),
+  OWNER_NOTE: uiSource("Owner note"),
+  CONVERSATION_SUMMARY: uiSource("Conversation summary"),
+};
+
+const ORBIT_ERROR_CODE_WORD: Readonly<Record<string, UiCopyKey>> = {
+  CAPABILITY_DENIED: uiSource("This action is not available with the current permission."),
+  CSRF_MISSING: uiSource("Your NUR session needs to be renewed."),
+  SESSION_EXPIRED: uiSource("Your NUR session needs to be renewed."),
+  NOT_FOUND: uiSource("That Orbit record is no longer available."),
+  CONFLICT: uiSource("That Orbit record changed before NUR could save this action."),
+  RATE_LIMITED: uiSource("NUR is receiving too many requests. Try again shortly."),
+};
+
+const ORBIT_ERROR_STATUS_WORD: Readonly<Record<number, UiCopyKey>> = {
+  0: uiSource("NUR could not reach the service."),
+  200: uiSource("NUR returned an invalid response."),
+  400: uiSource("NUR could not use that request."),
+  401: uiSource("Your NUR session needs to be renewed."),
+  403: uiSource("This action is not available with the current permission."),
+  404: uiSource("That Orbit record is no longer available."),
+  409: uiSource("That Orbit record changed before NUR could save this action."),
+  422: uiSource("NUR could not use one of the submitted values."),
+  429: uiSource("NUR is receiving too many requests. Try again shortly."),
+  500: uiSource("NUR could not complete that Orbit request."),
+  502: uiSource("NUR could not reach the service."),
+  503: uiSource("NUR could not reach the service."),
+  504: uiSource("NUR could not reach the service."),
+};
+
+function controlledToken(value: unknown): string {
+  return typeof value === "string"
+    ? value.trim().replaceAll("-", "_").replaceAll(" ", "_").toUpperCase()
+    : "";
+}
+
+function controlledLabel(
+  words: Readonly<Record<string, UiCopyKey>>,
+  value: unknown,
+  fallback: UiCopyKey = uiSource("Unclear"),
+): string {
+  return uiCopy(words[controlledToken(value)] ?? fallback);
+}
+
+export function orbitRelationalStateLabel(value: unknown): string {
+  return controlledLabel(RELATIONAL_STATE_WORD, value);
+}
+
+export function orbitGroupTypeLabel(value: unknown): string {
+  return controlledLabel(GROUP_TYPE_WORD, value);
+}
+
+export function orbitPrivacyModeLabel(value: unknown): string {
+  return controlledLabel(GROUP_PRIVACY_WORD, value);
+}
+
+export function orbitSignalKindLabel(value: unknown): string {
+  return controlledLabel(SIGNAL_KIND_WORD, value);
+}
+
+export function orbitThreadStatusLabel(value: unknown): string {
+  return controlledLabel(THREAD_STATUS_WORD, value);
+}
+
+export function orbitContextVisibilityLabel(value: unknown): string {
+  return controlledLabel(CONTEXT_VISIBILITY_WORD, value);
+}
+
+export function orbitContextSourceLabel(value: unknown): string {
+  return controlledLabel(CONTEXT_SOURCE_WORD, value);
+}
+
+/** Visible errors are localized classifications; raw diagnostics stay in devtools. */
+export function orbitVisibleFailure(
+  error: unknown,
+  fallback: UiCopyKey = uiSource("NUR could not complete that Orbit request."),
+  context = "request",
+): string {
+  console.error(`[NUR Orbit] ${context}`, error);
+  const detail = typeof error === "object" && error !== null
+    ? error as { code?: unknown; status?: unknown }
+    : null;
+  const code = controlledToken(detail?.code);
+  const status = typeof detail?.status === "number" ? detail.status : null;
+  const source = (code && ORBIT_ERROR_CODE_WORD[code])
+    || (status !== null && ORBIT_ERROR_STATUS_WORD[status])
+    || (status !== null && status >= 500 ? ORBIT_ERROR_STATUS_WORD[500] : undefined)
+    || fallback;
+  return uiCopy(source);
+}
 
 export interface OrbitPerson {
   id: string;
@@ -271,14 +422,14 @@ function edgeMeaning(edge: OrbitEdge): string {
 }
 
 function relativeDate(value: string | null): string {
-  if (!value) return "No recorded activity";
+  if (!value) return uiCopy("No recorded activity");
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return value;
   const days = Math.floor((Date.now() - parsed.getTime()) / 86_400_000);
-  if (days <= 0) return "Today";
-  if (days === 1) return "Yesterday";
-  if (days < 30) return `${days} days ago`;
-  return parsed.toLocaleDateString();
+  if (days <= 0) return uiCopy("Today");
+  if (days === 1) return uiCopy("Yesterday");
+  if (days < 30) return uiFormat("{0} days ago", [days]);
+  return parsed.toLocaleDateString(activeUiLocale());
 }
 
 function orbitCreationActions(
@@ -287,11 +438,11 @@ function orbitCreationActions(
   className: string,
 ): HTMLElement {
   const row = el(doc, "div", className);
-  const addPerson = capsule(doc, "✦ Add a person", "primary");
+  const addPerson = capsule(doc, uiCopy("✦ Add a person"), "primary");
   addPerson.dataset.orbitAction = "add-person";
   addPerson.addEventListener("click", () => actions.addPerson());
 
-  const createGroup = capsule(doc, "Create Group");
+  const createGroup = capsule(doc, uiCopy("Create Group"));
   createGroup.dataset.orbitAction = "create-group";
   createGroup.addEventListener("click", () => actions.createGroup());
   row.append(addPerson, createGroup);
@@ -304,21 +455,21 @@ function orbitHeader(doc: Document, state: OrbitState, actions: Actions): HTMLEl
   const header = el(doc, "header", "nur-orbit-header");
 
   const titleBlock = el(doc, "div");
-  const title = el(doc, "h1", "nur-orbit-title", "Orbit");
+  const title = el(doc, "h1", "nur-orbit-title", uiCopy("Orbit"));
   markV197HolographicWordmark(title);
   titleBlock.append(title);
   titleBlock.append(
-    el(doc, "p", "nur-orbit-subtitle", "People, circles and relational gravity"),
+    el(doc, "p", "nur-orbit-subtitle", uiCopy("People, circles and relational gravity")),
   );
   header.append(titleBlock);
 
   const switcher = el(doc, "div", "nur-orbit-segmented");
   switcher.setAttribute("role", "tablist");
-  switcher.setAttribute("aria-label", "Orbit view");
+  switcher.setAttribute("aria-label", uiCopy("Orbit view"));
   for (const [view, label] of [
-    ["orbit", "Orbit"], ["list", "List"], ["threads", "Threads"],
-  ] as [OrbitView, string][]) {
-    const tab = capsule(doc, label);
+    ["orbit", uiSource("Orbit")], ["list", uiSource("List")], ["threads", uiSource("Threads")],
+  ] as [OrbitView, UiCopyKey][]) {
+    const tab = capsule(doc, uiCopy(label));
     tab.setAttribute("role", "tab");
     tab.setAttribute("aria-selected", state.view === view ? "true" : "false");
     tab.dataset.orbitView = view;
@@ -331,8 +482,8 @@ function orbitHeader(doc: Document, state: OrbitState, actions: Actions): HTMLEl
 
   const search = el(doc, "input", "nur-orbit-search");
   search.type = "search";
-  search.placeholder = "Search people, groups, plans or threads";
-  search.setAttribute("aria-label", "Search people, groups, plans or threads");
+  search.placeholder = uiCopy("Search people, groups, plans or threads");
+  search.setAttribute("aria-label", uiCopy("Search people, groups, plans or threads"));
   search.value = state.query;
   search.addEventListener("input", () => {
     scheduleV197SearchCommit(doc, SEARCH_KEY, search.value, actions.setQuery);
@@ -350,25 +501,25 @@ function orbitHeader(doc: Document, state: OrbitState, actions: Actions): HTMLEl
 
 function orbitLeftRail(doc: Document, state: OrbitState, actions: Actions): HTMLElement {
   const rail = el(doc, "aside", "nur-orbit-rail");
-  rail.setAttribute("aria-label", "Orbit filters");
+  rail.setAttribute("aria-label", uiCopy("Orbit filters"));
 
   const people = state.field.people;
   const countIn = (band: OrbitBand) => people.filter((p) => p.orbit_level === band).length;
 
   const scopes = el(doc, "section", "nur-orbit-rail-section");
-  scopes.append(el(doc, "h2", "nur-orbit-rail-heading", "Scopes"));
+  scopes.append(el(doc, "h2", "nur-orbit-rail-heading", uiCopy("Scopes")));
   const scopeChips = el(doc, "div", "nur-orbit-chips");
-  const scopeDefs: [OrbitBand | "ALL" | "GROUPS", string, number][] = [
-    ["ALL", "All", people.length],
-    ["INNER", "Inner", countIn("INNER")],
-    ["NEAR", "Near", countIn("NEAR")],
-    ["OUTER", "Outer", countIn("OUTER")],
-    ["PERIPHERAL", "Peripheral", countIn("PERIPHERAL")],
-    ["DORMANT", "Dormant", countIn("DORMANT")],
-    ["GROUPS", "Groups", state.field.groups.length],
+  const scopeDefs: [OrbitBand | "ALL" | "GROUPS", UiCopyKey, number][] = [
+    ["ALL", uiSource("All"), people.length],
+    ["INNER", uiSource("Inner"), countIn("INNER")],
+    ["NEAR", uiSource("Near"), countIn("NEAR")],
+    ["OUTER", uiSource("Outer"), countIn("OUTER")],
+    ["PERIPHERAL", uiSource("Peripheral"), countIn("PERIPHERAL")],
+    ["DORMANT", uiSource("Dormant"), countIn("DORMANT")],
+    ["GROUPS", uiSource("Groups"), state.field.groups.length],
   ];
   for (const [key, label, count] of scopeDefs) {
-    const node = chip(doc, label, state.bandFilter === key, count);
+    const node = chip(doc, uiCopy(label), state.bandFilter === key, count);
     node.dataset.orbitScope = String(key);
     node.addEventListener("click", () => actions.setBandFilter(key));
     scopeChips.append(node);
@@ -379,7 +530,7 @@ function orbitLeftRail(doc: Document, state: OrbitState, actions: Actions): HTML
   // Smart segments, each computed from real rows. A segment with nothing in it
   // shows zero rather than being hidden, so the owner can see it is empty.
   const segments = el(doc, "section", "nur-orbit-rail-section");
-  segments.append(el(doc, "h2", "nur-orbit-rail-heading", "Segments"));
+  segments.append(el(doc, "h2", "nur-orbit-rail-heading", uiCopy("Segments")));
   const segChips = el(doc, "div", "nur-orbit-chips");
   const active = people.filter((p) => activityOf(p) === "active").length;
   const dormant = people.filter((p) => activityOf(p) === "dormant").length;
@@ -389,10 +540,10 @@ function orbitLeftRail(doc: Document, state: OrbitState, actions: Actions): HTML
       || p.orbit_level_suggestion !== null,
   ).length;
   for (const [label, count] of [
-    ["Active now", active], ["Needs attention", needsAttention],
-    ["Emerging", emerging], ["Dormant", dormant],
-  ] as [string, number][]) {
-    const node = chip(doc, label, false, count);
+    [uiSource("Active now"), active], [uiSource("Needs attention"), needsAttention],
+    [uiSource("Emerging"), emerging], [uiSource("Dormant"), dormant],
+  ] as [UiCopyKey, number][]) {
+    const node = chip(doc, uiCopy(label), false, count);
     node.disabled = count === 0;
     segChips.append(node);
   }
@@ -400,17 +551,15 @@ function orbitLeftRail(doc: Document, state: OrbitState, actions: Actions): HTML
   rail.append(segments);
 
   const create = el(doc, "section", "nur-orbit-rail-section");
-  create.append(el(doc, "h2", "nur-orbit-rail-heading", "Context"));
+  create.append(el(doc, "h2", "nur-orbit-rail-heading", uiCopy("Context")));
   // Import is declared and honestly disabled: suggesting people from Talk and
   // Journal requires an approval step that does not exist yet, and adding
   // inferred people without it is exactly what the spec forbids.
-  const importBtn = capsule(doc, "Import from NUR context", "quiet");
+  const importBtn = capsule(doc, uiCopy("Import from NUR context"), "quiet");
   importBtn.style.width = "100%";
   importBtn.style.marginTop = "6px";
   importBtn.disabled = true;
-  importBtn.title =
-    "Not connected yet. Importing would add people NUR inferred from Talk and Journal, "
-    + "and that needs an explicit approval step before anything is stored.";
+  importBtn.title = uiCopy("Not connected yet. Importing would add people NUR inferred from Talk and Journal, and that needs an explicit approval step before anything is stored.");
   create.append(importBtn);
   rail.append(create);
 
@@ -437,8 +586,7 @@ function orbitCanvas(doc: Document, state: OrbitState, actions: Actions): HTMLEl
   });
   canvas.setAttribute(
     "aria-label",
-    `Relational field: ${visible.length} people, ${state.field.groups.length} groups. `
-    + "A parallel list of every node is available in List view.",
+    uiFormat("Relational field: {0} people, {1} groups. A parallel list of every node is available in List view.", [visible.length, state.field.groups.length]),
   );
   if (state.selected) canvas.dataset.hasSelection = "true";
 
@@ -489,7 +637,7 @@ function orbitCanvas(doc: Document, state: OrbitState, actions: Actions): HTMLEl
     const label = svg(doc, "text", {
       x: cx, y: cy - ry - 5, class: "nur-orbit-ring-label", "text-anchor": "middle",
     });
-    label.textContent = BAND_LABEL[band];
+    label.textContent = uiCopy(BAND_LABEL[band]);
     rings.append(label);
   }
   canvas.append(rings);
@@ -592,9 +740,11 @@ function orbitCanvas(doc: Document, state: OrbitState, actions: Actions): HTMLEl
     label.textContent = person.display_name;
     group.append(label);
     const tip = svg(doc, "title", {});
-    tip.textContent =
-      `${person.display_name} · ${person.relationship_type ?? "Relationship not set"} · `
-      + `${person.orbit_level ? BAND_LABEL[person.orbit_level] + " Orbit" : "Not yet placed"}`;
+    tip.textContent = uiFormat("{0} · {1} · {2}", [
+      person.display_name,
+      person.relationship_type ?? uiCopy("Relationship not set"),
+      person.orbit_level ? uiFormat("{0} Orbit", [uiCopy(BAND_LABEL[person.orbit_level])]) : uiCopy("Not yet placed"),
+    ]);
     group.append(tip);
     group.addEventListener("click", () => actions.select("PERSON", person.id));
     nodes.append(group);
@@ -626,12 +776,15 @@ function orbitCanvas(doc: Document, state: OrbitState, actions: Actions): HTMLEl
     const label = svg(doc, "text", {
       x: at.x, y: at.y + 40, "text-anchor": "middle", class: "nur-orbit-node-label",
     });
-    label.textContent = `${groupRow.name} · ${groupRow.member_count}`;
+    label.textContent = uiFormat("{0} · {1}", [groupRow.name, groupRow.member_count]);
     node.append(label);
     const tip = svg(doc, "title", {});
-    tip.textContent =
-      `${groupRow.name} · ${groupRow.member_count} members · ${groupRow.purpose ?? "No purpose set"} · `
-      + `Group NUR ${groupRow.group_nur_enabled ? "active" : "off"}`;
+    tip.textContent = uiFormat("{0} · {1} members · {2} · Group NUR {3}", [
+      groupRow.name,
+      groupRow.member_count,
+      groupRow.purpose ?? uiCopy("No purpose set"),
+      groupRow.group_nur_enabled ? uiCopy("active") : uiCopy("off"),
+    ]);
     node.append(tip);
     node.addEventListener("click", () => actions.select("GROUP", groupRow.id));
     nodes.append(node);
@@ -641,7 +794,7 @@ function orbitCanvas(doc: Document, state: OrbitState, actions: Actions): HTMLEl
 
   const anchor = el(doc, "div", "nur-orbit-anchor-sigil");
   anchor.setAttribute("role", "img");
-  anchor.setAttribute("aria-label", "You - your relational center");
+  anchor.setAttribute("aria-label", uiCopy("You - your relational center"));
   anchor.dataset.nurOrbitAnchor = "v197-startup-sigil";
   anchor.append(createV197StartupStar(doc));
   surface.append(anchor);
@@ -660,11 +813,11 @@ function orbitEmptyState(doc: Document, _state: OrbitState, actions: Actions): H
   const empty = el(doc, "div", "nur-orbit-empty");
   empty.dataset.nurOrbitEmptyLayout = "bottom-footer";
   empty.append(el(doc, "p", undefined,
-    "Your Orbit begins with one person, one signal, one shared field."));
+    uiCopy("Your Orbit begins with one person, one signal, one shared field.")));
   const row = el(doc, "div", "nur-orbit-empty-actions");
-  const add = capsule(doc, "✦ Add first person", "primary");
+  const add = capsule(doc, uiCopy("✦ Add first person"), "primary");
   add.addEventListener("click", () => actions.addPerson());
-  const group = capsule(doc, "Create a group");
+  const group = capsule(doc, uiCopy("Create a group"));
   group.addEventListener("click", () => actions.createGroup());
   row.append(add, group);
   empty.append(row);
@@ -708,23 +861,23 @@ function orbitListView(doc: Document, state: OrbitState, actions: Actions): HTML
 
   const list = el(doc, "div", "nur-orbit-list");
   list.setAttribute("role", "table");
-  list.setAttribute("aria-label", "Orbit people");
+  list.setAttribute("aria-label", uiCopy("Orbit people"));
 
   const head = el(doc, "div", "nur-orbit-list-head");
   head.setAttribute("role", "row");
   for (const [label, sort] of [
-    ["Person", "name"], ["Orbit", "band"], ["Relationship", null],
-    ["Activity", "recent"], ["Next move", null], ["Privacy", null],
-  ] as [string, OrbitState["sort"] | null][]) {
+    [uiSource("Person"), "name"], [uiSource("Orbit"), "band"], [uiSource("Relationship"), null],
+    [uiSource("Activity"), "recent"], [uiSource("Next move"), null], [uiSource("Privacy"), null],
+  ] as [UiCopyKey, OrbitState["sort"] | null][]) {
     const cell = el(doc, "div");
     cell.setAttribute("role", "columnheader");
     if (sort) {
-      const button = el(doc, "button", undefined, label);
+      const button = el(doc, "button", undefined, uiCopy(label));
       button.type = "button";
       button.addEventListener("click", () => actions.setSort(sort));
       cell.append(button);
     } else {
-      cell.textContent = label;
+      cell.textContent = uiCopy(label);
     }
     head.append(cell);
   }
@@ -740,7 +893,7 @@ function orbitListView(doc: Document, state: OrbitState, actions: Actions): HTML
     const name = el(doc, "div", "nur-orbit-row-name");
     name.append(el(doc, "strong", undefined, person.display_name));
     if (person.orbit_level_suggestion) {
-      const flag = el(doc, "span", "nur-orbit-privacy", "· suggestion");
+      const flag = el(doc, "span", "nur-orbit-privacy", uiCopy("· suggestion"));
       flag.title = person.orbit_level_suggestion_reason ?? "";
       name.append(flag);
     }
@@ -748,19 +901,19 @@ function orbitListView(doc: Document, state: OrbitState, actions: Actions): HTML
 
     const band = el(doc, "div");
     const pill = el(doc, "span", "nur-orbit-band",
-      person.orbit_level ? BAND_LABEL[person.orbit_level] : "Unplaced");
+      person.orbit_level ? uiCopy(BAND_LABEL[person.orbit_level]) : uiCopy("Unplaced"));
     pill.dataset.band = bandOf(person);
     band.append(pill);
     row.append(band);
 
-    row.append(el(doc, "div", undefined, person.relationship_type ?? "Not set"));
+    row.append(el(doc, "div", undefined, person.relationship_type ?? uiCopy("Not set")));
     row.append(el(doc, "div", undefined, relativeDate(person.last_interaction_at)));
     row.append(el(doc, "div", undefined,
-      person.relational_state ? person.relational_state.toLowerCase() : "No move recorded"));
+      person.relational_state ? orbitRelationalStateLabel(person.relational_state) : uiCopy("No move recorded")));
 
     const privacy = el(doc, "div");
     const mark = el(doc, "span", "nur-orbit-privacy",
-      person.sharing_allowed ? "Shareable" : "Private only");
+      person.sharing_allowed ? uiCopy("Shareable") : uiCopy("Private only"));
     mark.dataset.shared = person.sharing_allowed ? "true" : "false";
     privacy.append(mark);
     row.append(privacy);
@@ -777,19 +930,19 @@ function orbitListView(doc: Document, state: OrbitState, actions: Actions): HTML
     if (state.selected?.id === group.id) row.setAttribute("aria-selected", "true");
     const name = el(doc, "div", "nur-orbit-row-name");
     name.append(el(doc, "strong", undefined, group.name));
-    name.append(el(doc, "span", "nur-orbit-privacy", `· ${group.member_count} members`));
+    name.append(el(doc, "span", "nur-orbit-privacy", uiFormat("· {0} members", [group.member_count])));
     row.append(name);
     const band = el(doc, "div");
-    const pill = el(doc, "span", "nur-orbit-band", "Group");
+    const pill = el(doc, "span", "nur-orbit-band", uiCopy("Group"));
     pill.dataset.band = "UNPLACED";
     band.append(pill);
     row.append(band);
-    row.append(el(doc, "div", undefined, group.group_type.toLowerCase()));
-    row.append(el(doc, "div", undefined, group.purpose ?? "No purpose set"));
+    row.append(el(doc, "div", undefined, orbitGroupTypeLabel(group.group_type)));
+    row.append(el(doc, "div", undefined, group.purpose ?? uiCopy("No purpose set")));
     row.append(el(doc, "div", undefined,
-      group.group_nur_enabled ? "Group NUR active" : "Group NUR off"));
+      group.group_nur_enabled ? uiCopy("Group NUR active") : uiCopy("Group NUR off")));
     const privacy = el(doc, "div");
-    const mark = el(doc, "span", "nur-orbit-privacy", group.privacy_mode.replace(/_/g, " ").toLowerCase());
+    const mark = el(doc, "span", "nur-orbit-privacy", orbitPrivacyModeLabel(group.privacy_mode));
     mark.dataset.shared = group.privacy_mode === "PRIVATE_ORGANIZER" ? "false" : "true";
     privacy.append(mark);
     row.append(privacy);
@@ -810,9 +963,8 @@ function orbitThreadsView(doc: Document, state: OrbitState, actions: Actions): H
   if (state.threads.length === 0) {
     const empty = el(doc, "div", "nur-orbit-empty");
     empty.append(el(doc, "p", undefined,
-      "No relational threads yet. A thread appears when a conversation, decision "
-      + "or shared plan is left open with someone."));
-    const add = capsule(doc, "✦ Add a person", "primary");
+      uiCopy("No relational threads yet. A thread appears when a conversation, decision or shared plan is left open with someone.")));
+    const add = capsule(doc, uiCopy("✦ Add a person"), "primary");
     add.addEventListener("click", () => actions.addPerson());
     const row = el(doc, "div", "nur-orbit-empty-actions");
     row.append(add);
@@ -824,12 +976,12 @@ function orbitThreadsView(doc: Document, state: OrbitState, actions: Actions): H
   const nameFor = (thread: OrbitThreadRow): string => {
     if (thread.person_id) {
       return state.field.people.find((p) => p.id === thread.person_id)?.display_name
-        ?? "Unknown person";
+        ?? uiCopy("Unknown person");
     }
     if (thread.group_id) {
-      return state.field.groups.find((g) => g.id === thread.group_id)?.name ?? "Unknown group";
+      return state.field.groups.find((g) => g.id === thread.group_id)?.name ?? uiCopy("Unknown group");
     }
-    return "Unattributed";
+    return uiCopy("Unattributed");
   };
 
   for (const bucket of THREAD_GROUPS) {
@@ -837,18 +989,18 @@ function orbitThreadsView(doc: Document, state: OrbitState, actions: Actions): H
     if (inBucket.length === 0) continue;
     const section = el(doc, "section", "nur-orbit-rail-section");
     section.append(el(doc, "h2", "nur-orbit-rail-heading",
-      `${bucket.label} · ${inBucket.length}`));
+      uiFormat("{0} · {1}", [uiCopy(bucket.label), inBucket.length])));
     for (const thread of inBucket) {
       const card = el(doc, "div", "nur-orbit-item");
       card.append(el(doc, "strong", undefined, thread.topic));
       card.append(el(doc, "div", "nur-orbit-item-meta",
-        `${nameFor(thread)} · ${relativeDate(thread.last_event_at)}`));
+        uiFormat("{0} · {1}", [nameFor(thread), relativeDate(thread.last_event_at)])));
       if (thread.open_decision) {
         card.append(el(doc, "div", "nur-orbit-item-meta",
-          `Open decision: ${thread.open_decision}`));
+          uiFormat("Open decision: {0}", [thread.open_decision])));
       }
       if (thread.next_action) {
-        card.append(el(doc, "div", "nur-orbit-item-meta", `Next: ${thread.next_action}`));
+        card.append(el(doc, "div", "nur-orbit-item-meta", uiFormat("Next: {0}", [thread.next_action])));
       }
       section.append(card);
     }
@@ -862,74 +1014,72 @@ function orbitThreadsView(doc: Document, state: OrbitState, actions: Actions): H
 
 function orbitDetailPanel(doc: Document, state: OrbitState, actions: Actions): HTMLElement {
   const panel = el(doc, "aside", "nur-orbit-detail");
-  panel.setAttribute("aria-label", "Orbit detail");
+  panel.setAttribute("aria-label", uiCopy("Orbit detail"));
   panel.setAttribute("role", "region");
 
   if (!state.selected) {
     panel.append(el(doc, "p", "nur-orbit-detail-empty",
-      "Select a person or group to explore its Orbit."));
+      uiCopy("Select a person or group to explore its Orbit.")));
     return panel;
   }
 
   if (state.selected.type === "GROUP") {
     const group = state.field.groups.find((g) => g.id === state.selected?.id);
     if (!group) {
-      panel.append(el(doc, "p", "nur-orbit-detail-empty", "That group is no longer here."));
+      panel.append(el(doc, "p", "nur-orbit-detail-empty", uiCopy("That group is no longer here.")));
       return panel;
     }
     panel.append(el(doc, "h2", "nur-orbit-detail-name", group.name));
     panel.append(el(doc, "p", "nur-orbit-detail-meta",
-      `${group.member_count} members · ${group.privacy_mode.replace(/_/g, " ").toLowerCase()}`));
+      uiFormat("{0} members · {1}", [group.member_count, orbitPrivacyModeLabel(group.privacy_mode)])));
     if (group.purpose) panel.append(el(doc, "p", "nur-orbit-note", group.purpose));
 
     const actionsRow = el(doc, "div", "nur-orbit-actions");
-    const openNur = capsule(doc, "Open Group NUR", "primary");
+    const openNur = capsule(doc, uiCopy("Open Group NUR"), "primary");
     if (!group.group_nur_enabled) {
       // Honestly disabled with the reason, rather than a button that misleads.
       openNur.disabled = true;
-      openNur.title =
-        "Group NUR is off for this circle. It needs a shared-context privacy mode, "
-        + "because a shared assistant must not read context no member agreed to share.";
+      openNur.title = uiCopy("Group NUR is off for this circle. It needs a shared-context privacy mode, because a shared assistant must not read context no member agreed to share.");
     } else {
-      openNur.title = "Group NUR workspace is not built yet.";
+      openNur.title = uiCopy("Group NUR workspace is not built yet.");
       openNur.disabled = true;
     }
     actionsRow.append(openNur);
     panel.append(actionsRow);
     panel.append(el(doc, "p", "nur-orbit-note",
       group.group_nur_enabled
-        ? "Group NUR is enabled for this circle. The shared workspace itself is not built yet."
-        : "Enable a shared-context privacy mode to allow Group NUR."));
+        ? uiCopy("Group NUR is enabled for this circle. The shared workspace itself is not built yet.")
+        : uiCopy("Enable a shared-context privacy mode to allow Group NUR.")));
     return panel;
   }
 
   const person = state.field.people.find((p) => p.id === state.selected?.id);
   if (!person) {
-    panel.append(el(doc, "p", "nur-orbit-detail-empty", "That person is no longer here."));
+    panel.append(el(doc, "p", "nur-orbit-detail-empty", uiCopy("That person is no longer here.")));
     return panel;
   }
 
   panel.append(el(doc, "h2", "nur-orbit-detail-name", person.display_name));
   panel.append(el(doc, "p", "nur-orbit-detail-meta",
     [
-      person.relationship_type ?? "Relationship not set",
-      person.orbit_level ? `${BAND_LABEL[person.orbit_level]} Orbit` : "Not yet placed",
-      person.sharing_allowed ? "Shareable" : "Private context",
+      person.relationship_type ?? uiCopy("Relationship not set"),
+      person.orbit_level ? uiFormat("{0} Orbit", [uiCopy(BAND_LABEL[person.orbit_level])]) : uiCopy("Not yet placed"),
+      person.sharing_allowed ? uiCopy("Shareable") : uiCopy("Private context"),
     ].join(" · ")));
 
   // A pending suggestion is shown with its reason and both answers, never applied.
   if (person.orbit_level_suggestion) {
     const box = el(doc, "div", "nur-orbit-why");
     box.append(el(doc, "div", undefined,
-      `Suggested move to ${BAND_LABEL[person.orbit_level_suggestion]} Orbit.`));
+      uiFormat("Suggested move to {0} Orbit.", [uiCopy(BAND_LABEL[person.orbit_level_suggestion])])));
     box.append(el(doc, "div", "nur-orbit-item-meta",
       person.orbit_level_suggestion_reason ?? ""));
     const row = el(doc, "div", "nur-orbit-actions");
-    const accept = capsule(doc, "Accept", "quiet");
+    const accept = capsule(doc, uiCopy("Accept"), "quiet");
     accept.addEventListener(
       "click", () => actions.setBand(person.id, person.orbit_level_suggestion as OrbitBand),
     );
-    const keep = capsule(doc, "Keep as is", "quiet");
+    const keep = capsule(doc, uiCopy("Keep as is"), "quiet");
     keep.addEventListener(
       "click", () => actions.setBand(person.id, person.orbit_level ?? "PERIPHERAL"),
     );
@@ -940,16 +1090,16 @@ function orbitDetailPanel(doc: Document, state: OrbitState, actions: Actions): H
 
   const primary = el(doc, "div", "nur-orbit-actions");
   for (const [label, hint] of [
-    ["Open Talk", "Talk does not yet accept a person as context."],
-    ["Add Context", "Linking existing context from this panel is not built yet."],
-    ["Start Plan", "Creating a shared plan from Orbit is not built yet."],
-  ]) {
-    const button = capsule(doc, label, label === "Open Talk" ? "primary" : "default");
+    [uiSource("Open Talk"), uiSource("Talk does not yet accept a person as context.")],
+    [uiSource("Add Context"), uiSource("Linking existing context from this panel is not built yet.")],
+    [uiSource("Start Plan"), uiSource("Creating a shared plan from Orbit is not built yet.")],
+  ] as [UiCopyKey, UiCopyKey][]) {
+    const button = capsule(doc, uiCopy(label), label === uiSource("Open Talk") ? "primary" : "default");
     button.disabled = true;
-    button.title = hint;
+    button.title = uiCopy(hint);
     primary.append(button);
   }
-  const archive = capsule(doc, "Archive", "destructive");
+  const archive = capsule(doc, uiCopy("Archive"), "destructive");
   archive.addEventListener("click", () => actions.archive(person.id));
   primary.append(archive);
   panel.append(primary);
@@ -957,10 +1107,10 @@ function orbitDetailPanel(doc: Document, state: OrbitState, actions: Actions): H
   const tabs = el(doc, "div", "nur-orbit-tabs");
   tabs.setAttribute("role", "tablist");
   for (const [tab, label] of [
-    ["overview", "Overview"], ["context", "Shared Context"], ["threads", "Threads"],
-    ["plans", "Plans"], ["insights", "Insights"],
-  ] as [DetailTab, string][]) {
-    const node = el(doc, "button", "nur-orbit-tab", label);
+    ["overview", uiSource("Overview")], ["context", uiSource("Shared Context")], ["threads", uiSource("Threads")],
+    ["plans", uiSource("Plans")], ["insights", uiSource("Insights")],
+  ] as [DetailTab, UiCopyKey][]) {
+    const node = el(doc, "button", "nur-orbit-tab", uiCopy(label));
     node.type = "button";
     node.setAttribute("role", "tab");
     node.setAttribute("aria-selected", state.tab === tab ? "true" : "false");
@@ -987,13 +1137,13 @@ function overviewTab(
   if (person.user_summary) {
     const box = el(doc, "div", "nur-orbit-item");
     box.append(el(doc, "div", undefined, person.user_summary));
-    box.append(el(doc, "div", "nur-orbit-item-meta", "Written by you"));
+    box.append(el(doc, "div", "nur-orbit-item-meta", uiCopy("Written by you")));
     wrap.append(box);
   }
   if (person.nur_summary) {
     const box = el(doc, "div", "nur-orbit-item");
     box.append(el(doc, "div", undefined, person.nur_summary));
-    box.append(el(doc, "div", "nur-orbit-item-meta", "NUR observation, not your words"));
+    box.append(el(doc, "div", "nur-orbit-item-meta", uiCopy("NUR observation, not your words")));
     wrap.append(box);
   }
 
@@ -1001,14 +1151,14 @@ function overviewTab(
     const matching = state.signals.filter((s) => s.signal_kind === kind);
     const card = el(doc, "div", "nur-orbit-signal");
     const top = el(doc, "div", "nur-orbit-signal-top");
-    top.append(el(doc, "span", "nur-orbit-signal-name", kind.toLowerCase()));
+    top.append(el(doc, "span", "nur-orbit-signal-name", orbitSignalKindLabel(kind)));
     const best = matching.find((s) => s.basis === "USER_STATED") ?? matching[0];
     top.append(el(doc, "span", "nur-orbit-signal-value",
       best?.value !== null && best?.value !== undefined ? String(best.value) : "—"));
     card.append(top);
 
     if (!best) {
-      card.append(el(doc, "div", "nur-orbit-item-meta", "Nothing recorded"));
+      card.append(el(doc, "div", "nur-orbit-item-meta", uiCopy("Nothing recorded")));
       wrap.append(card);
       continue;
     }
@@ -1016,12 +1166,12 @@ function overviewTab(
     // Every basis present is shown. A stated reading and an inferred one are
     // different claims and neither is allowed to stand in for the other.
     for (const signal of matching) {
-      const badge = el(doc, "span", "nur-orbit-basis", BASIS_WORD[signal.basis] ?? signal.basis);
+      const badge = el(doc, "span", "nur-orbit-basis", uiCopy(BASIS_WORD[signal.basis] ?? uiSource("Unresolved")));
       badge.dataset.basis = signal.basis;
       card.append(badge);
     }
 
-    const why = capsule(doc, "Why is NUR showing this?", "quiet");
+    const why = capsule(doc, uiCopy("Why is NUR showing this?"), "quiet");
     why.dataset.orbitWhy = kind;
     why.setAttribute("aria-expanded", state.expandedWhy === kind ? "true" : "false");
     why.addEventListener("click", () => actions.toggleWhy(kind));
@@ -1030,9 +1180,11 @@ function overviewTab(
     if (state.expandedWhy === kind) {
       const box = el(doc, "div", "nur-orbit-why");
       for (const signal of matching) {
+        const basisLabel = uiCopy(BASIS_WORD[signal.basis] ?? uiSource("Unresolved"));
         box.append(el(doc, "div", "nur-orbit-item-meta",
-          `${BASIS_WORD[signal.basis] ?? signal.basis}`
-          + (signal.confidence !== null ? ` · confidence ${signal.confidence}` : "")));
+          signal.confidence !== null
+            ? uiFormat("{0} · confidence {1}", [basisLabel, signal.confidence])
+            : basisLabel));
         const evidence = signal.evidence ?? [];
         if (evidence.length) {
           const list = el(doc, "ul");
@@ -1041,12 +1193,12 @@ function overviewTab(
           }
           box.append(list);
         } else if (signal.basis === "USER_STATED") {
-          box.append(el(doc, "div", undefined, "You stated this directly."));
+          box.append(el(doc, "div", undefined, uiCopy("You stated this directly.")));
         }
         const against = signal.contradictory_evidence ?? [];
         if (against.length) {
           const doubt = el(doc, "div", "nur-orbit-why-doubt");
-          doubt.append(el(doc, "div", undefined, "Evidence against this reading:"));
+          doubt.append(el(doc, "div", undefined, uiCopy("Evidence against this reading:")));
           const list = el(doc, "ul");
           for (const item of against) list.append(el(doc, "li", undefined, JSON.stringify(item)));
           doubt.append(list);
@@ -1055,8 +1207,7 @@ function overviewTab(
       }
       if (matching.some((s) => s.basis === "NUR_INFERRED")) {
         box.append(el(doc, "div", "nur-orbit-why-doubt",
-          "NUR may be overgeneralizing from a small number of interactions. "
-          + "Review the evidence before treating this as settled."));
+          uiCopy("NUR may be overgeneralizing from a small number of interactions. Review the evidence before treating this as settled.")));
       }
       card.append(box);
     }
@@ -1065,8 +1216,7 @@ function overviewTab(
 
   if (!person.inference_allowed) {
     wrap.append(el(doc, "p", "nur-orbit-note",
-      "Inference is off for this person, so NUR records only what you state or what "
-      + "activity measures. Nothing here is a guess."));
+      uiCopy("Inference is off for this person, so NUR records only what you state or what activity measures. Nothing here is a guess.")));
   }
   return wrap;
 }
@@ -1075,17 +1225,17 @@ function contextTab(doc: Document, state: OrbitState): HTMLElement {
   const wrap = el(doc, "div");
   if (state.context.length === 0) {
     wrap.append(el(doc, "p", "nur-orbit-note",
-      "No context is linked to this person yet."));
+      uiCopy("No context is linked to this person yet.")));
     return wrap;
   }
   for (const link of state.context) {
     const card = el(doc, "div", "nur-orbit-item");
-    card.append(el(doc, "strong", undefined, String(link.source_type ?? "Context")));
+    card.append(el(doc, "strong", undefined, orbitContextSourceLabel(link.source_type ?? "CONTEXT")));
     if (link.link_reason) {
       card.append(el(doc, "div", undefined, String(link.link_reason)));
     }
     card.append(el(doc, "div", "nur-orbit-item-meta",
-      `${String(link.visibility_scope ?? "PRIVATE").replace(/_/g, " ").toLowerCase()} · `
+      ("" + uiFormat("{0} ·", [orbitContextVisibilityLabel(link.visibility_scope ?? "PRIVATE")]) + " ")
       + relativeDate(String(link.created_at ?? ""))));
     wrap.append(card);
   }
@@ -1095,16 +1245,16 @@ function contextTab(doc: Document, state: OrbitState): HTMLElement {
 function threadsTab(doc: Document, state: OrbitState): HTMLElement {
   const wrap = el(doc, "div");
   if (state.personThreads.length === 0) {
-    wrap.append(el(doc, "p", "nur-orbit-note", "No open threads with this person."));
+    wrap.append(el(doc, "p", "nur-orbit-note", uiCopy("No open threads with this person.")));
     return wrap;
   }
   for (const thread of state.personThreads) {
     const card = el(doc, "div", "nur-orbit-item");
     card.append(el(doc, "strong", undefined, thread.topic));
     card.append(el(doc, "div", "nur-orbit-item-meta",
-      `${thread.status.replace(/_/g, " ").toLowerCase()} · ${relativeDate(thread.last_event_at)}`));
+      uiFormat("{0} · {1}", [orbitThreadStatusLabel(thread.status), relativeDate(thread.last_event_at)])));
     if (thread.next_action) {
-      card.append(el(doc, "div", "nur-orbit-item-meta", `Next: ${thread.next_action}`));
+      card.append(el(doc, "div", "nur-orbit-item-meta", uiFormat("Next: {0}", [thread.next_action])));
     }
     wrap.append(card);
   }
@@ -1116,8 +1266,7 @@ function plansTab(doc: Document): HTMLElement {
   // Declared and honest: shared plans are a real object elsewhere in NUR, but
   // nothing links a plan to a person yet, so this shows no invented progress.
   wrap.append(el(doc, "p", "nur-orbit-note",
-    "Shared plans are not linked to people yet. When a plan names a participant it "
-    + "will appear here with its owner, milestones and Timeline connection."));
+    uiCopy("Shared plans are not linked to people yet. When a plan names a participant it will appear here with its owner, milestones and Timeline connection.")));
   return wrap;
 }
 
@@ -1125,8 +1274,7 @@ function insightsTab(doc: Document, state: OrbitState): HTMLElement {
   const wrap = el(doc, "div");
   if (state.insights.length === 0) {
     wrap.append(el(doc, "p", "nur-orbit-note",
-      "No relational insights yet. NUR records one only when it can show the evidence "
-      + "behind it and say where it might be wrong."));
+      uiCopy("No relational insights yet. NUR records one only when it can show the evidence behind it and say where it might be wrong.")));
     return wrap;
   }
   for (const insight of state.insights) {
@@ -1139,20 +1287,20 @@ function insightsTab(doc: Document, state: OrbitState): HTMLElement {
       card.append(list);
     }
     if (insight.confidence !== null && insight.confidence !== undefined) {
-      card.append(el(doc, "div", "nur-orbit-item-meta", `Confidence ${insight.confidence}`));
+      card.append(el(doc, "div", "nur-orbit-item-meta", uiFormat("Confidence {0}", [insight.confidence])));
     }
     if (insight.alternative_interpretation) {
       card.append(el(doc, "div", "nur-orbit-item-meta",
-        `Alternative reading: ${insight.alternative_interpretation}`));
+        uiFormat("Alternative reading: {0}", [insight.alternative_interpretation])));
     }
     if (insight.recommended_move) {
       card.append(el(doc, "div", "nur-orbit-item-meta",
-        `Suggested move: ${insight.recommended_move}`));
+        uiFormat("Suggested move: {0}", [insight.recommended_move])));
     }
     // Always last and always present — the schema will not store an insight
     // without it, so it can be rendered unconditionally.
     card.append(el(doc, "div", "nur-orbit-why-doubt",
-      `What NUR may be wrong about: ${String(insight.may_be_wrong_about ?? "")}`));
+      uiFormat("What NUR may be wrong about: {0}", [String(insight.may_be_wrong_about ?? "")])));
     wrap.append(card);
   }
   return wrap;
@@ -1212,14 +1360,16 @@ export async function renderV197Orbit(
   doc.body.classList.add(BODY_CLASS);
 
   const state: OrbitState = {
-    view: doc.defaultView && doc.defaultView.innerWidth <= 900 ? "list" : "orbit",
+    view: doc.defaultView && doc.defaultView.innerWidth <= 900
+      ? structuralValue("list")
+      : structuralValue("orbit"),
     field: EMPTY_FIELD,
     threads: [],
     query: "",
-    bandFilter: "ALL",
+    bandFilter: structuralValue("ALL"),
     selected: null,
-    tab: "overview",
-    sort: "band",
+    tab: structuralValue("overview"),
+    sort: structuralValue("band"),
     signals: [],
     context: [],
     insights: [],
@@ -1254,13 +1404,13 @@ export async function renderV197Orbit(
     },
     addPerson() {
       const view = doc.defaultView;
-      const name = view ? view.prompt("Who should join your Orbit?")?.trim() : null;
+      const name = view ? view.prompt(uiCopy("Who should join your Orbit?"))?.trim() : null;
       if (!name) return;
       void mutate(() => api.post("/orbits/people", { display_name: name }));
     },
     createGroup() {
       const view = doc.defaultView;
-      const name = view ? view.prompt("Name this circle")?.trim() : null;
+      const name = view ? view.prompt(uiCopy("Name this circle"))?.trim() : null;
       if (!name) return;
       void mutate(() => api.post("/orbit-groups", { name }));
     },
@@ -1272,9 +1422,7 @@ export async function renderV197Orbit(
       state.error = null;
       await loadField();
     } catch (error) {
-      // The server's own refusal text is shown rather than a generic failure:
-      // "this person is private-reference only" is the useful sentence.
-      state.error = error instanceof Error ? error.message : "That did not work.";
+      state.error = orbitVisibleFailure(error, uiSource("That did not work."), "mutation");
       paint();
     }
   }
@@ -1290,7 +1438,7 @@ export async function renderV197Orbit(
       state.error = null;
     } catch (error) {
       state.field = EMPTY_FIELD;
-      state.error = error instanceof Error ? error.message : "Orbit could not load.";
+      state.error = orbitVisibleFailure(error, uiSource("Orbit could not load."), "load field");
     }
     paint();
   }
@@ -1307,8 +1455,9 @@ export async function renderV197Orbit(
       state.context = context ?? [];
       state.insights = insights ?? [];
       state.personThreads = threads ?? [];
-    } catch {
+    } catch (error) {
       // Detail is supplementary. A failure here must not blank the field.
+      console.error("[NUR Orbit] load person detail", error);
       state.signals = [];
     }
     paint();
