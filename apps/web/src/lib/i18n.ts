@@ -383,6 +383,19 @@ export const CORE_COPY = Object.fromEntries(SUPPORTED_LOCALES.map((locale) => {
   }];
 })) as Record<SupportedLocale, { privateBoundary: string; askPlaceholder: string }>;
 
+export function coreCopyFor(
+  rawLocale: string | null | undefined,
+  requested: WritingPreference = "default",
+): { privateBoundary: string; askPlaceholder: string } {
+  const locale = normalizeLocale(rawLocale);
+  const variant = resolveWritingPreference(locale, requested);
+  if (locale === "en" && variant === "default") return CORE_COPY.en;
+  return {
+    privateBoundary: textFor(locale, variant, privateBoundarySource),
+    askPlaceholder: textFor(locale, variant, askPlaceholderSource),
+  };
+}
+
 export const V197_NAV_COPY = Object.fromEntries(SUPPORTED_LOCALES.map((locale) => {
   const variant = defaultVariant(locale);
   return [locale, localizeTree(enNavigation, locale, variant)];
@@ -413,14 +426,47 @@ export const CRITICAL_COPY = Object.fromEntries(SUPPORTED_LOCALES.map((locale) =
   }];
 })) as Record<SupportedLocale, CriticalCopy>;
 
-export function navigationCopyFor(rawLocale: string | null | undefined): NavigationCopy {
-  return V197_NAV_COPY[normalizeLocale(rawLocale)];
+export function navigationCopyFor(
+  rawLocale: string | null | undefined,
+  requested: WritingPreference = "default",
+): NavigationCopy {
+  const locale = normalizeLocale(rawLocale);
+  const variant = resolveWritingPreference(locale, requested);
+  if (locale === "en" && variant === "default") return V197_NAV_COPY.en;
+  return localizeTree(enNavigation, locale, variant) as NavigationCopy;
 }
 
-export function languageControlCopyFor(rawLocale: string | null | undefined): LanguageControlCopy {
-  return LANGUAGE_CONTROL_COPY[normalizeLocale(rawLocale)];
+export function languageControlCopyFor(
+  rawLocale: string | null | undefined,
+  requested: WritingPreference = "default",
+): LanguageControlCopy {
+  const locale = normalizeLocale(rawLocale);
+  const variant = resolveWritingPreference(locale, requested);
+  if (locale === "en" && variant === "default") return LANGUAGE_CONTROL_COPY.en;
+  const localized = localizeTree(enLanguageControls, locale, variant) as LanguageControlCopy;
+  return {
+    ...localized,
+    saved: (label: string) => textFor(locale, variant, "Saved: {{0}}.", { 0: label }),
+  };
 }
 
-export function criticalCopyFor(rawLocale: string | null | undefined): CriticalCopy {
-  return CRITICAL_COPY[normalizeLocale(rawLocale)];
+export function criticalCopyFor(
+  rawLocale: string | null | undefined,
+  requested: WritingPreference = "default",
+): CriticalCopy {
+  const locale = normalizeLocale(rawLocale);
+  const variant = resolveWritingPreference(locale, requested);
+  if (locale === "en" && variant === "default") return CRITICAL_COPY.en;
+  const localized = localizeTree(enCritical, locale, variant) as CriticalCopy;
+  return {
+    ...localized,
+    talk: {
+      ...localized.talk,
+      holdingPopulated: (count: number) => textFor(locale, variant, "{{0}} persisted Talk turns are available in this private ledger.", { 0: count }),
+    },
+    capsule: {
+      ...localized.capsule,
+      excludedNote: (count: number) => textFor(locale, variant, count === 1 ? "{{0}} source stays excluded — the recipient sees the boundary, never the content." : "{{0}} sources stay excluded — the recipient sees the boundary, never the content.", { 0: count }),
+    },
+  };
 }

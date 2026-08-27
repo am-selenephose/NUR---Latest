@@ -87,6 +87,6 @@ describe("canonical 35-locale i18n authority", () => {
       expect(collectLeaves(V197_NAV_COPY[locale]).every(text => text.trim().length > 0)).toBe(true);
       expect(collectLeaves(LANGUAGE_CONTROL_COPY[locale]).every(text => text.trim().length > 0)).toBe(true);
     }
-    expect(criticalCopyFor("not-a-locale")).toBe(CRITICAL_COPY.en);
+    expect(criticalCopyFor("not-a-locale")).toEqual(CRITICAL_COPY.en);
   });
 });

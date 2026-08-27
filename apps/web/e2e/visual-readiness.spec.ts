@@ -1,4 +1,4 @@
-import { copyFile, mkdir } from "node:fs/promises";
+import { copyFile, mkdir, readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { expect, test, type FrameLocator, type Locator, type Page, type Route } from "@playwright/test";
 import { installBundledFontPolicy } from "./helpers/nurMocks";
@@ -175,7 +175,11 @@ async function json(route: Route, body: unknown, status = 200) {
   await route.fulfill({ status, contentType: "application/json", body: JSON.stringify(body) });
 }
 
-async function installVisualMocks(page: Page, locale = "en") {
+async function installVisualMocks(
+  page: Page,
+  locale = "en",
+  writingPreference: "default" | "roman" | "script" = "default",
+) {
   await installBundledFontPolicy(page);
   await page.context().addCookies([{
     name: "nur_csrf",
@@ -190,7 +194,7 @@ async function installVisualMocks(page: Page, locale = "en") {
   }, locale);
   await page.route("**/api/v1/auth/me", route => json(route, {
     ...baseUser,
-    profile: { ...baseUser.profile, locale },
+    profile: { ...baseUser.profile, locale, writing_preference: writingPreference },
   }));
   await page.route("**/api/v1/profile/preferences", route => json(route, {
     locale,
@@ -199,13 +203,13 @@ async function installVisualMocks(page: Page, locale = "en") {
     default_boundary: "PRIVATE_ORBIT",
     active_orbit_id: orbit.id,
     omega_enabled: true,
-    writing_preference: "default",
+    writing_preference: writingPreference,
     timezone: "UTC",
   }));
   await page.route("**/healthz", route => json(route, { status: "ok" }));
   await page.route("**/api/v1/universe/live", route => json(route, {
     ...liveUniverse,
-    owner: { ...liveUniverse.owner, locale },
+    owner: { ...liveUniverse.owner, locale, writing_preference: writingPreference },
   }));
   await page.route("**/api/v1/universe/map-summary", route => json(route, null));
   await page.route("**/api/v1/universe/orbits-summary", route => json(route, null));
@@ -346,6 +350,25 @@ function universeFrame(page: Page): FrameLocator {
   return page.frameLocator("#nur-universe-stage");
 }
 
+function catalogFilename(locale: string, writingPreference: "default" | "roman" | "script") {
+  if (locale === "ur") return `ur-${writingPreference}.json`;
+  if (locale === "hi") return `hi-${writingPreference}.json`;
+  return `${locale}.json`;
+}
+
+async function activeCatalogCopy(
+  locale: string,
+  writingPreference: "default" | "roman" | "script",
+  key: string,
+) {
+  const webRoot = process.cwd().endsWith("/apps/web") ? process.cwd() : join(process.cwd(), "apps/web");
+  const raw = await readFile(join(webRoot, "src/i18n/catalogs", catalogFilename(locale, writingPreference)), "utf8");
+  const value = (JSON.parse(raw) as Record<string, unknown>)[key];
+  expect(typeof value, `${locale}:${writingPreference} has catalog value for ${key}`).toBe("string");
+  expect(String(value).trim(), `${locale}:${writingPreference} has nonblank catalog value for ${key}`).not.toBe("");
+  return String(value);
+}
+
 function overlaps(a: Awaited<ReturnType<typeof box>>, b: Awaited<ReturnType<typeof box>>, pad = 0) {
   return !(
     a.x + a.width + pad <= b.x ||
@@ -370,7 +393,7 @@ async function assertNoHorizontalOverflow(frame: FrameLocator) {
   expect(overflow.bodyScrollWidth, "body has no horizontal overflow").toBeLessThanOrEqual(overflow.bodyClientWidth + 1);
 }
 
-async function assertMetricReadable(metric: Locator, label: string, expected: RegExp) {
+async function assertMetricReadable(metric: Locator, label: string, expected: string | RegExp) {
   await expect(metric).toBeVisible();
   await expect(metric).toContainText(expected);
   const fit = await metric.evaluate(el => {
@@ -470,19 +493,25 @@ async function assertBoundaryControlsStyled(frame: FrameLocator) {
   }
 }
 
-async function assertRtlDirection(frame: FrameLocator) {
+async function assertUrduDirection(frame: FrameLocator, writingPreference: "roman" | "script") {
   const root = frame.locator("html");
+  const expectedDirection = writingPreference === "script" ? "rtl" : "ltr";
   await expect(root).toHaveAttribute("lang", "ur");
-  await expect(root).toHaveAttribute("dir", "rtl");
+  await expect(root).toHaveAttribute("dir", expectedDirection);
   const direction = await root.evaluate(el => ({
     direction: getComputedStyle(el).direction,
     writingPreference: document.body.dataset.nurWritingPreference,
   }));
-  expect(direction.direction).toBe("rtl");
-  expect(direction.writingPreference).toBe("default");
+  expect(direction.direction).toBe(expectedDirection);
+  expect(direction.writingPreference).toBe(writingPreference);
 }
 
-async function assertSystemsMapGeometry(page: Page, viewportLabel: string) {
+async function assertSystemsMapGeometry(
+  page: Page,
+  viewportLabel: string,
+  locale = "en",
+  writingPreference: "default" | "roman" | "script" = "default",
+) {
   const frame = universeFrame(page);
   await expect(frame.locator("#page-systems")).toBeVisible();
   const viewport = page.viewportSize();
@@ -574,8 +603,16 @@ async function assertSystemsMapGeometry(page: Page, viewportLabel: string) {
     expect(command.height, "mobile command grid has a visible layout box").toBeGreaterThanOrEqual(44);
 
     const metrics = frame.locator(".universe-hero-stats > span");
-    await assertMetricReadable(metrics.nth(1), "outcomes returned metric", /outcomes returned/i);
-    await assertMetricReadable(metrics.nth(2), "insights evolving metric", /insights evolving/i);
+    await assertMetricReadable(
+      metrics.nth(1),
+      "outcomes returned metric",
+      await activeCatalogCopy(locale, writingPreference, "ui.0747"),
+    );
+    await assertMetricReadable(
+      metrics.nth(2),
+      "insights evolving metric",
+      await activeCatalogCopy(locale, writingPreference, "ui.0748"),
+    );
     await expect(addControl, "mobile intentionally removes the desktop-only Add System control").toBeHidden();
     const mapPanel = await box("mobile systems map", frame.locator(".universe-map-panel"));
     expect(master.y, "master star begins inside the mobile map").toBeGreaterThanOrEqual(mapPanel.y - 1);
@@ -762,7 +799,7 @@ test("Today and Systems controls keep one proportional geometry contract with lo
 });
 
 test("RTL screenshots cover Talk, Systems, Share Orbit, and Capsule", async ({ page }, testInfo) => {
-  await installVisualMocks(page, "ur");
+  await installVisualMocks(page, "ur", "script");
   const mobileProject = testInfo.project.name.endsWith("-mobile");
   const viewport = mobileProject ? { width: 393, height: 852 } : { width: 1280, height: 720 };
   const suffix = mobileProject ? "mobile-393x852" : "1280x720";
@@ -771,7 +808,7 @@ test("RTL screenshots cover Talk, Systems, Share Orbit, and Capsule", async ({ p
 
   await page.goto("/talk");
   await expect(frame.locator("#page-talk")).toBeVisible();
-  await assertRtlDirection(frame);
+  await assertUrduDirection(frame, "script");
   await screenshot(page, `rtl-talk-${suffix}.png`);
 
   await page.goto("/systems");
@@ -789,6 +826,15 @@ test("RTL screenshots cover Talk, Systems, Share Orbit, and Capsule", async ({ p
   await page.goto("/capsule/cap-active");
   await expect(frame.locator("#nur-v197-adjunct-root")).toBeVisible();
   await screenshot(page, `rtl-capsule-${suffix}.png`);
+});
+
+test("Roman Urdu keeps Talk LTR", async ({ page }) => {
+  await installVisualMocks(page, "ur", "roman");
+  await page.setViewportSize({ width: 393, height: 852 });
+  const frame = universeFrame(page);
+  await page.goto("/talk");
+  await expect(frame.locator("#page-talk")).toBeVisible();
+  await assertUrduDirection(frame, "roman");
 });
 
 test("capsule room active chamber is polished and bounded", async ({ page }) => {
@@ -821,18 +867,18 @@ test("mobile visual evidence covers Systems, RTL Talk, and Share Orbit capture",
    */
   test.setTimeout(90_000);
   const prefix = testInfo.project.name === "webkit-mobile" ? "webkit" : "chromium";
-  await installVisualMocks(page, "ur");
+  await installVisualMocks(page, "ur", "script");
   await page.setViewportSize({ width: 393, height: 852 });
   const frame = universeFrame(page);
 
   await page.goto("/systems");
   await expect(frame.locator("#page-systems")).toBeVisible();
-  await assertSystemsMapGeometry(page, `${prefix}-393x852`);
+  await assertSystemsMapGeometry(page, `${prefix}-393x852`, "ur", "script");
   await screenshot(page, `systems-${prefix}-mobile-393x852.png`);
 
   await page.goto("/talk");
   await expect(frame.locator("#page-talk")).toBeVisible();
-  await assertRtlDirection(frame);
+  await assertUrduDirection(frame, "script");
   await screenshot(page, `rtl-talk-${prefix}-mobile-393x852.png`);
 
   await page.goto("/systems");

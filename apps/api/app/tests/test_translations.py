@@ -85,8 +85,14 @@ async def test_locale_catalog_has_35_truthful_slots_and_priority_writing_variant
         "Hindi",
     ]
     assert all(
-        variant["quality_state"] == "MACHINE_DRAFT"
+        variant["quality_state"] == ("TECHNICALLY_COMPLETE" if locale["locale"] == "en" else "MACHINE_DRAFT")
         for locale in body["locales"]
+        for variant in locale["variants"]
+    )
+    assert all(
+        variant["quality_state"] != "HUMAN_REVIEWED"
+        for locale in body["locales"]
+        if locale["locale"] != "en"
         for variant in locale["variants"]
     )
     assert "does not imply human review" in body["quality_claim"]

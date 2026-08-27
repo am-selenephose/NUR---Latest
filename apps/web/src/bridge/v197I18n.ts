@@ -1,6 +1,6 @@
 import manifest from "../i18n/source-manifest.json";
 import {
-  CORE_COPY,
+  coreCopyFor,
   LOCALE_META,
   criticalCopyFor,
   languageControlCopyFor,
@@ -106,8 +106,9 @@ export function applyV197Locale(
   const locale = resolveLocale(rawLocale);
   const resolvedWritingPreference = resolveWritingPreference(locale, writingPreference);
   setActiveV197Catalog(locale, resolvedWritingPreference);
-  const copy = navigationCopyFor(locale);
-  const critical = criticalCopyFor(locale);
+  const copy = navigationCopyFor(locale, resolvedWritingPreference);
+  const critical = criticalCopyFor(locale, resolvedWritingPreference);
+  const core = coreCopyFor(locale, resolvedWritingPreference);
   const direction = directionForPreference(locale, resolvedWritingPreference);
 
   document.documentElement.lang = locale;
@@ -142,9 +143,9 @@ export function applyV197Locale(
   setText(document, '[data-world-focus="community"] .clean-tool-button b', copy.community);
   setText(document, '[data-send="talk"] > span', critical.talk.send);
   setText(document, '[data-send="today"] > span', copy.send);
-  setPlaceholder(document, "#talk-input", CORE_COPY[locale].askPlaceholder);
-  setPlaceholder(document, "#today-input", CORE_COPY[locale].askPlaceholder);
-  setText(document, ".v172-boundary-current b", CORE_COPY[locale].privateBoundary);
+  setPlaceholder(document, "#talk-input", core.askPlaceholder);
+  setPlaceholder(document, "#today-input", core.askPlaceholder);
+  setText(document, ".v172-boundary-current b", core.privateBoundary);
 
   setText(document, "#page-talk .page-kicker", critical.talk.kicker);
   setTitleParts(document, "#talk-title", critical.talk.title, critical.talk.titleEmphasis);
@@ -177,7 +178,7 @@ function refreshWritingControl(
   preferred: WritingPreference,
 ): WritingPreference {
   const locale = resolveLocale(rawLocale);
-  const copy = languageControlCopyFor(locale);
+  const copy = languageControlCopyFor(locale, preferred);
   const allowed = writingOptionsForLocale(locale);
   const selected = resolveWritingPreference(locale, preferred);
   select.replaceChildren(...allowed.map(value => {
@@ -199,7 +200,7 @@ export function ensureV197LanguageControls(
   aiProvider = "disabled",
 ): void {
   const currentLocale = resolveLocale(rawLocale);
-  const copy = languageControlCopyFor(currentLocale);
+  const copy = languageControlCopyFor(currentLocale, writingPreference);
   const providerLabel = aiProvider === "openai"
     ? copy.providerConfigured
     : copy.providerDisabled;
