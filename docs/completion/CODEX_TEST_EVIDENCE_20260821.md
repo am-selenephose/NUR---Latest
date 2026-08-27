@@ -1,87 +1,58 @@
-# NUR Test Evidence - 2026-08-24 Internal Closure Candidate
+# NUR Test Evidence — Correction-Pass Closure
 
-Candidate identity: the commit containing this file. Results below were first
-established on the reviewed working tree and must be replayed by the complete
-gate on the clean commit before push. GitHub Actions must then pass on that
-exact pushed SHA.
+**Evidence refreshed:** 2026-08-28 (user timezone)
 
-The immediately preceding exact branch head
-`34902deb90ff8bb07ba8a16ba50e8b4c4e27f06f` passed GitHub Actions run
-`32644405657`: `api` and `web-and-security` both succeeded. The final report is
-still prohibited until the commit containing this file has the same green
-exact-head status-check rollup.
+The evidence below is anchored to the actual branch `codex/nur-final-closure-20260820` at final head `cb5ec5c93d1ded3be203b46eee9354074647f418`. The branch remains PR #5, OPEN and DRAFT. No merge or tag was performed.
 
-## Static And Contract Evidence
+## Static and contract evidence
 
 | Command or gate | Result |
 | --- | --- |
 | API Ruff, full tree | PASS |
-| API pytest | PASS: 1109 passed in 197.13s |
-| OpenAPI/client drift | PASS: 144 client operations, 420 OpenAPI operations, 0 missing |
-| Migration graph/head | PASS: single head `0061_pw_delivery_resilience` |
+| API pytest, full suite | **PASS: 1115 passed** |
+| Agency bridge and locale-preference integration tests | **PASS: 19 passed** |
+| OpenAPI/client drift | PASS |
+| Migration graph/head | PASS |
 | Secret scan | PASS |
 | Web TypeScript | PASS |
-| Web unit tests | PASS: 26 files, 132 tests |
-| Web production build | PASS: 51 modules; chunk-size advisory only |
-| Mocked Playwright readiness | PASS: 19 passed, 1 intentional skip, 0 failed |
+| Web unit tests | **PASS: 27 files, 135 tests** |
+| Web production build | PASS; Vite emitted only the known large-bundle advisory |
+| Mocked Playwright readiness | **PASS: 21 passed, 1 intentional desktop-only skip, 0 failed** |
 | Mobile TypeScript | PASS |
-| npm audit high | PASS: 0 vulnerabilities |
-| Mutation security matrix | PASS |
-| SBOM freshness and fresh-extract package | PASS |
-| `nur-gate` shell contracts | PASS: 17 gate contracts |
-| ShellCheck | PASS |
-| Locale catalog/key completeness | PASS: 35 declared locale slots |
-| Locale behavior | PASS: Roman Urdu after durable hydration, RTL and deterministic English fallback |
-| Locale extraction | PASS: TypeScript AST test 2/2; `I18N_EXTRACTION=PASS scanned=1 violations=0` |
+| npm audit high | **PASS: 0 vulnerabilities** |
+| Locale catalog/key completeness | **PASS: 35 locale IDs, 37 variants, 944 keys; exact parity** |
+| Locale extraction | **PASS: 29 UI-producing bridge modules scanned, 0 raw-copy violations** |
+| Locale behavior | PASS: strict offline bundled lookup, no supported-locale English fallback, writing-variant validation, RTL/Roman behavior |
 
-## Real-Stack Evidence
+## Agency role-projection evidence
 
-All rows use production Nginx, FastAPI, PostgreSQL and Redis; worker/Beat are
-included where the behavior requires them. HTTP behavior is not intercepted,
-except that the fictional external `billing.test` destination is held locally
-after the real backend checkout response.
+The real `submit_workflow_proposal()` bridge forwards `WorkflowStepProposal.role.value` into `ProposedStep`. The compiler preserves the role in `CompiledStep`, and persistence writes the compiled role into `AgentStep` without inventing a fallback role.
 
-| Scenario | Result |
+The targeted integration suite proves an implementer-to-security-reviewer DAG preserves both roles in compiled and persisted rows. It also proves, through the real bridge, that a mutating security reviewer is rejected, same-role self-verification is rejected, a verifier without a subject is rejected, and dangling/cyclic dependencies are rejected. The targeted Agency and locale-preference set passed 19/19, followed by the full API regression pass of 1115/1115.
+
+## Browser and localization evidence
+
+The deterministic Chromium desktop all-35 release matrix passed 74/74 tests, including locale persistence, writing-variant behavior, preservation of user/model content, overflow checks, and Map/Orbit/Timeline/Insights route surfaces. The representative mobile localization suite passed 21/21; the representative desktop localization command executed in CI and passed 9/9. Route-surface checks passed on desktop and mobile for German, Arabic, Roman Urdu, and Simplified Chinese.
+
+Urdu script is explicitly RTL and Roman Urdu is explicitly LTR. Hindi Roman and script are LTR; Arabic and Persian are RTL. Unsupported writing choices are filtered out. Visual assertions read expected values from the precise active catalog rather than accepting English or using language-detection heuristics. User-authored and model-generated content is preserved during static UI language changes.
+
+## Exact-head GitHub Actions
+
+[NUR Readiness run 33072481729](https://github.com/am-selenephos/NUR---Latest/actions/runs/33072481729) completed successfully on the exact final head `cb5ec5c93d1ded3be203b46eee9354074647f418`.
+
+| Job | Result |
 | --- | --- |
-| Canonical Phase-H lifecycle | PASS: 4, with 2 project-intentional mobile lifecycle skips |
-| Deterministic Talk answer/replay/cancel | PASS: 1 in 12.9s |
-| Agency APPROVE/EDIT/REJECT and durable verified result | PASS: 3 |
-| Focused Plan/Agency append-only lifecycle after backend event fix | PASS: 1 in 14.2s |
-| Billing real checkout handoff and no premature entitlement | PASS: 1 in 9.6s |
-| Capsule durability | PASS: 10 consecutive create/reload/isolation cycles |
-| Runtime/performance/accessibility matrix | PASS: 7, with 5 intentional applicability skips |
-| WebKit mobile routes | PASS: 2 |
-| API, worker, Beat and Redis crash/restart drills | PASS |
-| DR backup/restore | PASS: 192 tables hashed, 2 object digests; backup 196ms, restore 1777ms |
-| G11 internal gate steps | PASS: API translations, V197 language/accessibility browser suite, extraction |
+| `web-and-security` | SUCCESS; representative localization step executed and passed 9/9 |
+| `api` | SUCCESS |
 
-G11's final verdict remains `FOUNDER_ACTION_REQUIRED`, solely because an agent
-cannot truthfully mark its own translations native-reviewed. That external
-review boundary is not an internal test failure.
+The web job executed the required typecheck, unit, extraction, catalog parity, build, mocked E2E, representative localization E2E, mobile typecheck, and high-severity audit gates. The API job completed successfully with the PostgreSQL/Redis-backed suite.
 
-The diagnostic runs that exposed real defects were retained in the engineering
-log but are not counted as green evidence: popup success was initially
-misclassified as blocked, initial popup navigation raced `about:blank`, and the
-Mind-to-Agency bridge initially omitted the first two lifecycle events. Each
-root cause was fixed without weakening assertions, force-clicking, arbitrary
-sleeps or timeout inflation.
+## Human-review and infrastructure boundaries
 
-## Exact Candidate Gate
+All non-English catalogs remain `MACHINE_DRAFT / HUMAN_REVIEW_PENDING`; no non-English locale or variant is labeled `HUMAN_REVIEWED`. Native-speaker review is an external quality gate, not a fabricated internal pass.
 
-Run from repository root on a clean commit:
+A local WebKit attempt was infrastructure-limited by missing host libraries. Chromium desktop and mobile acceptance is green; the WebKit limitation is recorded as an environment hold rather than a product assertion failure.
 
-```bash
-bash infra/scripts/nur-gate.sh G01_STATIC
-NUR_REAL_STACK_BUILD_NETWORK=host NUR_REAL_STACK_SOAK=1 bash infra/scripts/real-stack-release-gate.sh
-```
+## Final classification
 
-The explicit build network records this workstation's Docker bridge DNS
-failure (`EAI_AGAIN` against `registry.npmjs.org`). A clean container probe
-proved host-network resolution before the rerun. Runtime services and all test
-traffic remained on the release gate's isolated Compose network.
-
-Together these commands include static contracts, real-stack browser proof,
-production serving, performance/accessibility, crash recovery, DR and the exact
-10-minute soak. Push is prohibited if either command fails. After push,
-`.github/workflows/readiness.yml` must succeed on the same SHA before K2 is
-accepted in the final report.
+All internally solvable correction-pass items are verified. The resulting implementation verdict is `NUR_INTERNAL_COMPLETE_EXTERNAL_BLOCKED`: external native-language review, live-provider/deployment evidence, and independent final review remain open, while founder-only merge/main-CI/tag actions remain intentionally unperformed.

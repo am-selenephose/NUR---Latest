@@ -1,62 +1,61 @@
 {
-  "schema_version": 2,
-  "generated_at": "2026-08-24",
-  "phase": "final_closure_candidate",
+  "schema_version": 3,
+  "generated_at": "2026-08-28",
+  "phase": "correction_pass_closure",
   "repository": "am-selenephos/NUR---Latest",
   "remote": "https://github.com/am-selenephos/NUR---Latest.git",
   "base_branch": "main",
   "completion_branch": "codex/nur-final-closure-20260820",
-  "pre_closure_sha": "5ac83100a4cd4cc52cea9af81fc938d1b308003f",
   "candidate_identity": "COMMIT_CONTAINING_THIS_STATE",
   "draft_pr": {
     "number": 5,
     "url": "https://github.com/am-selenephos/NUR---Latest/pull/5",
-    "state": "OPEN_DRAFT",
-    "pre_closure_exact_head_ci_run": 32644405657,
-    "pre_closure_exact_head_ci_sha": "34902deb90ff8bb07ba8a16ba50e8b4c4e27f06f",
-    "pre_closure_exact_head_ci": "PASS",
-    "candidate_exact_head_ci": "AUTHORITY_IS_PR_5_STATUS_CHECK_ROLLUP; FINAL_REPORT_PROHIBITED_UNLESS_GREEN"
+    "state": "OPEN_DRAFT_UNMERGED",
+    "exact_head_ci_run": 33072481729,
+    "exact_head_ci_sha": "cb5ec5c93d1ded3be203b46eee9354074647f418",
+    "exact_head_ci": "PASS",
+    "final_report_requires_green_exact_head": true
   },
   "canonical_v197": {
     "path": "apps/web/public/v197/NUR_V197_CHECKBOX_TICK_RESTORED.html",
-    "sha256": "397c302579472e60f5bd667546a96b6e3f262aa40bd932d10c1946e13b046dd2",
     "redesigned_by_closure": false
   },
-  "dependency_authority": {
-    "package_lock_sha256": "d8cce9f3614d615e11c62976b203fb6b439bf9d50c8b17c469bf4d23f05c0baf",
-    "api_requirements_lock_sha256": "4b005c5d9499b06a2d58635df9f7e681843426936c12c46c5299c8b9b37ffc9a"
-  },
-  "repository_census_after_candidate_commit": {
-    "tracked_files": 993,
-    "api_migrations": 61,
-    "api_test_modules": 117,
-    "web_e2e_specs": 63,
-    "migration_head": "0061_pw_delivery_resilience"
+  "repository_contract": {
+    "supported_locale_ids": 35,
+    "writing_variants": 37,
+    "canonical_static_ui_keys": 944,
+    "frontend_catalog_authority": "apps/web/src/i18n/schema.ts + catalog.ts + catalogs/*.json",
+    "render_time_translation_dependency": "NONE",
+    "supported_locale_english_fallback": false,
+    "user_and_model_content_auto_translated": false
   },
   "candidate_evidence": {
     "secret_scan": "PASS",
     "api_ruff": "PASS",
-    "api_pytest": "PASS: 1109 passed",
-    "openapi_drift": "PASS: 144 client operations; 420 OpenAPI operations; 0 missing",
+    "api_pytest": "PASS: 1115 passed",
+    "agency_targeted_integration": "PASS: 19 passed; exact role projection, persistence, verifier and dependency rejection",
+    "openapi_drift": "PASS",
     "web_typecheck": "PASS",
-    "web_unit": "PASS: 26 files; 132 tests",
-    "web_build": "PASS: 51 modules; advisory chunk warning only",
-    "web_e2e_mocked": "PASS: 19 passed; 1 intentional skip; 0 failed",
+    "web_unit": "PASS: 27 files; 135 tests",
+    "web_build": "PASS: known large-bundle advisory only",
+    "web_e2e_mocked": "PASS: 21 passed; 1 intentional desktop-only skip; 0 failed",
     "mobile_typecheck": "PASS",
     "npm_audit_high": "PASS: 0 vulnerabilities",
-    "talk_real_stack": "PASS: answer, replay, cancel and reload",
-    "agency_real_stack": "PASS: APPROVE, EDIT, REJECT, worker verification and reload",
-    "billing_real_stack": "PASS: real backend handoff; no premature entitlement",
-    "capsule_durability": "PASS: 10 consecutive cycles",
-    "webkit_mobile": "PASS: 2",
-    "crash_recovery": "PASS: API, worker, Beat and Redis",
-    "dr_restore": "PASS: 192 tables and 2 object digests",
-    "localization_behavior": "PASS: 35 complete locale slots; Roman Urdu post-hydration; fallback and RTL",
-    "localization_extraction": "PASS: TypeScript AST scan; zero direct locale-sensitive DOM copy literals",
-    "g11_internal_steps": "PASS: API translations, V197 language/accessibility browser suite, extraction",
-    "g11_final_boundary": "FOUNDER_ACTION_REQUIRED: independent native-language review",
-    "exact_commit_release_gate": "FINAL_REPORT_PROHIBITED_UNLESS_GREEN",
-    "exact_head_github_actions": "AUTHORITY_IS_PR_5_STATUS_CHECK_ROLLUP"
+    "localization_catalog_parity": "PASS: 35 locale IDs; 37 variants; 944 keys; 0 errors",
+    "localization_extraction": "PASS: 29 UI-producing bridge modules scanned; 0 violations",
+    "localization_browser_matrix": "PASS: Chromium desktop 74/74; mobile 21/21",
+    "localization_representative_desktop": "PASS: 9/9",
+    "localization_rtl_variants": "PASS: Urdu script RTL; Roman Urdu LTR; Hindi LTR; Arabic/Persian RTL",
+    "agency_role_projection": "PASS: WorkflowRole preserved into ProposedStep, CompiledStep, and persisted AgentStep",
+    "agency_verifier_safety": "PASS: mutating verifier, self-verification, subjectless verifier, dangling and cyclic dependency rejection",
+    "exact_head_github_actions": "PASS: run 33072481729 on SHA cb5ec5c93d1ded3be203b46eee9354074647f418; api and web-and-security SUCCESS",
+    "representative_ci_step": "EXECUTED_AND_PASSED: 9/9"
+  },
+  "human_review_boundary": {
+    "non_english_catalog_quality": "MACHINE_DRAFT",
+    "human_review": "HUMAN_REVIEW_PENDING",
+    "non_english_human_reviewed": false,
+    "webkit_local_hold": "HOST_DEPENDENCY_LIMITATION_ONLY"
   },
   "completion": {
     "total": 82,
@@ -71,8 +70,8 @@
   },
   "remaining_internal": [],
   "remaining_external": [
-    "H Localization: independent native-language review for the polished locale tier.",
-    "J6 Live provider gate: approved OpenAI credential and eligible model plus deployed transactional email, merchant billing, notification, research and production-like storage receipts where those providers are intended.",
+    "H Localization: independent native-language review for all machine-draft locale and writing-variant catalogs.",
+    "J6 Live provider/deployment gate: approved live AI credential/model and intended deployed provider receipts.",
     "J10 Independent final review."
   ],
   "remaining_founder": [

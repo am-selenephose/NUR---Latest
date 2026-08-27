@@ -43,7 +43,7 @@ The visual reconciliation also made locale writing preference an end-to-end conc
 
 ## Exact-head GitHub Actions
 
-Exact-head NUR Readiness run **33071721912** for commit `6dfe557ba40f39231808313f0d9a090b2786f0c2` completed successfully with both required jobs green:
+Exact-head NUR Readiness run **33072481729** for implementation commit `cb5ec5c93d1ded3be203b46eee9354074647f418` completed successfully with both required jobs green before this evidence-only documentation synchronization:
 
 | Job | Result |
 |---|---|
