@@ -25,6 +25,22 @@ const TAU = Math.PI * 2;
 const GOLD = new THREE.Color(0xffd35a);
 const IVORY = new THREE.Color(0xfffae8);
 const GALAXY_STAR_SCALE = 1.82;
+const MOBILE_FRAME_GAP_MS = 33;
+const MAX_ANIMATION_DELTA_SECONDS = .05;
+
+export function celestialDeltaSeconds(now: number, previous: number): number {
+  if (previous <= 0) return 1 / 60;
+  return THREE.MathUtils.clamp((now - previous) / 1_000, 0, MAX_ANIMATION_DELTA_SECONDS);
+}
+
+export function shouldPaintCelestialFrame(
+  viewportWidth: number,
+  now: number,
+  lastPaintAt: number,
+): boolean {
+  if (viewportWidth >= 700 || lastPaintAt <= 0) return true;
+  return now - lastPaintAt >= MOBILE_FRAME_GAP_MS;
+}
 
 type PointSeed = {
   x: number;
@@ -700,9 +716,9 @@ function updateSizes(controller: CelestialController): void {
 
 function updateAnimation(controller: CelestialController, now: number): void {
   const seconds = now / 1_000;
-  const elapsed = controller.lastAnimationAt ? now - controller.lastAnimationAt : 16.667;
+  const deltaSeconds = celestialDeltaSeconds(now, controller.lastAnimationAt);
   controller.lastAnimationAt = now;
-  const frameScale = THREE.MathUtils.clamp(elapsed / 16.667, .25, 2.5);
+  const frameScale = deltaSeconds * 60;
   const brainEase = 1 - Math.pow(.72, frameScale);
   controller.yaw += (controller.targetYaw - controller.yaw) * brainEase;
   controller.pitch += (controller.targetPitch - controller.pitch) * brainEase;
@@ -781,10 +797,10 @@ function updateAnimation(controller: CelestialController, now: number): void {
       : Math.max(0, 1 - (elapsed - .48) / .8) * .34;
     if (elapsed > 1.3) controller.mode = "live";
   } else {
-    controller.burst *= .91;
-    controller.absorb *= .9;
+    controller.burst *= Math.pow(.91, frameScale);
+    controller.absorb *= Math.pow(.9, frameScale);
   }
-  controller.energy *= .94;
+  controller.energy *= Math.pow(.94, frameScale);
 
   for (const material of [controller.galaxyMaterial, controller.brainMaterial]) {
     material.uniforms.uTime.value = seconds;
@@ -852,9 +868,11 @@ function requestFrame(controller: CelestialController): void {
   controller.raf = controller.frameWindow.requestAnimationFrame(now => {
     controller.raf = null;
     if (controller.disposed || !stageIsVisible(controller)) return;
-    const mobile = Math.max(controller.frameWindow.innerWidth, controller.frameWindow.parent.innerWidth || 0) < 700;
-    const minimumGap = mobile ? 33 : 20;
-    if (controller.lastPaintAt && now - controller.lastPaintAt < minimumGap) {
+    const viewportWidth = Math.max(
+      controller.frameWindow.innerWidth,
+      controller.frameWindow.parent.innerWidth || 0,
+    );
+    if (!shouldPaintCelestialFrame(viewportWidth, now, controller.lastPaintAt)) {
       requestFrame(controller);
       return;
     }
