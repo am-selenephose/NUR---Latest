@@ -48,6 +48,124 @@ export interface V197ThemeController {
   dispose(): void;
 }
 
+const V197_THEME_GESTURE_COMMIT_MS = 280;
+const V197_THEME_WORLD_SURFACE = ".universe-map-panel";
+const V197_THEME_GESTURE_BLOCKERS = [
+  "a",
+  "button",
+  "input",
+  "textarea",
+  "select",
+  "label",
+  "summary",
+  "dialog",
+  "[contenteditable]",
+  "[role='button']",
+  "[role='dialog']",
+  "[data-action]",
+  "[data-page]",
+  "[data-world-focus]",
+  "[data-world-tab]",
+  "[data-owner-route]",
+  "#nur-brain-canvas",
+  "#front-nur-star",
+  ".nur-panel",
+  ".universe-panel",
+  ".universe-card",
+  ".universe-insight-panel",
+  ".nur-adjunct-root",
+  ".nur-rail",
+  ".clean-left-rail",
+  ".clean-right-rail",
+  ".nur-topbar",
+  ".global-composer",
+  ".scope-modal",
+  ".modal",
+  ".share-sheet",
+].join(",");
+
+function isEligibleThemeTarget(target: EventTarget | null): boolean {
+  const element = target as Element | null;
+  if (typeof element?.closest !== "function") return false;
+  // The constellation's outer world stage also carries the generic panel class.
+  // Only its directly exposed empty glass is eligible; descendants stay guarded.
+  if (element.matches(V197_THEME_WORLD_SURFACE)) return true;
+  return element.closest(V197_THEME_GESTURE_BLOCKERS) === null;
+}
+
+function installThemeGestures(
+  document: Document,
+  advance: () => void,
+  reset: () => void,
+): () => void {
+  const frameWindow = document.defaultView;
+  if (!frameWindow) return () => undefined;
+
+  let pendingDouble: number | null = null;
+  let pointerStart: { x: number; y: number } | null = null;
+  let dragged = false;
+  let suppressNextClick = false;
+
+  const cancelPendingDouble = () => {
+    if (pendingDouble === null) return;
+    frameWindow.clearTimeout(pendingDouble);
+    pendingDouble = null;
+  };
+  const onClick = (event: MouseEvent) => {
+    if (event.detail >= 3) {
+      cancelPendingDouble();
+      if (isEligibleThemeTarget(event.target) && !suppressNextClick) reset();
+      suppressNextClick = false;
+      return;
+    }
+    if (suppressNextClick) {
+      suppressNextClick = false;
+      cancelPendingDouble();
+      return;
+    }
+    if (event.detail !== 2 || !isEligibleThemeTarget(event.target)) return;
+    cancelPendingDouble();
+    // Native click detail owns click counting. This one short commit window only
+    // lets a native third click cancel the pending double-click visual change.
+    pendingDouble = frameWindow.setTimeout(() => {
+      pendingDouble = null;
+      advance();
+    }, V197_THEME_GESTURE_COMMIT_MS);
+  };
+  const onPointerDown = (event: PointerEvent) => {
+    if (event.button !== 0 || !isEligibleThemeTarget(event.target)) {
+      pointerStart = null;
+      dragged = false;
+      return;
+    }
+    pointerStart = { x: event.clientX, y: event.clientY };
+    dragged = false;
+  };
+  const onPointerMove = (event: PointerEvent) => {
+    if (!pointerStart || dragged) return;
+    dragged = Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y) > 8;
+  };
+  const onPointerEnd = () => {
+    if (pointerStart && dragged) suppressNextClick = true;
+    pointerStart = null;
+    dragged = false;
+  };
+
+  document.addEventListener("click", onClick, true);
+  document.addEventListener("pointerdown", onPointerDown, true);
+  document.addEventListener("pointermove", onPointerMove, true);
+  document.addEventListener("pointerup", onPointerEnd, true);
+  document.addEventListener("pointercancel", onPointerEnd, true);
+  return () => {
+    cancelPendingDouble();
+    document.removeEventListener("click", onClick, true);
+    document.removeEventListener("pointerdown", onPointerDown, true);
+    document.removeEventListener("pointermove", onPointerMove, true);
+    document.removeEventListener("pointerup", onPointerEnd, true);
+    document.removeEventListener("pointercancel", onPointerEnd, true);
+  };
+}
+
 function isThemeAccent(value: string | null): value is V197ThemeAccent {
   return value !== null && (V197_THEME_CYCLE as readonly string[]).includes(value);
 }
@@ -104,14 +222,14 @@ export function createV197ThemeController(
   rootDocument: Document,
   storage: V197ThemeStorage | null = storageFor(rootDocument),
 ): V197ThemeController {
-  const documents = new Set<Document>();
+  const documents = new Map<Document, () => void>();
   let accent = readStoredAccent(storage);
   let disposed = false;
 
   const synchronize = (emit: boolean): void => {
-    for (const attachedDocument of documents) applyTheme(attachedDocument, accent);
+    for (const attachedDocument of documents.keys()) applyTheme(attachedDocument, accent);
     if (emit) {
-      for (const attachedDocument of documents) dispatchThemeChange(attachedDocument, accent);
+      for (const attachedDocument of documents.keys()) dispatchThemeChange(attachedDocument, accent);
     }
   };
 
@@ -132,9 +250,16 @@ export function createV197ThemeController(
 
     attach(document) {
       if (disposed) return () => undefined;
-      documents.add(document);
+      if (documents.has(document)) return () => undefined;
+      const removeGestures = installThemeGestures(
+        document,
+        () => controller.advance(),
+        () => controller.reset(),
+      );
+      documents.set(document, removeGestures);
       applyTheme(document, accent);
       return () => {
+        documents.get(document)?.();
         documents.delete(document);
       };
     },
@@ -161,6 +286,7 @@ export function createV197ThemeController(
 
     dispose() {
       disposed = true;
+      for (const removeGestures of documents.values()) removeGestures();
       documents.clear();
     },
   };

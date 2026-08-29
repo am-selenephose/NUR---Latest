@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { V197Session } from "./v197ApiClient";
 import type { V197AgenticWorkflowDetail } from "./v197Agentic";
 import { renderV197Adjunct } from "./v197Adjuncts";
+import type { V197ThemeController } from "./v197Theme";
 
 const session: V197Session = {
   id: "11111111-1111-1111-1111-111111111111",
@@ -14,6 +15,15 @@ const session: V197Session = {
     kind: "PERSONAL",
     status: "ACTIVE",
   },
+};
+
+const theme: V197ThemeController = {
+  accent: "original",
+  attach: () => () => undefined,
+  setAccent: () => undefined,
+  advance: () => "original",
+  reset: () => undefined,
+  dispose: () => undefined,
 };
 
 function workflow(state: V197AgenticWorkflowDetail["state"]): V197AgenticWorkflowDetail {
@@ -68,7 +78,7 @@ describe("V197 Agent detail durable polling", () => {
         .mockResolvedValueOnce([event(7, "RUNNING"), event(8, "SUCCEEDED")]),
     };
 
-    await renderV197Adjunct(document, "/agents/workflow-1", api as never, null, vi.fn(), session);
+    await renderV197Adjunct(document, "/agents/workflow-1", api as never, null, vi.fn(), session, theme);
     expect(api.agenticWorkflowEvents).toHaveBeenNthCalledWith(1, "workflow-1");
 
     await vi.advanceTimersByTimeAsync(1_500);
@@ -84,7 +94,7 @@ describe("V197 Agent detail durable polling", () => {
       agenticWorkflowEvents: vi.fn().mockResolvedValue([event(8, "SUCCEEDED")]),
     };
 
-    await renderV197Adjunct(document, "/agents/workflow-1", api as never, null, vi.fn(), session);
+    await renderV197Adjunct(document, "/agents/workflow-1", api as never, null, vi.fn(), session, theme);
     await vi.advanceTimersByTimeAsync(3_000);
 
     expect(api.agenticWorkflowEvents).toHaveBeenCalledTimes(1);
@@ -98,7 +108,7 @@ describe("V197 Agent detail durable polling", () => {
         .mockResolvedValueOnce([]),
     };
 
-    await renderV197Adjunct(document, "/agents/workflow-1", api as never, null, vi.fn(), session);
+    await renderV197Adjunct(document, "/agents/workflow-1", api as never, null, vi.fn(), session, theme);
     Object.defineProperty(document, "hidden", { configurable: true, value: true });
     await vi.advanceTimersByTimeAsync(1_500);
 
@@ -122,9 +132,9 @@ describe("V197 Agent detail durable polling", () => {
         .mockReturnValueOnce(pendingPoll),
     };
 
-    await renderV197Adjunct(document, "/agents/workflow-1", api as never, null, vi.fn(), session);
+    await renderV197Adjunct(document, "/agents/workflow-1", api as never, null, vi.fn(), session, theme);
     await vi.advanceTimersByTimeAsync(1_500);
-    await renderV197Adjunct(document, "/systems", api as never, null, vi.fn(), session);
+    await renderV197Adjunct(document, "/systems", api as never, null, vi.fn(), session, theme);
     resolvePoll?.([event(8, "SUCCEEDED")]);
     await vi.runAllTicks();
 

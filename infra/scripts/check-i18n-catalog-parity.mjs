@@ -16,7 +16,7 @@ const sourceByKey = new Map(manifest.map((row) => [row.id, row.source]));
 const parsedLocales = [...schemaText.matchAll(/export const SUPPORTED_LOCALES = \[([\s\S]*?)\] as const;/g)][0]?.[1]?.match(/"([^"]+)"/g)?.map((value) => value.slice(1, -1)) ?? [];
 if (parsedLocales.join("|") !== locales.join("|")) errors.push(`supported locale order mismatch: ${parsedLocales.join(",")}`);
 if (locales.length !== 35 || new Set(locales).size !== 35) errors.push(`expected exactly 35 locales, got ${locales.length}`);
-  if (manifest.length !== 944 || new Set(keys).size !== manifest.length) errors.push(`expected 944 unique manifest keys, got ${manifest.length}`);
+if (manifest.length !== 953 || new Set(keys).size !== manifest.length) errors.push(`expected 953 unique manifest keys, got ${manifest.length}`);
 const loaded = new Map();
 for (const locale of locales) {
   for (const variant of variantMap[locale]) {

@@ -942,5 +942,14 @@
   "ui.1785": "Recent reviews",
   "ui.1786": "Deterministic — computed from your own recorded timestamps, no model consulted.",
   "ui.1787": "Select something in time to explore its meaning, dependencies and outcome.",
-  "ui.1788": "Reschedule history"
+  "ui.1788": "Reschedule history",
+  "ui.1789": "Appearance",
+  "ui.1790": "Original",
+  "ui.1791": "Yellow",
+  "ui.1792": "Green",
+  "ui.1793": "Blue",
+  "ui.1794": "Violet",
+  "ui.1795": "Red",
+  "ui.1796": "Orange",
+  "ui.1797": "Indigo"
 }

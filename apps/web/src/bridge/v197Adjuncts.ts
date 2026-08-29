@@ -22,6 +22,11 @@ import V197_ADJUNCT_FORENSIC_CSS from "../styles/v197-adjunct-forensic.css?raw";
 import { markV197HolographicWordmark } from "./v197Brand";
 import { createV197StarSeal } from "./v197StarSeal";
 import {
+  V197_THEME_CYCLE,
+  type V197ThemeAccent,
+  type V197ThemeController,
+} from "./v197Theme";
+import {
   DRAWER_SECTIONS,
   buildApprovalCard,
   describeRisk,
@@ -293,6 +298,7 @@ async function renderSettings(
   api: V197ApiClient,
   snapshot: V197BridgeSnapshot,
   refreshSnapshot: RefreshSnapshot,
+  theme: V197ThemeController,
 ): Promise<void> {
   const shell = mount(document, v197Copy("Your NUR, held on your terms."), v197Copy("Language, model access, motion and learning preferences stay in your owner-scoped ledger."));
   const grid = element(document, "div", "nur-adjunct-grid");
@@ -357,6 +363,34 @@ async function renderSettings(
   writingLabel.append(writing);
   language.append(localeLabel, writingLabel);
   language.append(status(document, v197Copy("Roman Urdu is stored as locale=ur with writing_preference=roman. Draft locales are labelled honestly.")));
+
+  const appearance = panel(document, v197Copy("Appearance"), v197Copy("Presence"));
+  const themeLabel = element(document, "label", "nur-adjunct-field");
+  themeLabel.append(element(document, "span", undefined, v197Copy("Appearance")));
+  const themeSelect = element(document, "select", "nur-adjunct-select") as HTMLSelectElement;
+  themeSelect.dataset.adjunctControl = "theme-accent";
+  const themeLabels: Record<V197ThemeAccent, string> = {
+    original: v197Copy("Original"),
+    yellow: v197Copy("Yellow"),
+    green: v197Copy("Green"),
+    blue: v197Copy("Blue"),
+    violet: v197Copy("Violet"),
+    red: v197Copy("Red"),
+    orange: v197Copy("Orange"),
+    indigo: v197Copy("Indigo"),
+  };
+  for (const accent of V197_THEME_CYCLE) {
+    const option = element(document, "option", undefined, themeLabels[accent]) as HTMLOptionElement;
+    option.value = accent;
+    option.selected = accent === theme.accent;
+    themeSelect.append(option);
+  }
+  themeSelect.addEventListener("change", () => {
+    const accent = themeSelect.value as V197ThemeAccent;
+    if ((V197_THEME_CYCLE as readonly string[]).includes(accent)) theme.setAccent(accent);
+  });
+  themeLabel.append(themeSelect);
+  appearance.append(themeLabel);
 
   const experience = panel(document, v197Copy("Presence"), v197Copy("Motion, sound and Omega"));
   const toggle = (label: string, key: string, checked: boolean) => {
@@ -590,7 +624,7 @@ async function renderSettings(
     }
   });
 
-  grid.append(provider, language, experience, security, sessionsPanel, ownership, deletion, savePanel);
+  grid.append(provider, language, appearance, experience, security, sessionsPanel, ownership, deletion, savePanel);
   await loadSessions();
 }
 
@@ -3470,6 +3504,7 @@ export async function renderV197Adjunct(
   snapshot: V197BridgeSnapshot | null,
   refreshSnapshot: RefreshSnapshot,
   session: V197Session,
+  theme: V197ThemeController,
 ): Promise<boolean> {
   if (!route.startsWith("/agents/")) stopAgenticDetailPolling(document);
   const existing = document.getElementById(ROOT_ID);
@@ -3507,7 +3542,7 @@ export async function renderV197Adjunct(
   try {
     if (route === "/settings") {
       if (!snapshot) throw new Error("Settings require the full owner snapshot.");
-      await renderSettings(document, api, snapshot, refreshSnapshot);
+      await renderSettings(document, api, snapshot, refreshSnapshot, theme);
     }
     else if (route === "/memory") {
       if (!snapshot) throw new Error("Memory requires the full owner snapshot.");

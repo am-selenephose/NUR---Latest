@@ -944,6 +944,15 @@ export const UI_COPY_KEYS = [
   "ui.1786",
   "ui.1787",
   "ui.1788",
+  "ui.1789",
+  "ui.1790",
+  "ui.1791",
+  "ui.1792",
+  "ui.1793",
+  "ui.1794",
+  "ui.1795",
+  "ui.1796",
+  "ui.1797",
 ] as const;
 export type UiCopyKey = typeof UI_COPY_KEYS[number];
 export type WritingPreference = "default" | "roman" | "script";

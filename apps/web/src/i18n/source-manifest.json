@@ -9519,5 +9519,97 @@
     "locations": [
       "apps/web/src/bridge/v197Timeline.ts:1175"
     ]
+  },
+  {
+    "id": "ui.1789",
+    "source": "Appearance",
+    "kinds": [
+      "panel:1",
+      "element:3"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:367",
+      "apps/web/src/bridge/v197Adjuncts.ts:369"
+    ]
+  },
+  {
+    "id": "ui.1790",
+    "source": "Original",
+    "kinds": [
+      "v197Copy:0"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:374"
+    ]
+  },
+  {
+    "id": "ui.1791",
+    "source": "Yellow",
+    "kinds": [
+      "v197Copy:0"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:375"
+    ]
+  },
+  {
+    "id": "ui.1792",
+    "source": "Green",
+    "kinds": [
+      "v197Copy:0"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:376"
+    ]
+  },
+  {
+    "id": "ui.1793",
+    "source": "Blue",
+    "kinds": [
+      "v197Copy:0"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:377"
+    ]
+  },
+  {
+    "id": "ui.1794",
+    "source": "Violet",
+    "kinds": [
+      "v197Copy:0"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:378"
+    ]
+  },
+  {
+    "id": "ui.1795",
+    "source": "Red",
+    "kinds": [
+      "v197Copy:0"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:379"
+    ]
+  },
+  {
+    "id": "ui.1796",
+    "source": "Orange",
+    "kinds": [
+      "v197Copy:0"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:380"
+    ]
+  },
+  {
+    "id": "ui.1797",
+    "source": "Indigo",
+    "kinds": [
+      "v197Copy:0"
+    ],
+    "locations": [
+      "apps/web/src/bridge/v197Adjuncts.ts:381"
+    ]
   }
 ]

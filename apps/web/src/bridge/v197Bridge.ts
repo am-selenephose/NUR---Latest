@@ -305,6 +305,7 @@ export class V197Bridge {
         this.snapshot,
         async () => this.refreshSnapshot(),
         this.session,
+        this.theme,
       );
       if (!stillCurrent()) return;
       if (adjunctRendered) return;

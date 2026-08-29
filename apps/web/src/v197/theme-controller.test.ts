@@ -32,6 +32,7 @@ function freshDocument(): Document {
 }
 
 afterEach(() => {
+  vi.useRealTimers();
   document.body.replaceChildren();
   document.documentElement.removeAttribute("data-nur-theme-accent");
   document.documentElement.style.removeProperty("--nur-theme-accent");
@@ -59,6 +60,82 @@ describe("V197 spectral theme controller", () => {
       "orange",
       "indigo",
     ]);
+  });
+
+  it("cycles on an eligible native double click and resets on a native triple click", () => {
+    vi.useFakeTimers();
+    const worldDocument = freshDocument();
+    const controller = createV197ThemeController(worldDocument, new MemoryStorage());
+
+    worldDocument.body.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
+    worldDocument.body.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 2 }));
+    expect(controller.accent).toBe("original");
+    vi.runAllTimers();
+    expect(controller.accent).toBe("yellow");
+
+    worldDocument.body.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
+    worldDocument.body.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 2 }));
+    worldDocument.body.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 3 }));
+    vi.runAllTimers();
+    expect(controller.accent).toBe("original");
+  });
+
+  it("blocks controls, panels, brain gestures, and completed drags", () => {
+    vi.useFakeTimers();
+    const worldDocument = freshDocument();
+    const controller = createV197ThemeController(worldDocument, new MemoryStorage());
+    const button = worldDocument.createElement("button");
+    const panel = worldDocument.createElement("section");
+    const brain = worldDocument.createElement("canvas");
+    panel.className = "nur-panel";
+    brain.id = "nur-brain-canvas";
+    worldDocument.body.append(button, panel, brain);
+
+    for (const target of [button, panel, brain]) {
+      target.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 2 }));
+    }
+    vi.runAllTimers();
+    expect(controller.accent).toBe("original");
+
+    worldDocument.body.dispatchEvent(new MouseEvent("pointerdown", {
+      bubbles: true,
+      clientX: 10,
+      clientY: 10,
+    }));
+    worldDocument.body.dispatchEvent(new MouseEvent("pointermove", {
+      bubbles: true,
+      clientX: 40,
+      clientY: 34,
+    }));
+    worldDocument.body.dispatchEvent(new MouseEvent("pointerup", {
+      bubbles: true,
+      clientX: 40,
+      clientY: 34,
+    }));
+    worldDocument.body.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 2 }));
+    vi.runAllTimers();
+    expect(controller.accent).toBe("original");
+  });
+
+  it("allows only directly exposed empty glass on the constellation world stage", () => {
+    vi.useFakeTimers();
+    const worldDocument = freshDocument();
+    const controller = createV197ThemeController(worldDocument, new MemoryStorage());
+    const stage = worldDocument.createElement("section");
+    const legend = worldDocument.createElement("div");
+    stage.className = "universe-map-panel nur-panel";
+    legend.className = "universe-map-legend";
+    stage.append(legend);
+    worldDocument.body.append(stage);
+
+    stage.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 2 }));
+    vi.runAllTimers();
+    expect(controller.accent).toBe("yellow");
+
+    controller.reset();
+    legend.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 2 }));
+    vi.runAllTimers();
+    expect(controller.accent).toBe("original");
   });
 
   it("restores, applies, persists, advances, and resets one semantic root state", () => {

@@ -942,5 +942,14 @@
   "ui.1785": "Neuere Überprüfungen",
   "ui.1786": "Deterministisch - berechnet aus Ihren eigenen aufgezeichneten Zeitstempeln, kein Modell konsultiert.",
   "ui.1787": "Wählen Sie etwas rechtzeitig aus, um seine Bedeutung, Abhängigkeiten und Ergebnisse zu erkunden.",
-  "ui.1788": "Verschiebungsgeschichte"
+  "ui.1788": "Verschiebungsgeschichte",
+  "ui.1789": "Erscheinungsbild",
+  "ui.1790": "Original",
+  "ui.1791": "Gelb",
+  "ui.1792": "Grün",
+  "ui.1793": "Blau",
+  "ui.1794": "Violett",
+  "ui.1795": "Rot",
+  "ui.1796": "Orange",
+  "ui.1797": "Indigo"
 }
