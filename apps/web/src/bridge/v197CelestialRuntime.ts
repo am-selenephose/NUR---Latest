@@ -80,6 +80,8 @@ type GalaxyDiagnostics = {
   dragging: boolean;
   parallaxX: number;
   parallaxY: number;
+  themeColor: string;
+  themeStrength: number;
 };
 
 type BrainDiagnostics = {
@@ -100,6 +102,8 @@ type BrainDiagnostics = {
   angularVelocityYaw: number;
   angularVelocityPitch: number;
   dragging: boolean;
+  themeColor: string;
+  themeStrength: number;
 };
 
 type GalaxyApi = {
@@ -107,6 +111,7 @@ type GalaxyApi = {
   burst: (x?: number, y?: number, intensity?: number) => void;
   setMode: (mode?: string) => void;
   setRotate: (enabled: boolean) => void;
+  setTheme: (color: string, strength: number) => void;
   getParticleCount: () => number;
   getTransientParticleCount: () => number;
   getParticleDiagnostics: () => GalaxyDiagnostics;
@@ -118,6 +123,7 @@ type StarBrainApi = {
   absorb: () => void;
   shatter: () => void;
   firePulse: (from?: number) => void;
+  setTheme: (color: string, strength: number) => void;
   dispose: () => void;
   getDiagnostics: () => BrainDiagnostics;
 };
@@ -136,6 +142,8 @@ type StarUniforms = {
   uTime: { value: number };
   uPointScale: { value: number };
   uRainbowStrength: { value: number };
+  uThemeColor: { value: THREE.Color };
+  uThemeStrength: { value: number };
   uEnergy: { value: number };
   uBurst: { value: number };
   uAbsorb: { value: number };
@@ -287,6 +295,8 @@ const STAR_VERTEX_SHADER = `
   uniform float uTime;
   uniform float uPointScale;
   uniform float uRainbowStrength;
+  uniform vec3 uThemeColor;
+  uniform float uThemeStrength;
   uniform float uEnergy;
   uniform float uBurst;
   uniform float uAbsorb;
@@ -318,6 +328,7 @@ const STAR_VERTEX_SHADER = `
     vec3 prism = spectrum(spectralDrift);
     vec3 warmWhite = vec3(1.0,.965,.84);
     vColor = mix(warmWhite,prism,uRainbowStrength);
+    vColor = mix(vColor, uThemeColor, uThemeStrength * .42);
     vAlpha = aAlpha * (.72 + max(0.0,twinkle)*.38) * (1.0 + uEnergy*.28);
     vTwinkle = twinkle;
 
@@ -366,6 +377,8 @@ function starMaterial(pointScale: number, rainbowStrength: number): THREE.Shader
       uTime: { value: 0 },
       uPointScale: { value: pointScale },
       uRainbowStrength: { value: rainbowStrength },
+      uThemeColor: { value: new THREE.Color(0xffffff) },
+      uThemeStrength: { value: 0 },
       uEnergy: { value: 0 },
       uBurst: { value: 0 },
       uAbsorb: { value: 0 },
@@ -882,6 +895,20 @@ function requestFrame(controller: CelestialController): void {
   });
 }
 
+function applyCelestialTheme(
+  controller: CelestialController,
+  color: string,
+  strength: number,
+): void {
+  const normalizedStrength = THREE.MathUtils.clamp(strength, 0, 1);
+  controller.galaxyMaterial.uniforms.uThemeColor.value.set(color);
+  controller.brainMaterial.uniforms.uThemeColor.value.set(color);
+  controller.galaxyMaterial.uniforms.uThemeStrength.value = normalizedStrength;
+  controller.brainMaterial.uniforms.uThemeStrength.value = normalizedStrength;
+  controller.staticFramePainted = false;
+  requestFrame(controller);
+}
+
 function syncStageAnimation(controller: CelestialController): void {
   controller.stageVisibilityCheckedAt = 0;
   if (!stageIsVisible(controller, true)) {
@@ -1299,6 +1326,7 @@ function createController(
     burst: (_x, _y, intensity = .18) => burst(intensity),
     setMode: mode => { frameWindow.nurGalaxyMode = mode || "today"; },
     setRotate: enabled => { controller.rotating = enabled; frameWindow.nurGalaxyRotate = enabled; },
+    setTheme: (color, strength) => applyCelestialTheme(controller, color, strength),
     getParticleCount: () => controller.galaxyPointCount,
     getTransientParticleCount: () => 0,
     getParticleDiagnostics: () => ({
@@ -1317,6 +1345,8 @@ function createController(
       dragging: controller.galaxyDragging,
       parallaxX: controller.galaxyParallaxX,
       parallaxY: controller.galaxyParallaxY,
+      themeColor: `#${controller.galaxyMaterial.uniforms.uThemeColor.value.getHexString()}`,
+      themeStrength: controller.galaxyMaterial.uniforms.uThemeStrength.value,
       ...diagnosticsBase(),
     }),
     dispose: () => disposeController(controller),
@@ -1336,6 +1366,7 @@ function createController(
       requestFrame(controller);
     },
     firePulse: () => burst(.32),
+    setTheme: (color, strength) => applyCelestialTheme(controller, color, strength),
     dispose: () => disposeController(controller),
     getDiagnostics: () => ({
       reducedMotion,
@@ -1355,6 +1386,8 @@ function createController(
       angularVelocityYaw: controller.brainAngularVelocityYaw,
       angularVelocityPitch: controller.brainAngularVelocityPitch,
       dragging: controller.dragging,
+      themeColor: `#${controller.brainMaterial.uniforms.uThemeColor.value.getHexString()}`,
+      themeStrength: controller.brainMaterial.uniforms.uThemeStrength.value,
     }),
   };
   controller.galaxyApi = galaxyApi;

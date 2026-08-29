@@ -1513,3 +1513,35 @@ body.universe-edition.nur-v197-systems-active #nur-front-v61 #page-systems :is(
   box-shadow: none !important;
   filter: none !important;
 }
+
+/* Device-local spectral themes alter semantic reflected light, never the black
+   world or the opacity of NUR's glass. Original mode has no data attribute, so
+   every pre-theme value above remains byte-for-byte authoritative. */
+html[data-nur-theme-accent] {
+  --nur-line-faint: color-mix(in srgb, var(--nur-theme-accent) 12%, transparent);
+  --nur-line: color-mix(in srgb, var(--nur-theme-accent) 22%, transparent);
+  --nur-line-strong: color-mix(in srgb, var(--nur-theme-accent) 48%, transparent);
+  --nur-pastel-film: linear-gradient(
+    112deg,
+    color-mix(in srgb, var(--nur-theme-accent) 3.2%, transparent) 0%,
+    rgba(255, 255, 255, .008) 38%,
+    color-mix(in srgb, var(--nur-theme-accent) 2.2%, transparent) 72%,
+    rgba(255, 255, 255, .004) 100%
+  );
+  --nur-pastel-film-strong: linear-gradient(
+    112deg,
+    color-mix(in srgb, var(--nur-theme-accent) 7.8%, transparent) 0%,
+    rgba(255, 255, 255, .014) 42%,
+    color-mix(in srgb, var(--nur-theme-accent) 5.4%, transparent) 76%,
+    rgba(255, 255, 255, .008) 100%
+  );
+  --nur-spectrum-border: linear-gradient(
+    112deg,
+    rgba(255, 249, 224, .6) 0%,
+    color-mix(in srgb, var(--nur-theme-accent) 70%, rgba(255, 225, 139, .72)) 35%,
+    color-mix(in srgb, var(--nur-theme-accent) 44%, rgba(255, 211, 90, .7)) 72%,
+    rgba(255, 245, 204, .58) 100%
+  );
+  --nur-selected-rim: var(--nur-spectrum-border);
+  --nur-focus: 0 0 0 3px color-mix(in srgb, var(--nur-theme-accent) 24%, transparent);
+}

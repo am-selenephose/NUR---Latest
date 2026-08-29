@@ -36,6 +36,8 @@
   --nur-spectrum-blue: #4fccff;
   --nur-spectrum-indigo: #5a70ff;
   --nur-spectrum-violet: #c16bff;
+  --nur-theme-accent: var(--nur-gold);
+  --nur-theme-strength: 0;
   --nur-pastel-red: #ff9ba8;
   --nur-pastel-orange: #ffc39d;
   --nur-pastel-yellow: #ffe8a3;
