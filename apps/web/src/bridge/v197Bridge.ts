@@ -23,6 +23,7 @@ import {
 import { cancelAllV197SearchCommits } from "./v197SearchInput";
 import { consumeImmediateLogoutReturn, markImmediateLogoutReturn } from "./v197LogoutReturn";
 import { selectRequired, V197_SELECTORS } from "./v197Selectors";
+import { createV197ThemeController, type V197ThemeController } from "./v197Theme";
 
 /** Routes a bridge-native surface owns end to end.
  *
@@ -149,6 +150,7 @@ function resumeEntryStage(frame: HTMLIFrameElement): void {
 
 export class V197Bridge {
   private readonly api = new V197ApiClient();
+  private readonly theme: V197ThemeController;
   private applyingRoute = false;
   private universeDocument: Document | null = null;
   private session: V197Session | null = null;
@@ -161,12 +163,16 @@ export class V197Bridge {
   private authenticatedSessionActive = false;
   private stageGuard: MutationObserver | null = null;
   private entryPresentationTransition: Promise<void> | null = null;
+  private entryThemeCleanup: (() => void) | null = null;
+  private universeThemeCleanup: (() => void) | null = null;
   private routeRevision = 0;
 
   constructor(
     private readonly hostWindow: V197HostWindow,
     private readonly hostDocument: Document,
-  ) {}
+  ) {
+    this.theme = createV197ThemeController(hostDocument);
+  }
 
   async start(): Promise<void> {
     const hostApi = this.hostWindow.NURConsolidated;
@@ -178,6 +184,8 @@ export class V197Bridge {
     resumeEntryStage(entryFrame);
     const entryDocument = await waitForFrameDocument(entryFrame, "#nur-front-v61", "Canonical V197 entry");
     ensureV197EntryPolish(entryDocument);
+    this.entryThemeCleanup?.();
+    this.entryThemeCleanup = this.theme.attach(entryDocument);
     this.hostDocument.documentElement.dataset.nurEntryPolished = "true";
     this.ensureEntryAuthBinding(entryDocument, hostApi);
     this.installStageGuard(hostApi);
@@ -395,6 +403,8 @@ export class V197Bridge {
     }
     this.universeDocument = universeDocument;
     ensureV197PremiumPolish(universeDocument);
+    this.universeThemeCleanup?.();
+    this.universeThemeCleanup = this.theme.attach(universeDocument);
     if (["/", "/auth", "/onboarding"].includes(window.location.pathname)) {
       window.history.replaceState({}, "", "/today");
     }
@@ -413,6 +423,8 @@ export class V197Bridge {
     this.entryAuthCleanup?.();
     this.entryAuthCleanup = null;
     this.entryAuthDocument = null;
+    this.entryThemeCleanup?.();
+    this.entryThemeCleanup = null;
     const entryFrame = this.hostDocument.querySelector<HTMLIFrameElement>(V197_SELECTORS.entryStage);
     if (!entryFrame) return;
     entryFrame.removeAttribute("srcdoc");
