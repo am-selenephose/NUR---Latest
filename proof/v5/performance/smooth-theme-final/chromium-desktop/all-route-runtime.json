@@ -1,0 +1,156 @@
+{
+  "project": "chromium-desktop",
+  "generatedAt": "2026-08-30T18:22:17.372Z",
+  "wordmarkMotion": {
+    "before": "0% 50%",
+    "after": "0% 50%",
+    "reflectedBefore": "7.05319% 50%",
+    "reflectedAfter": "9.93654% 50%",
+    "reflectedAnimationName": "nurWordmarkSpectrumShift",
+    "reflectedAnimationPlayState": "running",
+    "animationName": "nurWordmarkSpectrumShift",
+    "animationDuration": "5.2s",
+    "animationPlayState": "running",
+    "animationBefore": 366.7659999999999,
+    "animationAfter": 516.6999999999999,
+    "reducedMotion": false,
+    "rootClasses": "",
+    "systemsClasses": "nur-page active",
+    "inlineStyle": null,
+    "keyframes": [
+      {
+        "offset": 0
+      },
+      {
+        "offset": 1
+      }
+    ]
+  },
+  "zoom": {
+    "before": 5.15,
+    "after": 4.899073525153837
+  },
+  "mapWrites": [
+    {
+      "nodes": [
+        {
+          "node_ref_type": "goal",
+          "node_ref_id": "smooth-goal",
+          "x": 483,
+          "y": 330
+        }
+      ]
+    }
+  ],
+  "inputFrameLatency": {
+    "durationMs": 10.899999998509884,
+    "value": "Typing remains responsive while NUR is answering.",
+    "disabled": false
+  },
+  "before": {
+    "elements": 1317,
+    "styles": 8,
+    "canvases": [
+      "nur-brain-canvas",
+      "space3d"
+    ],
+    "globalListeners": {
+      "added": 42,
+      "removed": 0,
+      "active": 42
+    },
+    "mutation": {
+      "created": 5,
+      "disconnected": 0,
+      "active": 5,
+      "callbacks": 302,
+      "records": 10612,
+      "durationMs": 1.4999999925494194,
+      "maxDurationMs": 0.6000000014901161
+    },
+    "resize": {
+      "created": 1,
+      "disconnected": 0,
+      "active": 1,
+      "callbacks": 6,
+      "records": 6,
+      "durationMs": 0.19999999552965164,
+      "maxDurationMs": 0.10000000149011612
+    },
+    "streamTextAppends": 1,
+    "longTasks": [
+      {
+        "startTime": 121.29999999701977,
+        "duration": 50
+      },
+      {
+        "startTime": 208.5,
+        "duration": 190
+      }
+    ],
+    "longAnimationFrames": [],
+    "galaxyIdentity": true,
+    "renderer": {
+      "calls": 1,
+      "triangles": 0,
+      "points": 2400,
+      "lines": 0,
+      "geometries": 3,
+      "textures": 0,
+      "programs": 2
+    }
+  },
+  "after": {
+    "elements": 1317,
+    "styles": 8,
+    "canvases": [
+      "nur-brain-canvas",
+      "space3d"
+    ],
+    "globalListeners": {
+      "added": 42,
+      "removed": 0,
+      "active": 42
+    },
+    "mutation": {
+      "created": 5,
+      "disconnected": 0,
+      "active": 5,
+      "callbacks": 691,
+      "records": 19238,
+      "durationMs": 3.099999986588955,
+      "maxDurationMs": 0.6000000014901161
+    },
+    "resize": {
+      "created": 1,
+      "disconnected": 0,
+      "active": 1,
+      "callbacks": 26,
+      "records": 26,
+      "durationMs": 0.7999999895691872,
+      "maxDurationMs": 0.10000000149011612
+    },
+    "streamTextAppends": 1,
+    "longTasks": [
+      {
+        "startTime": 121.29999999701977,
+        "duration": 50
+      },
+      {
+        "startTime": 208.5,
+        "duration": 190
+      }
+    ],
+    "longAnimationFrames": [],
+    "galaxyIdentity": true,
+    "renderer": {
+      "calls": 1,
+      "triangles": 0,
+      "points": 2400,
+      "lines": 0,
+      "geometries": 3,
+      "textures": 0,
+      "programs": 2
+    }
+  }
+}

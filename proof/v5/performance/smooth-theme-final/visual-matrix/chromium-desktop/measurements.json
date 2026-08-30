@@ -1,0 +1,572 @@
+[
+  {
+    "surface": "today",
+    "storedAccent": null,
+    "theme": "original",
+    "panelFound": true,
+    "themeAttribute": "original",
+    "inlineAccent": "",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0.32)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0.32,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "talk",
+    "storedAccent": null,
+    "theme": "original",
+    "panelFound": true,
+    "themeAttribute": "original",
+    "inlineAccent": "",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0.32)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0.32,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "systems",
+    "storedAccent": null,
+    "theme": "original",
+    "panelFound": true,
+    "themeAttribute": "original",
+    "inlineAccent": "",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0.84)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0.84,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "universe",
+    "storedAccent": null,
+    "theme": "original",
+    "panelFound": true,
+    "themeAttribute": "original",
+    "inlineAccent": "",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0.84)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0.84,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "map",
+    "storedAccent": null,
+    "theme": "original",
+    "panelFound": true,
+    "themeAttribute": "original",
+    "inlineAccent": "",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "settings",
+    "storedAccent": null,
+    "theme": "original",
+    "panelFound": true,
+    "themeAttribute": "original",
+    "inlineAccent": "",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "today",
+    "storedAccent": "yellow",
+    "theme": "yellow",
+    "panelFound": true,
+    "themeAttribute": "yellow",
+    "inlineAccent": "#ffdc5c",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0.32)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0.32,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "talk",
+    "storedAccent": "yellow",
+    "theme": "yellow",
+    "panelFound": true,
+    "themeAttribute": "yellow",
+    "inlineAccent": "#ffdc5c",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0.32)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0.32,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "systems",
+    "storedAccent": "yellow",
+    "theme": "yellow",
+    "panelFound": true,
+    "themeAttribute": "yellow",
+    "inlineAccent": "#ffdc5c",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0.84)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0.84,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "universe",
+    "storedAccent": "yellow",
+    "theme": "yellow",
+    "panelFound": true,
+    "themeAttribute": "yellow",
+    "inlineAccent": "#ffdc5c",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0.84)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0.84,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "map",
+    "storedAccent": "yellow",
+    "theme": "yellow",
+    "panelFound": true,
+    "themeAttribute": "yellow",
+    "inlineAccent": "#ffdc5c",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "settings",
+    "storedAccent": "yellow",
+    "theme": "yellow",
+    "panelFound": true,
+    "themeAttribute": "yellow",
+    "inlineAccent": "#ffdc5c",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "today",
+    "storedAccent": "green",
+    "theme": "green",
+    "panelFound": true,
+    "themeAttribute": "green",
+    "inlineAccent": "#48ebaf",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0.32)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0.32,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "talk",
+    "storedAccent": "green",
+    "theme": "green",
+    "panelFound": true,
+    "themeAttribute": "green",
+    "inlineAccent": "#48ebaf",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0.32)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0.32,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "systems",
+    "storedAccent": "green",
+    "theme": "green",
+    "panelFound": true,
+    "themeAttribute": "green",
+    "inlineAccent": "#48ebaf",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0.84)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0.84,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "universe",
+    "storedAccent": "green",
+    "theme": "green",
+    "panelFound": true,
+    "themeAttribute": "green",
+    "inlineAccent": "#48ebaf",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0.84)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0.84,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "map",
+    "storedAccent": "green",
+    "theme": "green",
+    "panelFound": true,
+    "themeAttribute": "green",
+    "inlineAccent": "#48ebaf",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "settings",
+    "storedAccent": "green",
+    "theme": "green",
+    "panelFound": true,
+    "themeAttribute": "green",
+    "inlineAccent": "#48ebaf",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "today",
+    "storedAccent": "blue",
+    "theme": "blue",
+    "panelFound": true,
+    "themeAttribute": "blue",
+    "inlineAccent": "#4fccff",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0.32)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0.32,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "talk",
+    "storedAccent": "blue",
+    "theme": "blue",
+    "panelFound": true,
+    "themeAttribute": "blue",
+    "inlineAccent": "#4fccff",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0.32)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0.32,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "systems",
+    "storedAccent": "blue",
+    "theme": "blue",
+    "panelFound": true,
+    "themeAttribute": "blue",
+    "inlineAccent": "#4fccff",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0.84)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0.84,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "universe",
+    "storedAccent": "blue",
+    "theme": "blue",
+    "panelFound": true,
+    "themeAttribute": "blue",
+    "inlineAccent": "#4fccff",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0.84)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0.84,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "map",
+    "storedAccent": "blue",
+    "theme": "blue",
+    "panelFound": true,
+    "themeAttribute": "blue",
+    "inlineAccent": "#4fccff",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "settings",
+    "storedAccent": "blue",
+    "theme": "blue",
+    "panelFound": true,
+    "themeAttribute": "blue",
+    "inlineAccent": "#4fccff",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "today",
+    "storedAccent": "violet",
+    "theme": "violet",
+    "panelFound": true,
+    "themeAttribute": "violet",
+    "inlineAccent": "#c16bff",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0.32)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0.32,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "talk",
+    "storedAccent": "violet",
+    "theme": "violet",
+    "panelFound": true,
+    "themeAttribute": "violet",
+    "inlineAccent": "#c16bff",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0.32)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0.32,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "systems",
+    "storedAccent": "violet",
+    "theme": "violet",
+    "panelFound": true,
+    "themeAttribute": "violet",
+    "inlineAccent": "#c16bff",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0.84)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0.84,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "universe",
+    "storedAccent": "violet",
+    "theme": "violet",
+    "panelFound": true,
+    "themeAttribute": "violet",
+    "inlineAccent": "#c16bff",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0.84)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0.84,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "map",
+    "storedAccent": "violet",
+    "theme": "violet",
+    "panelFound": true,
+    "themeAttribute": "violet",
+    "inlineAccent": "#c16bff",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  },
+  {
+    "surface": "settings",
+    "storedAccent": "violet",
+    "theme": "violet",
+    "panelFound": true,
+    "themeAttribute": "violet",
+    "inlineAccent": "#c16bff",
+    "bodyColor": "rgb(0, 0, 0)",
+    "panelColor": "rgba(0, 0, 0, 0)",
+    "panelChannels": [
+      0,
+      0,
+      0
+    ],
+    "panelAlpha": 0,
+    "bodyFont": "\"Crimson Pro\", serif",
+    "headingFont": "\"Bodoni Moda\", serif",
+    "horizontalOverflow": 0
+  }
+]
