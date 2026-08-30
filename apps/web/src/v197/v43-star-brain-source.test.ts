@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { galaxyZoomFromWheel } from "../bridge/v197CelestialRuntime";
+
 const runtimePath = resolve(process.cwd(), "src/bridge/v197CelestialRuntime.ts");
 const bridgePath = resolve(process.cwd(), "src/bridge/v197StarBrain.ts");
 const runtime = readFileSync(runtimePath, "utf8");
@@ -60,15 +62,27 @@ describe("V43 anatomical Three.js celestial runtime", () => {
     expect(runtime).toContain("brainAngularVelocityYaw");
     expect(runtime).toContain("brainAngularVelocityPitch");
     expect(runtime).toContain('bind(brainCanvas, "wheel"');
+    expect(runtime).toContain('bind(frameWindow, "wheel"');
+    expect(runtime).toContain("galaxyZoomTarget");
+    expect(runtime).toContain("cameraZ: controller.galaxyCamera.position.z");
     expect(runtime).toContain('bind(brainCanvas, "dblclick"');
     expect(runtime).toContain("getParticleDiagnostics");
     expect(runtime).toContain("getDiagnostics");
     expect(runtime).toContain("function disposeController");
     expect(runtime).toContain("controller.renderer.dispose();");
     expect(runtime).toContain('brainHost.dataset.nurInteractionProfile = "independent-3d-drag-inertia-v1";');
-    expect(runtime).toContain('galaxyCanvas.dataset.nurInteractionProfile = "spatial-drag-inertia-parallax-v1";');
+    expect(runtime).toContain('galaxyCanvas.dataset.nurInteractionProfile = "spatial-drag-inertia-parallax-zoom-v2";');
     expect(bridge).toContain("export function disposeV197StarBrain");
     expect(bridge).toContain("disposeV197CelestialRuntime(document)");
+  });
+
+  it("maps galaxy wheel input to bounded analogue zoom without frame-rate state", () => {
+    expect(galaxyZoomFromWheel(0, -120, 0)).toBeCloseTo(-.216, 6);
+    expect(galaxyZoomFromWheel(0, 120, 0)).toBeCloseTo(.216, 6);
+    expect(galaxyZoomFromWheel(1.2, 20_000, 0)).toBe(1.25);
+    expect(galaxyZoomFromWheel(-1, -20_000, 0)).toBe(-1.05);
+    expect(galaxyZoomFromWheel(.4, 3, 1)).toBeCloseTo(.454, 6);
+    expect(galaxyZoomFromWheel(.4, 1, 2)).toBeCloseTo(.85, 6);
   });
 
   it("mounts without the deleted warm-only source injection", () => {

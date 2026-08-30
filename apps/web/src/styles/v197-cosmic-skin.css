@@ -356,7 +356,7 @@ body.universe-edition #nur-front-v61 .nur-v197-wordmark {
     drop-shadow(0 0 5px rgba(255, 248, 223, .68))
     drop-shadow(0 0 16px rgba(255, 173, 50, .3))
     drop-shadow(0 0 28px rgba(255, 222, 150, .09)) !important;
-  animation: univPrism 6.4s ease-in-out infinite !important;
+  animation: nurWordmarkSpectrumShift 5.2s linear infinite alternate !important;
   will-change: background-position !important;
 }
 
@@ -479,7 +479,7 @@ body.front-v61-active #nur-front-v61 .f4-brand-word {
   background-clip: text !important;
   color: transparent !important;
   -webkit-text-fill-color: transparent !important;
-  animation: univPrism 6.4s ease-in-out infinite !important;
+  animation: nurWordmarkSpectrumShift 5.2s linear infinite alternate !important;
   transform: translateX(calc(.09em + 2px)) !important;
 }
 
@@ -2151,7 +2151,7 @@ body.universe-edition #nur-front-v61 .universe-map-panel .universe-map-title > :
   letter-spacing: .125em !important;
   transform: translate(.058em, -12px) !important;
   white-space: nowrap !important;
-  animation: univPrism 6.4s ease-in-out infinite !important;
+  animation: nurWordmarkSpectrumShift 5.2s linear infinite alternate !important;
   will-change: background-position, filter !important;
 }
 
@@ -2203,9 +2203,9 @@ body.universe-edition #nur-front-v61 .universe-map-panel > .universe-map-title >
   display: none !important;
 }
 
-@keyframes univPrism {
-  0%, 100% { background-position: 0 50%; }
-  50% { background-position: 100% 50%; }
+@keyframes nurWordmarkSpectrumShift {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
 }
 
 body.universe-edition #nur-front-v61 .universe-map-title > .nur-v197-wordmark {
@@ -2232,7 +2232,7 @@ body.universe-edition #nur-front-v61 .universe-map-title > .nur-v197-wordmark::a
   text-align: inherit !important;
   white-space: inherit !important;
   pointer-events: none !important;
-  animation: univPrism 6.4s ease-in-out infinite !important;
+  animation: nurWordmarkSpectrumShift 5.2s linear infinite alternate !important;
   will-change: background-position !important;
 }
 

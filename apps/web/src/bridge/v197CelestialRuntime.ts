@@ -27,6 +27,21 @@ const IVORY = new THREE.Color(0xfffae8);
 const GALAXY_STAR_SCALE = 1.82;
 const MOBILE_FRAME_GAP_MS = 33;
 const MAX_ANIMATION_DELTA_SECONDS = .05;
+const GALAXY_CAMERA_BASE_Z = 5.15;
+const GALAXY_ZOOM_MIN = -1.05;
+const GALAXY_ZOOM_MAX = 1.25;
+const WHEEL_DELTA_LINE = 1;
+const WHEEL_DELTA_PAGE = 2;
+
+export function galaxyZoomFromWheel(current: number, deltaY: number, deltaMode: number): number {
+  const scale = deltaMode === WHEEL_DELTA_PAGE
+    ? .45
+    : deltaMode === WHEEL_DELTA_LINE
+      ? .018
+      : .0018;
+  const step = THREE.MathUtils.clamp(deltaY * scale, -.45, .45);
+  return THREE.MathUtils.clamp(current + step, GALAXY_ZOOM_MIN, GALAXY_ZOOM_MAX);
+}
 
 export function celestialDeltaSeconds(now: number, previous: number): number {
   if (previous <= 0) return 1 / 60;
@@ -80,6 +95,11 @@ type GalaxyDiagnostics = {
   dragging: boolean;
   parallaxX: number;
   parallaxY: number;
+  cameraZ: number;
+  zoom: number;
+  zoomTarget: number;
+  zoomMin: number;
+  zoomMax: number;
   themeColor: string;
   themeStrength: number;
 };
@@ -202,6 +222,8 @@ type CelestialController = {
   galaxyParallaxY: number;
   galaxyDepth: number;
   galaxyDepthVelocity: number;
+  galaxyZoom: number;
+  galaxyZoomTarget: number;
   pointerX: number;
   pointerY: number;
   rotating: boolean;
@@ -791,7 +813,11 @@ function updateAnimation(controller: CelestialController, now: number): void {
     + THREE.MathUtils.clamp(controller.galaxyAngularVelocityYaw * -.62, -.025, .025);
   controller.galaxyGroup.position.x = controller.galaxyParallaxX * .055;
   controller.galaxyGroup.position.y = controller.galaxyParallaxY * -.04;
-  controller.galaxyCamera.position.z = 5.15 + THREE.MathUtils.clamp(controller.galaxyDepth, -.13, .13);
+  const zoomEase = controller.reducedMotion ? 1 : 1 - Math.pow(.78, frameScale);
+  controller.galaxyZoom += (controller.galaxyZoomTarget - controller.galaxyZoom) * zoomEase;
+  controller.galaxyCamera.position.z = GALAXY_CAMERA_BASE_Z
+    + controller.galaxyZoom
+    + THREE.MathUtils.clamp(controller.galaxyDepth, -.13, .13);
   controller.brainGroup.rotation.y = controller.yaw;
   controller.brainGroup.rotation.x = controller.pitch;
   controller.brainGroup.rotation.z = Math.sin(seconds * .12) * .018
@@ -1006,6 +1032,22 @@ function canStartGalaxyDrag(controller: CelestialController, event: PointerEvent
   return true;
 }
 
+function canZoomGalaxy(controller: CelestialController, event: WheelEvent): boolean {
+  if (event.ctrlKey) return false;
+  const target = eventElement(event.target);
+  if (!target || controller.brainHost.contains(target)) return false;
+  if (!target.closest("#space3d, #f4-core, .f4-visual, .f4-stage, .universe-map-panel")) return false;
+  if (target.closest(GALAXY_INTERACTION_BLOCKERS)) return false;
+  for (const node of event.composedPath()) {
+    const element = eventElement(node);
+    if (!element || element === controller.document.body) break;
+    if ((element as HTMLElement).onclick || controller.frameWindow.getComputedStyle(element).cursor === "pointer") {
+      return false;
+    }
+  }
+  return true;
+}
+
 function installInteractions(controller: CelestialController): void {
   const { brainCanvas, frameWindow } = controller;
   controller.teardown.push(bind(frameWindow, "pointermove", event => {
@@ -1062,6 +1104,18 @@ function installInteractions(controller: CelestialController): void {
   };
   controller.teardown.push(bind(frameWindow, "pointerup", endGalaxyDrag));
   controller.teardown.push(bind(frameWindow, "pointercancel", endGalaxyDrag));
+
+  controller.teardown.push(bind(frameWindow, "wheel", event => {
+    if (!canZoomGalaxy(controller, event)) return;
+    event.preventDefault();
+    controller.galaxyZoomTarget = galaxyZoomFromWheel(
+      controller.galaxyZoomTarget,
+      event.deltaY,
+      event.deltaMode,
+    );
+    controller.staticFramePainted = false;
+    requestFrame(controller);
+  }, { passive: false }));
 
   controller.teardown.push(bind(brainCanvas, "pointerdown", event => {
     if (!event.isPrimary || (event.pointerType === "mouse" && event.button !== 0)) return;
@@ -1206,7 +1260,7 @@ function createController(
 
   const galaxyScene = new THREE.Scene();
   const galaxyCamera = new THREE.PerspectiveCamera(55, 1, .1, 30);
-  galaxyCamera.position.set(0, 0, 5.15);
+  galaxyCamera.position.set(0, 0, GALAXY_CAMERA_BASE_Z);
   const galaxyGroup = new THREE.Group();
   const galaxyMaterial = starMaterial(1, .78);
   galaxyGroup.add(new THREE.Points(pointGeometry(galaxy.points), galaxyMaterial));
@@ -1275,6 +1329,8 @@ function createController(
     galaxyParallaxY: 0,
     galaxyDepth: 0,
     galaxyDepthVelocity: 0,
+    galaxyZoom: 0,
+    galaxyZoomTarget: 0,
     pointerX: 0,
     pointerY: 0,
     rotating: true,
@@ -1345,6 +1401,11 @@ function createController(
       dragging: controller.galaxyDragging,
       parallaxX: controller.galaxyParallaxX,
       parallaxY: controller.galaxyParallaxY,
+      cameraZ: controller.galaxyCamera.position.z,
+      zoom: controller.galaxyZoom,
+      zoomTarget: controller.galaxyZoomTarget,
+      zoomMin: GALAXY_ZOOM_MIN,
+      zoomMax: GALAXY_ZOOM_MAX,
       themeColor: `#${controller.galaxyMaterial.uniforms.uThemeColor.value.getHexString()}`,
       themeStrength: controller.galaxyMaterial.uniforms.uThemeStrength.value,
       ...diagnosticsBase(),
@@ -1415,7 +1476,7 @@ function createController(
   galaxyCanvas.dataset.nurSpectrumBands = V197_SPECTRUM_NAMES.join(",");
   galaxyCanvas.dataset.nurSpectrumBandCount = String(V197_SPECTRUM_NAMES.length);
   galaxyCanvas.dataset.nurEngine = V197_CELESTIAL_ENGINE;
-  galaxyCanvas.dataset.nurInteractionProfile = "spatial-drag-inertia-parallax-v1";
+  galaxyCanvas.dataset.nurInteractionProfile = "spatial-drag-inertia-parallax-zoom-v2";
 
   installInteractions(controller);
   controller.teardown.push(bind(frameWindow, "resize", () => {

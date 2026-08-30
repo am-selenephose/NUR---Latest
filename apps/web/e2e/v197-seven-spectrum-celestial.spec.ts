@@ -13,6 +13,9 @@ type GalaxyDiagnostics = {
   dragging: boolean;
   parallaxX: number;
   parallaxY: number;
+  cameraZ: number;
+  zoom: number;
+  zoomTarget: number;
 };
 
 type BrainDiagnostics = {
@@ -187,6 +190,42 @@ async function proveGalaxyInteraction(
     .toBeLessThan(Math.hypot(released.angularVelocityYaw, released.angularVelocityPitch));
 }
 
+async function proveGalaxyZoom(
+  page: Page,
+  frame: FrameLocator,
+  stageSelector: string,
+  galaxyCanvas: Locator,
+): Promise<void> {
+  const point = await emptyGalaxyPoint(frame);
+  const stage = await page.locator(stageSelector).boundingBox();
+  expect(stage).toBeTruthy();
+  const before = await galaxyDiagnostics(galaxyCanvas);
+
+  await page.mouse.move(stage!.x + point.x, stage!.y + point.y);
+  await page.mouse.wheel(0, -180);
+  await expect.poll(async () => (await galaxyDiagnostics(galaxyCanvas)).cameraZ)
+    .toBeLessThan(before.cameraZ - .08);
+  const zoomedIn = await galaxyDiagnostics(galaxyCanvas);
+  expect(zoomedIn.zoomTarget).toBeLessThan(before.zoomTarget);
+
+  await page.mouse.wheel(0, 360);
+  await expect.poll(async () => (await galaxyDiagnostics(galaxyCanvas)).cameraZ)
+    .toBeGreaterThan(zoomedIn.cameraZ + .08);
+
+  const beforeBlocked = await galaxyDiagnostics(galaxyCanvas);
+  const blocked = frame.locator("button").first();
+  await blocked.evaluate(element => {
+    element.dispatchEvent(new WheelEvent("wheel", {
+      bubbles: true,
+      cancelable: true,
+      deltaY: -180,
+    }));
+  });
+  await page.waitForTimeout(120);
+  const afterBlocked = await galaxyDiagnostics(galaxyCanvas);
+  expect(afterBlocked.zoomTarget).toBeCloseTo(beforeBlocked.zoomTarget, 6);
+}
+
 async function proveBrainInteraction(
   page: Page,
   canvas: Locator,
@@ -293,6 +332,7 @@ test("Entry is true black with a moving seven-spectrum Three.js sky and star bra
   });
   const touch = testInfo.project.name.includes("mobile");
   await proveGalaxyInteraction(page, entry, "#nur-entry-stage", galaxyCanvas, brainCanvas, touch);
+  if (!touch) await proveGalaxyZoom(page, entry, "#nur-entry-stage", galaxyCanvas);
   await proveBrainInteraction(page, brainCanvas, galaxyCanvas, touch);
 });
 
@@ -325,6 +365,7 @@ test("Systems is true black with the same moving seven-spectrum rig", async ({ p
   });
   const touch = testInfo.project.name.includes("mobile");
   await proveGalaxyInteraction(page, universe, "#nur-universe-stage", galaxyCanvas, brainCanvas, touch);
+  if (!touch) await proveGalaxyZoom(page, universe, "#nur-universe-stage", galaxyCanvas);
   await proveBrainInteraction(page, brainCanvas, galaxyCanvas, touch);
 
   await galaxyCanvas.evaluate(() => {

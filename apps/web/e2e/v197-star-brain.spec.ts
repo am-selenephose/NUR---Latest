@@ -203,6 +203,8 @@ test("Entry replaces the center MasterStar with the coordinated interactive V43 
         clip: word.backgroundClip,
         fill: word.webkitTextFillColor,
         animation: word.animationName,
+        animationDuration: word.animationDuration,
+        animationTiming: word.animationTimingFunction,
         background: word.backgroundImage,
         position: word.backgroundPosition,
       },
@@ -220,7 +222,9 @@ test("Entry replaces the center MasterStar with the coordinated interactive V43 
   expect(typography.word.weight).toBe("500");
   expect(typography.word.clip).toBe("text");
   expect(typography.word.fill).toBe("rgba(0, 0, 0, 0)");
-  expect(typography.word.animation).toContain("univPrism");
+  expect(typography.word.animation).toContain("nurWordmarkSpectrumShift");
+  expect(typography.word.animationDuration).toBe("5.2s");
+  expect(typography.word.animationTiming).toBe("linear");
   expect(typography.word.background).toContain("linear-gradient");
   expect(typography.subtitle.family).toContain("Crimson Pro");
   expect(typography.subtitle.style).toBe("normal");
@@ -455,6 +459,9 @@ test("Systems map mounts only the coordinated brain and keeps the NUR lockup on 
         lineHeight: Number.parseFloat(wordmarkStyle.lineHeight),
         tracking: Number.parseFloat(wordmarkStyle.letterSpacing),
         animation: wordmarkStyle.animationName,
+        animationDuration: wordmarkStyle.animationDuration,
+        animationTiming: wordmarkStyle.animationTimingFunction,
+        visibleBackgroundPosition: getComputedStyle(wordmark, "::after").backgroundPosition,
       },
       subtitleTypography: {
         family: subtitleStyle.fontFamily,
@@ -489,7 +496,14 @@ test("Systems map mounts only the coordinated brain and keeps the NUR lockup on 
   expect(mapContract.wordmarkIsExactSource).toBe(true);
   expect(mapContract.wordmarkTypography.family).toContain("Bodoni Moda");
   expect(mapContract.wordmarkTypography.weight).toBe("500");
-  expect(mapContract.wordmarkTypography.animation).toContain("univPrism");
+  expect(mapContract.wordmarkTypography.animation).toContain("nurWordmarkSpectrumShift");
+  expect(mapContract.wordmarkTypography.animationDuration).toBe("5.2s");
+  expect(mapContract.wordmarkTypography.animationTiming).toBe("linear");
+  await page.waitForTimeout(800);
+  await expect.poll(() => universe.locator(".nur-v197-stable-wordmark").evaluate(
+    element => getComputedStyle(element, "::after").backgroundPosition,
+  ))
+    .not.toBe(mapContract.wordmarkTypography.visibleBackgroundPosition);
   expect(mapContract.subtitleTypography.family).toContain("Crimson Pro");
   expect(mapContract.subtitleTypography.weight).toBe("400");
   expect(mapContract.subtitleTypography.style).toBe("normal");
