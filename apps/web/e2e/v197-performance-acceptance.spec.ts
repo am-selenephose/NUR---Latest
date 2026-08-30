@@ -449,7 +449,9 @@ async function geometry(frame: Frame): Promise<Record<string, unknown>> {
         }
       }
     }
-    const style = getComputedStyle(document.querySelector<HTMLElement>(".nur-v197-stable-wordmark")!);
+    const wordmarkElement = document.querySelector<HTMLElement>(".nur-v197-stable-wordmark")!;
+    const style = getComputedStyle(wordmarkElement);
+    const reflectedStyle = getComputedStyle(wordmarkElement, "::after");
     return {
       viewport: { width: innerWidth, height: innerHeight },
       panel,
@@ -472,6 +474,9 @@ async function geometry(frame: Frame): Promise<Record<string, unknown>> {
       wordmarkStyle: {
         fontFamily: style.fontFamily,
         animationName: style.animationName,
+        animationDuration: style.animationDuration,
+        animationTimingFunction: style.animationTimingFunction,
+        reflectedAnimationName: reflectedStyle.animationName,
         backgroundClip: style.backgroundClip,
         webkitTextFillColor: style.getPropertyValue("-webkit-text-fill-color"),
       },
@@ -574,7 +579,10 @@ test("G04 warm V197 runtime preserves identity, centring, and natural interactio
 
   const wordmarkStyle = measuredGeometry.wordmarkStyle as Record<string, string>;
   expect(wordmarkStyle.fontFamily).toContain("Bodoni Moda");
-  expect(wordmarkStyle.animationName).toContain("univPrism");
+  expect(wordmarkStyle.animationName).toContain("nurWordmarkSpectrumShift");
+  expect(wordmarkStyle.animationDuration).toContain("5.2s");
+  expect(wordmarkStyle.animationTimingFunction).toContain("linear");
+  expect(wordmarkStyle.reflectedAnimationName).toContain("nurWordmarkSpectrumShift");
   expect(wordmarkStyle.backgroundClip).toBe("text");
   expect(wordmarkStyle.webkitTextFillColor).toBe("rgba(0, 0, 0, 0)");
   const collisions = measuredGeometry.collisions as {

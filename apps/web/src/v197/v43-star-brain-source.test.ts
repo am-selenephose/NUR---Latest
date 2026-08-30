@@ -65,6 +65,11 @@ describe("V43 anatomical Three.js celestial runtime", () => {
     expect(runtime).toContain('bind(frameWindow, "wheel"');
     expect(runtime).toContain("galaxyZoomTarget");
     expect(runtime).toContain("cameraZ: controller.galaxyCamera.position.z");
+    expect(runtime).toContain("calls: controller.renderer.info.render.calls");
+    expect(runtime).toContain("points: controller.renderer.info.render.points");
+    expect(runtime).toContain("geometries: controller.renderer.info.memory.geometries");
+    expect(runtime).toContain("textures: controller.renderer.info.memory.textures");
+    expect(runtime).toContain("programs: controller.renderer.info.programs?.length ?? null");
     expect(runtime).toContain('bind(brainCanvas, "dblclick"');
     expect(runtime).toContain("getParticleDiagnostics");
     expect(runtime).toContain("getDiagnostics");

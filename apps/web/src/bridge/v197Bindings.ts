@@ -62,6 +62,47 @@ type V197UniverseWindow = Window & {
   nurOpenPage?: (page: string, options?: Record<string, unknown>) => void;
 };
 
+export interface V197FrameTextBuffer {
+  append(value: string): void;
+  flush(): void;
+  cancel(): void;
+}
+
+export function createV197FrameTextBuffer(
+  view: Window,
+  target: HTMLElement,
+  afterFlush: () => void = () => undefined,
+): V197FrameTextBuffer {
+  let pending = "";
+  let frame: number | null = null;
+
+  const present = () => {
+    frame = null;
+    if (!pending) return;
+    target.append(target.ownerDocument.createTextNode(pending));
+    pending = "";
+    afterFlush();
+  };
+
+  return {
+    append(value) {
+      if (!value) return;
+      pending += value;
+      if (frame === null) frame = view.requestAnimationFrame(present);
+    },
+    flush() {
+      if (frame !== null) view.cancelAnimationFrame(frame);
+      frame = null;
+      present();
+    },
+    cancel() {
+      if (frame !== null) view.cancelAnimationFrame(frame);
+      frame = null;
+      pending = "";
+    },
+  };
+}
+
 function closest(target: EventTarget | null, selector: string): HTMLElement | null {
   const node = target as Element | null;
   return node && typeof node.closest === "function" ? node.closest<HTMLElement>(selector) : null;
@@ -397,6 +438,7 @@ export class V197ActionBindings {
           onDelta: transient.delta,
         },
       );
+      transient.flush();
       await this.award("talk_meaningful", "COGNITIVE_EVENT", result.turn_event_id, `talk:${result.turn_event_id}:meaningful`);
       setInputValue(this.document, inputSelector, "");
       await this.refresh();
@@ -416,10 +458,17 @@ export class V197ActionBindings {
     delta: (value: string) => void;
     event: (value: V197StreamEvent) => void;
     fail: (honest: string) => void;
+    flush: () => void;
     remove: () => void;
   } {
     const stream = this.document.querySelector<HTMLElement>("#talk-stream");
-    if (!stream) return { delta: () => undefined, event: () => undefined, fail: () => undefined, remove: () => undefined };
+    if (!stream) return {
+      delta: () => undefined,
+      event: () => undefined,
+      fail: () => undefined,
+      flush: () => undefined,
+      remove: () => undefined,
+    };
     // A turn is now in flight, so the "no persisted Talk turns yet" placeholder
     // must not linger (it is otherwise only cleared by a successful refresh).
     stream.querySelector("[data-nur-talk-empty]")?.remove();
@@ -447,15 +496,19 @@ export class V197ActionBindings {
     stream.append(user, response);
     stream.scrollTop = stream.scrollHeight;
     let hasDelta = false;
+    const textBuffer = createV197FrameTextBuffer(
+      this.document.defaultView ?? window,
+      body,
+      () => { stream.scrollTop = stream.scrollHeight; },
+    );
     return {
       delta: value => {
         if (!hasDelta) {
           body.textContent = "";
+          meta.firstChild!.textContent = `${v197Copy("NUR · live model stream")} `;
           hasDelta = true;
         }
-        body.append(this.document.createTextNode(value));
-        meta.firstChild!.textContent = `${v197Copy("NUR · live model stream")} `;
-        stream.scrollTop = stream.scrollHeight;
+        textBuffer.append(value);
       },
       event: value => {
         if (value.event === "talk.accepted") meta.firstChild!.textContent = `${v197Copy("NUR · private turn accepted")} `;
@@ -469,6 +522,7 @@ export class V197ActionBindings {
       // user turn stays, no assistant text is invented, and the composer never
       // leaves a silent user-only bubble on a provider/API failure.
       fail: honest => {
+        textBuffer.cancel();
         response.setAttribute("aria-busy", "false");
         response.classList.add("is-error");
         response.dataset.nurTalkError = "true";
@@ -477,7 +531,9 @@ export class V197ActionBindings {
         body.textContent = honest;
         stream.scrollTop = stream.scrollHeight;
       },
+      flush: textBuffer.flush,
       remove: () => {
+        textBuffer.cancel();
         user.remove();
         response.remove();
       },

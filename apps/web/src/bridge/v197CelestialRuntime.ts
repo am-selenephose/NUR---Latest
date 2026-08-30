@@ -102,6 +102,15 @@ type GalaxyDiagnostics = {
   zoomMax: number;
   themeColor: string;
   themeStrength: number;
+  renderer: {
+    calls: number;
+    triangles: number;
+    points: number;
+    lines: number;
+    geometries: number;
+    textures: number;
+    programs: number | null;
+  };
 };
 
 type BrainDiagnostics = {
@@ -1408,6 +1417,15 @@ function createController(
       zoomMax: GALAXY_ZOOM_MAX,
       themeColor: `#${controller.galaxyMaterial.uniforms.uThemeColor.value.getHexString()}`,
       themeStrength: controller.galaxyMaterial.uniforms.uThemeStrength.value,
+      renderer: {
+        calls: controller.renderer.info.render.calls,
+        triangles: controller.renderer.info.render.triangles,
+        points: controller.renderer.info.render.points,
+        lines: controller.renderer.info.render.lines,
+        geometries: controller.renderer.info.memory.geometries,
+        textures: controller.renderer.info.memory.textures,
+        programs: controller.renderer.info.programs?.length ?? null,
+      },
       ...diagnosticsBase(),
     }),
     dispose: () => disposeController(controller),
