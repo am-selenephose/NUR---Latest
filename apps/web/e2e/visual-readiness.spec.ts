@@ -295,55 +295,123 @@ async function box(name: string, locator: Locator) {
   return value!;
 }
 
-async function canvasContentBox(name: string, locator: Locator) {
-  await expect(locator, `${name} canvas is visible`).toBeVisible();
-  let value: { x: number; y: number; width: number; height: number } | null = null;
+const canonicalGalaxyVersion = "NUR_V197_CANONICAL_CROSS_SCREEN_LAGFREE_2026-08-29";
+const canonicalGalaxyOwner = "canonical-cross-screen-lagfree-v1";
+const canonicalGalaxyInteraction = "5d-drag-pinch-wheel-double-triple-click";
+
+async function assertCanonicalGalaxyRuntime(frame: FrameLocator, viewportLabel: string) {
+  const canvas = frame.locator("canvas#space3d");
+  await expect(canvas, `${viewportLabel} has exactly one celestial canvas`).toHaveCount(1);
+  await expect(canvas, `${viewportLabel} canonical galaxy is visible`).toBeVisible();
+  await expect(frame.locator("html"), `${viewportLabel} canonical runtime finished loading`)
+    .toHaveAttribute("data-nur-canonical-galaxy", "ready");
+  await expect(canvas).toHaveAttribute("data-nur-canvas-owner", canonicalGalaxyOwner);
+  await expect(canvas).toHaveAttribute("data-nur-galaxy-rig", canonicalGalaxyOwner);
+  await expect(canvas).toHaveAttribute("data-nur-galaxy-version", canonicalGalaxyVersion);
+  await expect(canvas).toHaveAttribute("data-nur-interaction-profile", canonicalGalaxyInteraction);
+  await expect(
+    frame.locator("#front-nur-star, #nur-brain-canvas, #nur-brain-canvas-v197"),
+    `${viewportLabel} has no superseded star-brain owner`,
+  ).toHaveCount(0);
+
+  type GalaxyEvidence = {
+    rect: { left: number; top: number; width: number; height: number };
+    viewport: { width: number; height: number };
+    backing: { width: number; height: number };
+    style: { display: string; position: string; opacity: number; pointerEvents: string; visibility: string };
+    diagnostics: {
+      version: string;
+      cssWidth: number;
+      cssHeight: number;
+      backingWidth: number;
+      backingHeight: number;
+      stars: number;
+      ambientStars: number;
+      renderedFrames: number;
+      contextLost: boolean;
+    } | null;
+    pixelSignal: { litSamples: number; spreadWidth: number; spreadHeight: number };
+  };
+
+  let evidence: GalaxyEvidence | null = null;
   await expect.poll(async () => {
-    value = await locator.evaluate((element: HTMLCanvasElement) => {
+    evidence = await canvas.evaluate((element: HTMLCanvasElement) => {
+      const frameWindow = element.ownerDocument.defaultView as (Window & {
+        NURDiagnostics?: { snapshot?: () => GalaxyEvidence["diagnostics"] };
+      }) | null;
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
       const context = element.getContext("2d");
-      if (!context || element.width < 2 || element.height < 2) return null;
-      const pixels = context.getImageData(0, 0, element.width, element.height).data;
-      const columns = new Uint32Array(element.width);
-      const rows = new Uint32Array(element.height);
-      let lit = 0;
-      for (let y = 0; y < element.height; y += 1) {
-        for (let x = 0; x < element.width; x += 1) {
-          const index = (y * element.width + x) * 4;
-          const alpha = pixels[index + 3] ?? 0;
-          const brightness = (pixels[index] ?? 0) + (pixels[index + 1] ?? 0) + (pixels[index + 2] ?? 0);
-          if (alpha <= 20 || brightness <= 120) continue;
-          columns[x] += 1;
-          rows[y] += 1;
-          lit += 1;
+      let litSamples = 0;
+      let minX = element.width;
+      let maxX = -1;
+      let minY = element.height;
+      let maxY = -1;
+      if (context && element.width > 1 && element.height > 1) {
+        const pixels = context.getImageData(0, 0, element.width, element.height).data;
+        const step = Math.max(1, Math.floor(Math.min(element.width, element.height) / 320));
+        for (let y = 0; y < element.height; y += step) {
+          for (let x = 0; x < element.width; x += step) {
+            const index = (y * element.width + x) * 4;
+            const brightness = (pixels[index] ?? 0) + (pixels[index + 1] ?? 0) + (pixels[index + 2] ?? 0);
+            if ((pixels[index + 3] ?? 0) <= 20 || brightness <= 150) continue;
+            litSamples += 1;
+            minX = Math.min(minX, x);
+            maxX = Math.max(maxX, x);
+            minY = Math.min(minY, y);
+            maxY = Math.max(maxY, y);
+          }
         }
       }
-      if (lit < 70) return null;
-      const quantile = (counts: Uint32Array, fraction: number) => {
-        const target = lit * fraction;
-        let seen = 0;
-        for (let index = 0; index < counts.length; index += 1) {
-          seen += counts[index];
-          if (seen >= target) return index;
-        }
-        return counts.length - 1;
-      };
-      const left = quantile(columns, .01);
-      const right = quantile(columns, .99);
-      const top = quantile(rows, .01);
-      const bottom = quantile(rows, .99);
-      const canvas = element.getBoundingClientRect();
-      const scaleX = canvas.width / element.width;
-      const scaleY = canvas.height / element.height;
+      const scaleX = rect.width / Math.max(1, element.width);
+      const scaleY = rect.height / Math.max(1, element.height);
       return {
-        x: canvas.left + left * scaleX,
-        y: canvas.top + top * scaleY,
-        width: Math.max(scaleX, (right - left + 1) * scaleX),
-        height: Math.max(scaleY, (bottom - top + 1) * scaleY),
+        rect: { left: rect.left, top: rect.top, width: rect.width, height: rect.height },
+        viewport: { width: frameWindow?.innerWidth ?? 0, height: frameWindow?.innerHeight ?? 0 },
+        backing: { width: element.width, height: element.height },
+        style: {
+          display: style.display,
+          position: style.position,
+          opacity: Number(style.opacity),
+          pointerEvents: style.pointerEvents,
+          visibility: style.visibility,
+        },
+        diagnostics: frameWindow?.NURDiagnostics?.snapshot?.() ?? null,
+        pixelSignal: {
+          litSamples,
+          spreadWidth: maxX >= minX ? (maxX - minX + 1) * scaleX : 0,
+          spreadHeight: maxY >= minY ? (maxY - minY + 1) * scaleY : 0,
+        },
       };
     });
-    return value;
-  }, { message: `${name} has a lit pixel envelope` }).not.toBeNull();
-  return value!;
+    return evidence?.diagnostics?.renderedFrames ?? 0;
+  }, { message: `${viewportLabel} canonical galaxy paints live frames` }).toBeGreaterThan(0);
+
+  expect(evidence).not.toBeNull();
+  const proof = evidence!;
+  expect(proof.style.display).toBe("block");
+  expect(proof.style.position).toBe("fixed");
+  expect(proof.style.visibility).toBe("visible");
+  expect(proof.style.opacity).toBe(1);
+  expect(proof.style.pointerEvents).toBe("none");
+  expect(Math.abs(proof.rect.left), `${viewportLabel} canvas begins at the viewport left`).toBeLessThanOrEqual(1);
+  expect(Math.abs(proof.rect.top), `${viewportLabel} canvas begins at the viewport top`).toBeLessThanOrEqual(1);
+  expect(Math.abs(proof.rect.width - proof.viewport.width), `${viewportLabel} canvas spans the viewport width`).toBeLessThanOrEqual(1);
+  expect(Math.abs(proof.rect.height - proof.viewport.height), `${viewportLabel} canvas spans the viewport height`).toBeLessThanOrEqual(1);
+  expect(proof.backing.width, `${viewportLabel} canvas has a real backing buffer`).toBeGreaterThanOrEqual(proof.rect.width);
+  expect(proof.backing.height, `${viewportLabel} canvas has a real backing buffer`).toBeGreaterThanOrEqual(proof.rect.height);
+  expect(proof.diagnostics?.version).toBe(canonicalGalaxyVersion);
+  expect(proof.diagnostics?.cssWidth).toBe(proof.viewport.width);
+  expect(proof.diagnostics?.cssHeight).toBe(proof.viewport.height);
+  expect(proof.diagnostics?.backingWidth).toBe(proof.backing.width);
+  expect(proof.diagnostics?.backingHeight).toBe(proof.backing.height);
+  expect(proof.diagnostics?.stars, `${viewportLabel} keeps the exact canonical star population`).toBe(2662);
+  expect(proof.diagnostics?.ambientStars, `${viewportLabel} keeps every ambient star`).toBe(222);
+  expect(proof.diagnostics?.contextLost, `${viewportLabel} canvas context remains active`).toBe(false);
+  expect(proof.pixelSignal.litSamples, `${viewportLabel} canvas contains painted stars`).toBeGreaterThan(30);
+  expect(proof.pixelSignal.spreadWidth, `${viewportLabel} star field has horizontal depth`).toBeGreaterThan(proof.viewport.width * .2);
+  expect(proof.pixelSignal.spreadHeight, `${viewportLabel} star field has vertical depth`).toBeGreaterThan(proof.viewport.height * .15);
+  return proof;
 }
 
 function universeFrame(page: Page): FrameLocator {
@@ -518,9 +586,7 @@ async function assertSystemsMapGeometry(
   const title = await box(`${viewportLabel} NUR wordmark`, frame.locator(".universe-map-title .nur-v197-stable-wordmark"));
   const subtitle = await box(`${viewportLabel} map subtitle`, frame.locator(".universe-map-title small"));
   await expect(frame.locator(".universe-master-star")).toBeVisible();
-  const brain = frame.locator(".universe-master-star > #front-nur-star");
-  await expect(brain).toBeVisible();
-  const master = await canvasContentBox(`${viewportLabel} master star`, brain.locator("#nur-brain-canvas"));
+  await assertCanonicalGalaxyRuntime(frame, viewportLabel);
   const addControl = frame.locator(".universe-add-system");
   const addIsVisible = await addControl.isVisible();
   const add = addIsVisible
@@ -533,14 +599,13 @@ async function assertSystemsMapGeometry(
   }));
 
   assertNoOverlap(`${viewportLabel}: System Field/title collision`, title, await maybeBox(frame.locator(".universe-field-readout")), 6);
-  assertNoOverlap(`${viewportLabel}: NUR title/master star collision`, title, master);
-  assertNoOverlap(`${viewportLabel}: Neural subtitle/master star collision`, subtitle, master);
   assertNoOverlap(`${viewportLabel}: Add System/title collision`, add, title, 8);
-  assertNoOverlap(`${viewportLabel}: Add System/master star collision`, add, master, 8);
 
   for (const [index, node] of nodeBoxes.entries()) {
     expect(node.width, `${viewportLabel} map node ${index} has width`).toBeGreaterThan(0);
     expect(node.height, `${viewportLabel} map node ${index} has height`).toBeGreaterThan(0);
+    assertNoOverlap(`${viewportLabel}: node ${index} covers NUR title`, node, title, 4);
+    assertNoOverlap(`${viewportLabel}: node ${index} covers Neural subtitle`, node, subtitle, 4);
     assertNoOverlap(`${viewportLabel}: Add System covers node label ${index}`, add, node, 4);
   }
 
@@ -615,8 +680,12 @@ async function assertSystemsMapGeometry(
     );
     await expect(addControl, "mobile intentionally removes the desktop-only Add System control").toBeHidden();
     const mapPanel = await box("mobile systems map", frame.locator(".universe-map-panel"));
-    expect(master.y, "master star begins inside the mobile map").toBeGreaterThanOrEqual(mapPanel.y - 1);
-    expect(master.y + master.height, "master star is not cut by the mobile map").toBeLessThanOrEqual(mapPanel.y + mapPanel.height + 1);
+    for (const [index, node] of nodeBoxes.entries()) {
+      expect(node.x, `mobile map node ${index} begins inside the map`).toBeGreaterThanOrEqual(mapPanel.x - 1);
+      expect(node.x + node.width, `mobile map node ${index} stays inside the map width`).toBeLessThanOrEqual(mapPanel.x + mapPanel.width + 1);
+      expect(node.y, `mobile map node ${index} begins inside the map height`).toBeGreaterThanOrEqual(mapPanel.y - 1);
+      expect(node.y + node.height, `mobile map node ${index} stays inside the map height`).toBeLessThanOrEqual(mapPanel.y + mapPanel.height + 1);
+    }
   }
 
   await assertNoHorizontalOverflow(frame);
@@ -677,8 +746,7 @@ test("Today and Systems controls keep one proportional geometry contract with lo
   await expect(frame.locator("#research-query")).toBeVisible();
   await expect(frame.locator("[data-research-submit]")).toBeVisible();
   await expect(frame.locator(".universe-command-row .world-command")).toHaveCount(2);
-  await expect(frame.locator("#page-systems #front-nur-star"))
-    .toHaveAttribute("data-nur-point-count", mobile ? "1640" : "2540");
+  await assertCanonicalGalaxyRuntime(frame, mobile ? "393x852 Systems" : "1440x900 Systems");
 
   if (!mobile) {
     const fit = await frame.locator("#page-systems").evaluate(element => {
@@ -750,8 +818,7 @@ test("Today and Systems controls keep one proportional geometry contract with lo
   await page.goto("/today");
   await expect(frame.locator("#page-today")).toBeVisible();
   await assertEqualControlGroup(frame.locator("#page-today .tiny-link"), 3, "Today panel actions");
-  await expect(frame.locator("#page-today #front-nur-star"))
-    .toHaveAttribute("data-nur-point-count", mobile ? "1640" : "2540");
+  await assertCanonicalGalaxyRuntime(frame, mobile ? "393x852 Today" : "1440x900 Today");
   const sendStar = frame.locator("#page-today .thought-send-button[data-send='today'] .nur-v197-sigil-star");
   await expect(sendStar).toBeVisible();
   await expect(sendStar).toHaveCSS("display", "block");

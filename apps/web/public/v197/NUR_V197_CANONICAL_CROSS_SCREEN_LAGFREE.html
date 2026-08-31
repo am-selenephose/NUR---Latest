@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#000000" />
+<title>NUR V197 — Galaxy Rig Ambient 5D Center Movers Really Slow Wider V2</title>
+<style>
+  :root{color-scheme:dark}
+  *{box-sizing:border-box}
+  html,body{margin:0;width:100%;height:100%;min-height:100%;overflow:hidden;background:#000}
+  body{
+    background:#000;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    cursor:grab;
+    user-select:none;
+    touch-action:none;
+  }
+  body.dragging{cursor:grabbing}
+  canvas{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    height:100dvh;
+    display:block;
+    background:#000;
+    touch-action:none;
+    contain:strict;
+    outline:none;
+  }
+  .hud{
+    position:fixed;
+    left:16px;
+    left:max(16px,env(safe-area-inset-left));
+    bottom:14px;
+    bottom:max(14px,env(safe-area-inset-bottom));
+    z-index:2;
+    pointer-events:none;
+    color:rgba(255,247,228,.50);
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    font-size:11px;
+    text-shadow:0 0 14px rgba(255,220,150,.12);
+    line-height:1.55;
+    max-width:min(520px,calc(100vw - max(32px,env(safe-area-inset-left)) - max(16px,env(safe-area-inset-right))));
+    text-wrap:balance;
+  }
+  @media (max-width:700px){
+    .hud{
+      left:11px;
+      left:max(11px,env(safe-area-inset-left));
+      bottom:10px;
+      bottom:max(10px,env(safe-area-inset-bottom));
+      max-width:calc(100vw - max(22px,env(safe-area-inset-left)) - max(11px,env(safe-area-inset-right)));
+      font-size:9px;
+      line-height:1.45;
+      letter-spacing:.10em;
+      color:rgba(255,247,228,.42);
+    }
+  }
+</style>
+</head>
+<body>
+<canvas id="galaxy" tabindex="0" role="application" aria-label="Interactive five-dimensional amber galaxy. Drag to orbit, pinch or use the wheel to zoom, and use keyboard controls described on screen."></canvas>
+<div class="hud">NUR · honey amber + metallic gold 5d rig · drag orbit · shift-drag dimensional planes · wheel zoom · alt/shift+wheel warp · click pulse · double-click rainbow shift · triple-click original palette · pinch zoom/twist on touch</div>
+<script>
+(() => {
+  'use strict';
+
+  const canvas = document.getElementById('galaxy');
+
+  // Prefer one explicit SDR pipeline everywhere. Browsers may ignore unsupported
+  // attributes, so diagnostics read back what was actually accepted.
+  function create2DContext(target, alpha){
+    const attempts = [
+      {alpha, colorSpace:'srgb', colorType:'unorm8', desynchronized:false},
+      {alpha, colorSpace:'srgb', desynchronized:false},
+      {alpha, colorSpace:'srgb'},
+      {alpha}
+    ];
+    for(const attrs of attempts){
+      try{
+        const ctx = target.getContext('2d', attrs);
+        if(ctx) return ctx;
+      }catch(_err){}
+    }
+    return null;
+  }
+
+  const c = create2DContext(canvas, false);
+  if(!c) throw new Error('NUR: Canvas 2D context unavailable');
+  const contextAttributes = typeof c.getContextAttributes === 'function' ? c.getContextAttributes() : null;
+  const motionQuery = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : null;
+  let reduced = !!(motionQuery && motionQuery.matches);
+  const deviceMem = Number(navigator.deviceMemory) || 0;
+  const hwThreads = Number(navigator.hardwareConcurrency) || 0;
+  // Hardware APIs are only hints: deviceMemory is unavailable in some browsers.
+  // Never let a missing hint reduce visual fidelity.
+  const lowSpec = (deviceMem > 0 && deviceMem <= 4) || (hwThreads > 0 && hwThreads <= 4);
+  const SPEC = {
+    O: [[128,154,245],[144,168,248],[108,138,236]],
+    B: [[148,176,245],[166,190,248],[138,164,238]],
+    F: [[242,174,92],[230,156,66],[216,139,46]],
+    G: [[238,164,66],[224,146,46],[208,128,30]],
+    K: [[255,176,66],[244,160,48],[228,142,38]],
+    M: [[255,136,72],[236,116,54],[214,98,40]],
+    N: [[118,221,132],[102,214,124],[84,196,112]]
+  };
+
+  const DIST = [
+    {t:'M',w:.34},{t:'K',w:.25},{t:'G',w:.18},{t:'F',w:.10},
+    {t:'N',w:.05},{t:'B',w:.05},{t:'O',w:.03}
+  ];
+
+  const BRIGHT_TYPES = ['G','G','K','K','K','F','M','M','N','B','O'];
+  const NUR_RAINBOW = [
+    [255,64,64],   // red
+    [255,140,48],  // orange
+    [232,148,48],  // honey amber (yellow fully removed)
+    [84,214,118],  // green
+    [84,164,255],  // blue
+    [96,92,255],   // indigo
+    [188,96,255]   // violet
+  ];
+  const GOLD_STARS = [
+    [244,174,88],  // light honey amber
+    [238,162,72],  // honey gold
+    [232,150,58],  // rich honey amber
+    [224,140,46],  // classic amber
+    [216,130,38],  // deep amber
+    [206,120,32],  // burnt amber
+    [196,110,28],  // dark amber
+    [184,100,24],  // bronze amber
+    [170,90,20],   // deep bronze
+    [156,80,18]    // darkest honey amber
+  ];
+  const METALLIC_GOLD_STARS = [
+    [226,186,102], // bright metallic gold
+    [214,174,88],  // brushed gold
+    [202,160,74],  // classic metallic gold
+    [192,150,66],  // deep metallic gold
+    [182,140,58],  // rich metal gold
+    [170,130,52]   // darker metallic gold
+  ];
+  const RAINBOW_STAR_CHANCE = Object.freeze({ arm:.18, core:.14, halo:.10, super:.34 });
+  const GOLD_STAR_CHANCE = Object.freeze({ arm:.28, core:.34, halo:.24, super:.42 });
+  const METALLIC_GOLD_STAR_CHANCE = Object.freeze({ arm:.16, core:.22, halo:.14, super:.30 });
+
+  const VISUAL_SEED = 0x4e555231; // 'NUR1' — stable galaxy identity across devices/reloads.
+  let rngState = VISUAL_SEED >>> 0;
+  function resetVisualSeed(){ rngState = VISUAL_SEED >>> 0; }
+  function rand(){
+    rngState = (rngState + 0x6D2B79F5) >>> 0;
+    let t = rngState;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  }
+  const rnd = (a,b)=>a+rand()*(b-a);
+  const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+
+  const DEFAULT_RIG = Object.freeze({
+    yaw:.28,
+    pitch:-.10,
+    roll:.03,
+    zoom:1,
+    hyperspace:.18,
+    dim4:.18,
+    dim5:-.12
+  });
+  const ZOOM_MIN = .72;
+  const ZOOM_MAX = 1.70;
+  const HYPER_MIN = 0;
+  const HYPER_MAX = 1;
+  const FRAME_MS = 1000/60;
+
+  // Preserve the image; adapt time instead of deleting pixels/particles.
+  const FRAME_60_MS = 1000/60;
+  const FRAME_45_MS = 1000/45;
+  const FRAME_30_MS = 1000/30;
+  const FRAME_20_MS = 1000/20;
+  const CADENCE_TIERS = [FRAME_60_MS,FRAME_45_MS,FRAME_30_MS,FRAME_20_MS];
+  const MAX_CANVAS_EDGE = 8192;
+  // Internal sampling is intentionally independent of devicePixelRatio. That
+  // prevents the same CSS scene from changing ray thickness/antialiasing just
+  // because X11, Wayland or another monitor reports a different DPR.
+  const CANONICAL_TARGET_DPR = 1.75;
+  const CANONICAL_MIN_DPR = 1.25;
+  const MAX_BACKING_PIXELS = 12000000;
+  let targetFrameMs = FRAME_60_MS;
+  let smoothRenderCost = 0;
+  let pressureFrames = 0;
+  let reliefFrames = 0;
+  let lastDevicePixelRatio = window.devicePixelRatio || 1;
+  let refreshHz = 60;
+  let cadenceStride = 1;
+  let rafTick = 0;
+  const rafSamples = new Float32Array(30);
+  let rafSampleCount = 0;
+  let rafSampleCursor = 0;
+
+  let W=0,H=0,minSide=1;
+  let last = performance.now();
+  let lastRaf = last;
+  let smoothDt = FRAME_MS;
+  const quality = 2; // visual fidelity is fixed; only frame cadence adapts
+  let activeDpr = 1;
+  let contextLost = false;
+  let layoutObserver = null;
+  let energy = 0;
+  let frameNo = 0;
+  const particles = [];
+  const drawOrder = [];
+  const linkNodes = [];
+  const linkPairs = [];
+  let linkPairQuality = -1;
+  let linkPairStamp = -1;
+  const ambientOrbiters = [];
+  const ambientFloaters = [];
+  const ambientFireballs = [];
+  const ambientProj = { sx:0, sy:0, ss:1, sz:0 };
+  const AMBIENT_ORBIT_COUNT = 56;
+  const AMBIENT_FLOATER_COUNT = 150;
+  const AMBIENT_FIREBALL_COUNT = 16;
+  let rigColorOrbit = 0, rigColorTarget = 0, rigColorMix = 0, rigColorMixTarget = 0;
+  const RIG_COLOR_BLEND = .78;
+
+  // Canonical cross-screen ray tuning: keep the lossless renderer architecture,
+  // but place the ray/glow energy between the older soft X11 look and the newer
+  // more visible cross-screen branch so rays survive darker displays without
+  // becoming hard or laser-like on Wayland.
+  const RAY_TUNE = Object.freeze({
+    haloScaleSuper:4.20,
+    haloScaleNormal:2.14,
+    spritePrimaryLen:2.88,
+    spriteSecondaryLen:1.66,
+    spritePrimaryAlpha:1.02,
+    spriteSecondaryAlpha:.62,
+    spriteSpikeAlpha:.145,
+    livePrimaryLenSuper:4.00,
+    livePrimaryLenNormal:2.30,
+    liveSecondaryLenSuper:2.14,
+    liveSecondaryLenNormal:1.42,
+    livePrimaryAlphaCap:.18,
+    livePrimaryAlphaMul:.78,
+    liveSecondaryAlphaCap:.075,
+    liveSecondaryAlphaMul:.46,
+    lineWidth:.46,
+    crossAxisScale:.46,
+    crossAxisAlpha:.72
+  });
+
+  const pointer = {
+    x:0,y:0,tx:0,ty:0,
+    active:false,id:null,lastX:0,lastY:0
+  };
+  const activePointers = new Map();
+  const gesture = {
+    pinchActive:false,
+    startDistance:0,
+    startAngle:0,
+    startZoom:DEFAULT_RIG.zoom,
+    startDim5:DEFAULT_RIG.dim5,
+    startHyper:DEFAULT_RIG.hyperspace
+  };
+  const twoPointerScratch = { distance:1, angle:0, centerX:0, centerY:0 };
+
+  const frameBasis = {
+    cy:1, sy:0, cp:1, sp:0, cr:1, sr:0,
+    c4:1, s4:0, c5:1, s5:0,
+    hyper:0, cameraDistance:3.35, rigScale:1
+  };
+  const HORIZONTAL_SPREAD = 1.13;
+
+  const rig = {
+    yaw:DEFAULT_RIG.yaw,
+    pitch:DEFAULT_RIG.pitch,
+    roll:DEFAULT_RIG.roll,
+    zoom:DEFAULT_RIG.zoom,
+    hyperspace:DEFAULT_RIG.hyperspace,
+    dim4:DEFAULT_RIG.dim4,
+    dim5:DEFAULT_RIG.dim5,
+    targetYaw:DEFAULT_RIG.yaw,
+    targetPitch:DEFAULT_RIG.pitch,
+    targetRoll:DEFAULT_RIG.roll,
+    targetZoom:DEFAULT_RIG.zoom,
+    targetHyperspace:DEFAULT_RIG.hyperspace,
+    targetDim4:DEFAULT_RIG.dim4,
+    targetDim5:DEFAULT_RIG.dim5,
+    velYaw:0,
+    velPitch:0,
+    velRoll:0,
+    velDim4:0,
+    velDim5:0
+  };
+
+  function configureContext(scaleX=activeDpr,scaleY=activeDpr){
+    c.setTransform(scaleX,0,0,scaleY,0,0);
+    c.imageSmoothingEnabled = true;
+    if('imageSmoothingQuality' in c) c.imageSmoothingQuality = 'high';
+    c.lineCap = 'round';
+    c.lineJoin = 'round';
+  }
+
+  // QUALITY CONTRACT: compute tier never changes galaxy population, palette,
+  // geometry, glow logic or star cores. It may only change presentation cadence.
+  function resize(){
+    const rect = typeof canvas.getBoundingClientRect === 'function' ? canvas.getBoundingClientRect() : null;
+    W = Math.max(1,Math.round((rect && rect.width) || document.documentElement.clientWidth || innerWidth || 1));
+    H = Math.max(1,Math.round((rect && rect.height) || document.documentElement.clientHeight || innerHeight || 1));
+    minSide = Math.min(W,H);
+    const cssPixels = Math.max(1, W*H);
+    const edgeCap = Math.min(MAX_CANVAS_EDGE/W, MAX_CANVAS_EDGE/H);
+    const pixelBudgetDpr = Math.sqrt(Math.max(cssPixels,MAX_BACKING_PIXELS)/cssPixels);
+    let dpr = Math.min(CANONICAL_TARGET_DPR, pixelBudgetDpr, edgeCap);
+    dpr = Math.max(Math.min(CANONICAL_MIN_DPR, edgeCap), dpr);
+    let pixelW = Math.max(1,Math.round(W*dpr));
+    let pixelH = Math.max(1,Math.round(H*dpr));
+    if(canvas.width !== pixelW || canvas.height !== pixelH){
+      try{
+        canvas.width = pixelW;
+        canvas.height = pixelH;
+      }catch(_err){
+        dpr = Math.max(1,Math.min(1.25,edgeCap));
+        pixelW = Math.max(1,Math.round(W*dpr));
+        pixelH = Math.max(1,Math.round(H*dpr));
+        canvas.width = pixelW;
+        canvas.height = pixelH;
+      }
+    }
+    activeDpr = Math.min(pixelW/W,pixelH/H);
+    configureContext(pixelW/W,pixelH/H);
+  }
+
+  function normalizePointer(clientX, clientY){
+    const safeW = Math.max(1, W);
+    const safeH = Math.max(1, H);
+    pointer.tx = clamp(clientX / safeW - .5, -.5, .5);
+    pointer.ty = clamp(clientY / safeH - .5, -.5, .5);
+  }
+
+  function resetRig(full=false){
+    rig.yaw = rig.targetYaw = DEFAULT_RIG.yaw;
+    rig.pitch = rig.targetPitch = DEFAULT_RIG.pitch;
+    rig.roll = rig.targetRoll = DEFAULT_RIG.roll;
+    rig.zoom = rig.targetZoom = DEFAULT_RIG.zoom;
+    rig.hyperspace = rig.targetHyperspace = DEFAULT_RIG.hyperspace;
+    rig.dim4 = rig.targetDim4 = DEFAULT_RIG.dim4;
+    rig.dim5 = rig.targetDim5 = DEFAULT_RIG.dim5;
+    rig.velYaw = rig.velPitch = rig.velRoll = 0;
+    rig.velDim4 = rig.velDim5 = 0;
+    rigColorOrbit = 0;
+    rigColorTarget = 0;
+    rigColorMix = 0;
+    rigColorMixTarget = 0;
+    if(full){
+      energy = 0;
+      pointer.x = pointer.y = pointer.tx = pointer.ty = 0;
+      gesture.pinchActive = false;
+      linkPairStamp = -1;
+    }
+  }
+
+  function normal(){
+    let u=0,v=0;
+    while(u===0)u=rand();
+    while(v===0)v=rand();
+    return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+  }
+
+  function mixColInto(a,b,t,out){
+    out[0]=Math.round(a[0]+(b[0]-a[0])*t);
+    out[1]=Math.round(a[1]+(b[1]-a[1])*t);
+    out[2]=Math.round(a[2]+(b[2]-a[2])*t);
+    return out;
+  }
+
+  function rndCol(bright=false){
+    if(bright){
+      const t = BRIGHT_TYPES[(rand()*BRIGHT_TYPES.length)|0];
+      return SPEC[t][(rand()*SPEC[t].length)|0];
+    }
+    let r = rand(), cum = 0;
+    for(const {t,w} of DIST){
+      cum += w;
+      if(r < cum) return SPEC[t][(rand()*SPEC[t].length)|0];
+    }
+    return SPEC.G[0];
+  }
+
+  const PRISM_CHANCE = Object.freeze({super:.76, core:.60, arm:.50, halo:.42});
+  const SCINT_WARM = [236,156,82];
+  const DOMINANT_WARM = [232,142,54];
+  const prismScratch = [0,0,0];
+  const warmScratch = [0,0,0];
+  const renderScratch = [0,0,0];
+  const honeyScratch = [0,0,0];
+  const rigTintScratch = [0,0,0];
+  const finalScratch = [0,0,0];
+
+  function shouldPrismStar(kind){
+    return rand() < PRISM_CHANCE[kind];
+  }
+
+  function rainbowCol(){
+    return NUR_RAINBOW[(rand()*NUR_RAINBOW.length)|0];
+  }
+
+  function goldCol(){
+    return GOLD_STARS[(rand()*GOLD_STARS.length)|0];
+  }
+
+  function metallicGoldCol(){
+    return METALLIC_GOLD_STARS[(rand()*METALLIC_GOLD_STARS.length)|0];
+  }
+
+  function pickStarColor(kind, isBright){
+    if(rand() < (METALLIC_GOLD_STAR_CHANCE[kind] || 0)) return metallicGoldCol();
+    if(rand() < (GOLD_STAR_CHANCE[kind] || 0)) return goldCol();
+    if(rand() < (RAINBOW_STAR_CHANCE[kind] || 0)) return rainbowCol();
+    return rndCol(isBright);
+  }
+
+  function isGreenish(col){
+    return col[1] > col[0] + 8 && col[1] > col[2];
+  }
+
+  function prismShiftInto(col,phase,twinkle,isS,out){
+    const orbit = (((phase%(Math.PI*2))+(Math.PI*2))/(Math.PI*2))*NUR_RAINBOW.length;
+    const i0 = Math.floor(orbit)%NUR_RAINBOW.length;
+    const i1 = (i0+1)%NUR_RAINBOW.length;
+    const t = orbit-i0;
+    mixColInto(NUR_RAINBOW[i0], NUR_RAINBOW[i1], t, prismScratch);
+    const amt = Math.min(.82,(isS ? .56 : .42)+twinkle*(isS ? .24 : .18));
+    return mixColInto(col,prismScratch,amt,out);
+  }
+  function sampleRainbowFloatInto(orbit,out){
+    const wrapped = ((orbit % NUR_RAINBOW.length) + NUR_RAINBOW.length) % NUR_RAINBOW.length;
+    const i0 = Math.floor(wrapped) % NUR_RAINBOW.length;
+    const i1 = (i0 + 1) % NUR_RAINBOW.length;
+    const t = wrapped - Math.floor(wrapped);
+    return mixColInto(NUR_RAINBOW[i0], NUR_RAINBOW[i1], t, out);
+  }
+
+  function scintColInto(col,twinkle,isS,out){
+    const amt = (isS ? .16 : .05) + twinkle*(isS ? .15 : .05);
+    return mixColInto(col,SCINT_WARM,amt,out);
+  }
+
+  function warmDominantInto(col,amt,out){
+    return mixColInto(col,DOMINANT_WARM,amt,out);
+  }
+
+  // Final color gate: any yellow / pale-gold star generated by palette,
+  // prism interpolation, or warm mixing is forced into a honey-amber hue.
+  const HONEY_AMBER_LIGHT = [240,166,82];
+  const HONEY_AMBER_DEEP = [214,128,38];
+  function honeyAmberizeInto(col,out){
+    const r=col[0], g=col[1], b=col[2];
+    const yellowLike = r >= 190 && g >= 145 && b <= 145 && g > b*1.15;
+    if(!yellowLike){
+      out[0]=r; out[1]=g; out[2]=b;
+      return out;
+    }
+    const brightness = clamp((r+g+b-430)/280,0,1);
+    return mixColInto(HONEY_AMBER_DEEP,HONEY_AMBER_LIGHT,brightness,out);
+  }
+
+  const spriteDpr = 3;
+  const SPRITE_REF_ALPHA = .20;
+  const SPRITE_SIZES = [2.75,3.75,5.0,6.5];
+  const SPRITE_COLORS = [
+    [238,154,72],[230,140,56],[218,124,44],[236,160,72],[224,142,48],
+    [232,166,92],[216,132,58],[192,111,60],
+    [226,186,102],[214,174,88],[202,160,74],[192,150,66],[182,140,58],[170,130,52],
+    [129,187,218],[111,164,231],[146,151,237],[184,133,225],[220,123,191],
+    [239,120,111],[232,142,62],[226,150,50],[210,132,34],[141,207,181],
+    [118,221,132],[92,198,116]
+  ];
+  const spriteCache = new Map();
+  const nearestColorMemo = new Int16Array(4096);
+  nearestColorMemo.fill(-1);
+
+  function nearestSpriteColor(col){
+    const r=col[0]|0, g=col[1]|0, b=col[2]|0;
+    const memoKey=((r>>4)<<8)|((g>>4)<<4)|(b>>4);
+    const memo=nearestColorMemo[memoKey];
+    if(memo>=0) return memo;
+    let best=0,bestD=Infinity;
+    for(let i=0;i<SPRITE_COLORS.length;i++){
+      const q=SPRITE_COLORS[i];
+      const dr=r-q[0], dg=g-q[1], db=b-q[2];
+      const d=dr*dr+dg*dg+db*db;
+      if(d<bestD){ bestD=d; best=i; }
+    }
+    nearestColorMemo[memoKey]=best;
+    return best;
+  }
+
+  function spriteSizeIndex(r){
+    if(r<3.25) return 0;
+    if(r<4.4) return 1;
+    if(r<5.75) return 2;
+    return 3;
+  }
+
+  function starPathCtx(ctx,x,y,outer,inner,rot=-Math.PI/2){
+    ctx.beginPath();
+    for(let i=0;i<8;i++){
+      const rr=(i&1)?inner:outer;
+      const a=rot+i*Math.PI/4;
+      const px=x+Math.cos(a)*rr;
+      const py=y+Math.sin(a)*rr;
+      if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+    }
+    ctx.closePath();
+  }
+
+  function shardCtx(ctx,x,y,len,col,a,rot){
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(rot);
+    const g=ctx.createLinearGradient(-len,0,len,0);
+    g.addColorStop(0,`rgba(${col[0]},${col[1]},${col[2]},0)`);
+    g.addColorStop(.16,`rgba(${col[0]},${col[1]},${col[2]},${a*.05})`);
+    g.addColorStop(.34,`rgba(${col[0]},${col[1]},${col[2]},${a*.20})`);
+    g.addColorStop(.46,`rgba(${col[0]},${col[1]},${col[2]},${a*.40})`);
+    g.addColorStop(.50,`rgba(238,154,78,${a*.84})`);
+    g.addColorStop(.54,`rgba(${col[0]},${col[1]},${col[2]},${a*.40})`);
+    g.addColorStop(.66,`rgba(${col[0]},${col[1]},${col[2]},${a*.20})`);
+    g.addColorStop(.84,`rgba(${col[0]},${col[1]},${col[2]},${a*.05})`);
+    g.addColorStop(1,`rgba(${col[0]},${col[1]},${col[2]},0)`);
+    ctx.strokeStyle=g;
+    ctx.lineWidth=RAY_TUNE.lineWidth;
+    ctx.beginPath();
+    ctx.moveTo(-len,0);
+    ctx.lineTo(len,0);
+    ctx.stroke();
+    ctx.rotate(Math.PI/2);
+    ctx.globalAlpha*=RAY_TUNE.crossAxisAlpha;
+    ctx.beginPath();
+    ctx.moveTo(-len*RAY_TUNE.crossAxisScale,0);
+    ctx.lineTo(len*RAY_TUNE.crossAxisScale,0);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function buildNormalSprite(colorIndex,sizeIndex,withSpike){
+    const col=SPRITE_COLORS[colorIndex];
+    const r=SPRITE_SIZES[sizeIndex];
+    const hR=r*2.26;
+    const bodyR=Math.max(1.00,Math.min(2.92,r*.114));
+    const spikeLen=Math.max(5.4,r*2.28);
+    const half=Math.ceil(Math.max(hR,spikeLen)+5);
+    const logical=half*2;
+    const el=document.createElement('canvas');
+    el.width=logical*spriteDpr;
+    el.height=logical*spriteDpr;
+    const ctx=create2DContext(el,true);
+    if(!ctx) throw new Error('NUR: sprite Canvas 2D context unavailable');
+    ctx.setTransform(spriteDpr,0,0,spriteDpr,half*spriteDpr,half*spriteDpr);
+    const a=SPRITE_REF_ALPHA, tw=1, rot=.72;
+
+    const hg=ctx.createRadialGradient(0,0,r*.45,0,0,hR);
+    hg.addColorStop(0,`rgba(${col[0]},${col[1]},${col[2]},${a*.066*tw})`);
+    hg.addColorStop(.18,`rgba(${col[0]},${col[1]},${col[2]},${a*.040*tw})`);
+    hg.addColorStop(.44,`rgba(${col[0]},${col[1]},${col[2]},${a*.018})`);
+    hg.addColorStop(.80,`rgba(${col[0]},${col[1]},${col[2]},${a*.0055})`);
+    hg.addColorStop(1,`rgba(${col[0]},${col[1]},${col[2]},0)`);
+    ctx.fillStyle=hg;
+    ctx.beginPath();
+    ctx.arc(0,0,hR,0,Math.PI*2);
+    ctx.fill();
+
+    shardCtx(ctx,0,0,bodyR*RAY_TUNE.spritePrimaryLen,col,Math.min(.24,a*RAY_TUNE.spritePrimaryAlpha),rot);
+    shardCtx(ctx,0,0,bodyR*RAY_TUNE.spriteSecondaryLen,col,Math.min(.09,a*RAY_TUNE.spriteSecondaryAlpha),rot+Math.PI/4);
+
+    const ig=ctx.createRadialGradient(0,0,0,0,0,bodyR);
+    ig.addColorStop(0,`rgba(255,214,142,${Math.min(1,a*tw*4.9)})`);
+    ig.addColorStop(.22,`rgba(${col[0]},${col[1]},${col[2]},${Math.min(.94,a*tw*2.8)})`);
+    ig.addColorStop(.64,`rgba(${col[0]},${col[1]},${col[2]},${Math.min(.18,a*.44)})`);
+    ig.addColorStop(1,`rgba(${col[0]},${col[1]},${col[2]},0)`);
+    ctx.fillStyle=ig;
+    starPathCtx(ctx,0,0,bodyR,Math.max(.18,bodyR*.105),rot-Math.PI/2);
+    ctx.fill();
+    ctx.strokeStyle=`rgba(255,206,136,${Math.min(.34,a*1.26)})`;
+    ctx.lineWidth=.42;
+    starPathCtx(ctx,0,0,bodyR*.78,Math.max(.18,bodyR*.105)*.78,rot-Math.PI/2);
+    ctx.stroke();
+
+    const cA=Math.min(a*tw*4.5,.91);
+    ctx.fillStyle=`rgba(${Math.min(255,col[0]+45)},${Math.min(255,col[1]+38)},${Math.min(255,col[2]+28)},${cA})`;
+    starPathCtx(ctx,0,0,Math.max(.95,bodyR*.24+tw*.35),Math.max(.20,bodyR*.045),rot);
+    ctx.fill();
+
+    if(withSpike){
+      const spikeA=RAY_TUNE.spriteSpikeAlpha;
+      ctx.save();
+      ctx.rotate(.3);
+      for(const ang of [0,Math.PI/2]){
+        ctx.save();
+        ctx.rotate(ang);
+        const sg=ctx.createLinearGradient(-spikeLen*.54,0,spikeLen*.54,0);
+        sg.addColorStop(0,`rgba(${Math.min(255,col[0]+25)},${Math.min(255,col[1]+18)},${Math.min(255,col[2]+12)},0)`);
+        sg.addColorStop(.26,`rgba(${col[0]},${col[1]},${col[2]},${spikeA*.44})`);
+        sg.addColorStop(.5,`rgba(232,142,62,${spikeA*.66})`);
+        sg.addColorStop(.74,`rgba(${col[0]},${col[1]},${col[2]},${spikeA*.44})`);
+        sg.addColorStop(1,`rgba(${Math.min(255,col[0]+25)},${Math.min(255,col[1]+18)},${Math.min(255,col[2]+12)},0)`);
+        ctx.strokeStyle=sg;
+        ctx.lineWidth=.46;
+        ctx.beginPath();
+        ctx.moveTo(-spikeLen*.54,0);
+        ctx.lineTo(spikeLen*.54,0);
+        ctx.stroke();
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
+    return {canvas:el,half,logical};
+  }
+
+  function getNormalSprite(col,sizeIndex,withSpike){
+    const ci=nearestSpriteColor(col);
+    const key=(ci<<4)|(sizeIndex<<1)|(withSpike?1:0);
+    let sp=spriteCache.get(key);
+    if(!sp){
+      sp=buildNormalSprite(ci,sizeIndex,withSpike);
+      spriteCache.set(key,sp);
+    }
+    return sp;
+  }
+
+  function drawNormalSprite(x,y,r,col,alpha,phase,twinkle,withSpike){
+    const sizeIndex=spriteSizeIndex(r);
+    const sp=getNormalSprite(col,sizeIndex,withSpike);
+    const scale=r/SPRITE_SIZES[sizeIndex];
+    const opacity=Math.min(1,alpha/(SPRITE_REF_ALPHA*.88));
+    c.save();
+    c.translate(x,y);
+    c.rotate(phase*.37+twinkle*.82-.72);
+    c.scale(scale,scale);
+    c.globalAlpha=opacity;
+    c.drawImage(sp.canvas,-sp.half,-sp.half,sp.logical,sp.logical);
+    c.restore();
+  }
+
+  function stellarPath(x,y,outer,inner,points=4,rot=-Math.PI/2){
+    c.beginPath();
+    if(points===4){
+      let ux=Math.cos(rot), uy=Math.sin(rot);
+      for(let i=0;i<8;i++){
+        const rr=(i&1)?inner:outer;
+        const px=x+ux*rr, py=y+uy*rr;
+        if(i===0) c.moveTo(px,py); else c.lineTo(px,py);
+        const nextX=(ux-uy)*Math.SQRT1_2;
+        uy=(ux+uy)*Math.SQRT1_2;
+        ux=nextX;
+      }
+      c.closePath();
+      return;
+    }
+    for(let i=0;i<points*2;i++){
+      const rr = i%2===0 ? outer : inner;
+      const a = rot + i*Math.PI/points;
+      const px = x + Math.cos(a)*rr;
+      const py = y + Math.sin(a)*rr;
+      if(i===0) c.moveTo(px,py); else c.lineTo(px,py);
+    }
+    c.closePath();
+  }
+
+  function glitterShard(x,y,len,col,a,rot){
+    c.save();
+    c.translate(x,y);
+    c.rotate(rot);
+    const g = c.createLinearGradient(-len,0,len,0);
+    g.addColorStop(0,`rgba(${col[0]},${col[1]},${col[2]},0)`);
+    g.addColorStop(.16,`rgba(${col[0]},${col[1]},${col[2]},${a*.05})`);
+    g.addColorStop(.34,`rgba(${col[0]},${col[1]},${col[2]},${a*.20})`);
+    g.addColorStop(.46,`rgba(${col[0]},${col[1]},${col[2]},${a*.40})`);
+    g.addColorStop(.50,`rgba(238,154,78,${a*.84})`);
+    g.addColorStop(.54,`rgba(${col[0]},${col[1]},${col[2]},${a*.40})`);
+    g.addColorStop(.66,`rgba(${col[0]},${col[1]},${col[2]},${a*.20})`);
+    g.addColorStop(.84,`rgba(${col[0]},${col[1]},${col[2]},${a*.05})`);
+    g.addColorStop(1,`rgba(${col[0]},${col[1]},${col[2]},0)`);
+    c.strokeStyle = g;
+    c.lineWidth = RAY_TUNE.lineWidth;
+    c.beginPath();
+    c.moveTo(-len,0);
+    c.lineTo(len,0);
+    c.stroke();
+    c.rotate(Math.PI/2);
+    c.globalAlpha *= RAY_TUNE.crossAxisAlpha;
+    c.beginPath();
+    c.moveTo(-len*RAY_TUNE.crossAxisScale,0);
+    c.lineTo(len*RAY_TUNE.crossAxisScale,0);
+    c.stroke();
+    c.restore();
+  }
+
+  function starGlow(x,y,r,sCol,alpha,twinkle,isS,phase=0){
+    const hR = r*(isS ? RAY_TUNE.haloScaleSuper : RAY_TUNE.haloScaleNormal);
+    const hg = c.createRadialGradient(x,y,r*.45,x,y,hR);
+    hg.addColorStop(0,`rgba(${sCol[0]},${sCol[1]},${sCol[2]},${alpha*0.040*twinkle})`);
+    hg.addColorStop(.16,`rgba(${sCol[0]},${sCol[1]},${sCol[2]},${alpha*0.022*twinkle})`);
+    hg.addColorStop(.44,`rgba(${sCol[0]},${sCol[1]},${sCol[2]},${alpha*0.010})`);
+    hg.addColorStop(.80,`rgba(${sCol[0]},${sCol[1]},${sCol[2]},${alpha*0.0035})`);
+    hg.addColorStop(1,`rgba(${sCol[0]},${sCol[1]},${sCol[2]},0)`);
+    c.fillStyle = hg;
+    c.beginPath(); c.arc(x,y,hR,0,Math.PI*2); c.fill();
+
+    const bodyR = isS ? clamp(r*.20,2.7,7.2) : clamp(r*.126,1.06,3.02);
+    const innerR = Math.max(.18, bodyR*.105);
+    const rot = phase*.37 + twinkle*.82 + (isS ? Math.PI/8 : 0);
+
+    glitterShard(
+      x,y,
+      bodyR*(isS ? RAY_TUNE.livePrimaryLenSuper : RAY_TUNE.livePrimaryLenNormal),
+      sCol,
+      Math.min(RAY_TUNE.livePrimaryAlphaCap,alpha*RAY_TUNE.livePrimaryAlphaMul),
+      rot
+    );
+    glitterShard(
+      x,y,
+      bodyR*(isS ? RAY_TUNE.liveSecondaryLenSuper : RAY_TUNE.liveSecondaryLenNormal),
+      sCol,
+      Math.min(RAY_TUNE.liveSecondaryAlphaCap,alpha*RAY_TUNE.liveSecondaryAlphaMul),
+      rot+Math.PI/4
+    );
+
+    const ig = c.createRadialGradient(x,y,0,x,y,bodyR);
+    ig.addColorStop(0,   `rgba(255,224,154,${Math.min(1,alpha*twinkle*5.0)})`);
+    ig.addColorStop(.18, `rgba(${sCol[0]},${sCol[1]},${sCol[2]},${Math.min(.95,alpha*twinkle*2.85)})`);
+    ig.addColorStop(.52, `rgba(${sCol[0]},${sCol[1]},${sCol[2]},${Math.min(.22,alpha*.46)})`);
+    ig.addColorStop(.82, `rgba(${sCol[0]},${sCol[1]},${sCol[2]},${Math.min(.045,alpha*.18)})`);
+    ig.addColorStop(1,   `rgba(${sCol[0]},${sCol[1]},${sCol[2]},0)`);
+    c.fillStyle = ig;
+    stellarPath(x,y,bodyR,innerR,4,rot-Math.PI/2);
+    c.fill();
+
+    c.strokeStyle = `rgba(255,220,146,${Math.min(.30,alpha*1.10)})`;
+    c.lineWidth = .38;
+    stellarPath(x,y,bodyR*.78,innerR*.78,4,rot-Math.PI/2);
+    c.stroke();
+
+    const cA = Math.min(alpha*twinkle*4.6, .90);
+    if(cA>0.04){
+      const wr=Math.min(255,sCol[0]+45),wg=Math.min(255,sCol[1]+38),wb=Math.min(255,sCol[2]+28);
+      c.fillStyle=`rgba(${wr},${wg},${wb},${cA})`;
+      stellarPath(x,y,Math.max(.95,bodyR*.24+twinkle*.35),Math.max(.20,bodyR*.045),4,rot);
+      c.fill();
+    }
+  }
+
+  function spike(x,y,len,col,a,rot=0){
+    c.save();
+    c.translate(x,y);
+    c.rotate(rot);
+    const l=len*.54, opFrac=.66;
+    for(let axis=0;axis<2;axis++){
+      if(axis) c.rotate(Math.PI/2);
+      const sg=c.createLinearGradient(-l,0,l,0);
+      sg.addColorStop(0,  `rgba(${Math.min(255,col[0]+25)},${Math.min(255,col[1]+18)},${Math.min(255,col[2]+12)},0)`);
+      sg.addColorStop(.26,`rgba(${col[0]},${col[1]},${col[2]},${a*opFrac*.44})`);
+      sg.addColorStop(.5, `rgba(232,142,62,${a*opFrac*.66})`);
+      sg.addColorStop(.74,`rgba(${col[0]},${col[1]},${col[2]},${a*opFrac*.44})`);
+      sg.addColorStop(1,  `rgba(${Math.min(255,col[0]+25)},${Math.min(255,col[1]+18)},${Math.min(255,col[2]+12)},0)`);
+      c.strokeStyle=sg;
+      c.lineWidth=0.55;
+      c.beginPath(); c.moveTo(-l,0); c.lineTo(l,0); c.stroke();
+    }
+    c.restore();
+  }
+
+  function makeStar(kind){
+    const isBright = kind==='super';
+    let x,y,z,w,v,r,a, radial;
+
+    if(kind==='arm'){
+      const arm=(rand()*4)|0;
+      radial=.14+Math.pow(rand(),.66)*rnd(.24,1.66);
+      const ang=arm*(Math.PI*2/4)+radial*4.65+rnd(-.46,.46)+.34;
+      const thick=.026+radial*.16;
+      const clump=rand()<.26 ? rnd(.80,1.22) : 1;
+      x=Math.cos(ang)*radial*clump*(1+rnd(-.06,.06));
+      z=Math.sin(ang)*radial*.86*clump + normal()*thick*.48;
+      y=normal()*thick + Math.sin(ang*1.78+radial*4.4)*radial*.10;
+      z+=Math.sin(ang*2.15)*radial*.11;
+      y+=Math.cos(ang*.7)*radial*.03;
+      w=Math.sin(ang*1.4)*radial*.52 + normal()*0.08;
+      v=Math.cos(ang*1.1)*radial*.48 + normal()*0.08;
+      r=rnd(.38,1.66);
+      a=rnd(.065,.29);
+    } else if(kind==='core'){
+      const gemCore = rand() < .22;
+      radial = Math.pow(rand(), gemCore ? .84 : .72) * rnd(gemCore ? .05 : .08, gemCore ? .58 : .72);
+      const ang = rnd(0,Math.PI*2);
+      x = Math.cos(ang)*radial;
+      z = Math.sin(ang)*radial*.84;
+      y = normal()*(gemCore ? (.04+radial*.11) : (.03+radial*.08));
+      w = Math.sin(ang*1.3)*radial*(gemCore ? .86 : .72);
+      v = Math.cos(ang*1.7)*radial*(gemCore ? .80 : .66);
+      r = gemCore ? rnd(2.25,4.85) : rnd(.85,2.35);
+      a = gemCore ? rnd(.22,.48) : rnd(.13,.34);
+    } else if(kind==='halo'){
+      const shell=Math.pow(rand(), .78);
+      const theta=rnd(0,Math.PI*2);
+      const phi=Math.acos(rnd(-1,1));
+      radial=rnd(1.05,2.15) * (0.62 + shell*.78);
+      x=Math.sin(phi)*Math.cos(theta)*radial;
+      y=Math.cos(phi)*radial*.68;
+      z=Math.sin(phi)*Math.sin(theta)*radial;
+      w=Math.sin(theta*1.25)*radial*.56;
+      v=Math.cos(phi*1.4)*radial*.50;
+      r=rnd(.22,.98);
+      a=rnd(.025,.12);
+    } else {
+      const arm=(rand()*4)|0;
+      radial=Math.pow(rand(),.70)*rnd(.12,1.08);
+      const ang=arm*(Math.PI/2)+radial*5.1+rnd(-.24,.24);
+      x=Math.cos(ang)*radial;
+      z=Math.sin(ang)*radial*.84;
+      y=normal()*(.03+radial*.07);
+      w=Math.sin(ang*1.4)*radial*.48 + rnd(-.08,.08);
+      v=Math.cos(ang*1.2)*radial*.44 + rnd(-.08,.08);
+      r=rnd(1.8,4.35);
+      a=rnd(.22,.58);
+    }
+
+    // Make the overall galaxy read more vertical / elongated
+    const verticalStretch = kind==='halo' ? 1.20 : (kind==='core' ? 1.38 : (isBright ? 1.32 : 1.48));
+    const horizontalCompress = kind==='halo' ? 0.90 : (kind==='core' ? 0.76 : (isBright ? 0.82 : 0.74));
+    const depthCompress = kind==='halo' ? 0.96 : 0.90;
+    x *= horizontalCompress;
+    y *= verticalStretch;
+    z *= depthCompress;
+    w *= 0.94;
+    v *= 1.02;
+
+    const radialNorm = clamp(Math.hypot(x,y,z) / 2.28, 0, 1);
+    const motionScale = clamp(1 - radialNorm*.76, .22, 1);
+
+    const col = pickStarColor(kind, isBright);
+    const metallicGoldish = METALLIC_GOLD_STARS.some(gc => gc[0]===col[0] && gc[1]===col[1] && gc[2]===col[2]);
+    const prism = metallicGoldish ? false : shouldPrismStar(kind);
+    const greenish = isGreenish(col);
+    const rainbowish = NUR_RAINBOW.some(rc => rc[0]===col[0] && rc[1]===col[1] && rc[2]===col[2]);
+    const goldish = GOLD_STARS.some(gc => gc[0]===col[0] && gc[1]===col[1] && gc[2]===col[2]);
+
+    return {
+      kind,
+      x,y,z,w,v,r,a,
+      sx:0,sy:0,sz:0,ss:0,
+      isSuper:isBright,
+      coreGem:(kind==='core' && r>2.2),
+      metallicGold:metallicGoldish,
+      warmAmt:metallicGoldish ? 0 : ((greenish || rainbowish || goldish) ? (kind==='halo' ? .01 : .02) : (kind==='halo' ? .08 : (isBright ? .10 : .18))),
+      col,
+      prism,
+      prismPhase:rnd(0,Math.PI*2),
+      prismSpeed:(kind==='core' && r>2.2) ? rnd(.00028,.00088) : rnd(.00018,.00056),
+      phase:rnd(0,Math.PI*2),
+      radialNorm,
+      motionScale:(kind==='core' && r>2.2) ? Math.min(1.24, motionScale*1.22) : motionScale,
+      speed:(kind==='core' && r>2.2) ? rnd(.00068,.00205) : rnd(.00032,.00128),
+      linkable:(kind==='arm' || kind==='core'),
+      twinkAmt:isBright?rnd(.10,.22):((kind==='core' && r>2.2) ? rnd(.28,.54) : rnd(.18,.42)),
+      twinkSpd:(kind==='core' && r>2.2) ? rnd(.00115,.00360) : rnd(.00070,.00255),
+      twinkPh:rnd(0,Math.PI*2),
+      centerMover:(kind==='core') && ((r>2.2) || rand()<.18),
+      moveAmpX:(kind==='core' && r>2.2) ? rnd(.022,.074) : rnd(.010,.032),
+      moveAmpY:(kind==='core' && r>2.2) ? rnd(.018,.066) : rnd(.008,.026),
+      moveAmpZ:(kind==='core' && r>2.2) ? rnd(.016,.058) : rnd(.008,.024),
+      moveAmpW:(kind==='core' && r>2.2) ? rnd(.008,.026) : rnd(.004,.014),
+      moveAmpV:(kind==='core' && r>2.2) ? rnd(.008,.024) : rnd(.004,.014),
+      moveSpd:(kind==='core' && r>2.2) ? rnd(.00014,.00042) : rnd(.00010,.00028),
+      moveSpd2:(kind==='core' && r>2.2) ? rnd(.00011,.00034) : rnd(.00008,.00022),
+      movePh2:rnd(0,Math.PI*2),
+      flashP:isBright?0.9982:((kind==='core' && r>2.2) ? 0.9958 : 0.9972)
+    };
+  }
+
+
+  function ambientBaseColor(kind){
+    if(kind==='fire'){
+      return rand()<.72
+        ? GOLD_STARS[(rand()*GOLD_STARS.length)|0]
+        : METALLIC_GOLD_STARS[(rand()*METALLIC_GOLD_STARS.length)|0];
+    }
+    const roll = rand();
+    if(roll < .34) return GOLD_STARS[(rand()*GOLD_STARS.length)|0];
+    if(roll < .52) return METALLIC_GOLD_STARS[(rand()*METALLIC_GOLD_STARS.length)|0];
+    if(roll < .84) return NUR_RAINBOW[(rand()*NUR_RAINBOW.length)|0];
+    return pickStarColor('halo', false);
+  }
+
+  function projectAmbientPoint(x, y, z, w, v, phase, now, out){
+    const hyper = frameBasis.hyper;
+
+    const d4 = Math.sin(now*.00012 + phase)*.10;
+    const d4sq=d4*d4, sd4=d4*(1-d4sq/6+d4sq*d4sq/120), cd4=1-d4sq*.5+d4sq*d4sq/24;
+    const c4=frameBasis.c4*cd4-frameBasis.s4*sd4, s4=frameBasis.s4*cd4+frameBasis.c4*sd4;
+    const x4 = x*c4 - w*s4;
+    const w4 = x*s4 + w*c4;
+    x = x4; w = w4;
+
+    const d5 = Math.cos(now*.00010 + phase*1.3)*.10;
+    const d5sq=d5*d5, sd5=d5*(1-d5sq/6+d5sq*d5sq/120), cd5=1-d5sq*.5+d5sq*d5sq/24;
+    const c5=frameBasis.c5*cd5-frameBasis.s5*sd5, s5=frameBasis.s5*cd5+frameBasis.c5*sd5;
+    const z5 = z*c5 - v*s5;
+    const v5 = z*s5 + v*c5;
+    z = z5; v = v5;
+
+    x += w*hyper*.26;
+    y += v*hyper*.12;
+    z += (w - v)*hyper*.30;
+
+    const x1 = x*frameBasis.cy - z*frameBasis.sy;
+    const z1 = x*frameBasis.sy + z*frameBasis.cy;
+    const y1 = y*frameBasis.cp - z1*frameBasis.sp;
+    const z2 = y*frameBasis.sp + z1*frameBasis.cp;
+    const x2 = x1*frameBasis.cr - y1*frameBasis.sr;
+    const y2 = x1*frameBasis.sr + y1*frameBasis.cr;
+
+    const zWarp = z2*(1 + hyper*1.12) + Math.sin(now*.00018 + phase)*(.05 + hyper*.08);
+    const denom = frameBasis.cameraDistance + zWarp;
+    if(denom <= .08) return false;
+    const sc = 1 / denom;
+
+    out.sx = W*.5 + x2*frameBasis.rigScale*sc*HORIZONTAL_SPREAD;
+    out.sy = H*.5 + y2*frameBasis.rigScale*sc;
+    out.ss = sc;
+    out.sz = zWarp;
+    return true;
+  }
+
+  function makeAmbientOrbiter(){
+    const radiusX=rnd(.52,1.04);
+    const radiusY=rnd(.42,.98);
+    const outerness = clamp((Math.max(radiusX,radiusY)-.52)/(.52), 0, 1);
+    const motionScale = clamp(1 - outerness*.74, .24, 1);
+    return {
+      mode:'orbit',
+      col:ambientBaseColor('orbit'),
+      radiusX,
+      radiusY,
+      outerness,
+      motionScale,
+      speed:rnd(.00007,.00022) * motionScale * (rand()<.5 ? -1 : 1),
+      angle:rnd(0,Math.PI*2),
+      phase:rnd(0,Math.PI*2),
+      precess:rnd(.00003,.00009) * motionScale * (rand()<.5 ? -1 : 1),
+      wobble:rnd(.00010,.00026) * (.58 + motionScale*.42),
+      yDrift:rnd(0,Math.PI*2),
+      zBias:rnd(-.70,.90),
+      wBias:rnd(-.55,.55),
+      vBias:rnd(-.55,.55),
+      depthPulse:rnd(.00005,.00015) * (.56 + motionScale*.44),
+      r:rnd(.84,2.10),
+      a:rnd(.10,.24),
+      twinkAmt:rnd(.24,.54),
+      twinkSpd:rnd(.00082,.00215),
+      twinkPh:rnd(0,Math.PI*2),
+      warmAmt:rnd(.01,.10),
+      bright:rand()<.32
+    };
+  }
+
+  function makeAmbientFloater(){
+    const ang = rnd(0,Math.PI*2);
+    const lx=rnd(-1.75,1.75), ly=rnd(-1.34,1.34), lz=rnd(-.62,.98);
+    const outerness = clamp(Math.max(Math.abs(lx)/1.75, Math.abs(ly)/1.34, Math.abs(lz)/.98), 0, 1);
+    const motionScale = clamp(1 - outerness*.68, .24, 1);
+    return {
+      mode:'free',
+      col:ambientBaseColor('free'),
+      lx, ly, lz,
+      outerness,
+      motionScale,
+      w:rnd(-.58,.58),
+      v:rnd(-.52,.52),
+      heading:ang,
+      speed:rnd(.0010,.0026) * motionScale,
+      drift:rnd(0,Math.PI*2),
+      driftSpd:rnd(.00012,.00045) * (.62 + motionScale*.38),
+      turnAmp:rnd(.06,.26),
+      turnAmp2:rnd(.03,.12),
+      turnPhase:rnd(0,Math.PI*2),
+      phase:rnd(0,Math.PI*2),
+      parallax:rnd(.82,1.42),
+      wanderAmp:rnd(.00025,.00110) * (.54 + motionScale*.46),
+      depthDrift:rnd(.00008,.00028) * (.56 + motionScale*.44),
+      r:rnd(.72,1.95),
+      a:rnd(.08,.22),
+      twinkAmt:rnd(.26,.60),
+      twinkSpd:rnd(.00095,.00245),
+      twinkPh:rnd(0,Math.PI*2),
+      warmAmt:rnd(.01,.08),
+      bright:rand()<.24,
+      wrapPad:rnd(.14,.34)
+    };
+  }
+
+  function makeAmbientFireball(){
+    const ang = rnd(0,Math.PI*2);
+    const lx=rnd(-1.82,1.82), ly=rnd(-1.42,1.42), lz=rnd(-.34,.84);
+    const outerness = clamp(Math.max(Math.abs(lx)/1.82, Math.abs(ly)/1.42, Math.abs(lz)/.84), 0, 1);
+    const motionScale = clamp(1 - outerness*.72, .22, 1);
+    return {
+      mode:'fire',
+      col:ambientBaseColor('fire'),
+      lx, ly, lz,
+      outerness,
+      motionScale,
+      w:rnd(-.40,.40),
+      v:rnd(-.34,.34),
+      heading:ang,
+      speed:rnd(.00045,.0014) * motionScale,
+      drift:rnd(0,Math.PI*2),
+      driftSpd:rnd(.00008,.00022) * (.60 + motionScale*.40),
+      turnAmp:rnd(.03,.12),
+      wanderAmp:rnd(.00012,.00045) * (.54 + motionScale*.46),
+      depthDrift:rnd(.00004,.00016) * (.56 + motionScale*.44),
+      phase:rnd(0,Math.PI*2),
+      r:rnd(2.8,6.4),
+      a:rnd(.18,.36),
+      twinkAmt:rnd(.12,.30),
+      twinkSpd:rnd(.00052,.00130),
+      twinkPh:rnd(0,Math.PI*2),
+      pulseSpd:rnd(.00050,.00120) * (.64 + motionScale*.36),
+      warmAmt:rnd(.18,.30)
+    };
+  }
+
+  function seedAmbient(){
+    ambientOrbiters.length = 0;
+    ambientFloaters.length = 0;
+    ambientFireballs.length = 0;
+    for(let i=0;i<AMBIENT_ORBIT_COUNT;i++) ambientOrbiters.push(makeAmbientOrbiter());
+    for(let i=0;i<AMBIENT_FLOATER_COUNT;i++) ambientFloaters.push(makeAmbientFloater());
+    for(let i=0;i<AMBIENT_FIREBALL_COUNT;i++) ambientFireballs.push(makeAmbientFireball());
+  }
+
+  function updateAmbient(now, dt){
+    const dtNorm = Math.min(2.4, Math.max(.45, dt / 16.6667));
+    for(let i=0;i<ambientFloaters.length;i++){
+      const s = ambientFloaters[i];
+      const turn = Math.sin(now*s.driftSpd + s.turnPhase) * s.turnAmp + Math.cos(now*(s.driftSpd*.58) + s.drift) * s.turnAmp2;
+      const heading = s.heading + turn;
+      const driftX = Math.cos(now*s.driftSpd + s.drift) * s.wanderAmp;
+      const driftY = Math.sin(now*(s.driftSpd*.92) + s.phase) * s.wanderAmp;
+      s.lx += (Math.cos(heading) * s.speed * s.parallax + driftX) * dtNorm;
+      s.ly += (Math.sin(heading) * s.speed * s.parallax + driftY) * dtNorm;
+      s.lz += Math.sin(now*(s.depthDrift*.88) + s.phase) * s.depthDrift * dtNorm;
+      s.w  += Math.cos(now*(s.depthDrift*.68) + s.drift) * s.depthDrift * .55 * dtNorm;
+      s.v  += Math.sin(now*(s.depthDrift*.58) + s.turnPhase) * s.depthDrift * .50 * dtNorm;
+      s.heading += Math.sin(now*(s.driftSpd*.18) + s.phase) * .0010 * (s.motionScale || 1) * dtNorm;
+      const pad = s.wrapPad;
+      if(s.lx < -1.95 - pad) s.lx = 1.95 + pad;
+      else if(s.lx > 1.95 + pad) s.lx = -1.95 - pad;
+      if(s.ly < -1.48 - pad) s.ly = 1.48 + pad;
+      else if(s.ly > 1.48 + pad) s.ly = -1.48 - pad;
+      if(s.lz < -1.05) s.lz = 1.00;
+      else if(s.lz > 1.05) s.lz = -1.00;
+      if(s.w < -1.0) s.w = 1.0; else if(s.w > 1.0) s.w = -1.0;
+      if(s.v < -1.0) s.v = 1.0; else if(s.v > 1.0) s.v = -1.0;
+    }
+    for(let i=0;i<ambientFireballs.length;i++){
+      const s = ambientFireballs[i];
+      const heading = s.heading + Math.sin(now*s.driftSpd + s.drift) * s.turnAmp;
+      const driftX = Math.cos(now*(s.driftSpd*.88) + s.phase) * s.wanderAmp;
+      const driftY = Math.sin(now*(s.driftSpd*.74) + s.drift) * s.wanderAmp;
+      s.lx += (Math.cos(heading) * s.speed + driftX) * dtNorm;
+      s.ly += (Math.sin(heading) * s.speed + driftY) * dtNorm;
+      s.lz += Math.sin(now*(s.depthDrift*.76) + s.phase) * s.depthDrift * dtNorm;
+      s.w  += Math.cos(now*(s.depthDrift*.62) + s.drift) * s.depthDrift * .42 * dtNorm;
+      s.v  += Math.sin(now*(s.depthDrift*.54) + s.phase) * s.depthDrift * .38 * dtNorm;
+      s.heading += Math.cos(now*(s.driftSpd*.18) + s.phase) * .0007 * (s.motionScale || 1) * dtNorm;
+      if(s.lx < -2.04) s.lx = 2.04; else if(s.lx > 2.04) s.lx = -2.04;
+      if(s.ly < -1.58) s.ly = 1.58; else if(s.ly > 1.58) s.ly = -1.58;
+      if(s.lz < -.92) s.lz = .88; else if(s.lz > .92) s.lz = -.88;
+      if(s.w < -.72) s.w = .72; else if(s.w > .72) s.w = -.72;
+      if(s.v < -.72) s.v = .72; else if(s.v > .72) s.v = -.72;
+    }
+  }
+
+  function drawAmbientStars(now){
+    const orbitRadiusBase = .82 + rig.zoom*.10 + rig.hyperspace*.08;
+    for(let i=0;i<ambientOrbiters.length;i++){
+      const s = ambientOrbiters[i];
+      const orbitMotion = s.motionScale || 1;
+      const ang = s.angle + now * s.speed;
+      const precess = now * s.precess * orbitMotion;
+      const x = Math.cos(ang + precess) * orbitRadiusBase * s.radiusX + Math.cos(now*s.wobble*orbitMotion + s.phase) * .09;
+      const y = Math.sin(ang * 1.12 + s.phase*.18 + precess*.8) * orbitRadiusBase * s.radiusY + Math.cos(now*(.00006 + .00016*orbitMotion) + s.yDrift) * .07;
+      const z = s.zBias + Math.sin(now*s.depthPulse*orbitMotion + s.phase)*.18;
+      const w = s.wBias + Math.cos(now*(s.depthPulse*.82)*orbitMotion + s.phase)*.16;
+      const v = s.vBias + Math.sin(now*(s.depthPulse*.76)*orbitMotion + s.yDrift)*.16;
+      if(!projectAmbientPoint(x, y, z, w, v, s.phase, now, ambientProj)) continue;
+      const tw = 1 - s.twinkAmt + s.twinkAmt * (.5 + .5*Math.sin(now*s.twinkSpd + s.twinkPh));
+      const pulse = .80 + .20*Math.sin(now*.00034 + s.phase);
+      const alpha = s.a * tw * pulse * (1 + energy*.08) * Math.min(1.2, ambientProj.ss*5.2);
+      const baseCol = warmDominantInto(s.col, s.warmAmt, warmScratch);
+      const rigTint = sampleRainbowFloatInto(rigColorOrbit + s.phase*.18, rigTintScratch);
+      const renderCol = mixColInto(baseCol, rigTint, rigColorMix, finalScratch);
+      const rr = s.r * (1 + tw*.18) * clamp(ambientProj.ss*4.6, .42, 1.85);
+      if(s.bright || alpha > .11) starGlow(ambientProj.sx, ambientProj.sy, rr*1.22, renderCol, alpha*.30, tw, false, s.phase+now*.0002);
+      drawNormalSprite(ambientProj.sx, ambientProj.sy, rr, renderCol, alpha*.94, s.phase+now*.00022, tw, s.bright);
+    }
+
+    for(let i=0;i<ambientFloaters.length;i++){
+      const s = ambientFloaters[i];
+      if(!projectAmbientPoint(s.lx, s.ly, s.lz, s.w, s.v, s.phase, now, ambientProj)) continue;
+      if(ambientProj.sx < -120 || ambientProj.sx > W+120 || ambientProj.sy < -120 || ambientProj.sy > H+120) continue;
+      const tw = 1 - s.twinkAmt + s.twinkAmt * (.5 + .5*Math.sin(now*s.twinkSpd + s.twinkPh));
+      const pulse = .82 + .18*Math.sin(now*.00038 + s.phase);
+      const alpha = s.a * tw * pulse * (1 + energy*.06) * clamp(ambientProj.ss*5.0, .34, 1.65);
+      const baseCol = warmDominantInto(s.col, s.warmAmt, warmScratch);
+      const rigTint = sampleRainbowFloatInto(rigColorOrbit + s.phase*.24, rigTintScratch);
+      const renderCol = mixColInto(baseCol, rigTint, rigColorMix, finalScratch);
+      const rr = s.r * (1 + tw*.18) * s.parallax * clamp(ambientProj.ss*4.8, .40, 1.78);
+      if(s.bright || alpha > .10) starGlow(ambientProj.sx, ambientProj.sy, rr*1.16, renderCol, alpha*.24, tw, false, s.phase+now*.0002);
+      drawNormalSprite(ambientProj.sx, ambientProj.sy, rr, renderCol, alpha*.90, s.phase+now*.00024, tw, s.bright);
+    }
+
+    for(let i=0;i<ambientFireballs.length;i++){
+      const s = ambientFireballs[i];
+      if(!projectAmbientPoint(s.lx, s.ly, s.lz, s.w, s.v, s.phase, now, ambientProj)) continue;
+      if(ambientProj.sx < -160 || ambientProj.sx > W+160 || ambientProj.sy < -160 || ambientProj.sy > H+160) continue;
+      const tw = 1 - s.twinkAmt + s.twinkAmt * (.5 + .5*Math.sin(now*s.twinkSpd + s.twinkPh));
+      const firePulse = .62 + .38 * (.5 + .5*Math.sin(now*s.pulseSpd + s.phase));
+      const alpha = s.a * tw * firePulse * (1 + energy*.10) * clamp(ambientProj.ss*5.4, .46, 1.95);
+      const px = ambientProj.sx;
+      const py = ambientProj.sy;
+      const baseCol = warmDominantInto(s.col, s.warmAmt, warmScratch);
+      const amberBase = honeyAmberizeInto(baseCol, honeyScratch);
+      const rigTint = sampleRainbowFloatInto(rigColorOrbit + s.phase*.28 + .2, rigTintScratch);
+      const renderCol = mixColInto(amberBase, rigTint, rigColorMix, finalScratch);
+      const rr = s.r * (1 + firePulse*.20) * clamp(ambientProj.ss*4.9, .52, 2.18);
+      starGlow(px, py, rr*1.66, renderCol, alpha*.92, Math.min(1, tw + firePulse*.22), true, s.phase+now*.0002);
+      drawNormalSprite(px, py, rr, renderCol, alpha*.84, s.phase+now*.00022, Math.min(1, tw + firePulse*.18), true);
+      const fireCore = Math.min(.86, alpha*2.18);
+      if(fireCore > .02){
+        c.fillStyle = `rgba(${renderCol[0]},${renderCol[1]},${renderCol[2]},${fireCore})`;
+        stellarPath(px, py, Math.max(1.2, rr*.40), Math.max(.22, rr*.068), 4, s.phase+now*.00032);
+        c.fill();
+      }
+    }
+  }
+
+  function seed(){
+    resetVisualSeed();
+    particles.length = 0;
+    drawOrder.length = 0;
+    // Canonical population: identical star density and structure on every device.
+    const armCount  = 1480;
+    const coreCount = 468;
+    const haloCount = 610;
+    const superCount= 104;
+    for(let i=0;i<armCount;i++) particles.push(makeStar('arm'));
+    for(let i=0;i<coreCount;i++) particles.push(makeStar('core'));
+    for(let i=0;i<haloCount;i++) particles.push(makeStar('halo'));
+    for(let i=0;i<superCount;i++) particles.push(makeStar('super'));
+    for(let i=0;i<particles.length;i++){
+      const p=particles[i];
+      p.localMotion = p.speed * (p.motionScale || 1);
+      p.isGem = !!p.coreGem;
+      p.isArm = p.kind==='arm';
+      p.isCore = p.kind==='core';
+      p.isHalo = p.kind==='halo';
+      drawOrder.push(i);
+    }
+    seedAmbient();
+  }
+
+
+  function selectCadenceStride(){
+    const desiredHz = 1000/targetFrameMs;
+    cadenceStride = clamp(Math.round(refreshHz/desiredHz),1,12)|0;
+  }
+
+  function updateRefreshEstimate(rafDt){
+    // Short/zero callbacks and long background stalls are not panel refresh samples.
+    if(rafDt<1.25 || rafDt>45) return;
+    rafSamples[rafSampleCursor] = rafDt;
+    rafSampleCursor = (rafSampleCursor+1)%rafSamples.length;
+    rafSampleCount = Math.min(rafSamples.length,rafSampleCount+1);
+    if(rafSampleCount<rafSamples.length || rafSampleCursor!==0) return;
+    const sample = Array.from(rafSamples).sort((a,b)=>a-b);
+    const panelInterval = sample[Math.floor(sample.length*.25)];
+    refreshHz = clamp(1000/panelInterval,24,600);
+    selectCadenceStride();
+  }
+
+  function setCadenceTier(index){
+    const next = CADENCE_TIERS[clamp(index,0,CADENCE_TIERS.length-1)|0];
+    if(next===targetFrameMs) return;
+    targetFrameMs = next;
+    pressureFrames = 0;
+    reliefFrames = 0;
+    selectCadenceStride();
+    rafTick = 0;
+  }
+
+  function updatePerformanceCadence(renderCostMs){
+    if(!Number.isFinite(renderCostMs) || renderCostMs <= 0) return;
+    if(smoothRenderCost === 0) smoothRenderCost = renderCostMs;
+    else smoothRenderCost += (renderCostMs - smoothRenderCost) * .12;
+
+    // The actual refresh divisor is the budget. Spatial quality never changes.
+    const presentedFrameMs = 1000*cadenceStride/Math.max(24,refreshHz);
+    const budget = presentedFrameMs*.78;
+    if(smoothRenderCost > budget){
+      pressureFrames++;
+      reliefFrames = 0;
+    }else{
+      pressureFrames = Math.max(0, pressureFrames - 1);
+      const tier = CADENCE_TIERS.indexOf(targetFrameMs);
+      const fasterMs = tier>0 ? CADENCE_TIERS[tier-1] : FRAME_60_MS;
+      if(smoothRenderCost < fasterMs*.60) reliefFrames++;
+      else reliefFrames = Math.max(0, reliefFrames - 1);
+    }
+
+    const tier = CADENCE_TIERS.indexOf(targetFrameMs);
+    if(pressureFrames >= 12 && tier<CADENCE_TIERS.length-1){
+      setCadenceTier(tier+1);
+    }else if(reliefFrames >= 180 && tier>0){
+      setCadenceTier(tier-1);
+    }
+  }
+
+  function projectInto(p, now, basis){
+    const hyper = basis.hyper;
+    let x = p.x;
+    let y = p.y;
+    let z = p.z;
+    let w = p.w;
+    let v = p.v;
+
+    if(p.centerMover){
+      const centerMotionSlow = .78;
+      const mv1 = now * p.moveSpd * centerMotionSlow + p.phase;
+      const mv2 = now * p.moveSpd2 * centerMotionSlow + p.movePh2;
+      x += Math.sin(mv1) * p.moveAmpX + Math.cos(mv2) * (p.moveAmpX*.34);
+      y += Math.cos(mv1*.92 + p.twinkPh) * p.moveAmpY + Math.sin(mv2*1.12) * (p.moveAmpY*.28);
+      z += Math.sin(mv1*1.08 + p.movePh2) * p.moveAmpZ + Math.cos(mv2*.86) * (p.moveAmpZ*.30);
+      w += Math.sin(mv1*.74 + p.phase*.6) * p.moveAmpW;
+      v += Math.cos(mv2*.78 + p.twinkPh*.7) * p.moveAmpV;
+    }
+
+    const localMotion = p.localMotion;
+    // The per-star dimensional wobble is at most 0.06 rad. Compose that small
+    // angle with the frame's exact rig rotation using a 5th-order small-angle
+    // approximation: same motion shape, two trig calls instead of six per star.
+    const d4 = Math.sin(now*localMotion*.16 + p.phase)*.06;
+    const d4sq = d4*d4;
+    const sd4 = d4*(1-d4sq/6+d4sq*d4sq/120);
+    const cd4 = 1-d4sq*.5+d4sq*d4sq/24;
+    const c4 = basis.c4*cd4 - basis.s4*sd4;
+    const s4 = basis.s4*cd4 + basis.c4*sd4;
+    const x4 = x*c4 - w*s4;
+    const w4 = x*s4 + w*c4;
+    x = x4; w = w4;
+
+    const d5 = Math.cos(now*localMotion*.13 + p.twinkPh)*.06;
+    const d5sq = d5*d5;
+    const sd5 = d5*(1-d5sq/6+d5sq*d5sq/120);
+    const cd5 = 1-d5sq*.5+d5sq*d5sq/24;
+    const c5 = basis.c5*cd5 - basis.s5*sd5;
+    const s5 = basis.s5*cd5 + basis.c5*sd5;
+    const z5 = z*c5 - v*s5;
+    const v5 = z*s5 + v*c5;
+    z = z5; v = v5;
+
+    x += w*hyper*.30;
+    y += v*hyper*.12;
+    z += (w - v)*hyper*.40;
+
+    const x1=x*basis.cy-z*basis.sy;
+    const z1=x*basis.sy+z*basis.cy;
+    const y1=y*basis.cp-z1*basis.sp;
+    const z2=y*basis.sp+z1*basis.cp;
+    const x2=x1*basis.cr-y1*basis.sr;
+    const y2=x1*basis.sr+y1*basis.cr;
+
+    const zWarp = z2*(1 + hyper*1.36) + Math.sin(now*(.00008 + localMotion*.16) + p.phase)*hyper*.14;
+    const denom = basis.cameraDistance + zWarp;
+    if(!(denom > .08)){
+      p.sx = -1e6;
+      p.sy = -1e6;
+      p.sz = zWarp;
+      p.ss = 0;
+      return;
+    }
+    const sc = 1/denom;
+
+    p.sx=W*.5+x2*basis.rigScale*sc*HORIZONTAL_SPREAD;
+    p.sy=H*.5+y2*basis.rigScale*sc;
+    p.sz=zWarp;
+    p.ss=sc;
+  }
+
+  function updateRig(now, dt){
+    smoothDt += (dt - smoothDt) * .18;
+    const frameScale = clamp(smoothDt/FRAME_MS, .05, 3);
+    const pointerEase = 1 - Math.pow(.952, frameScale);
+    pointer.x += (pointer.tx - pointer.x) * pointerEase;
+    pointer.y += (pointer.ty - pointer.y) * pointerEase;
+
+    const driftYaw = reduced ? 0 : (Math.sin(now*.000060)*.42 + Math.sin(now*.000017)*.18);
+    const driftPitch = reduced ? 0 : (Math.cos(now*.000051)*.22 + Math.sin(now*.000021)*.06);
+    const driftRoll = reduced ? 0 : Math.sin(now*.000039)*.085;
+    const driftDim4 = reduced ? 0 : Math.sin(now*.000037)*.22;
+    const driftDim5 = reduced ? 0 : Math.cos(now*.000031)*.18;
+    const autoInfluence = pointer.active ? .18 : .32;
+
+    rig.targetYaw += rig.velYaw*frameScale;
+    rig.targetPitch += rig.velPitch*frameScale;
+    rig.targetRoll += rig.velRoll*frameScale;
+    rig.targetDim4 += rig.velDim4*frameScale;
+    rig.targetDim5 += rig.velDim5*frameScale;
+
+    const yawSeek = 1 - Math.pow(.994, frameScale);
+    const rollSeek = 1 - Math.pow(.995, frameScale);
+    const dimSeek = 1 - Math.pow(.993, frameScale);
+    rig.targetYaw += ((driftYaw + pointer.x*autoInfluence) - rig.targetYaw) * yawSeek;
+    rig.targetPitch += ((driftPitch + pointer.y*.17) - rig.targetPitch) * yawSeek;
+    rig.targetRoll += ((driftRoll + pointer.x*.05) - rig.targetRoll) * rollSeek;
+    rig.targetDim4 += ((driftDim4 + pointer.x*.20) - rig.targetDim4) * dimSeek * .38;
+    rig.targetDim5 += ((driftDim5 - pointer.y*.18) - rig.targetDim5) * dimSeek * .34;
+
+    rig.targetPitch = clamp(rig.targetPitch, -.98, .98);
+    rig.targetZoom = clamp(rig.targetZoom, ZOOM_MIN, ZOOM_MAX);
+    rig.targetHyperspace = clamp(rig.targetHyperspace, HYPER_MIN, HYPER_MAX);
+    rig.targetDim4 = clamp(rig.targetDim4, -Math.PI, Math.PI);
+    rig.targetDim5 = clamp(rig.targetDim5, -Math.PI, Math.PI);
+
+    rig.velYaw *= Math.pow(pointer.active ? .989 : .968, frameScale);
+    rig.velPitch *= Math.pow(pointer.active ? .989 : .968, frameScale);
+    rig.velRoll *= Math.pow(pointer.active ? .991 : .974, frameScale);
+    rig.velDim4 *= Math.pow(pointer.active ? .990 : .972, frameScale);
+    rig.velDim5 *= Math.pow(pointer.active ? .990 : .972, frameScale);
+
+    const yawEase = 1 - Math.pow(.944, frameScale);
+    const rollEase = 1 - Math.pow(.950, frameScale);
+    const zoomEase = 1 - Math.pow(.950, frameScale);
+    const hyperEase = 1 - Math.pow(.930, frameScale);
+    rig.yaw += (rig.targetYaw-rig.yaw)*yawEase;
+    rig.pitch += (rig.targetPitch-rig.pitch)*yawEase;
+    rig.roll += (rig.targetRoll-rig.roll)*rollEase;
+    rig.zoom += (rig.targetZoom-rig.zoom)*zoomEase;
+    rig.dim4 += (rig.targetDim4-rig.dim4)*(1-Math.pow(.947,frameScale));
+    rig.dim5 += (rig.targetDim5-rig.dim5)*(1-Math.pow(.947,frameScale));
+    rig.hyperspace += (rig.targetHyperspace-rig.hyperspace)*hyperEase;
+
+    energy *= Math.pow(.985, frameScale);
+    rigColorOrbit += (rigColorTarget - rigColorOrbit) * (1 - Math.pow(.90, frameScale));
+    rigColorMix += (rigColorMixTarget - rigColorMix) * (1 - Math.pow(.88, frameScale));
+  }
+
+
+
+  function frame(now){
+    requestAnimationFrame(frame);
+    if(contextLost || document.hidden){
+      last = lastRaf = now;
+      rafTick = 0;
+      return;
+    }
+
+    // Spatial fidelity is invariant. Weaker machines use a stable display-refresh
+    // divisor, never fewer stars, different colors, cheaper glows or device-tier DPR.
+    const currentDpr = window.devicePixelRatio || 1;
+    if(Math.abs(currentDpr - lastDevicePixelRatio) > .01){
+      lastDevicePixelRatio = currentDpr;
+      // Internal sampling is canonical, not device-DPR-driven. The browser's
+      // resize/ResizeObserver path will still update if CSS geometry changes.
+    }
+    const rafDt = Math.min(100, Math.max(0, now-lastRaf));
+    lastRaf = now;
+    updateRefreshEstimate(rafDt);
+    if((rafTick++ % cadenceStride)!==0) return;
+
+    const renderStarted = performance.now();
+    const dt = Math.min(66.667, Math.max(0, now-last));
+    last = now;
+    updateRig(now, dt);
+    updateAmbient(now, dt);
+
+    frameNo++;
+    c.fillStyle = '#000';
+    c.fillRect(0,0,W,H);
+
+    const hyper = rig.hyperspace;
+    frameBasis.hyper = hyper;
+    frameBasis.cy = Math.cos(rig.yaw);
+    frameBasis.sy = Math.sin(rig.yaw);
+    frameBasis.cp = Math.cos(rig.pitch);
+    frameBasis.sp = Math.sin(rig.pitch);
+    frameBasis.cr = Math.cos(rig.roll);
+    frameBasis.sr = Math.sin(rig.roll);
+    frameBasis.c4 = Math.cos(rig.dim4);
+    frameBasis.s4 = Math.sin(rig.dim4);
+    frameBasis.c5 = Math.cos(rig.dim5);
+    frameBasis.s5 = Math.sin(rig.dim5);
+    frameBasis.cameraDistance = 3.30 - (rig.zoom-1)*1.22 - hyper*.32;
+    frameBasis.rigScale = minSide * (1.40 + hyper*.14) * rig.zoom;
+
+    for(let i=0;i<particles.length;i++) projectInto(particles[i], now, frameBasis);
+    const sortEvery = 3;
+    if((frameNo - 1) % sortEvery === 0) drawOrder.sort((a,b)=>particles[a].sz-particles[b].sz);
+
+    const linkLimit = quality===2
+      ? (reduced ? 94 : Math.max(86, Math.round(168 - rig.hyperspace*24)))
+      : (quality===1 ? 48 : 28);
+    const linkStep = quality===2 ? 1 : (quality===1 ? 2 : 3);
+    const linkDist2 = quality===0 ? 2300 : (quality===1 ? 2650 : 3000);
+    const linkRebuildEvery = 8;
+    if(frameNo===1 || quality!==linkPairQuality || linkPairStamp < 0 || frameNo - linkPairStamp >= linkRebuildEvery){
+      linkPairQuality = quality;
+      linkPairStamp = frameNo;
+      linkNodes.length = 0;
+      linkPairs.length = 0;
+      for(let i=0;i<drawOrder.length && linkNodes.length<linkLimit;i++){
+        const idx = drawOrder[i];
+        const p = particles[idx];
+        if(p.linkable && p.ss < .34) linkNodes.push(idx);
+      }
+      for(let i=0;i<linkNodes.length;i+=linkStep){
+        const ai=linkNodes[i], A=particles[ai];
+        for(let j=i+1;j<linkNodes.length;j+=linkStep){
+          const bi=linkNodes[j], B=particles[bi];
+          const dx=A.sx-B.sx, dy=A.sy-B.sy, d=dx*dx+dy*dy;
+          if(d<linkDist2){
+            const cA=A.col,cB=B.col;
+            linkPairs.push(ai,bi,(cA[0]+cB[0])>>1,(cA[1]+cB[1])>>1,(cA[2]+cB[2])>>1);
+          }
+        }
+      }
+    }
+
+    c.lineWidth = quality===0 ? .24 : .38;
+    const linkAlphaScale = (1 - rig.hyperspace*.35) * (quality===0 ? .62 : (quality===1 ? .82 : 1));
+    for(let i=0;i<linkPairs.length;i+=5){
+      const A=particles[linkPairs[i]], B=particles[linkPairs[i+1]];
+      const dx=A.sx-B.sx, dy=A.sy-B.sy, d=dx*dx+dy*dy;
+      if(d<linkDist2){
+        const al=(1-d/linkDist2)*(.010+energy*.015)*linkAlphaScale;
+        c.strokeStyle=`rgba(${linkPairs[i+2]},${linkPairs[i+3]},${linkPairs[i+4]},${al})`;
+        c.beginPath(); c.moveTo(A.sx,A.sy); c.lineTo(B.sx,B.sy); c.stroke();
+      }
+    }
+
+    for(let order=0; order<drawOrder.length; order++){
+      const p = particles[drawOrder[order]];
+      const qx = p.sx, qy = p.sy, qScale = p.ss;
+      if(qx<-260 || qx>W+260 || qy<-260 || qy>H+260) continue;
+
+      const breathe = .76 + Math.sin(now*p.localMotion+p.phase)*.24;
+      const twinkle = 1 - p.twinkAmt + p.twinkAmt*(.5 + .5*Math.sin(now*p.twinkSpd+p.twinkPh));
+      const flashTick = Math.floor(now / FRAME_60_MS);
+      const flashNoise = Math.sin((flashTick + 1) * 12.9898 + p.phase * 78.233) * 43758.5453;
+      const flashUnit = flashNoise - Math.floor(flashNoise);
+      const flash = reduced ? 1 : (flashUnit > p.flashP ? 1.92 : 1);
+      const dB = .52 + qScale*1.95;
+      const rad = p.r*(.28 + qScale*2.72);
+      const alpha = p.a*breathe*twinkle*flash*dB*(1+energy*.34)*(1+hyper*.14);
+      const isS = p.isSuper;
+      const isGem = p.isGem;
+      const sR = Math.max(isS ? 5.3 : (isGem ? 3.55 : 2.10), rad*(isS ? 3.48 : (isGem ? 2.08 : 1.72)));
+      const phase = p.phase+now*.00024;
+      const baseCol = p.prism
+        ? prismShiftInto(p.col,p.prismPhase+now*p.prismSpeed+phase*.18,twinkle,isS,prismScratch)
+        : p.col;
+      const warmedBase = warmDominantInto(baseCol,p.warmAmt,warmScratch);
+      const scintCol = scintColInto(warmedBase,twinkle,isS,renderScratch);
+      const baseRenderCol = p.metallicGold ? scintCol : honeyAmberizeInto(scintCol,honeyScratch);
+      const rigTint = sampleRainbowFloatInto(rigColorOrbit + p.phase*.22 + (p.isHalo ? .38 : 0), rigTintScratch);
+      const renderCol = mixColInto(baseRenderCol, rigTint, rigColorMix, finalScratch);
+
+
+      const spikeOn = isS || isGem || (p.isArm&&alpha>.20&&rad>.88) || (p.isCore&&alpha>.18) || (p.prism&&alpha>.14);
+      if(isS){
+        starGlow(qx,qy,sR*1.04,renderCol,alpha*.66,twinkle,true,phase);
+        drawNormalSprite(qx,qy,sR*.98,renderCol,alpha*.46,phase,twinkle,true);
+        const sl=Math.max(6.4,sR*(4.8 + hyper*.42));
+        spike(qx,qy,sl,renderCol,Math.min(.18,alpha*.22),p.phase+now*.00007);
+      }else if(isGem){
+        starGlow(qx,qy,sR*1.16,renderCol,alpha*.96,twinkle,true,phase);
+        drawNormalSprite(qx,qy,sR*1.10,renderCol,alpha*.86,phase,twinkle,true);
+        const sl=Math.max(8.0,sR*(5.45 + hyper*.52));
+        spike(qx,qy,sl,renderCol,Math.min(.28,alpha*.34),p.phase+now*.00007);
+        spike(qx,qy,sl*.78,renderCol,Math.min(.18,alpha*.22),p.phase+now*.00007 + Math.PI/4);
+      }else{
+        drawNormalSprite(qx,qy,sR*.98,renderCol,alpha*.68,phase,twinkle,spikeOn);
+      }
+
+      const cA = Math.min(.98,alpha*(isGem ? 4.20 : 3.55));
+      // Normal sprites already contain their own hot core. Keep the expensive
+      // live vector core only where it materially changes the image.
+      const needsVectorCore = isS || isGem || p.isCore || (p.prism && alpha>.26 && (order&3)===0);
+      if(cA>.02 && needsVectorCore){
+        c.fillStyle=`rgba(${renderCol[0]},${renderCol[1]},${renderCol[2]},${cA})`;
+        stellarPath(qx,qy,Math.max(.56,rad*.62),Math.max(.11,rad*.088),4,p.phase+now*.0004);
+        c.fill();
+      }
+    }
+
+    drawAmbientStars(now);
+    updatePerformanceCadence(performance.now() - renderStarted);
+  }
+
+  function getTwoPointerData(){
+    if(activePointers.size < 2) return null;
+    const iter=activePointers.values();
+    const a=iter.next().value, b=iter.next().value;
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    twoPointerScratch.distance = Math.hypot(dx,dy) || 1;
+    twoPointerScratch.angle = Math.atan2(dy,dx);
+    twoPointerScratch.centerX = (a.x+b.x)/2;
+    twoPointerScratch.centerY = (a.y+b.y)/2;
+    return twoPointerScratch;
+  }
+
+  function beginGesture(){
+    const info = getTwoPointerData();
+    if(!info) return;
+    gesture.pinchActive = true;
+    gesture.startDistance = info.distance;
+    gesture.startAngle = info.angle;
+    gesture.startZoom = rig.targetZoom;
+    gesture.startDim5 = rig.targetDim5;
+    gesture.startHyper = rig.targetHyperspace;
+    normalizePointer(info.centerX, info.centerY);
+  }
+
+  function beginDrag(e){
+    pointer.active = true;
+    pointer.id = e.pointerId;
+    pointer.lastX = e.clientX;
+    pointer.lastY = e.clientY;
+    document.body.classList.add('dragging');
+    try{ canvas.setPointerCapture(e.pointerId); }catch(_err){}
+  }
+
+  function endDrag(e){
+    if(e && pointer.id != null && e.pointerId !== pointer.id && activePointers.has(pointer.id)) return;
+    if(activePointers.size === 0){
+      pointer.active = false;
+      pointer.id = null;
+      document.body.classList.remove('dragging');
+    }
+  }
+
+  function onPointerDown(e){
+    activePointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    try{ canvas.setPointerCapture(e.pointerId); }catch(_err){}
+    normalizePointer(e.clientX,e.clientY);
+    if(activePointers.size === 1){
+      beginDrag(e);
+    }else if(activePointers.size === 2){
+      beginGesture();
+    }
+  }
+
+  function onPointerMove(e){
+    const coalesced = typeof e.getCoalescedEvents === 'function' ? e.getCoalescedEvents() : null;
+    const latest = coalesced && coalesced.length ? coalesced[coalesced.length-1] : e;
+    const tracked = activePointers.get(e.pointerId);
+    if(tracked){ tracked.x=latest.clientX; tracked.y=latest.clientY; }
+
+    if(activePointers.size >= 2 && gesture.pinchActive){
+      const info = getTwoPointerData();
+      if(info){
+        normalizePointer(info.centerX, info.centerY);
+        const distRatio = info.distance / Math.max(1, gesture.startDistance);
+        rig.targetZoom = clamp(gesture.startZoom * distRatio, ZOOM_MIN, ZOOM_MAX);
+        rig.targetDim5 = clamp(gesture.startDim5 + (info.angle - gesture.startAngle)*.9, -Math.PI, Math.PI);
+        rig.targetHyperspace = clamp(gesture.startHyper + (distRatio - 1)*.55, HYPER_MIN, HYPER_MAX);
+        energy = Math.min(1.4, energy + .035);
+      }
+      return;
+    }
+
+    normalizePointer(latest.clientX,latest.clientY);
+    if(!pointer.active || pointer.id !== e.pointerId) return;
+
+    const dx = latest.clientX - pointer.lastX;
+    const dy = latest.clientY - pointer.lastY;
+    pointer.lastX = latest.clientX;
+    pointer.lastY = latest.clientY;
+
+    if(latest.shiftKey || e.shiftKey){
+      rig.velDim4 += dx*.00044;
+      rig.velDim5 += dy*.00038;
+      rig.targetDim4 += dx*.00106;
+      rig.targetDim5 += dy*.00086;
+      rig.targetHyperspace = clamp(rig.targetHyperspace + (-dy)*.0009, HYPER_MIN, HYPER_MAX);
+    }else{
+      rig.velYaw += dx*.00056;
+      rig.velPitch += dy*.00044;
+      rig.velRoll += (dx-dy)*.00009;
+      rig.targetYaw += dx*.00128;
+      rig.targetPitch += dy*.00098;
+      rig.targetRoll += dx*.00011;
+      rig.targetPitch = clamp(rig.targetPitch, -.98, .98);
+    }
+
+    energy = Math.min(1.35, energy + .03);
+  }
+
+  function endPointer(e){
+    if(e){
+      activePointers.delete(e.pointerId);
+      try{ canvas.releasePointerCapture(e.pointerId); }catch(_err){}
+    }
+    if(activePointers.size < 2) gesture.pinchActive = false;
+    if(activePointers.size === 1){
+      const [id, pos] = activePointers.entries().next().value;
+      pointer.id = id;
+      pointer.active = true;
+      pointer.lastX = pos.x;
+      pointer.lastY = pos.y;
+      document.body.classList.add('dragging');
+    }else if(activePointers.size === 0){
+      endDrag();
+    }
+  }
+
+  function onWheel(e){
+    e.preventDefault();
+    const modeScale = e.deltaMode===1 ? 16 : (e.deltaMode===2 ? Math.max(1,H) : 1);
+    const deltaPx = clamp(e.deltaY*modeScale,-240,240);
+    if(!Number.isFinite(deltaPx) || deltaPx===0) return;
+    const direction = deltaPx<0 ? 1 : -1;
+    const magnitude = clamp(Math.abs(deltaPx)/120,.12,1.6);
+    if(e.altKey || e.shiftKey){
+      const delta = direction*.08*magnitude;
+      rig.targetHyperspace = clamp(rig.targetHyperspace + delta, HYPER_MIN, HYPER_MAX);
+    }else if(e.ctrlKey || e.metaKey){
+      const delta = direction*.08*magnitude;
+      rig.targetDim4 = clamp(rig.targetDim4 + delta, -Math.PI, Math.PI);
+    }else{
+      const delta = direction*.09*magnitude;
+      rig.targetZoom = clamp(rig.targetZoom + delta, ZOOM_MIN, ZOOM_MAX);
+    }
+    energy = Math.min(1.25, energy + .06);
+  }
+
+  function cycleRigRainbowColor(clientX, clientY){
+    if(Number.isFinite(clientX) && Number.isFinite(clientY)) normalizePointer(clientX, clientY);
+    rigColorTarget += 1;
+    rigColorMixTarget = RIG_COLOR_BLEND;
+    energy = Math.min(1.45, energy + .18);
+  }
+
+  function resetRigOriginalPalette(clientX, clientY){
+    if(Number.isFinite(clientX) && Number.isFinite(clientY)) normalizePointer(clientX, clientY);
+    rigColorTarget = 0;
+    rigColorOrbit = 0;
+    rigColorMix = 0;
+    rigColorMixTarget = 0;
+    energy = Math.min(1.32, energy + .10);
+  }
+
+  function onClick(e){
+    energy = Math.min(1.28, energy + .10);
+    if(e.detail===2){
+      cycleRigRainbowColor(e.clientX, e.clientY);
+    }else if(e.detail>=3){
+      resetRigOriginalPalette(e.clientX, e.clientY);
+    }
+  }
+  function onKeyDown(e){
+    const step = .08;
+    const rollStep = .045;
+    const dimStep = .12;
+    const k = e.key.toLowerCase();
+    if(e.key === 'ArrowLeft' || k === 'a') rig.targetYaw -= step;
+    else if(e.key === 'ArrowRight' || k === 'd') rig.targetYaw += step;
+    else if(e.key === 'ArrowUp' || k === 'w') rig.targetPitch -= step;
+    else if(e.key === 'ArrowDown' || k === 's') rig.targetPitch += step;
+    else if(k === 'q') rig.targetRoll -= rollStep;
+    else if(k === 'e') rig.targetRoll += rollStep;
+    else if(e.key === '+' || e.key === '=') rig.targetZoom = clamp(rig.targetZoom + .08, ZOOM_MIN, ZOOM_MAX);
+    else if(e.key === '-' || e.key === '_') rig.targetZoom = clamp(rig.targetZoom - .08, ZOOM_MIN, ZOOM_MAX);
+    else if(k === 'z') rig.targetHyperspace = clamp(rig.targetHyperspace - .08, HYPER_MIN, HYPER_MAX);
+    else if(k === 'x') rig.targetHyperspace = clamp(rig.targetHyperspace + .08, HYPER_MIN, HYPER_MAX);
+    else if(k === 'c') rig.targetDim4 = clamp(rig.targetDim4 - dimStep, -Math.PI, Math.PI);
+    else if(k === 'v') rig.targetDim4 = clamp(rig.targetDim4 + dimStep, -Math.PI, Math.PI);
+    else if(k === 'b') rig.targetDim5 = clamp(rig.targetDim5 - dimStep, -Math.PI, Math.PI);
+    else if(k === 'n') rig.targetDim5 = clamp(rig.targetDim5 + dimStep, -Math.PI, Math.PI);
+    else if(e.key === ' '){
+      e.preventDefault();
+      resetRig(true);
+    } else return;
+    e.preventDefault();
+    energy = Math.min(1.25, energy + .05);
+  }
+
+  function onPointerLeave(){
+    if(pointer.active) return;
+    pointer.tx = 0;
+    pointer.ty = 0;
+  }
+
+  function handleResize(){ linkPairStamp = -1; resize(); }
+
+  function handleVisibilityChange(){
+    if(document.hidden){
+      activePointers.clear();
+      gesture.pinchActive = false;
+      endDrag();
+    }
+    last = performance.now();
+    lastRaf = last;
+    rafTick = 0;
+    rafSampleCount = 0;
+    rafSampleCursor = 0;
+  }
+
+  function handleWindowBlur(){
+    activePointers.clear();
+    gesture.pinchActive = false;
+    endDrag();
+    pointer.tx = 0;
+    pointer.ty = 0;
+  }
+
+  function handleMotionPreference(e){
+    reduced = !!e.matches;
+    last = lastRaf = performance.now();
+    rafTick = 0;
+  }
+
+  function handleContextLost(e){
+    if(e && e.cancelable) e.preventDefault();
+    contextLost = true;
+  }
+
+  function handleContextRestored(){
+    contextLost = false;
+    spriteCache.clear();
+    linkPairStamp = -1;
+    resize();
+    last = lastRaf = performance.now();
+    rafTick = 0;
+  }
+
+  addEventListener('resize',handleResize,{passive:true});
+  if(window.visualViewport) visualViewport.addEventListener('resize',handleResize,{passive:true});
+  canvas.addEventListener('pointerdown',onPointerDown,{passive:true});
+  canvas.addEventListener('pointermove',onPointerMove,{passive:true});
+  canvas.addEventListener('pointerup',endPointer,{passive:true});
+  canvas.addEventListener('pointercancel',endPointer,{passive:true});
+  canvas.addEventListener('lostpointercapture',endPointer,{passive:true});
+  canvas.addEventListener('pointerleave',onPointerLeave,{passive:true});
+  canvas.addEventListener('wheel',onWheel,{passive:false});
+  canvas.addEventListener('click',onClick,{passive:true});
+  canvas.addEventListener('contextlost',handleContextLost);
+  canvas.addEventListener('contextrestored',handleContextRestored);
+  addEventListener('keydown',onKeyDown);
+  document.addEventListener('visibilitychange',handleVisibilityChange);
+  addEventListener('blur',handleWindowBlur);
+  if(motionQuery){
+    if(motionQuery.addEventListener) motionQuery.addEventListener('change',handleMotionPreference);
+    else if(motionQuery.addListener) motionQuery.addListener(handleMotionPreference);
+  }
+  if(typeof ResizeObserver==='function'){
+    layoutObserver = new ResizeObserver(handleResize);
+    layoutObserver.observe(canvas);
+  }
+
+  resize();
+  seed();
+  const diagnostics = Object.freeze({
+    snapshot(){
+      return {
+        version:'NUR_V197_CANONICAL_CROSS_SCREEN_LAGFREE_2026-08-29',
+        cssWidth:W,
+        cssHeight:H,
+        backingWidth:canvas.width,
+        backingHeight:canvas.height,
+        nativeDpr:Number(window.devicePixelRatio)||1,
+        activeDpr,
+        canonicalTargetDpr:CANONICAL_TARGET_DPR,
+        maxBackingPixels:MAX_BACKING_PIXELS,
+        spriteDpr,
+        contextAttributes,
+        panelHz:refreshHz,
+        cadenceStride,
+        presentedHz:refreshHz/cadenceStride,
+        targetHz:1000/targetFrameMs,
+        renderCostMs:smoothRenderCost,
+        renderedFrames:frameNo,
+        stars:particles.length,
+        ambientStars:ambientOrbiters.length+ambientFloaters.length+ambientFireballs.length,
+        reducedMotion:reduced,
+        haloLayer:false,
+        rayProfile:'canonical-soft-visible-lagfree',
+        contextLost
+      };
+    }
+  });
+  try{
+    Object.defineProperty(window,'NURDiagnostics',{value:diagnostics,configurable:false});
+  }catch(_err){
+    window.NURDiagnostics = diagnostics;
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

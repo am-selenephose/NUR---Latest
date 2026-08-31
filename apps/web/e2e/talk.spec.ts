@@ -443,26 +443,30 @@ test("former glow action is outcome-gated before visible count changes", async (
   await expect(outcomesReturned).toContainText("00");
   await expect(outcomesReturned).toContainText("outcomes returned");
 
-  await page.goto("/plan");
-  await readyUniverse(page, "#page-plan");
+  await universe.locator('[data-page="plan"]:visible').first().click();
+  await expect(page).toHaveURL(/\/plan$/);
+  await expect(universe.locator("#page-plan")).toBeVisible();
   await expect(universe.getByText("Mark a Personal Glow")).toHaveCount(0);
   await expect(universe.locator("#nur-outcome-composer")).toBeHidden();
   await universe.locator(".plan-check[data-plan-step-id='step-1']").click();
   await expect(universe.locator("#nur-outcome-composer")).toBeVisible();
   expect(mocks.outcomePosts()).toBe(0);
 
-  await page.goto("/systems");
-  await readyUniverse(page, "#page-systems");
+  await universe.locator('[data-page="systems"]:visible').first().click();
+  await expect(page).toHaveURL(/\/systems$/);
+  await expect(universe.locator("#page-systems")).toBeVisible();
   await expect(outcomesReturned).toContainText("00");
 
-  await page.goto("/plan");
-  await readyUniverse(page, "#page-plan");
+  await universe.locator('[data-page="plan"]:visible').first().click();
+  await expect(page).toHaveURL(/\/plan$/);
+  await expect(universe.locator("#page-plan")).toBeVisible();
   await universe.locator("#nur-outcome-input").fill("The owner shipped the visible fix.");
   await universe.locator('[data-action="return-outcome"]').click();
   await expect.poll(() => mocks.outcomePosts()).toBe(1);
 
-  await page.goto("/systems");
-  await readyUniverse(page, "#page-systems");
+  await universe.locator('[data-page="systems"]:visible').first().click();
+  await expect(page).toHaveURL(/\/systems$/);
+  await expect(universe.locator("#page-systems")).toBeVisible();
   await expect(outcomesReturned).toContainText("01");
 });
 

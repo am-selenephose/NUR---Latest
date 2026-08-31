@@ -3367,6 +3367,12 @@ body.universe-edition #nur-front-v61 .universe-system-node > span > :is(b, small
   direction: rtl !important;
 }
 
+[lang="ur"][dir="rtl"] body.universe-edition[data-nur-writing-preference="script"]
+  #nur-front-v61 .clean-nav-title {
+  white-space: normal !important;
+  line-height: 1.15 !important;
+}
+
 @media (max-width: 900px), (pointer: coarse) {
   body #nur-front-v61 :is(button, [role="button"], input, select),
   body.universe-edition #nur-front-v61 :is(button, [role="button"], input, select) {
