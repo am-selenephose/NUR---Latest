@@ -1,63 +1,89 @@
 import { v197Copy } from "./v197I18n";
 import { ensureV197AccessibleViewport } from "./v197Accessibility";
-import {
-  disposeV197CelestialRuntime,
-  ensureV197CelestialRuntime,
-  V197_CELESTIAL_ENGINE,
-  V197_SPECTRUM_NAMES,
-} from "./v197CelestialRuntime";
+import { disposeV197CelestialRuntime } from "./v197CelestialRuntime";
 
-export const V197_STAR_BRAIN_CANVAS_ID = "nur-brain-canvas";
 export const V197_STAR_BRAIN_HOST_ID = "front-nur-star";
-const V197_UNIVERSE_BRAIN_HALO_CLASS = "nur-v197-brain-orbit-halo";
+export const V197_EXACT_STAR_BRAIN_FRAME_ID = "nur-exact-brain-frame";
+export const V197_EXACT_STAR_BRAIN_PATH =
+  "/v197/NUR_V197_BRAIN_EXACT_GALAXY_STARS_RADIANT_OUTER_ANATOMY_SOFTER_PATH.html";
+export const V197_EXACT_STAR_BRAIN_SHA256 =
+  "3c0b36f9d9732ed8fd0013e924754bbf3fe1f9c932a3498342af2df0084538b0";
+const V197_SPECTRUM_NAMES = [
+  "red", "orange", "yellow", "green", "blue", "indigo", "violet",
+] as const;
+const V197_EXACT_BRAIN_ENGINE = "canvas2d-exact-artifact-v1";
 
-type V197StarBrainSurface = "entry" | "today" | "universe" | "map";
+type V197StarBrainSurface = "entry" | "today" | "universe";
 
-type VeiledContext = CanvasRenderingContext2D & { __v197Veil?: boolean };
+const V197_DEDICATED_WORLD_SURFACES = new Set([
+  "map", "orbits", "timeline", "insights",
+]);
 
 type V197StarBrainController = {
   observer: MutationObserver;
   frame: number | null;
+  resizeListener: () => void;
 };
 
 const starBrainControllers = new WeakMap<Document, V197StarBrainController>();
 const starBrainHosts = new WeakMap<Document, HTMLElement>();
+const starBrainFrames = new WeakMap<Document, HTMLIFrameElement>();
+const configuredExactBrainCanvases = new WeakSet<HTMLCanvasElement>();
 
-function syncV197UniverseBrainHalos(
-  document: Document,
-  host: HTMLElement,
-  surface: V197StarBrainSurface,
-): void {
-  const selector = `.${V197_UNIVERSE_BRAIN_HALO_CLASS}`;
-  if (surface !== "universe") {
-    document.querySelectorAll(selector).forEach(halo => halo.remove());
-    return;
-  }
+type ExactBrainApi = {
+  shatter: () => void;
+  setTheme: (_color: string, _strength: number) => void;
+  getDiagnostics: () => Record<string, unknown>;
+  dispose: () => void;
+};
 
-  document.querySelectorAll<HTMLElement>(selector).forEach(halo => {
-    if (halo.parentElement !== host) halo.remove();
-  });
-  const variants = ["", "two", "three"] as const;
-  variants.forEach((variant, index) => {
-    const variantSelector = variant
-      ? `:scope > ${selector}.${variant}`
-      : `:scope > ${selector}:not(.two):not(.three)`;
-    if (host.querySelector(variantSelector)) return;
-    const halo = document.createElement("span");
-    halo.className = ["f4-ring", variant, V197_UNIVERSE_BRAIN_HALO_CLASS]
-      .filter(Boolean)
-      .join(" ");
-    halo.dataset.nurHaloIndex = String(index + 1);
-    halo.dataset.nurHaloSource = "entry-f4-ring";
-    halo.setAttribute("aria-hidden", "true");
-    host.prepend(halo);
-  });
+type ExactBrainWindow = Window & {
+  nurStarBrain?: ExactBrainApi;
+};
+
+const exactBrainApis = new WeakMap<Document, ExactBrainApi>();
+
+function removeExternalBrainHalos(document: Document): void {
+  document.querySelectorAll(
+    "#f4-orbit > .f4-ring, .universe-master-star > .nur-v197-brain-orbit-halo",
+  ).forEach(halo => halo.remove());
+}
+
+function exactNativeBrainSize(frameWindow: Window): number {
+  return frameWindow.innerWidth <= 600
+    ? Math.min(frameWindow.innerWidth * .98, 470)
+    : Math.min(frameWindow.innerWidth * .56, 700);
+}
+
+function applyExactBrainHostGeometry(frameWindow: Window, brainHost: HTMLElement): number {
+  const size = exactNativeBrainSize(frameWindow);
+  brainHost.style.setProperty("position", "absolute", "important");
+  brainHost.style.setProperty("inset", "auto", "important");
+  brainHost.style.setProperty("left", "50%", "important");
+  brainHost.style.setProperty("top", "50%", "important");
+  brainHost.style.setProperty("width", `${size}px`, "important");
+  brainHost.style.setProperty("height", `${size}px`, "important");
+  brainHost.style.setProperty("max-width", "none", "important");
+  brainHost.style.setProperty("max-height", "none", "important");
+  brainHost.style.setProperty("transform", "translate(-50%, -50%)", "important");
+  brainHost.style.setProperty("overflow", "visible", "important");
+  brainHost.style.setProperty("filter", "none", "important");
+  brainHost.style.setProperty("mask-image", "none", "important");
+  brainHost.style.setProperty("-webkit-mask-image", "none", "important");
+  brainHost.dataset.nurNativeSize = String(size);
+  return size;
 }
 
 function resolveV197StarBrainHost(document: Document): {
   host: HTMLElement;
   surface: V197StarBrainSurface;
 } | null {
+  const body = document.body;
+  if (
+    body?.classList.contains("nur-surface-hosted")
+    || V197_DEDICATED_WORLD_SURFACES.has(body?.dataset.nurWorldSurface ?? "")
+  ) return null;
+
   const todayPage = document.querySelector<HTMLElement>("#page-today.active");
   const todayHost = todayPage?.querySelector<HTMLElement>(".orbit-star-zone > .f4-core");
   if (todayHost) return { host: todayHost, surface: "today" };
@@ -67,17 +93,12 @@ function resolveV197StarBrainHost(document: Document): {
   );
   if (universeHost) return { host: universeHost, surface: "universe" };
 
-  const mapHost = document.querySelector<HTMLElement>(
-    "body.universe-edition #page-universe-map.active .lens-map-master",
-  );
-  if (mapHost) return { host: mapHost, surface: "map" };
-
   const entryHost = document.querySelector<HTMLElement>("#nur-front-v61 #f4-core");
   return entryHost ? { host: entryHost, surface: "entry" } : null;
 }
 
 function removeLegacyMasterStar(host: HTMLElement, surface: V197StarBrainSurface): void {
-  const selector = surface === "universe" || surface === "map"
+  const selector = surface === "universe"
     ? ":scope > .f4-core, :scope > .spark, :scope > .f4-master-star"
     : ":scope > .spark, :scope > .f4-master-star";
 
@@ -86,16 +107,18 @@ function removeLegacyMasterStar(host: HTMLElement, surface: V197StarBrainSurface
 }
 
 export function placeV197StarBrainHost(document: Document): HTMLElement | null {
+  const dedicatedSurface = document.body?.classList.contains("nur-surface-hosted")
+    || V197_DEDICATED_WORLD_SURFACES.has(document.body?.dataset.nurWorldSurface ?? "");
   document.body?.classList.toggle(
     "nur-v197-systems-active",
-    Boolean(document.querySelector("#page-systems.active")),
+    !dedicatedSurface && Boolean(document.querySelector("#page-systems.active")),
   );
   const resolved = resolveV197StarBrainHost(document);
   if (!resolved) return null;
   const { host: canonicalHost, surface } = resolved;
   canonicalHost.dataset.nurStarBrainSurface = surface;
   removeLegacyMasterStar(canonicalHost, surface);
-  syncV197UniverseBrainHalos(document, canonicalHost, surface);
+  removeExternalBrainHalos(document);
 
   let brainHost = (document.getElementById(V197_STAR_BRAIN_HOST_ID) as HTMLElement | null)
     ?? starBrainHosts.get(document)
@@ -103,126 +126,244 @@ export function placeV197StarBrainHost(document: Document): HTMLElement | null {
   if (!brainHost) {
     brainHost = document.createElement("div");
     brainHost.id = V197_STAR_BRAIN_HOST_ID;
-    brainHost.dataset.nurSource = "v43-anatomy-three-celestial-runtime";
+    brainHost.dataset.nurSource = "founder-exact-radiant-outer-anatomy";
     starBrainHosts.set(document, brainHost);
   }
   if (brainHost.parentElement !== canonicalHost) canonicalHost.append(brainHost);
+  applyExactBrainHostGeometry(document.defaultView!, brainHost);
   brainHost.dataset.nurSurface = surface;
-  brainHost.dataset.nurScaleProfile = surface === "universe" ? "systems-expanded" : "entry-exact";
+  brainHost.dataset.nurScaleProfile = "standalone-native-outer-viewport";
   brainHost.dataset.nurDispersal = "radial-circle";
-  brainHost.dataset.nurGalaxyPaint = "three-coordinated-celestial-rig-v1";
-  brainHost.dataset.nurRigDepth = "webgl-threejs-perspective";
+  brainHost.dataset.nurGalaxyPaint = "exact-galaxy-star-language";
+  brainHost.dataset.nurRigDepth = "canvas2d-perspective-anatomy";
   brainHost.dataset.nurSpectrumBands = V197_SPECTRUM_NAMES.join(",");
   brainHost.dataset.nurSpectrumBandCount = String(V197_SPECTRUM_NAMES.length);
-  brainHost.dataset.nurEngine = V197_CELESTIAL_ENGINE;
-  brainHost.dataset.nurEntrySystemsVisualContract = "shared-seven-spectrum-3d-v1";
-  brainHost.dataset.nurHaloContract = surface === "entry" || surface === "universe"
-    ? "entry-f4-ring-exact"
-    : "surface-native";
+  brainHost.dataset.nurEngine = V197_EXACT_BRAIN_ENGINE;
+  brainHost.dataset.nurArtifactSha256 = V197_EXACT_STAR_BRAIN_SHA256;
+  brainHost.dataset.nurEntrySystemsVisualContract = "founder-exact-seven-spectrum-v1";
+  brainHost.dataset.nurHaloContract = "halo-free";
   brainHost.title = v197Copy("drag to spin the mind - click: it dissolves into stardust and reforms - double-click: neural storm - scroll to zoom");
   brainHost.setAttribute(
     "aria-label",
     v197Copy("A living brain made of stars. Drag to spin it. Click and it dissolves into tiny star glitter, then flows back together."),
   );
-  brainHost.setAttribute("role", "button");
-  brainHost.tabIndex = 0;
+  brainHost.setAttribute("role", "group");
+  brainHost.tabIndex = -1;
   return brainHost;
 }
 
 function observeV197StarBrainPlacement(document: Document, frameWindow: Window): void {
   if (starBrainControllers.has(document)) return;
-  const root = document.getElementById("nur-front-v61") ?? document.body;
+  const root = document.body;
   if (!root) return;
 
   const constructors = frameWindow as unknown as {
     MutationObserver: typeof MutationObserver;
     HTMLElement: typeof HTMLElement;
   };
-  const controller: V197StarBrainController = { observer: null as unknown as MutationObserver, frame: null };
+  const controller: V197StarBrainController = {
+    observer: null as unknown as MutationObserver,
+    frame: null,
+    resizeListener: () => undefined,
+  };
+  const schedulePlacement = () => {
+    if (controller.frame !== null) return;
+    controller.frame = frameWindow.requestAnimationFrame(() => {
+      controller.frame = null;
+      ensureV197StarBrain(document);
+    });
+  };
   const observer = new constructors.MutationObserver((records: MutationRecord[]) => {
     const routeChanged = records.some(record => (
       record.type === "attributes"
       || Array.from(record.addedNodes).some(node => node instanceof constructors.HTMLElement)
       || Array.from(record.removedNodes).some(node => node instanceof constructors.HTMLElement)
     ));
-    if (!routeChanged || controller.frame !== null) return;
-    controller.frame = frameWindow.requestAnimationFrame(() => {
-      controller.frame = null;
-      placeV197StarBrainHost(document);
-    });
+    if (routeChanged) schedulePlacement();
   });
+  controller.resizeListener = schedulePlacement;
   controller.observer = observer;
   observer.observe(root, {
     subtree: true,
     childList: true,
     attributes: true,
-    attributeFilter: ["class"],
+    attributeFilter: ["class", "data-nur-page", "data-nur-world-surface"],
   });
+  frameWindow.addEventListener("resize", controller.resizeListener, { passive: true });
   starBrainControllers.set(document, controller);
 }
 
-/** Match the reference V197 full-sky wash attenuation without touching stars. */
-export function ensureV197BlackGalaxy(document: Document): void {
-  const canvas = document.querySelector<HTMLCanvasElement>("#space3d");
-  const frameWindow = document.defaultView;
-  if (!canvas || !frameWindow) return;
-  canvas.dataset.nurGalaxyRig = "canonical-v197-true-3d";
-  canvas.dataset.nurGalaxyLayers = "far-dust-galaxy-super";
-  canvas.dataset.nurNebulaBackdrop = "css-static-v1";
-  const context = canvas.getContext("2d") as VeiledContext | null;
-  if (!context || context.__v197Veil) return;
+/** Mount the founder-supplied HTML byte-for-byte inside the canonical V197 host. */
+function configureExactBrainFrame(
+  document: Document,
+  brainHost: HTMLElement,
+  brainFrame: HTMLIFrameElement,
+): void {
+  const embeddedDocument = brainFrame.contentDocument;
+  const embeddedWindow = brainFrame.contentWindow;
+  const frameWindow = document.defaultView as ExactBrainWindow | null;
+  if (!embeddedDocument || !embeddedWindow || !frameWindow) {
+    brainHost.dataset.nurExactBrainState = "unavailable";
+    return;
+  }
 
-  context.__v197Veil = true;
-  const originalFillRect = context.fillRect.bind(context);
-  context.fillRect = (x: number, y: number, width: number, height: number) => {
-    if (x === 0 && y === 0 && width > frameWindow.innerWidth * .92 && height > frameWindow.innerHeight * .92) {
-      const alpha = context.globalAlpha;
-      context.globalAlpha = alpha * .5;
-      originalFillRect(x, y, width, height);
-      context.globalAlpha = alpha;
-      return;
-    }
-    originalFillRect(x, y, width, height);
-  };
+  const orbit = embeddedDocument.querySelector<HTMLElement>(".front-orbit");
+  const innerHost = embeddedDocument.getElementById("front-nur-star") as HTMLElement | null;
+  const canvas = embeddedDocument.getElementById("nur-brain-canvas-v197") as HTMLCanvasElement | null;
+  if (!orbit || !innerHost || !canvas) {
+    brainHost.dataset.nurExactBrainState = "missing-runtime-dom";
+    return;
+  }
+
+  // The exact file calculates vw inside its nested iframe. Reapply the same
+  // standalone formula against the real outer viewport so it does not shrink
+  // from 700px to 299px merely because it is embedded in NUR.
+  const nativeSize = exactNativeBrainSize(frameWindow);
+  applyExactBrainHostGeometry(frameWindow, brainHost);
+  orbit.style.setProperty("opacity", "1", "important");
+  innerHost.style.setProperty("left", "50%", "important");
+  innerHost.style.setProperty("top", "50%", "important");
+  innerHost.style.setProperty("width", `${nativeSize}px`, "important");
+  innerHost.style.setProperty("height", `${nativeSize}px`, "important");
+  innerHost.style.setProperty("filter", "none", "important");
+  innerHost.style.setProperty("mask-image", "none", "important");
+  innerHost.style.setProperty("-webkit-mask-image", "none", "important");
+  brainHost.dataset.nurEmbeddedResponsiveProfile = "outer-viewport-native-size";
+
+  if (!configuredExactBrainCanvases.has(canvas)) {
+    configuredExactBrainCanvases.add(canvas);
+    canvas.dataset.nurParentBridgeState = "ready";
+
+    const markInteraction = (value: string) => {
+      const currentHost = brainFrame.parentElement as HTMLElement | null;
+      if (currentHost) currentHost.dataset.nurLastInteraction = value;
+    };
+
+    // Observe the supplied handlers without replacing or modifying them. These
+    // markers make the exact click/drag/zoom contract testable from the parent.
+    canvas.addEventListener("pointerdown", () => {
+      markInteraction("pointer-drag");
+    }, { capture: true });
+    canvas.addEventListener("wheel", () => {
+      markInteraction("wheel-zoom");
+    }, { capture: true });
+    canvas.addEventListener("click", () => {
+      markInteraction("rainbow-cycle");
+    }, { capture: true });
+    canvas.addEventListener("dblclick", () => {
+      markInteraction("original-palette-shatter");
+    }, { capture: true });
+    innerHost.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        markInteraction("keyboard-shatter");
+      }
+    }, { capture: true });
+  }
+
+  const exactApi: ExactBrainApi = Object.freeze({
+    shatter: () => {
+      const EventConstructor = (
+        embeddedWindow as unknown as { MouseEvent: typeof MouseEvent }
+      ).MouseEvent;
+      canvas.dispatchEvent(new EventConstructor("dblclick", {
+        bubbles: true,
+        cancelable: true,
+        view: embeddedWindow,
+      }));
+    },
+    // The supplied runtime owns its own seven-color click cycle. Global theme
+    // changes must not rewrite that exact palette or its interaction state.
+    setTheme: () => undefined,
+    getDiagnostics: () => ({
+      version: "NUR_V197_BRAIN_EXACT_GALAXY_STARS_RADIANT_OUTER_ANATOMY_SOFTER_PATH",
+      artifactSha256: V197_EXACT_STAR_BRAIN_SHA256,
+      canvasWidth: canvas.width,
+      canvasHeight: canvas.height,
+      surface: brainHost.dataset.nurSurface ?? null,
+      connected: brainFrame.isConnected,
+    }),
+    dispose: () => {
+      disposeV197StarBrain(document);
+    },
+  });
+  exactBrainApis.set(document, exactApi);
+  frameWindow.nurStarBrain = exactApi;
+  brainHost.dataset.nurExactBrainState = "ready";
+  brainFrame.dataset.nurExactBrainState = "ready";
 }
 
-/**
- * Mount the founder-approved V43 anatomy through the coordinated Three.js
- * celestial runtime. Galaxy and brain still paint into the canonical V197
- * canvas IDs, but they now share one scheduler, one spectrum, and one motion
- * clock instead of competing for the main thread in separate RAF loops.
- */
-export function ensureV197StarBrain(document: Document): HTMLCanvasElement | null {
+export function ensureV197StarBrain(document: Document): HTMLIFrameElement | null {
   ensureV197AccessibleViewport(document);
   const frameWindow = document.defaultView;
   if (!frameWindow) return null;
-  const brainHost = placeV197StarBrainHost(document);
-  if (!brainHost) return null;
-  brainHost.dataset.nurModel = "v43-anatomy-seven-spectrum";
-  brainHost.dataset.nurVariant = "three-galaxy-rig-brainstem-v3";
   observeV197StarBrainPlacement(document, frameWindow);
+  const brainHost = placeV197StarBrainHost(document);
+  if (!brainHost) {
+    detachV197StarBrainMount(document);
+    return null;
+  }
+  brainHost.dataset.nurModel = "exact-galaxy-stars-radiant-outer-anatomy";
+  brainHost.dataset.nurVariant = "softer-path-rainbow-click-double-shatter";
+  brainHost.dataset.nurInteractionContract =
+    "pointer-drag-wheel-single-rainbow-double-shatter-keyboard-shatter";
 
-  const canvas = ensureV197CelestialRuntime(document, brainHost);
-
-  if (brainHost.dataset.nurExactBridgeBound !== "true") {
-    brainHost.dataset.nurExactBridgeBound = "true";
-    /* The reference page's existing V4 host listener supplies this class.
-     * Canonical V197 has different hosts, so bridge only that event signal. */
-    brainHost.addEventListener("click", () => {
-      brainHost.dataset.nurLastInteraction = "shatter";
-      brainHost?.classList.remove("is-bursting");
-      void brainHost?.offsetWidth;
-      brainHost?.classList.add("is-bursting");
-      frameWindow.setTimeout(() => brainHost?.classList.remove("is-bursting"), 90);
-    });
-    brainHost.addEventListener("keydown", event => {
-      if (event.key !== "Enter" && event.key !== " ") return;
-      event.preventDefault();
-      brainHost?.click();
-    });
+  const existing = document.getElementById(V197_EXACT_STAR_BRAIN_FRAME_ID) as HTMLIFrameElement | null;
+  if (existing) {
+    if (existing.parentElement !== brainHost) brainHost.append(existing);
+    starBrainFrames.set(document, existing);
+    if (existing.contentDocument?.readyState === "complete") {
+      configureExactBrainFrame(document, brainHost, existing);
+    }
+    return existing;
   }
 
-  return canvas;
+  disposeV197CelestialRuntime(document);
+  document.querySelectorAll("#nur-brain-canvas, #nur-brain-canvas-v197").forEach(node => node.remove());
+
+  const brainFrame = document.createElement("iframe");
+  brainFrame.id = "nur-exact-brain-frame";
+  brainFrame.src = V197_EXACT_STAR_BRAIN_PATH;
+  brainFrame.title = v197Copy(
+    "A living brain made of stars. Drag to spin it. Click and it dissolves into tiny star glitter, then flows back together.",
+  );
+  brainFrame.loading = "eager";
+  brainFrame.dataset.nurArtifactSha256 = V197_EXACT_STAR_BRAIN_SHA256;
+  brainFrame.dataset.nurExactBrainState = "loading";
+  brainFrame.addEventListener("load", () => {
+    configureExactBrainFrame(document, brainHost, brainFrame);
+  });
+  brainFrame.addEventListener("error", () => {
+    brainHost.dataset.nurExactBrainState = "load-error";
+    brainFrame.dataset.nurExactBrainState = "load-error";
+  });
+  brainHost.append(brainFrame);
+  brainHost.dataset.nurExactBrainState = "loading";
+  starBrainFrames.set(document, brainFrame);
+  return brainFrame;
+}
+
+function detachV197StarBrainMount(document: Document): boolean {
+  const frameWindow = document.defaultView as ExactBrainWindow | null;
+  let stopped = false;
+  const brainFrame = (
+    document.getElementById(V197_EXACT_STAR_BRAIN_FRAME_ID) as HTMLIFrameElement | null
+  ) ?? starBrainFrames.get(document) ?? null;
+  if (brainFrame) {
+    brainFrame.src = "about:blank";
+    brainFrame.remove();
+    starBrainFrames.delete(document);
+    stopped = true;
+  }
+
+  if (frameWindow) delete frameWindow.nurStarBrain;
+  exactBrainApis.delete(document);
+  removeExternalBrainHalos(document);
+  const brainHost = document.getElementById(V197_STAR_BRAIN_HOST_ID);
+  if (brainHost) {
+    brainHost.remove();
+    stopped = true;
+  }
+  return stopped;
 }
 
 /**
@@ -237,31 +378,19 @@ export function ensureV197StarBrain(document: Document): HTMLCanvasElement | nul
  * Returns true when an engine was actually stopped.
  */
 export function disposeV197StarBrain(document: Document): boolean {
-  const frameWindow = document.defaultView;
+  const frameWindow = document.defaultView as ExactBrainWindow | null;
   let stopped = disposeV197CelestialRuntime(document);
 
   const controller = starBrainControllers.get(document);
   if (controller) {
     controller.observer.disconnect();
     if (controller.frame !== null) frameWindow?.cancelAnimationFrame(controller.frame);
+    frameWindow?.removeEventListener("resize", controller.resizeListener);
     starBrainControllers.delete(document);
     stopped = true;
   }
 
-  for (const canvasId of [V197_STAR_BRAIN_CANVAS_ID, "nur-brain-canvas-v197"]) {
-    const canvas = document.getElementById(canvasId) as HTMLCanvasElement | null;
-    if (!canvas) continue;
-    try {
-      canvas.width = 0;
-      canvas.height = 0;
-    } catch {
-      // Detaching is what matters; a refused resize is not fatal.
-    }
-    canvas.remove();
-    stopped = true;
-  }
-
-  document.getElementById(V197_STAR_BRAIN_HOST_ID)?.removeAttribute("data-nur-exact-bridge-bound");
+  stopped = detachV197StarBrainMount(document) || stopped;
 
   return stopped;
 }

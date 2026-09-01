@@ -1,58 +1,85 @@
-/* The Aug 29 cross-screen renderer is the only celestial background owner. */
-html.nur-canonical-cross-screen-runtime,
-html.nur-canonical-cross-screen-runtime body,
-html.nur-canonical-cross-screen-runtime body.universe-edition {
+/* The untouched HALO_FREE document is the only full-screen galaxy owner. */
+html.nur-exact-halo-free-runtime,
+html.nur-exact-halo-free-runtime body,
+html.nur-exact-halo-free-runtime body.universe-edition {
   background-color: #000 !important;
   background-image: none !important;
 }
 
-html.nur-canonical-cross-screen-runtime #nur-front-v61 {
-  background-color: transparent !important;
-  background-image: none !important;
-}
-
-html.nur-canonical-cross-screen-runtime #nur-front-v61::before {
-  background: none !important;
-}
-
-html.nur-canonical-cross-screen-runtime #space3d,
-html.nur-canonical-cross-screen-runtime canvas#space3d {
+html.nur-exact-halo-free-runtime #nur-v197-halo-free-galaxy-frame {
   position: fixed !important;
   inset: 0 !important;
   z-index: 0 !important;
+  display: block !important;
   width: 100% !important;
   height: 100% !important;
-  display: block !important;
+  border: 0 !important;
   opacity: 1 !important;
-  filter: none !important;
-  mix-blend-mode: normal !important;
-  isolation: isolate !important;
   background: #000 !important;
+  color-scheme: dark !important;
   pointer-events: none !important;
   touch-action: none !important;
   contain: strict !important;
 }
 
-/* These were separate old visual owners, not content. */
-html.nur-canonical-cross-screen-runtime :is(
+html.nur-exact-halo-free-runtime body:not(.universe-edition) #nur-front-v61 {
+  position: relative !important;
+  z-index: 1 !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+html.nur-exact-halo-free-runtime body.universe-edition #nur-front-v61 {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 1 !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+html.nur-exact-halo-free-runtime #nur-front-v61::before {
+  background: none !important;
+}
+
+/* Retire every previous sky and external brain-halo owner. */
+html.nur-exact-halo-free-runtime :is(
+  #space3d,
+  canvas#space3d,
   #atm,
   .vignette,
   #nur-brain-canvas,
-  #nur-brain-canvas-v197,
-  #front-nur-star,
-  .nur-v197-brain-orbit-halo,
   #f4-core > .f4-master-star,
   .orbit-star-zone > .f4-core > .f4-master-star,
   .universe-master-star > .f4-core,
-  .universe-master-star > .spark
+  .universe-master-star > .spark,
+  #f4-orbit > .f4-ring,
+  .nur-v197-brain-orbit-halo
 ) {
   display: none !important;
 }
 
-html.nur-canonical-cross-screen-runtime #f4-core::before,
-html.nur-canonical-cross-screen-runtime #f4-core::after,
-html.nur-canonical-cross-screen-runtime .universe-master-star::before,
-html.nur-canonical-cross-screen-runtime .universe-master-star::after {
+html.nur-exact-halo-free-runtime #front-nur-star,
+html.nur-exact-halo-free-runtime #nur-exact-brain-frame {
+  display: block !important;
+}
+
+html.nur-exact-halo-free-runtime #nur-exact-brain-frame {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 1 !important;
+  width: 100% !important;
+  height: 100% !important;
+  border: 0 !important;
+  background: #000 !important;
+  color-scheme: dark !important;
+  mix-blend-mode: normal !important;
+  pointer-events: auto !important;
+}
+
+html.nur-exact-halo-free-runtime #f4-core::before,
+html.nur-exact-halo-free-runtime #f4-core::after,
+html.nur-exact-halo-free-runtime .universe-master-star::before,
+html.nur-exact-halo-free-runtime .universe-master-star::after {
   content: none !important;
   display: none !important;
 }

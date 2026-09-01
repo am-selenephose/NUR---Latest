@@ -12,7 +12,7 @@ export default defineConfig({
   use: {
     baseURL: "http://localhost:4173",
     serviceWorkers: "block",
-    trace: "retain-on-failure",
+    trace: "on-first-retry",
   },
   projects: [
     { name: "chromium-desktop", use: { ...devices["Desktop Chrome"] } },

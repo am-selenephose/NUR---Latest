@@ -8,6 +8,7 @@ import V197_CANONICAL_GALAXY_CSS from "../styles/v197-canonical-galaxy.css?raw";
 import { lockV197BrandIdentity } from "./v197Brand";
 import { V197_FONT_FACE_CSS } from "./v197Fonts";
 import { ensureV197CanonicalGalaxy } from "./v197CanonicalGalaxy";
+import { ensureV197StarBrain } from "./v197StarBrain";
 import { installV197StarSeals, V197_STAR_SEAL_CLASS } from "./v197StarSeal";
 
 export const V197_PREMIUM_POLISH_STYLE_ID = "nur-v197-track-a-premium-polish";
@@ -261,6 +262,7 @@ export function ensureV197EntryPolish(document: Document): HTMLStyleElement {
   installHolographicFilm(document);
   observeHolographicControls(document);
   ensureV197CanonicalGalaxy(document);
+  ensureV197StarBrain(document);
   return style;
 }
 
@@ -311,5 +313,6 @@ export function ensureV197PremiumPolish(document: Document): HTMLStyleElement {
   observeHolographicControls(document);
   matchUniverseBackgroundToEntry(document);
   ensureV197CanonicalGalaxy(document);
+  ensureV197StarBrain(document);
   return style;
 }

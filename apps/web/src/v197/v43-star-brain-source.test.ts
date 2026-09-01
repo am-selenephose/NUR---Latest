@@ -90,9 +90,11 @@ describe("V43 anatomical Three.js celestial runtime", () => {
     expect(galaxyZoomFromWheel(.4, 1, 2)).toBeCloseTo(.85, 6);
   });
 
-  it("mounts without the deleted warm-only source injection", () => {
-    expect(bridge).toContain('from "./v197CelestialRuntime";');
-    expect(bridge).toContain("ensureV197CelestialRuntime(document, brainHost)");
+  it("keeps the superseded engine unmounted after the exact artifact replacement", () => {
+    expect(bridge).toContain('import { disposeV197CelestialRuntime } from "./v197CelestialRuntime";');
+    expect(bridge).not.toContain("ensureV197CelestialRuntime(document, brainHost)");
+    expect(bridge).toContain("V197_EXACT_STAR_BRAIN_PATH");
+    expect(bridge).toContain('brainFrame.id = "nur-exact-brain-frame"');
     expect(bridge).toContain('brainHost.dataset.nurDispersal = "radial-circle";');
     expect(bridge).not.toContain("v43StarBrainRuntime.js?raw");
     expect(bridge).not.toContain("script.textContent");

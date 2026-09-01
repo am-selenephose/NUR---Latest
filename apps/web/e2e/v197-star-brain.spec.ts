@@ -2,6 +2,8 @@ import { expect, test, type Locator } from "@playwright/test";
 
 import { installNurMocks, json, mockUser } from "./helpers/nurMocks";
 
+const exactBrainSha256 = "3c0b36f9d9732ed8fd0013e924754bbf3fe1f9c932a3498342af2df0084538b0";
+
 type LockupGeometry = {
   word: { element: number; text: number; tracking: number; translateX: number; fontSize: number };
   subtitle: { element: number; text: number; tracking: number; translateX: number; fontSize: number };
@@ -67,6 +69,10 @@ function expectSystemsInkCompensation(geometry: LockupGeometry): void {
 test("login replays the exact V197 startup star before the Universe is revealed", async ({ page }, testInfo) => {
   await installNurMocks(page);
   let authenticated = false;
+  let releaseLogin!: () => void;
+  const loginHeldForStartupProof = new Promise<void>(resolve => {
+    releaseLogin = resolve;
+  });
   await page.route("**/api/v1/auth/me", route => (
     authenticated
       ? json(route, mockUser)
@@ -74,7 +80,7 @@ test("login replays the exact V197 startup star before the Universe is revealed"
   ));
   await page.route("**/api/v1/auth/login", async route => {
     authenticated = true;
-    await new Promise(resolve => setTimeout(resolve, 1_200));
+    await loginHeldForStartupProof;
     await json(route, { ok: true });
   });
   await page.context().addCookies([{
@@ -128,6 +134,7 @@ test("login replays the exact V197 startup star before the Universe is revealed"
   expect(waitPresentation.zIndex).toBeGreaterThan(999);
   await page.screenshot({ path: testInfo.outputPath("exact-v197-login-star.png") });
 
+  releaseLogin();
   await expect(page.locator("#nur-universe-stage")).toHaveClass(/is-visible/, { timeout: 20_000 });
   await expect(wait).toBeHidden();
   await expect(page).toHaveURL(/\/today$/);
@@ -136,7 +143,7 @@ test("login replays the exact V197 startup star before the Universe is revealed"
   await expect(universe.locator(".nur-star-seal svg, .nur-star-seal use")).toHaveCount(0);
 });
 
-test("Entry replaces the center MasterStar with the coordinated interactive V43 anatomy", async ({ page }, testInfo) => {
+test("Entry replaces the center MasterStar with the exact founder-supplied interactive anatomy", async ({ page }, testInfo) => {
   await page.goto("/", { waitUntil: "load" });
   const entry = page.frameLocator("#nur-entry-stage");
   await expect.poll(() => entry.locator("body").evaluate(() => (
@@ -151,36 +158,32 @@ test("Entry replaces the center MasterStar with the coordinated interactive V43 
   await expect(brain).toBeVisible();
   await expect(entry.locator("#f4-core > .spark, #f4-core > .f4-master-star")).toHaveCount(0);
   await expect(entry.locator("#f4-core")).toHaveAttribute("data-nur-legacy-master-star", "removed");
-  await expect(brain).toHaveAttribute("data-nur-source", "v43-anatomy-three-celestial-runtime");
+  await expect(brain).toHaveAttribute("data-nur-source", "founder-exact-radiant-outer-anatomy");
   await expect(brain).toHaveAttribute("data-nur-dispersal", "radial-circle");
-  await expect(brain).toHaveAttribute("title", /drag to spin the mind.+double-click: neural storm.+scroll to zoom/);
-  await expect(brain).toHaveAttribute("data-nur-engine", "three-webgl-coordinated-v1");
-  await expect(brain.locator("#nur-brain-canvas")).toBeVisible();
-
-  const expectedPoints = testInfo.project.name.includes("mobile") ? "1640" : "2540";
-  const expectedStemPoints = testInfo.project.name.includes("mobile") ? "120" : "180";
-  await expect(brain).toHaveAttribute("data-nur-point-count", expectedPoints);
-  await expect(brain).toHaveAttribute("data-nur-stem-point-count", expectedStemPoints);
-  await expect(brain).toHaveAttribute("data-nur-sparkle-profile", "three-stellar-shader-seven-spectrum");
-  await expect(brain).toHaveAttribute("data-nur-galaxy-paint", "three-coordinated-celestial-rig-v1");
-  await expect(brain).toHaveAttribute(
-    "data-nur-render-profile",
-    "one-raf-two-canonical-canvases-v1",
-  );
+  await expect(brain).toHaveAttribute("data-nur-engine", "canvas2d-exact-artifact-v1");
+  await expect(brain).toHaveAttribute("data-nur-artifact-sha256", exactBrainSha256);
+  await expect(brain).toHaveAttribute("data-nur-exact-brain-state", "ready");
+  await expect(brain).toHaveAttribute("data-nur-model", "exact-galaxy-stars-radiant-outer-anatomy");
+  await expect(brain).toHaveAttribute("data-nur-variant", "softer-path-rainbow-click-double-shatter");
+  await expect(brain).toHaveAttribute("data-nur-galaxy-paint", "exact-galaxy-star-language");
   await expect(brain).toHaveAttribute("data-nur-spectrum-band-count", "7");
   await expect(brain).toHaveAttribute(
     "data-nur-spectrum-bands",
     "red,orange,yellow,green,blue,indigo,violet",
   );
-  await expect(brain).toHaveAttribute("data-nur-anatomy", "cortex-cerebellum-brainstem");
+  const artifactFrame = brain.locator("#nur-exact-brain-frame");
+  const exactBrain = entry.frameLocator("#nur-exact-brain-frame");
+  const exactCanvas = exactBrain.locator("#nur-brain-canvas-v197");
+  await expect(artifactFrame).toHaveAttribute("data-nur-artifact-sha256", exactBrainSha256);
+  await expect(exactCanvas).toBeVisible();
+  await expect(entry.locator("#nur-brain-canvas")).toHaveCount(0);
+  await expect(exactBrain.locator("#front-nur-star")).toHaveAttribute(
+    "title",
+    /click: cycle rainbow color.+double-click: dissolve\/spread.+scroll to zoom/,
+  );
   await expect.poll(() => entry.locator("body").evaluate(() => (
     typeof (window as unknown as { nurStarBrain?: { shatter?: unknown } }).nurStarBrain?.shatter
   ))).toBe("function");
-  const circularDispersal = await brain.evaluate(element => {
-    const style = getComputedStyle(element);
-    return style.maskImage || style.webkitMaskImage;
-  });
-  expect(circularDispersal).toContain("radial-gradient");
 
   const geometry = await lockupGeometry(
     entry.locator(".f4-brand-copy"),
@@ -294,8 +297,10 @@ test("Entry replaces the center MasterStar with the coordinated interactive V43 
     expect(heroControls.signIn.top).toBeGreaterThanOrEqual(heroControls.stackBottom + 7);
   }
 
-  await brain.locator("#nur-brain-canvas").click();
-  await expect(brain).toHaveAttribute("data-nur-last-interaction", "shatter");
+  await brain.scrollIntoViewIfNeeded();
+  await expect(brain).toBeInViewport();
+  await exactCanvas.click();
+  await expect(brain).toHaveAttribute("data-nur-last-interaction", "rainbow-cycle");
 });
 
 test("NUR and Neural Upgrade Rewiring stay on one center axis at every responsive boundary", async ({ page }, testInfo) => {
@@ -347,7 +352,7 @@ test("NUR and Neural Upgrade Rewiring stay on one center axis at every responsiv
   }
 });
 
-test("Systems map mounts only the coordinated brain and keeps the NUR lockup on one axis", async ({ page }, testInfo) => {
+test("Systems map mounts only the exact supplied brain and keeps the NUR lockup on one axis", async ({ page }, testInfo) => {
   await installNurMocks(page);
   await page.context().addCookies([
     { name: "nur_session", value: "star-brain-session", url: "http://localhost:4173", httpOnly: true, sameSite: "Lax" },
@@ -363,29 +368,27 @@ test("Systems map mounts only the coordinated brain and keeps the NUR lockup on 
   await expect(brain).toBeVisible();
   await expect(host.locator(":scope > .f4-core")).toHaveCount(0);
   await expect(host).toHaveAttribute("data-nur-legacy-master-star", "removed");
-  await expect(brain).toHaveAttribute("data-nur-source", "v43-anatomy-three-celestial-runtime");
+  await expect(brain).toHaveAttribute("data-nur-source", "founder-exact-radiant-outer-anatomy");
   await expect(brain).toHaveAttribute("data-nur-dispersal", "radial-circle");
-  await expect(brain.locator("#nur-brain-canvas")).toBeVisible();
-  await expect(brain).toHaveAttribute("data-nur-engine", "three-webgl-coordinated-v1");
-
-  const expectedPoints = testInfo.project.name.includes("mobile") ? "1640" : "2540";
-  const expectedStemPoints = testInfo.project.name.includes("mobile") ? "120" : "180";
-  await expect(brain).toHaveAttribute("data-nur-point-count", expectedPoints);
-  await expect(brain).toHaveAttribute("data-nur-stem-point-count", expectedStemPoints);
-  await expect(brain).toHaveAttribute("data-nur-sparkle-profile", "three-stellar-shader-seven-spectrum");
-  await expect(brain).toHaveAttribute("data-nur-galaxy-paint", "three-coordinated-celestial-rig-v1");
-  await expect(brain).toHaveAttribute(
-    "data-nur-render-profile",
-    "one-raf-two-canonical-canvases-v1",
-  );
+  await expect(brain).toHaveAttribute("data-nur-engine", "canvas2d-exact-artifact-v1");
+  await expect(brain).toHaveAttribute("data-nur-artifact-sha256", exactBrainSha256);
+  await expect(brain).toHaveAttribute("data-nur-exact-brain-state", "ready");
+  await expect(brain).toHaveAttribute("data-nur-model", "exact-galaxy-stars-radiant-outer-anatomy");
+  await expect(brain).toHaveAttribute("data-nur-variant", "softer-path-rainbow-click-double-shatter");
+  await expect(brain).toHaveAttribute("data-nur-galaxy-paint", "exact-galaxy-star-language");
   await expect(brain).toHaveAttribute("data-nur-spectrum-band-count", "7");
   await expect(brain).toHaveAttribute(
     "data-nur-spectrum-bands",
     "red,orange,yellow,green,blue,indigo,violet",
   );
-  await expect(brain).toHaveAttribute("data-nur-anatomy", "cortex-cerebellum-brainstem");
+  const artifactFrame = brain.locator("#nur-exact-brain-frame");
+  const exactBrain = universe.frameLocator("#nur-exact-brain-frame");
+  const exactCanvas = exactBrain.locator("#nur-brain-canvas-v197");
+  await expect(artifactFrame).toHaveAttribute("data-nur-artifact-sha256", exactBrainSha256);
+  await expect(exactCanvas).toBeVisible();
+  await expect(universe.locator("#nur-brain-canvas")).toHaveCount(0);
   await expect.poll(() => universe.locator("body").evaluate(() => (
-    typeof (window as unknown as { nurStarBrain?: { storm?: unknown } }).nurStarBrain?.storm
+    typeof (window as unknown as { nurStarBrain?: { shatter?: unknown } }).nurStarBrain?.shatter
   ))).toBe("function");
 
   const geometry = await lockupGeometry(
@@ -470,6 +473,17 @@ test("Systems map mounts only the coordinated brain and keeps the NUR lockup on 
         style: subtitleStyle.fontStyle,
         tracking: Number.parseFloat(subtitleStyle.letterSpacing),
       },
+      fontState: {
+        status: document.fonts.status,
+        wordmarkLoaded: document.fonts.check(
+          `${wordmarkStyle.fontWeight} ${wordmarkStyle.fontSize} "Bodoni Moda"`,
+          "NUR",
+        ),
+        subtitleLoaded: document.fonts.check(
+          `${subtitleStyle.fontWeight} ${subtitleStyle.fontSize} "Crimson Pro"`,
+          "NEURAL UPGRADE REWIRING",
+        ),
+      },
       lockupGeometry: {
         wordmarkWidth: wordmarkRect.width,
         subtitleWidth: subtitleRect.width,
@@ -499,7 +513,6 @@ test("Systems map mounts only the coordinated brain and keeps the NUR lockup on 
   expect(mapContract.wordmarkTypography.animation).toContain("nurWordmarkSpectrumShift");
   expect(mapContract.wordmarkTypography.animationDuration).toBe("5.2s");
   expect(mapContract.wordmarkTypography.animationTiming).toBe("linear");
-  await page.waitForTimeout(800);
   await expect.poll(() => universe.locator(".nur-v197-stable-wordmark").evaluate(
     element => getComputedStyle(element, "::after").backgroundPosition,
   ))
@@ -507,6 +520,9 @@ test("Systems map mounts only the coordinated brain and keeps the NUR lockup on 
   expect(mapContract.subtitleTypography.family).toContain("Crimson Pro");
   expect(mapContract.subtitleTypography.weight).toBe("400");
   expect(mapContract.subtitleTypography.style).toBe("normal");
+  expect(mapContract.fontState.status).toBe("loaded");
+  expect(mapContract.fontState.wordmarkLoaded).toBe(true);
+  expect(mapContract.fontState.subtitleLoaded).toBe(true);
   expect(Math.abs(mapContract.lockupGeometry.centerDelta)).toBeLessThanOrEqual(.25);
   if (testInfo.project.name.includes("mobile")) {
     expect(mapContract.wordmarkTypography.size).toBe(50);
@@ -515,8 +531,8 @@ test("Systems map mounts only the coordinated brain and keeps the NUR lockup on 
     expect(mapContract.subtitleTypography.size).toBe(12);
     expect(mapContract.subtitleTypography.tracking).toBeCloseTo(1.62, 1);
   } else {
-    expect(mapContract.lockupGeometry.wordmarkWidth).toBeCloseTo(182, 1);
-    expect(mapContract.lockupGeometry.subtitleWidth).toBeCloseTo(237.1875, 1);
+    expect(mapContract.lockupGeometry.wordmarkWidth).toBe(182);
+    expect(mapContract.lockupGeometry.subtitleWidth).toBe(237.1875);
     expect(mapContract.wordmarkTypography.size).toBe(72);
     expect(mapContract.wordmarkTypography.lineHeight).toBeCloseTo(56.88, 1);
     expect(mapContract.wordmarkTypography.tracking).toBe(9);
@@ -535,6 +551,26 @@ test("Systems map mounts only the coordinated brain and keeps the NUR lockup on 
   expect(mapContract.selectedBackground).toContain("255, 82, 111");
   await page.screenshot({ path: testInfo.outputPath("systems-final.png") });
 
-  await brain.locator("#nur-brain-canvas").click();
-  await expect(brain).toHaveAttribute("data-nur-last-interaction", "shatter");
+  await host.scrollIntoViewIfNeeded();
+  await expect(brain).toBeInViewport();
+  const brainHitPoint = await brain.evaluate(element => {
+    const rect = element.getBoundingClientRect();
+    const frame = element.querySelector<HTMLIFrameElement>("#nur-exact-brain-frame");
+    const xCandidates = [.5, .35, .65];
+    const yCandidates = [.5, .35, .65, .2, .8];
+    for (const yRatio of yCandidates) {
+      for (const xRatio of xCandidates) {
+        const x = rect.left + rect.width * xRatio;
+        const y = rect.top + rect.height * yRatio;
+        if (x < 0 || x > innerWidth || y < 0 || y > innerHeight) continue;
+        if (document.elementFromPoint(x, y) === frame) return { x, y };
+      }
+    }
+    return null;
+  });
+  expect(brainHitPoint, "exact brain exposes an unobscured physical hit point").not.toBeNull();
+  const stageBox = await page.locator("#nur-universe-stage").boundingBox();
+  expect(stageBox).not.toBeNull();
+  await page.mouse.click(stageBox!.x + brainHitPoint!.x, stageBox!.y + brainHitPoint!.y);
+  await expect(brain).toHaveAttribute("data-nur-last-interaction", "rainbow-cycle");
 });

@@ -6,7 +6,7 @@ describe("V197 star brain placement", () => {
     document.body.replaceChildren();
   });
 
-  it("replaces the Map MasterStar fallback with the one exact brain host", () => {
+  it("does not place a brain on the dedicated Map surface", () => {
     document.body.innerHTML = `
       <main id="nur-front-v61">
         <section id="page-universe-map" class="active">
@@ -15,19 +15,12 @@ describe("V197 star brain placement", () => {
       </main>
     `;
 
-    placeV197StarBrainHost(document);
-    const mapHost = document.querySelector<HTMLElement>(".lens-map-master");
-    const brain = mapHost?.querySelector<HTMLElement>("#front-nur-star");
-    expect(brain?.dataset.nurSurface).toBe("map");
-    expect(brain?.dataset.nurRigDepth).toBe("webgl-threejs-perspective");
-    expect(brain?.dataset.nurSpectrumBandCount).toBe("7");
-    expect(brain?.dataset.nurSpectrumBands).toBe("red,orange,yellow,green,blue,indigo,violet");
-    expect(mapHost?.dataset.nurLegacyMasterStar).toBe("removed");
-    expect(mapHost?.querySelector(".spark, .f4-master-star, .nur-star-module")).toBeNull();
-    expect(document.querySelectorAll("#front-nur-star")).toHaveLength(1);
+    expect(placeV197StarBrainHost(document)).toBeNull();
+    expect(document.querySelectorAll("#front-nur-star")).toHaveLength(0);
+    expect(document.querySelector(".lens-map-master > .f4-master-star")).not.toBeNull();
   });
 
-  it("clones Entry's exact three-ring halo structure around the Systems brain", () => {
+  it("does not synthesize external orbit halos around the exact Systems brain", () => {
     document.body.innerHTML = `
       <main id="nur-front-v61">
         <section id="page-systems" class="active">
@@ -44,11 +37,10 @@ describe("V197 star brain placement", () => {
     const host = document.querySelector<HTMLElement>(".universe-master-star");
     const halos = host?.querySelectorAll<HTMLElement>(":scope > .nur-v197-brain-orbit-halo");
     expect(host?.querySelector("#front-nur-star")?.getAttribute("data-nur-surface")).toBe("universe");
-    expect(halos).toHaveLength(3);
-    expect(Array.from(halos ?? []).map(halo => halo.dataset.nurHaloSource))
-      .toEqual(["entry-f4-ring", "entry-f4-ring", "entry-f4-ring"]);
-    expect(host?.querySelector(":scope > .f4-ring.two")).not.toBeNull();
-    expect(host?.querySelector(":scope > .f4-ring.three")).not.toBeNull();
+    expect(host?.querySelector("#front-nur-star")?.getAttribute("data-nur-engine"))
+      .toBe("canvas2d-exact-artifact-v1");
+    expect(halos).toHaveLength(0);
+    expect(host?.querySelector(":scope > .f4-ring")).toBeNull();
     expect(host?.querySelector(":scope > .f4-core, :scope > .spark, :scope > .f4-master-star")).toBeNull();
   });
 });

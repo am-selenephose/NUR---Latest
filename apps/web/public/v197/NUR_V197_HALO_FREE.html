@@ -1,51 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#000000" />
+<title>NUR V197 — Galaxy Rig Ambient 5D</title>
+<style>
+  :root{color-scheme:dark}
+  *{box-sizing:border-box}
+  html,body{margin:0;width:100%;height:100%;min-height:100%;overflow:hidden;background:#000}
+  body{
+    background:#000;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    cursor:grab;
+    user-select:none;
+    touch-action:none;
+  }
+  body.dragging{cursor:grabbing}
+  canvas{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    height:100dvh;
+    display:block;
+    background:#000;
+    touch-action:none;
+    contain:strict;
+    outline:none;
+  }
+  .hud{
+    position:fixed;
+    left:max(16px,env(safe-area-inset-left));
+    bottom:max(14px,env(safe-area-inset-bottom));
+    z-index:2;
+    pointer-events:none;
+    color:rgba(255,247,228,.50);
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    font-size:11px;
+    text-shadow:0 0 14px rgba(255,220,150,.12);
+    line-height:1.55;
+    max-width:min(520px,calc(100vw - max(32px,env(safe-area-inset-left)) - max(16px,env(safe-area-inset-right))));
+    text-wrap:balance;
+  }
+  @media (max-width:700px){
+    .hud{
+      left:max(11px,env(safe-area-inset-left));
+      bottom:max(10px,env(safe-area-inset-bottom));
+      max-width:calc(100vw - max(22px,env(safe-area-inset-left)) - max(11px,env(safe-area-inset-right)));
+      font-size:9px;
+      line-height:1.45;
+      letter-spacing:.10em;
+      color:rgba(255,247,228,.42);
+    }
+  }
+  @media (prefers-reduced-motion:reduce){
+    .hud{color:rgba(255,247,228,.56)}
+  }
+</style>
+</head>
+<body>
+<canvas id="galaxy" tabindex="0" role="application" aria-label="Interactive five-dimensional amber galaxy. Drag to orbit, pinch or use the wheel to zoom, and use keyboard controls described on screen."></canvas>
+<div class="hud">NUR · honey amber + metallic gold 5d rig · drag orbit · shift-drag dimensional planes · wheel zoom · alt/shift+wheel warp · click pulse · double-click rainbow shift · triple-click original palette · pinch zoom/twist on touch</div>
+<script>
 (() => {
   'use strict';
 
-  try{ window.nurGalaxy?.dispose?.(); }catch(_err){}
-
-  const legacyCanvas = document.getElementById('space3d');
-  if(!(legacyCanvas instanceof HTMLCanvasElement)){
-    throw new Error('NUR: canonical #space3d canvas unavailable');
+  const canvas = document.getElementById('galaxy');
+  let c = null;
+  try{
+    c = canvas.getContext('2d', { alpha:false, desynchronized:true, colorSpace:'srgb' });
+  }catch(_err){
+    c = canvas.getContext('2d', { alpha:false });
   }
-  const canvas = legacyCanvas.cloneNode(false);
-  canvas.id = 'space3d';
-  canvas.dataset.nurGalaxyRig = 'canonical-cross-screen-lagfree-v1';
-  canvas.dataset.nurGalaxyVersion = 'NUR_V197_CANONICAL_CROSS_SCREEN_LAGFREE_2026-08-29';
-  canvas.dataset.nurCanvasOwner = 'canonical-cross-screen-lagfree-v1';
-  canvas.dataset.nurInteractionProfile = '5d-drag-pinch-wheel-double-triple-click';
-  canvas.setAttribute('role','application');
-  canvas.setAttribute('aria-label','Interactive five-dimensional NUR galaxy. Drag to orbit, pinch or use the wheel to zoom.');
-  canvas.tabIndex = 0;
-  legacyCanvas.replaceWith(canvas);
-
-  // Prefer one explicit SDR pipeline everywhere. Browsers may ignore unsupported
-  // attributes, so diagnostics read back what was actually accepted.
-  function create2DContext(target, alpha){
-    const attempts = [
-      {alpha, colorSpace:'srgb', colorType:'unorm8', desynchronized:false},
-      {alpha, colorSpace:'srgb', desynchronized:false},
-      {alpha, colorSpace:'srgb'},
-      {alpha}
-    ];
-    for(const attrs of attempts){
-      try{
-        const ctx = target.getContext('2d', attrs);
-        if(ctx) return ctx;
-      }catch(_err){}
-    }
-    return null;
-  }
-
-  const c = create2DContext(canvas, false);
   if(!c) throw new Error('NUR: Canvas 2D context unavailable');
-  const contextAttributes = typeof c.getContextAttributes === 'function' ? c.getContextAttributes() : null;
   const motionQuery = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : null;
   let reduced = !!(motionQuery && motionQuery.matches);
-  const deviceMem = Number(navigator.deviceMemory) || 0;
-  const hwThreads = Number(navigator.hardwareConcurrency) || 0;
-  // Hardware APIs are only hints: deviceMemory is unavailable in some browsers.
-  // Never let a missing hint reduce visual fidelity.
-  const lowSpec = (deviceMem > 0 && deviceMem <= 4) || (hwThreads > 0 && hwThreads <= 4);
+
+  // Hardware hints are privacy-rounded or missing in several browsers. They
+  // are used only to choose a conservative first frame; measured render cost
+  // becomes the authority after the animation starts.
+  const deviceMem = Number.isFinite(navigator.deviceMemory) ? navigator.deviceMemory : null;
+  const hwThreads = Number.isFinite(navigator.hardwareConcurrency) ? navigator.hardwareConcurrency : null;
+  const constrainedHint = (deviceMem !== null && deviceMem <= 2) || (hwThreads !== null && hwThreads <= 2);
+  const balancedHint = !constrainedHint && ((deviceMem !== null && deviceMem <= 4) || (hwThreads !== null && hwThreads <= 4));
+
+  // A stable seed makes the same galaxy survive reloads, rotations, phones,
+  // desktops and monitor changes instead of silently becoming a new layout.
+  const DEFAULT_SEED = 0x4e555231;
+  let randomState = DEFAULT_SEED;
+  try{
+    const seedText = new URLSearchParams(location.search).get('seed');
+    if(seedText){
+      let hash = 2166136261;
+      for(let i=0;i<seedText.length;i++) hash = Math.imul(hash ^ seedText.charCodeAt(i), 16777619);
+      randomState = hash >>> 0 || DEFAULT_SEED;
+    }
+  }catch(_err){}
+  function random(){
+    randomState |= 0;
+    randomState = (randomState + 0x6D2B79F5) | 0;
+    let t = Math.imul(randomState ^ (randomState >>> 15), 1 | randomState);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  }
+
   const SPEC = {
     O: [[128,154,245],[144,168,248],[108,138,236]],
     B: [[148,176,245],[166,190,248],[138,164,238]],
@@ -95,17 +155,7 @@
   const GOLD_STAR_CHANCE = Object.freeze({ arm:.28, core:.34, halo:.24, super:.42 });
   const METALLIC_GOLD_STAR_CHANCE = Object.freeze({ arm:.16, core:.22, halo:.14, super:.30 });
 
-  const VISUAL_SEED = 0x4e555231; // 'NUR1' — stable galaxy identity across devices/reloads.
-  let rngState = VISUAL_SEED >>> 0;
-  function resetVisualSeed(){ rngState = VISUAL_SEED >>> 0; }
-  function rand(){
-    rngState = (rngState + 0x6D2B79F5) >>> 0;
-    let t = rngState;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  }
-  const rnd = (a,b)=>a+rand()*(b-a);
+  const rnd = (a,b)=>a+random()*(b-a);
   const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
 
   const DEFAULT_RIG = Object.freeze({
@@ -122,54 +172,39 @@
   const HYPER_MIN = 0;
   const HYPER_MAX = 1;
   const FRAME_MS = 1000/60;
-
-  // Preserve the image; adapt time instead of deleting pixels/particles.
-  const FRAME_60_MS = 1000/60;
-  const FRAME_45_MS = 1000/45;
-  const FRAME_30_MS = 1000/30;
-  const FRAME_20_MS = 1000/20;
-  const CADENCE_TIERS = [FRAME_60_MS,FRAME_45_MS,FRAME_30_MS,FRAME_20_MS];
-  const MAX_ADAPTIVE_RENDER_REST_MS = 180;
+  const QUALITY_DPR_SCALE = [0.76,0.90,1];
   const MAX_CANVAS_EDGE = 8192;
-  // Internal sampling is intentionally independent of devicePixelRatio. That
-  // prevents the same CSS scene from changing ray thickness/antialiasing just
-  // because X11, Wayland or another monitor reports a different DPR.
-  const CANONICAL_TARGET_DPR = 1.75;
-  const CANONICAL_MIN_DPR = 1.25;
-  const MAX_BACKING_PIXELS = 12000000;
-  let targetFrameMs = FRAME_60_MS;
-  let smoothRenderCost = 0;
-  let pressureFrames = 0;
-  let reliefFrames = 0;
-  let lastDevicePixelRatio = window.devicePixelRatio || 1;
-  let refreshHz = 60;
-  let cadenceStride = 1;
-  let rafTick = 0;
-  let nextRenderAt = 0;
-  let adaptiveRenderRestMs = 0;
-  const rafSamples = new Float32Array(30);
-  let rafSampleCount = 0;
-  let rafSampleCursor = 0;
+  const BASE_PIXEL_BUDGET = constrainedHint ? 4200000 : (balancedHint ? 8200000 : 14000000);
 
   let W=0,H=0,minSide=1;
   let last = performance.now();
   let lastRaf = last;
   let smoothDt = FRAME_MS;
-  const quality = 2; // visual fidelity is fixed; only frame cadence adapts
+  let quality = (constrainedHint || reduced) ? 1 : 2;
+  let qualityCeiling = reduced ? 1 : 2;
   let activeDpr = 1;
-  let contextLost = false;
-  let disposed = false;
-  let frameRequest = 0;
-  let rotationEnabled = true;
-  let layoutObserver = null;
+  let renderCostEma = 0;
+  let refreshHz = 60;
+  let cadenceStride = 1;
+  let emergencyStride = 1;
+  let rafTick = 0;
+  let qualityPressure = 0;
+  let qualityHeadroom = 0;
+  let lastQualityChange = -Infinity;
+  const rafSamples = new Float32Array(30);
+  let rafSampleCount = 0;
+  let rafSampleCursor = 0;
   let energy = 0;
   let frameNo = 0;
   const particles = [];
   const drawOrder = [];
   const linkNodes = [];
+  // Flat [a,b,r,g,b, a,b,r,g,b, ...] storage avoids thousands of tiny
+  // array allocations during periodic link rebuilds (and the GC hitch they cause).
   const linkPairs = [];
   let linkPairQuality = -1;
-  let linkPairStamp = -1;
+  let linkPairLimit = -1;
+  let linkPairStep = -1;
   const ambientOrbiters = [];
   const ambientFloaters = [];
   const ambientFireballs = [];
@@ -179,31 +214,6 @@
   const AMBIENT_FIREBALL_COUNT = 16;
   let rigColorOrbit = 0, rigColorTarget = 0, rigColorMix = 0, rigColorMixTarget = 0;
   const RIG_COLOR_BLEND = .78;
-
-  // Canonical cross-screen ray tuning: keep the lossless renderer architecture,
-  // but place the ray/glow energy between the older soft X11 look and the newer
-  // more visible cross-screen branch so rays survive darker displays without
-  // becoming hard or laser-like on Wayland.
-  const RAY_TUNE = Object.freeze({
-    haloScaleSuper:4.20,
-    haloScaleNormal:2.14,
-    spritePrimaryLen:2.88,
-    spriteSecondaryLen:1.66,
-    spritePrimaryAlpha:1.02,
-    spriteSecondaryAlpha:.62,
-    spriteSpikeAlpha:.145,
-    livePrimaryLenSuper:4.00,
-    livePrimaryLenNormal:2.30,
-    liveSecondaryLenSuper:2.14,
-    liveSecondaryLenNormal:1.42,
-    livePrimaryAlphaCap:.18,
-    livePrimaryAlphaMul:.78,
-    liveSecondaryAlphaCap:.075,
-    liveSecondaryAlphaMul:.46,
-    lineWidth:.46,
-    crossAxisScale:.46,
-    crossAxisAlpha:.72
-  });
 
   const pointer = {
     x:0,y:0,tx:0,ty:0,
@@ -218,13 +228,9 @@
     startDim5:DEFAULT_RIG.dim5,
     startHyper:DEFAULT_RIG.hyperspace
   };
-  const twoPointerScratch = { distance:1, angle:0, centerX:0, centerY:0 };
 
-  const frameBasis = {
-    cy:1, sy:0, cp:1, sp:0, cr:1, sr:0,
-    c4:1, s4:0, c5:1, s5:0,
-    hyper:0, cameraDistance:3.35, rigScale:1
-  };
+  const frameBasis = { cy:1, sy:0, cp:1, sp:0, cr:1, sr:0, hyper:0, cameraDistance:3.35, rigScale:1 };
+  const twoPointerScratch = { distance:1, angle:0, centerX:0, centerY:0 };
   const HORIZONTAL_SPREAD = 1.13;
 
   const rig = {
@@ -249,42 +255,49 @@
     velDim5:0
   };
 
-  function configureContext(scaleX=activeDpr,scaleY=activeDpr){
-    c.setTransform(scaleX,0,0,scaleY,0,0);
-    c.imageSmoothingEnabled = true;
-    if('imageSmoothingQuality' in c) c.imageSmoothingQuality = 'high';
-    c.lineCap = 'round';
-    c.lineJoin = 'round';
-  }
-
-  // QUALITY CONTRACT: compute tier never changes galaxy population, palette,
-  // geometry, glow logic or star cores. It may only change presentation cadence.
   function resize(){
     const rect = typeof canvas.getBoundingClientRect === 'function' ? canvas.getBoundingClientRect() : null;
-    W = Math.max(1,Math.round((rect && rect.width) || document.documentElement.clientWidth || innerWidth || 1));
-    H = Math.max(1,Math.round((rect && rect.height) || document.documentElement.clientHeight || innerHeight || 1));
+    W = Math.max(1, Math.round((rect && rect.width) || document.documentElement.clientWidth || innerWidth || 1));
+    H = Math.max(1, Math.round((rect && rect.height) || document.documentElement.clientHeight || innerHeight || 1));
     minSide = Math.min(W,H);
+
     const cssPixels = Math.max(1, W*H);
-    const edgeCap = Math.min(MAX_CANVAS_EDGE/W, MAX_CANVAS_EDGE/H);
-    const pixelBudgetDpr = Math.sqrt(Math.max(cssPixels,MAX_BACKING_PIXELS)/cssPixels);
-    let dpr = Math.min(CANONICAL_TARGET_DPR, pixelBudgetDpr, edgeCap);
-    dpr = Math.max(Math.min(CANONICAL_MIN_DPR, edgeCap), dpr);
-    let pixelW = Math.max(1,Math.round(W*dpr));
-    let pixelH = Math.max(1,Math.round(H*dpr));
+    const nativeDpr = clamp(Number(devicePixelRatio) || 1, .5, 4);
+    const floorDpr = Math.min(1,nativeDpr,MAX_CANVAS_EDGE/W,MAX_CANVAS_EDGE/H);
+    const maxBackingPixels = Math.max(cssPixels, BASE_PIXEL_BUDGET);
+    let dpr = Math.min(
+      nativeDpr * QUALITY_DPR_SCALE[quality],
+      Math.sqrt(maxBackingPixels/cssPixels),
+      MAX_CANVAS_EDGE/W,
+      MAX_CANVAS_EDGE/H
+    );
+    dpr = Math.max(floorDpr, dpr);
+    let pixelW = Math.max(1, Math.round(W*dpr));
+    let pixelH = Math.max(1, Math.round(H*dpr));
     if(canvas.width !== pixelW || canvas.height !== pixelH){
       try{
         canvas.width = pixelW;
         canvas.height = pixelH;
       }catch(_err){
-        dpr = Math.max(1,Math.min(1.25,edgeCap));
+        dpr = floorDpr;
         pixelW = Math.max(1,Math.round(W*dpr));
         pixelH = Math.max(1,Math.round(H*dpr));
         canvas.width = pixelW;
         canvas.height = pixelH;
       }
     }
-    activeDpr = Math.min(pixelW/W,pixelH/H);
-    configureContext(pixelW/W,pixelH/H);
+    activeDpr = dpr;
+    const nextSpriteDpr = activeDpr>=2.25 ? 3 : (activeDpr>=1.35 ? 2 : 1);
+    if(nextSpriteDpr!==spriteDpr){
+      spriteDpr = nextSpriteDpr;
+      spriteCache.clear();
+    }
+    c.setTransform(dpr,0,0,dpr,0,0);
+    c.imageSmoothingEnabled = true;
+    c.imageSmoothingQuality = quality===2 ? 'high' : 'medium';
+    c.lineCap = 'round';
+    c.lineJoin = 'round';
+
   }
 
   function normalizePointer(clientX, clientY){
@@ -312,14 +325,13 @@
       energy = 0;
       pointer.x = pointer.y = pointer.tx = pointer.ty = 0;
       gesture.pinchActive = false;
-      linkPairStamp = -1;
     }
   }
 
   function normal(){
     let u=0,v=0;
-    while(u===0)u=rand();
-    while(v===0)v=rand();
+    while(u===0)u=random();
+    while(v===0)v=random();
     return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
   }
 
@@ -332,13 +344,13 @@
 
   function rndCol(bright=false){
     if(bright){
-      const t = BRIGHT_TYPES[(rand()*BRIGHT_TYPES.length)|0];
-      return SPEC[t][(rand()*SPEC[t].length)|0];
+      const t = BRIGHT_TYPES[(random()*BRIGHT_TYPES.length)|0];
+      return SPEC[t][(random()*SPEC[t].length)|0];
     }
-    let r = rand(), cum = 0;
+    let r = random(), cum = 0;
     for(const {t,w} of DIST){
       cum += w;
-      if(r < cum) return SPEC[t][(rand()*SPEC[t].length)|0];
+      if(r < cum) return SPEC[t][(random()*SPEC[t].length)|0];
     }
     return SPEC.G[0];
   }
@@ -346,33 +358,37 @@
   const PRISM_CHANCE = Object.freeze({super:.76, core:.60, arm:.50, halo:.42});
   const SCINT_WARM = [236,156,82];
   const DOMINANT_WARM = [232,142,54];
+  // Core scintillation runs slightly faster so the hot centers feel alive
+  // without making the surrounding galaxy flicker.
+  const CORE_PULSE_SPEED = 1.38;
   const prismScratch = [0,0,0];
   const warmScratch = [0,0,0];
   const renderScratch = [0,0,0];
   const honeyScratch = [0,0,0];
   const rigTintScratch = [0,0,0];
   const finalScratch = [0,0,0];
+  const saturatedScratch = [0,0,0];
 
   function shouldPrismStar(kind){
-    return rand() < PRISM_CHANCE[kind];
+    return random() < PRISM_CHANCE[kind];
   }
 
   function rainbowCol(){
-    return NUR_RAINBOW[(rand()*NUR_RAINBOW.length)|0];
+    return NUR_RAINBOW[(random()*NUR_RAINBOW.length)|0];
   }
 
   function goldCol(){
-    return GOLD_STARS[(rand()*GOLD_STARS.length)|0];
+    return GOLD_STARS[(random()*GOLD_STARS.length)|0];
   }
 
   function metallicGoldCol(){
-    return METALLIC_GOLD_STARS[(rand()*METALLIC_GOLD_STARS.length)|0];
+    return METALLIC_GOLD_STARS[(random()*METALLIC_GOLD_STARS.length)|0];
   }
 
   function pickStarColor(kind, isBright){
-    if(rand() < (METALLIC_GOLD_STAR_CHANCE[kind] || 0)) return metallicGoldCol();
-    if(rand() < (GOLD_STAR_CHANCE[kind] || 0)) return goldCol();
-    if(rand() < (RAINBOW_STAR_CHANCE[kind] || 0)) return rainbowCol();
+    if(random() < (METALLIC_GOLD_STAR_CHANCE[kind] || 0)) return metallicGoldCol();
+    if(random() < (GOLD_STAR_CHANCE[kind] || 0)) return goldCol();
+    if(random() < (RAINBOW_STAR_CHANCE[kind] || 0)) return rainbowCol();
     return rndCol(isBright);
   }
 
@@ -406,6 +422,17 @@
     return mixColInto(col,DOMINANT_WARM,amt,out);
   }
 
+  // Increase chroma while preserving perceived brightness. This keeps the
+  // palette vivid without tinting the hot white cores.
+  function saturateColInto(col,amount,out){
+    const luma = col[0]*.2126 + col[1]*.7152 + col[2]*.0722;
+    const factor = 1 + amount;
+    out[0] = clamp(luma + (col[0]-luma)*factor, 0, 255);
+    out[1] = clamp(luma + (col[1]-luma)*factor, 0, 255);
+    out[2] = clamp(luma + (col[2]-luma)*factor, 0, 255);
+    return out;
+  }
+
   // Final color gate: any yellow / pale-gold star generated by palette,
   // prism interpolation, or warm mixing is forced into a honey-amber hue.
   const HONEY_AMBER_LIGHT = [240,166,82];
@@ -421,9 +448,17 @@
     return mixColInto(HONEY_AMBER_DEEP,HONEY_AMBER_LIGHT,brightness,out);
   }
 
-  const spriteDpr = 3;
+  // Sprite backing density follows the active screen. A 1x desktop no longer
+  // downsamples 3x sources thousands of times per frame, while 3x phones still
+  // receive native-density star assets.
+  let spriteDpr = 1;
   const SPRITE_REF_ALPHA = .20;
   const SPRITE_SIZES = [2.75,3.75,5.0,6.5];
+  // The tiny normal stars do not need eight almost-identical rotations. Major
+  // stars retain continuous vector glints in starGlow(), where rotation reads.
+  const SPRITE_ROT_BINS = 2;
+  const SPRITE_ROT_PERIOD = Math.PI/2;
+  const SPRITE_ROT_STEP = SPRITE_ROT_PERIOD/SPRITE_ROT_BINS;
   const SPRITE_COLORS = [
     [238,154,72],[230,140,56],[218,124,44],[236,160,72],[224,142,48],
     [232,166,92],[216,132,58],[192,111,60],
@@ -433,14 +468,13 @@
     [118,221,132],[92,198,116]
   ];
   const spriteCache = new Map();
-  const nearestColorMemo = new Int16Array(4096);
-  nearestColorMemo.fill(-1);
 
   function nearestSpriteColor(col){
     const r=col[0]|0, g=col[1]|0, b=col[2]|0;
-    const memoKey=((r>>4)<<8)|((g>>4)<<4)|(b>>4);
-    const memo=nearestColorMemo[memoKey];
-    if(memo>=0) return memo;
+    // Dynamic colors rarely repeat exactly. A Map cache became churn + GC, and
+    // quantizing its key can subtly change the chosen sprite color. The palette
+    // is only 28 entries, so an allocation-free exact scan is both stable and
+    // visually exact.
     let best=0,bestD=Infinity;
     for(let i=0;i<SPRITE_COLORS.length;i++){
       const q=SPRITE_COLORS[i];
@@ -448,7 +482,6 @@
       const d=dr*dr+dg*dg+db*db;
       if(d<bestD){ bestD=d; best=i; }
     }
-    nearestColorMemo[memoKey]=best;
     return best;
   }
 
@@ -477,58 +510,42 @@
     ctx.rotate(rot);
     const g=ctx.createLinearGradient(-len,0,len,0);
     g.addColorStop(0,`rgba(${col[0]},${col[1]},${col[2]},0)`);
-    g.addColorStop(.16,`rgba(${col[0]},${col[1]},${col[2]},${a*.05})`);
-    g.addColorStop(.34,`rgba(${col[0]},${col[1]},${col[2]},${a*.20})`);
-    g.addColorStop(.46,`rgba(${col[0]},${col[1]},${col[2]},${a*.40})`);
-    g.addColorStop(.50,`rgba(238,154,78,${a*.84})`);
-    g.addColorStop(.54,`rgba(${col[0]},${col[1]},${col[2]},${a*.40})`);
-    g.addColorStop(.66,`rgba(${col[0]},${col[1]},${col[2]},${a*.20})`);
-    g.addColorStop(.84,`rgba(${col[0]},${col[1]},${col[2]},${a*.05})`);
+    g.addColorStop(.46,`rgba(${col[0]},${col[1]},${col[2]},${a*.42})`);
+    g.addColorStop(.5,`rgba(238,154,78,${a})`);
+    g.addColorStop(.54,`rgba(${col[0]},${col[1]},${col[2]},${a*.42})`);
     g.addColorStop(1,`rgba(${col[0]},${col[1]},${col[2]},0)`);
     ctx.strokeStyle=g;
-    ctx.lineWidth=RAY_TUNE.lineWidth;
+    ctx.lineWidth=.48;
     ctx.beginPath();
     ctx.moveTo(-len,0);
     ctx.lineTo(len,0);
     ctx.stroke();
     ctx.rotate(Math.PI/2);
-    ctx.globalAlpha*=RAY_TUNE.crossAxisAlpha;
+    ctx.globalAlpha*=.78;
     ctx.beginPath();
-    ctx.moveTo(-len*RAY_TUNE.crossAxisScale,0);
-    ctx.lineTo(len*RAY_TUNE.crossAxisScale,0);
+    ctx.moveTo(-len*.42,0);
+    ctx.lineTo(len*.42,0);
     ctx.stroke();
     ctx.restore();
   }
 
-  function buildNormalSprite(colorIndex,sizeIndex,withSpike){
+  function buildNormalSprite(colorIndex,sizeIndex,withSpike,rotBin){
     const col=SPRITE_COLORS[colorIndex];
     const r=SPRITE_SIZES[sizeIndex];
-    const hR=r*2.26;
     const bodyR=Math.max(1.00,Math.min(2.92,r*.114));
     const spikeLen=Math.max(5.4,r*2.28);
-    const half=Math.ceil(Math.max(hR,spikeLen)+5);
+    const half=Math.ceil(spikeLen+5);
     const logical=half*2;
     const el=document.createElement('canvas');
     el.width=logical*spriteDpr;
     el.height=logical*spriteDpr;
-    const ctx=create2DContext(el,true);
-    if(!ctx) throw new Error('NUR: sprite Canvas 2D context unavailable');
+    const ctx=el.getContext('2d',{alpha:true});
     ctx.setTransform(spriteDpr,0,0,spriteDpr,half*spriteDpr,half*spriteDpr);
+    ctx.rotate(rotBin*SPRITE_ROT_STEP);
     const a=SPRITE_REF_ALPHA, tw=1, rot=.72;
 
-    const hg=ctx.createRadialGradient(0,0,r*.45,0,0,hR);
-    hg.addColorStop(0,`rgba(${col[0]},${col[1]},${col[2]},${a*.066*tw})`);
-    hg.addColorStop(.18,`rgba(${col[0]},${col[1]},${col[2]},${a*.040*tw})`);
-    hg.addColorStop(.44,`rgba(${col[0]},${col[1]},${col[2]},${a*.018})`);
-    hg.addColorStop(.80,`rgba(${col[0]},${col[1]},${col[2]},${a*.0055})`);
-    hg.addColorStop(1,`rgba(${col[0]},${col[1]},${col[2]},0)`);
-    ctx.fillStyle=hg;
-    ctx.beginPath();
-    ctx.arc(0,0,hR,0,Math.PI*2);
-    ctx.fill();
-
-    shardCtx(ctx,0,0,bodyR*RAY_TUNE.spritePrimaryLen,col,Math.min(.24,a*RAY_TUNE.spritePrimaryAlpha),rot);
-    shardCtx(ctx,0,0,bodyR*RAY_TUNE.spriteSecondaryLen,col,Math.min(.09,a*RAY_TUNE.spriteSecondaryAlpha),rot+Math.PI/4);
+    shardCtx(ctx,0,0,bodyR*2.75,col,Math.min(.22,a*.96),rot);
+    shardCtx(ctx,0,0,bodyR*1.55,col,Math.min(.08,a*.56),rot+Math.PI/4);
 
     const ig=ctx.createRadialGradient(0,0,0,0,0,bodyR);
     ig.addColorStop(0,`rgba(255,214,142,${Math.min(1,a*tw*4.9)})`);
@@ -543,13 +560,29 @@
     starPathCtx(ctx,0,0,bodyR*.78,Math.max(.18,bodyR*.105)*.78,rot-Math.PI/2);
     ctx.stroke();
 
-    const cA=Math.min(a*tw*4.5,.91);
-    ctx.fillStyle=`rgba(${Math.min(255,col[0]+45)},${Math.min(255,col[1]+38)},${Math.min(255,col[2]+28)},${cA})`;
-    starPathCtx(ctx,0,0,Math.max(.95,bodyR*.24+tw*.35),Math.max(.20,bodyR*.045),rot);
+    // Every star gets a distinct self-emitting center: a hot white point
+    // nested inside a soft additive halo, so the core reads as its own light.
+    const coreRadius=Math.max(.62,bodyR*.44);
+    const coreGlow=ctx.createRadialGradient(0,0,0,0,0,coreRadius);
+    coreGlow.addColorStop(0,`rgba(255,252,232,${Math.min(1,a*tw*8.6)})`);
+    coreGlow.addColorStop(.20,`rgba(255,238,190,${Math.min(.98,a*tw*6.2)})`);
+    coreGlow.addColorStop(.52,`rgba(${Math.min(255,col[0]+54)},${Math.min(255,col[1]+48)},${Math.min(255,col[2]+36)},${Math.min(.62,a*tw*3.4)})`);
+    coreGlow.addColorStop(1,`rgba(${col[0]},${col[1]},${col[2]},0)`);
+    ctx.save();
+    ctx.globalCompositeOperation='lighter';
+    ctx.fillStyle=coreGlow;
+    ctx.beginPath();
+    ctx.arc(0,0,coreRadius,0,Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+
+    const cA=Math.min(a*tw*5.4,.98);
+    ctx.fillStyle=`rgba(255,250,224,${cA})`;
+    starPathCtx(ctx,0,0,Math.max(.82,bodyR*.22+tw*.32),Math.max(.18,bodyR*.038),rot);
     ctx.fill();
 
     if(withSpike){
-      const spikeA=RAY_TUNE.spriteSpikeAlpha;
+      const spikeA=.13;
       ctx.save();
       ctx.rotate(.3);
       for(const ang of [0,Math.PI/2]){
@@ -575,12 +608,12 @@
     return {canvas:el,half,logical};
   }
 
-  function getNormalSprite(col,sizeIndex,withSpike){
+  function getNormalSprite(col,sizeIndex,withSpike,rotBin){
     const ci=nearestSpriteColor(col);
-    const key=(ci<<4)|(sizeIndex<<1)|(withSpike?1:0);
+    const key=((((ci*4)+sizeIndex)*2+(withSpike?1:0))*SPRITE_ROT_BINS)+rotBin;
     let sp=spriteCache.get(key);
     if(!sp){
-      sp=buildNormalSprite(ci,sizeIndex,withSpike);
+      sp=buildNormalSprite(ci,sizeIndex,withSpike,rotBin);
       spriteCache.set(key,sp);
     }
     return sp;
@@ -588,33 +621,21 @@
 
   function drawNormalSprite(x,y,r,col,alpha,phase,twinkle,withSpike){
     const sizeIndex=spriteSizeIndex(r);
-    const sp=getNormalSprite(col,sizeIndex,withSpike);
+    const rot=phase*.37+twinkle*.82-.72;
+    let wrapped=rot%SPRITE_ROT_PERIOD;
+    if(wrapped<0) wrapped+=SPRITE_ROT_PERIOD;
+    const rotBin=((wrapped/SPRITE_ROT_STEP+.5)|0)%SPRITE_ROT_BINS;
+    const sp=getNormalSprite(col,sizeIndex,withSpike,rotBin);
     const scale=r/SPRITE_SIZES[sizeIndex];
     const opacity=Math.min(1,alpha/(SPRITE_REF_ALPHA*.88));
-    c.save();
-    c.translate(x,y);
-    c.rotate(phase*.37+twinkle*.82-.72);
-    c.scale(scale,scale);
+    const half=sp.half*scale;
     c.globalAlpha=opacity;
-    c.drawImage(sp.canvas,-sp.half,-sp.half,sp.logical,sp.logical);
-    c.restore();
+    c.drawImage(sp.canvas,x-half,y-half,sp.logical*scale,sp.logical*scale);
+    c.globalAlpha=1;
   }
 
   function stellarPath(x,y,outer,inner,points=4,rot=-Math.PI/2){
     c.beginPath();
-    if(points===4){
-      let ux=Math.cos(rot), uy=Math.sin(rot);
-      for(let i=0;i<8;i++){
-        const rr=(i&1)?inner:outer;
-        const px=x+ux*rr, py=y+uy*rr;
-        if(i===0) c.moveTo(px,py); else c.lineTo(px,py);
-        const nextX=(ux-uy)*Math.SQRT1_2;
-        uy=(ux+uy)*Math.SQRT1_2;
-        ux=nextX;
-      }
-      c.closePath();
-      return;
-    }
     for(let i=0;i<points*2;i++){
       const rr = i%2===0 ? outer : inner;
       const a = rot + i*Math.PI/points;
@@ -631,75 +652,48 @@
     c.rotate(rot);
     const g = c.createLinearGradient(-len,0,len,0);
     g.addColorStop(0,`rgba(${col[0]},${col[1]},${col[2]},0)`);
-    g.addColorStop(.16,`rgba(${col[0]},${col[1]},${col[2]},${a*.05})`);
-    g.addColorStop(.34,`rgba(${col[0]},${col[1]},${col[2]},${a*.20})`);
-    g.addColorStop(.46,`rgba(${col[0]},${col[1]},${col[2]},${a*.40})`);
-    g.addColorStop(.50,`rgba(238,154,78,${a*.84})`);
-    g.addColorStop(.54,`rgba(${col[0]},${col[1]},${col[2]},${a*.40})`);
-    g.addColorStop(.66,`rgba(${col[0]},${col[1]},${col[2]},${a*.20})`);
-    g.addColorStop(.84,`rgba(${col[0]},${col[1]},${col[2]},${a*.05})`);
+    g.addColorStop(.46,`rgba(${col[0]},${col[1]},${col[2]},${a*.42})`);
+    g.addColorStop(.5,`rgba(238,154,78,${a})`);
+    g.addColorStop(.54,`rgba(${col[0]},${col[1]},${col[2]},${a*.42})`);
     g.addColorStop(1,`rgba(${col[0]},${col[1]},${col[2]},0)`);
     c.strokeStyle = g;
-    c.lineWidth = RAY_TUNE.lineWidth;
+    c.lineWidth = .48;
     c.beginPath();
     c.moveTo(-len,0);
     c.lineTo(len,0);
     c.stroke();
     c.rotate(Math.PI/2);
-    c.globalAlpha *= RAY_TUNE.crossAxisAlpha;
+    c.globalAlpha *= .78;
     c.beginPath();
-    c.moveTo(-len*RAY_TUNE.crossAxisScale,0);
-    c.lineTo(len*RAY_TUNE.crossAxisScale,0);
+    c.moveTo(-len*.42,0);
+    c.lineTo(len*.42,0);
     c.stroke();
     c.restore();
   }
 
   function starGlow(x,y,r,sCol,alpha,twinkle,isS,phase=0){
-    const hR = r*(isS ? RAY_TUNE.haloScaleSuper : RAY_TUNE.haloScaleNormal);
-    const hg = c.createRadialGradient(x,y,r*.45,x,y,hR);
-    hg.addColorStop(0,`rgba(${sCol[0]},${sCol[1]},${sCol[2]},${alpha*0.040*twinkle})`);
-    hg.addColorStop(.16,`rgba(${sCol[0]},${sCol[1]},${sCol[2]},${alpha*0.022*twinkle})`);
-    hg.addColorStop(.44,`rgba(${sCol[0]},${sCol[1]},${sCol[2]},${alpha*0.010})`);
-    hg.addColorStop(.80,`rgba(${sCol[0]},${sCol[1]},${sCol[2]},${alpha*0.0035})`);
-    hg.addColorStop(1,`rgba(${sCol[0]},${sCol[1]},${sCol[2]},0)`);
-    c.fillStyle = hg;
-    c.beginPath(); c.arc(x,y,hR,0,Math.PI*2); c.fill();
-
     const bodyR = isS ? clamp(r*.20,2.7,7.2) : clamp(r*.126,1.06,3.02);
     const innerR = Math.max(.18, bodyR*.105);
     const rot = phase*.37 + twinkle*.82 + (isS ? Math.PI/8 : 0);
 
-    glitterShard(
-      x,y,
-      bodyR*(isS ? RAY_TUNE.livePrimaryLenSuper : RAY_TUNE.livePrimaryLenNormal),
-      sCol,
-      Math.min(RAY_TUNE.livePrimaryAlphaCap,alpha*RAY_TUNE.livePrimaryAlphaMul),
-      rot
-    );
-    glitterShard(
-      x,y,
-      bodyR*(isS ? RAY_TUNE.liveSecondaryLenSuper : RAY_TUNE.liveSecondaryLenNormal),
-      sCol,
-      Math.min(RAY_TUNE.liveSecondaryAlphaCap,alpha*RAY_TUNE.liveSecondaryAlphaMul),
-      rot+Math.PI/4
-    );
+    glitterShard(x,y,bodyR*(isS?3.9:2.2),sCol,Math.min(.16,alpha*.70),rot);
+    glitterShard(x,y,bodyR*(isS?2.0:1.28),sCol,Math.min(.06,alpha*.42),rot+Math.PI/4);
 
     const ig = c.createRadialGradient(x,y,0,x,y,bodyR);
-    ig.addColorStop(0,   `rgba(255,224,154,${Math.min(1,alpha*twinkle*5.0)})`);
-    ig.addColorStop(.18, `rgba(${sCol[0]},${sCol[1]},${sCol[2]},${Math.min(.95,alpha*twinkle*2.85)})`);
-    ig.addColorStop(.52, `rgba(${sCol[0]},${sCol[1]},${sCol[2]},${Math.min(.22,alpha*.46)})`);
-    ig.addColorStop(.82, `rgba(${sCol[0]},${sCol[1]},${sCol[2]},${Math.min(.045,alpha*.18)})`);
+    ig.addColorStop(0,   `rgba(255,224,154,${Math.min(1,alpha*twinkle*5.2)})`);
+    ig.addColorStop(.18, `rgba(${sCol[0]},${sCol[1]},${sCol[2]},${Math.min(.96,alpha*twinkle*3.0)})`);
+    ig.addColorStop(.56, `rgba(${sCol[0]},${sCol[1]},${sCol[2]},${Math.min(.14,alpha*.34)})`);
     ig.addColorStop(1,   `rgba(${sCol[0]},${sCol[1]},${sCol[2]},0)`);
     c.fillStyle = ig;
     stellarPath(x,y,bodyR,innerR,4,rot-Math.PI/2);
     c.fill();
 
-    c.strokeStyle = `rgba(255,220,146,${Math.min(.30,alpha*1.10)})`;
-    c.lineWidth = .38;
+    c.strokeStyle = `rgba(255,220,146,${Math.min(.34,alpha*1.22)})`;
+    c.lineWidth = .40;
     stellarPath(x,y,bodyR*.78,innerR*.78,4,rot-Math.PI/2);
     c.stroke();
 
-    const cA = Math.min(alpha*twinkle*4.6, .90);
+    const cA = Math.min(alpha*twinkle*4.2, .88);
     if(cA>0.04){
       const wr=Math.min(255,sCol[0]+45),wg=Math.min(255,sCol[1]+38),wb=Math.min(255,sCol[2]+28);
       c.fillStyle=`rgba(${wr},${wg},${wb},${cA})`;
@@ -722,7 +716,7 @@
       sg.addColorStop(.74,`rgba(${col[0]},${col[1]},${col[2]},${a*opFrac*.44})`);
       sg.addColorStop(1,  `rgba(${Math.min(255,col[0]+25)},${Math.min(255,col[1]+18)},${Math.min(255,col[2]+12)},0)`);
       c.strokeStyle=sg;
-      c.lineWidth=0.55;
+      c.lineWidth=.55;
       c.beginPath(); c.moveTo(-l,0); c.lineTo(l,0); c.stroke();
     }
     c.restore();
@@ -733,11 +727,11 @@
     let x,y,z,w,v,r,a, radial;
 
     if(kind==='arm'){
-      const arm=(rand()*4)|0;
-      radial=.14+Math.pow(rand(),.66)*rnd(.24,1.66);
+      const arm=(random()*4)|0;
+      radial=.14+Math.pow(random(),.66)*rnd(.24,1.66);
       const ang=arm*(Math.PI*2/4)+radial*4.65+rnd(-.46,.46)+.34;
       const thick=.026+radial*.16;
-      const clump=rand()<.26 ? rnd(.80,1.22) : 1;
+      const clump=random()<.26 ? rnd(.80,1.22) : 1;
       x=Math.cos(ang)*radial*clump*(1+rnd(-.06,.06));
       z=Math.sin(ang)*radial*.86*clump + normal()*thick*.48;
       y=normal()*thick + Math.sin(ang*1.78+radial*4.4)*radial*.10;
@@ -748,8 +742,8 @@
       r=rnd(.38,1.66);
       a=rnd(.065,.29);
     } else if(kind==='core'){
-      const gemCore = rand() < .22;
-      radial = Math.pow(rand(), gemCore ? .84 : .72) * rnd(gemCore ? .05 : .08, gemCore ? .58 : .72);
+      const gemCore = random() < .22;
+      radial = Math.pow(random(), gemCore ? .84 : .72) * rnd(gemCore ? .05 : .08, gemCore ? .58 : .72);
       const ang = rnd(0,Math.PI*2);
       x = Math.cos(ang)*radial;
       z = Math.sin(ang)*radial*.84;
@@ -759,7 +753,7 @@
       r = gemCore ? rnd(2.25,4.85) : rnd(.85,2.35);
       a = gemCore ? rnd(.22,.48) : rnd(.13,.34);
     } else if(kind==='halo'){
-      const shell=Math.pow(rand(), .78);
+      const shell=Math.pow(random(), .78);
       const theta=rnd(0,Math.PI*2);
       const phi=Math.acos(rnd(-1,1));
       radial=rnd(1.05,2.15) * (0.62 + shell*.78);
@@ -771,8 +765,8 @@
       r=rnd(.22,.98);
       a=rnd(.025,.12);
     } else {
-      const arm=(rand()*4)|0;
-      radial=Math.pow(rand(),.70)*rnd(.12,1.08);
+      const arm=(random()*4)|0;
+      radial=Math.pow(random(),.70)*rnd(.12,1.08);
       const ang=arm*(Math.PI/2)+radial*5.1+rnd(-.24,.24);
       x=Math.cos(ang)*radial;
       z=Math.sin(ang)*radial*.84;
@@ -820,10 +814,12 @@
       motionScale:(kind==='core' && r>2.2) ? Math.min(1.24, motionScale*1.22) : motionScale,
       speed:(kind==='core' && r>2.2) ? rnd(.00068,.00205) : rnd(.00032,.00128),
       linkable:(kind==='arm' || kind==='core'),
-      twinkAmt:isBright?rnd(.10,.22):((kind==='core' && r>2.2) ? rnd(.28,.54) : rnd(.18,.42)),
-      twinkSpd:(kind==='core' && r>2.2) ? rnd(.00115,.00360) : rnd(.00070,.00255),
+      twinkAmt:isBright?rnd(.06,.16):((kind==='core' && r>2.2) ? rnd(.20,.42) : rnd(.12,.34)),
+      twinkSpd:(kind==='core' && r>2.2)
+        ? rnd(.00095,.00320) * CORE_PULSE_SPEED
+        : (kind==='core' ? rnd(.00055,.00225) * CORE_PULSE_SPEED : rnd(.00055,.00225)),
       twinkPh:rnd(0,Math.PI*2),
-      centerMover:(kind==='core') && ((r>2.2) || rand()<.18),
+      centerMover:(kind==='core') && ((r>2.2) || random()<.18),
       moveAmpX:(kind==='core' && r>2.2) ? rnd(.022,.074) : rnd(.010,.032),
       moveAmpY:(kind==='core' && r>2.2) ? rnd(.018,.066) : rnd(.008,.026),
       moveAmpZ:(kind==='core' && r>2.2) ? rnd(.016,.058) : rnd(.008,.024),
@@ -832,37 +828,35 @@
       moveSpd:(kind==='core' && r>2.2) ? rnd(.00014,.00042) : rnd(.00010,.00028),
       moveSpd2:(kind==='core' && r>2.2) ? rnd(.00011,.00034) : rnd(.00008,.00022),
       movePh2:rnd(0,Math.PI*2),
-      flashP:isBright?0.9982:((kind==='core' && r>2.2) ? 0.9958 : 0.9972)
+      rigTintOffset:kind==='halo' ? .38 : 0
     };
   }
 
 
   function ambientBaseColor(kind){
     if(kind==='fire'){
-      return rand()<.72
-        ? GOLD_STARS[(rand()*GOLD_STARS.length)|0]
-        : METALLIC_GOLD_STARS[(rand()*METALLIC_GOLD_STARS.length)|0];
+      return random()<.72
+        ? GOLD_STARS[(random()*GOLD_STARS.length)|0]
+        : METALLIC_GOLD_STARS[(random()*METALLIC_GOLD_STARS.length)|0];
     }
-    const roll = rand();
-    if(roll < .34) return GOLD_STARS[(rand()*GOLD_STARS.length)|0];
-    if(roll < .52) return METALLIC_GOLD_STARS[(rand()*METALLIC_GOLD_STARS.length)|0];
-    if(roll < .84) return NUR_RAINBOW[(rand()*NUR_RAINBOW.length)|0];
+    const roll = random();
+    if(roll < .34) return GOLD_STARS[(random()*GOLD_STARS.length)|0];
+    if(roll < .52) return METALLIC_GOLD_STARS[(random()*METALLIC_GOLD_STARS.length)|0];
+    if(roll < .84) return NUR_RAINBOW[(random()*NUR_RAINBOW.length)|0];
     return pickStarColor('halo', false);
   }
 
   function projectAmbientPoint(x, y, z, w, v, phase, now, out){
     const hyper = frameBasis.hyper;
 
-    const d4 = Math.sin(now*.00012 + phase)*.10;
-    const d4sq=d4*d4, sd4=d4*(1-d4sq/6+d4sq*d4sq/120), cd4=1-d4sq*.5+d4sq*d4sq/24;
-    const c4=frameBasis.c4*cd4-frameBasis.s4*sd4, s4=frameBasis.s4*cd4+frameBasis.c4*sd4;
+    const a4 = rig.dim4 + Math.sin(now*.00012 + phase)*.10;
+    const c4 = Math.cos(a4), s4 = Math.sin(a4);
     const x4 = x*c4 - w*s4;
     const w4 = x*s4 + w*c4;
     x = x4; w = w4;
 
-    const d5 = Math.cos(now*.00010 + phase*1.3)*.10;
-    const d5sq=d5*d5, sd5=d5*(1-d5sq/6+d5sq*d5sq/120), cd5=1-d5sq*.5+d5sq*d5sq/24;
-    const c5=frameBasis.c5*cd5-frameBasis.s5*sd5, s5=frameBasis.s5*cd5+frameBasis.c5*sd5;
+    const a5 = rig.dim5 + Math.cos(now*.00010 + phase*1.3)*.10;
+    const c5 = Math.cos(a5), s5 = Math.sin(a5);
     const z5 = z*c5 - v*s5;
     const v5 = z*s5 + v*c5;
     z = z5; v = v5;
@@ -902,10 +896,10 @@
       radiusY,
       outerness,
       motionScale,
-      speed:rnd(.00007,.00022) * motionScale * (rand()<.5 ? -1 : 1),
+      speed:rnd(.00007,.00022) * motionScale * (random()<.5 ? -1 : 1),
       angle:rnd(0,Math.PI*2),
       phase:rnd(0,Math.PI*2),
-      precess:rnd(.00003,.00009) * motionScale * (rand()<.5 ? -1 : 1),
+      precess:rnd(.00003,.00009) * motionScale * (random()<.5 ? -1 : 1),
       wobble:rnd(.00010,.00026) * (.58 + motionScale*.42),
       yDrift:rnd(0,Math.PI*2),
       zBias:rnd(-.70,.90),
@@ -914,11 +908,11 @@
       depthPulse:rnd(.00005,.00015) * (.56 + motionScale*.44),
       r:rnd(.84,2.10),
       a:rnd(.10,.24),
-      twinkAmt:rnd(.24,.54),
-      twinkSpd:rnd(.00082,.00215),
+      twinkAmt:rnd(.18,.44),
+      twinkSpd:rnd(.0007,.0019),
       twinkPh:rnd(0,Math.PI*2),
       warmAmt:rnd(.01,.10),
-      bright:rand()<.32
+      bright:random()<.32
     };
   }
 
@@ -948,11 +942,11 @@
       depthDrift:rnd(.00008,.00028) * (.56 + motionScale*.44),
       r:rnd(.72,1.95),
       a:rnd(.08,.22),
-      twinkAmt:rnd(.26,.60),
-      twinkSpd:rnd(.00095,.00245),
+      twinkAmt:rnd(.20,.52),
+      twinkSpd:rnd(.0008,.0022),
       twinkPh:rnd(0,Math.PI*2),
       warmAmt:rnd(.01,.08),
-      bright:rand()<.24,
+      bright:random()<.24,
       wrapPad:rnd(.14,.34)
     };
   }
@@ -980,8 +974,8 @@
       phase:rnd(0,Math.PI*2),
       r:rnd(2.8,6.4),
       a:rnd(.18,.36),
-      twinkAmt:rnd(.12,.30),
-      twinkSpd:rnd(.00052,.00130),
+      twinkAmt:rnd(.08,.22),
+      twinkSpd:rnd(.00042,.00110),
       twinkPh:rnd(0,Math.PI*2),
       pulseSpd:rnd(.00050,.00120) * (.64 + motionScale*.36),
       warmAmt:rnd(.18,.30)
@@ -1054,14 +1048,18 @@
       const v = s.vBias + Math.sin(now*(s.depthPulse*.76)*orbitMotion + s.yDrift)*.16;
       if(!projectAmbientPoint(x, y, z, w, v, s.phase, now, ambientProj)) continue;
       const tw = 1 - s.twinkAmt + s.twinkAmt * (.5 + .5*Math.sin(now*s.twinkSpd + s.twinkPh));
-      const pulse = .80 + .20*Math.sin(now*.00034 + s.phase);
+      const pulse = .82 + .18*Math.sin(now*.00034 + s.phase);
       const alpha = s.a * tw * pulse * (1 + energy*.08) * Math.min(1.2, ambientProj.ss*5.2);
       const baseCol = warmDominantInto(s.col, s.warmAmt, warmScratch);
       const rigTint = sampleRainbowFloatInto(rigColorOrbit + s.phase*.18, rigTintScratch);
-      const renderCol = mixColInto(baseCol, rigTint, rigColorMix, finalScratch);
+      const renderCol = saturateColInto(
+        mixColInto(baseCol, rigTint, rigColorMix, finalScratch), .46, saturatedScratch
+      );
       const rr = s.r * (1 + tw*.18) * clamp(ambientProj.ss*4.6, .42, 1.85);
-      if(s.bright || alpha > .11) starGlow(ambientProj.sx, ambientProj.sy, rr*1.22, renderCol, alpha*.30, tw, false, s.phase+now*.0002);
-      drawNormalSprite(ambientProj.sx, ambientProj.sy, rr, renderCol, alpha*.94, s.phase+now*.00022, tw, s.bright);
+      if((quality>0 && (s.bright || alpha>.13)) || (quality===0 && s.bright)){
+        starGlow(ambientProj.sx, ambientProj.sy, rr*1.18, renderCol, alpha*.24, tw, false, s.phase+now*.0002);
+      }
+      drawNormalSprite(ambientProj.sx, ambientProj.sy, rr, renderCol, alpha*.88, s.phase+now*.00022, tw, s.bright);
     }
 
     for(let i=0;i<ambientFloaters.length;i++){
@@ -1069,14 +1067,18 @@
       if(!projectAmbientPoint(s.lx, s.ly, s.lz, s.w, s.v, s.phase, now, ambientProj)) continue;
       if(ambientProj.sx < -120 || ambientProj.sx > W+120 || ambientProj.sy < -120 || ambientProj.sy > H+120) continue;
       const tw = 1 - s.twinkAmt + s.twinkAmt * (.5 + .5*Math.sin(now*s.twinkSpd + s.twinkPh));
-      const pulse = .82 + .18*Math.sin(now*.00038 + s.phase);
+      const pulse = .84 + .16*Math.sin(now*.00038 + s.phase);
       const alpha = s.a * tw * pulse * (1 + energy*.06) * clamp(ambientProj.ss*5.0, .34, 1.65);
       const baseCol = warmDominantInto(s.col, s.warmAmt, warmScratch);
       const rigTint = sampleRainbowFloatInto(rigColorOrbit + s.phase*.24, rigTintScratch);
-      const renderCol = mixColInto(baseCol, rigTint, rigColorMix, finalScratch);
+      const renderCol = saturateColInto(
+        mixColInto(baseCol, rigTint, rigColorMix, finalScratch), .46, saturatedScratch
+      );
       const rr = s.r * (1 + tw*.18) * s.parallax * clamp(ambientProj.ss*4.8, .40, 1.78);
-      if(s.bright || alpha > .10) starGlow(ambientProj.sx, ambientProj.sy, rr*1.16, renderCol, alpha*.24, tw, false, s.phase+now*.0002);
-      drawNormalSprite(ambientProj.sx, ambientProj.sy, rr, renderCol, alpha*.90, s.phase+now*.00024, tw, s.bright);
+      if((quality>0 && (s.bright || alpha>.12)) || (quality===0 && s.bright)){
+        starGlow(ambientProj.sx, ambientProj.sy, rr*1.12, renderCol, alpha*.18, tw, false, s.phase+now*.0002);
+      }
+      drawNormalSprite(ambientProj.sx, ambientProj.sy, rr, renderCol, alpha*.84, s.phase+now*.00024, tw, s.bright);
     }
 
     for(let i=0;i<ambientFireballs.length;i++){
@@ -1091,12 +1093,16 @@
       const baseCol = warmDominantInto(s.col, s.warmAmt, warmScratch);
       const amberBase = honeyAmberizeInto(baseCol, honeyScratch);
       const rigTint = sampleRainbowFloatInto(rigColorOrbit + s.phase*.28 + .2, rigTintScratch);
-      const renderCol = mixColInto(amberBase, rigTint, rigColorMix, finalScratch);
+      const renderCol = saturateColInto(
+        mixColInto(amberBase, rigTint, rigColorMix, finalScratch), .46, saturatedScratch
+      );
       const rr = s.r * (1 + firePulse*.20) * clamp(ambientProj.ss*4.9, .52, 2.18);
-      starGlow(px, py, rr*1.66, renderCol, alpha*.92, Math.min(1, tw + firePulse*.22), true, s.phase+now*.0002);
-      drawNormalSprite(px, py, rr, renderCol, alpha*.84, s.phase+now*.00022, Math.min(1, tw + firePulse*.18), true);
-      const fireCore = Math.min(.86, alpha*2.18);
-      if(fireCore > .02){
+      if(quality>0 || (i&1)===0){
+        starGlow(px, py, rr*1.58, renderCol, alpha*.84, Math.min(1, tw + firePulse*.18), true, s.phase+now*.0002);
+      }
+      drawNormalSprite(px, py, rr, renderCol, alpha*.76, s.phase+now*.00022, Math.min(1, tw + firePulse*.14), true);
+      const fireCore = Math.min(.78, alpha*2.0);
+      if(fireCore>.02 && (quality>0 || (i&1)===0)){
         c.fillStyle = `rgba(${renderCol[0]},${renderCol[1]},${renderCol[2]},${fireCore})`;
         stellarPath(px, py, Math.max(1.2, rr*.40), Math.max(.22, rr*.068), 4, s.phase+now*.00032);
         c.fill();
@@ -1105,14 +1111,14 @@
   }
 
   function seed(){
-    resetVisualSeed();
     particles.length = 0;
     drawOrder.length = 0;
-    // Canonical population: identical star density and structure on every device.
-    const armCount  = 1480;
+    // One canonical population on every viewport. Performance tiers change
+    // effect cost and backing resolution, never the identity of the galaxy.
+    const armCount = 1480;
     const coreCount = 468;
     const haloCount = 610;
-    const superCount= 104;
+    const superCount = 104;
     for(let i=0;i<armCount;i++) particles.push(makeStar('arm'));
     for(let i=0;i<coreCount;i++) particles.push(makeStar('core'));
     for(let i=0;i<haloCount;i++) particles.push(makeStar('halo'));
@@ -1121,67 +1127,84 @@
       const p=particles[i];
       p.localMotion = p.speed * (p.motionScale || 1);
       p.isGem = !!p.coreGem;
-      p.isArm = p.kind==='arm';
-      p.isCore = p.kind==='core';
-      p.isHalo = p.kind==='halo';
+      p.isArm = p.kind === 'arm';
+      p.isCore = p.kind === 'core';
+      // Derive glint from already-seeded phases/speeds so the optimization does
+      // not consume extra RNG calls and silently reshuffle the galaxy layout.
+      p.glintAmt = p.isSuper ? .28 : (p.isGem ? .20 : .065);
+      p.glintSpd = p.twinkSpd*.31 + p.localMotion*.17;
+      p.glintPh = p.phase*1.73 + p.twinkPh*.61;
       drawOrder.push(i);
     }
     seedAmbient();
   }
 
-
-  function selectCadenceStride(){
-    const desiredHz = 1000/targetFrameMs;
-    cadenceStride = clamp(Math.round(refreshHz/desiredHz),1,12)|0;
-  }
-
   function updateRefreshEstimate(rafDt){
-    // Short/zero callbacks and long background stalls are not panel refresh samples.
-    if(rafDt<1.25 || rafDt>45) return;
+    if(rafDt<5 || rafDt>45) return;
     rafSamples[rafSampleCursor] = rafDt;
     rafSampleCursor = (rafSampleCursor+1)%rafSamples.length;
     rafSampleCount = Math.min(rafSamples.length,rafSampleCount+1);
     if(rafSampleCount<rafSamples.length || rafSampleCursor!==0) return;
     const sample = Array.from(rafSamples).sort((a,b)=>a-b);
+    // Lower quartile rejects callbacks delayed by a heavy frame while still
+    // rejecting one-off unrealistically short samples.
     const panelInterval = sample[Math.floor(sample.length*.25)];
-    refreshHz = clamp(1000/panelInterval,24,600);
-    selectCadenceStride();
+    refreshHz = clamp(1000/panelInterval,24,240);
+
+    // Integer refresh divisors eliminate the 13.9/20.8ms judder produced by
+    // a naïve 60fps timer on 120/144/165/240Hz panels.
+    let nextStride = 1;
+    if(refreshHz>105){
+      let bestError = Infinity;
+      for(let stride=2;stride<=4;stride++){
+        const presentedHz = refreshHz/stride;
+        if(presentedHz<50 || presentedHz>78) continue;
+        const error = Math.abs(presentedHz-60);
+        if(error<bestError){ bestError=error; nextStride=stride; }
+      }
+    }
+    cadenceStride = nextStride;
   }
 
-  function setCadenceTier(index){
-    const next = CADENCE_TIERS[clamp(index,0,CADENCE_TIERS.length-1)|0];
-    if(next===targetFrameMs) return;
-    targetFrameMs = next;
-    pressureFrames = 0;
-    reliefFrames = 0;
-    selectCadenceStride();
-    rafTick = 0;
+  function applyQuality(next,now){
+    const clamped = clamp(next,0,qualityCeiling)|0;
+    if(clamped===quality) return;
+    quality = clamped;
+    lastQualityChange = now;
+    qualityPressure = 0;
+    qualityHeadroom = 0;
+    renderCostEma *= .72;
+    linkPairQuality = -1;
+    resize();
   }
 
-  function updatePerformanceCadence(renderCostMs){
-    if(!Number.isFinite(renderCostMs) || renderCostMs <= 0) return;
-    if(smoothRenderCost === 0) smoothRenderCost = renderCostMs;
-    else smoothRenderCost += (renderCostMs - smoothRenderCost) * .12;
+  function updateQuality(now){
+    const targetInterval = (1000/refreshHz)*cadenceStride*emergencyStride;
+    const frameBudget = Math.max(8,targetInterval*.80);
+    const overloaded = renderCostEma>frameBudget || smoothDt>targetInterval*1.34;
+    const comfortable = renderCostEma<frameBudget*.56 && smoothDt<targetInterval*1.16;
 
-    // The actual refresh divisor is the budget. Spatial quality never changes.
-    const presentedFrameMs = 1000*cadenceStride/Math.max(24,refreshHz);
-    const budget = presentedFrameMs*.78;
-    if(smoothRenderCost > budget){
-      pressureFrames++;
-      reliefFrames = 0;
-    }else{
-      pressureFrames = Math.max(0, pressureFrames - 1);
-      const tier = CADENCE_TIERS.indexOf(targetFrameMs);
-      const fasterMs = tier>0 ? CADENCE_TIERS[tier-1] : FRAME_60_MS;
-      if(smoothRenderCost < fasterMs*.60) reliefFrames++;
-      else reliefFrames = Math.max(0, reliefFrames - 1);
+    qualityPressure = overloaded ? qualityPressure+1 : Math.max(0,qualityPressure-2);
+    qualityHeadroom = comfortable ? qualityHeadroom+1 : Math.max(0,qualityHeadroom-3);
+
+    if(qualityPressure>=36 && now-lastQualityChange>1200){
+      if(quality>0) applyQuality(quality-1,now);
+      else if(emergencyStride===1){
+        emergencyStride=2;
+        lastQualityChange=now;
+        qualityPressure=0;
+      }
+      return;
     }
 
-    const tier = CADENCE_TIERS.indexOf(targetFrameMs);
-    if(pressureFrames >= 12 && tier<CADENCE_TIERS.length-1){
-      setCadenceTier(tier+1);
-    }else if(reliefFrames >= 180 && tier>0){
-      setCadenceTier(tier-1);
+    if(qualityHeadroom>=300 && now-lastQualityChange>6500){
+      if(emergencyStride>1){
+        emergencyStride=1;
+        lastQualityChange=now;
+        qualityHeadroom=0;
+      }else if(quality<qualityCeiling){
+        applyQuality(quality+1,now);
+      }
     }
   }
 
@@ -1205,25 +1228,14 @@
     }
 
     const localMotion = p.localMotion;
-    // The per-star dimensional wobble is at most 0.06 rad. Compose that small
-    // angle with the frame's exact rig rotation using a 5th-order small-angle
-    // approximation: same motion shape, two trig calls instead of six per star.
-    const d4 = Math.sin(now*localMotion*.16 + p.phase)*.06;
-    const d4sq = d4*d4;
-    const sd4 = d4*(1-d4sq/6+d4sq*d4sq/120);
-    const cd4 = 1-d4sq*.5+d4sq*d4sq/24;
-    const c4 = basis.c4*cd4 - basis.s4*sd4;
-    const s4 = basis.s4*cd4 + basis.c4*sd4;
+    const a4 = rig.dim4 + Math.sin(now*localMotion*.16 + p.phase)*.06;
+    const c4 = Math.cos(a4), s4 = Math.sin(a4);
     const x4 = x*c4 - w*s4;
     const w4 = x*s4 + w*c4;
     x = x4; w = w4;
 
-    const d5 = Math.cos(now*localMotion*.13 + p.twinkPh)*.06;
-    const d5sq = d5*d5;
-    const sd5 = d5*(1-d5sq/6+d5sq*d5sq/120);
-    const cd5 = 1-d5sq*.5+d5sq*d5sq/24;
-    const c5 = basis.c5*cd5 - basis.s5*sd5;
-    const s5 = basis.s5*cd5 + basis.c5*sd5;
+    const a5 = rig.dim5 + Math.cos(now*localMotion*.13 + p.twinkPh)*.06;
+    const c5 = Math.cos(a5), s5 = Math.sin(a5);
     const z5 = z*c5 - v*s5;
     const v5 = z*s5 + v*c5;
     z = z5; v = v5;
@@ -1268,7 +1280,7 @@
     const driftRoll = reduced ? 0 : Math.sin(now*.000039)*.085;
     const driftDim4 = reduced ? 0 : Math.sin(now*.000037)*.22;
     const driftDim5 = reduced ? 0 : Math.cos(now*.000031)*.18;
-    const autoInfluence = rotationEnabled ? (pointer.active ? .18 : .32) : 0;
+    const autoInfluence = pointer.active ? .18 : .32;
 
     rig.targetYaw += rig.velYaw*frameScale;
     rig.targetPitch += rig.velPitch*frameScale;
@@ -1317,32 +1329,24 @@
 
 
   function frame(now){
-    if(disposed) return;
-    frameRequest = requestAnimationFrame(frame);
-    if(contextLost || document.hidden){
+    requestAnimationFrame(frame);
+    if(document.hidden){
       last = lastRaf = now;
       rafTick = 0;
       return;
     }
 
-    // Spatial fidelity is invariant. Weaker machines use a stable display-refresh
-    // divisor, never fewer stars, different colors, cheaper glows or device-tier DPR.
-    const currentDpr = window.devicePixelRatio || 1;
-    if(Math.abs(currentDpr - lastDevicePixelRatio) > .01){
-      lastDevicePixelRatio = currentDpr;
-      // Internal sampling is canonical, not device-DPR-driven. The browser's
-      // resize/ResizeObserver path will still update if CSS geometry changes.
-    }
     const rafDt = Math.min(100, Math.max(0, now-lastRaf));
     lastRaf = now;
     updateRefreshEstimate(rafDt);
-    if(now < nextRenderAt) return;
-    if((rafTick++ % cadenceStride)!==0) return;
+    const totalStride = cadenceStride*emergencyStride;
+    if((rafTick++ % totalStride)!==0) return;
 
-    const renderStarted = performance.now();
-    const dt = Math.min(66.667, Math.max(0, now-last));
+    const renderStart = performance.now();
+    const dt = Math.min(50, Math.max(0, now-last));
     last = now;
     updateRig(now, dt);
+    updateQuality(now);
     updateAmbient(now, dt);
 
     frameNo++;
@@ -1357,26 +1361,23 @@
     frameBasis.sp = Math.sin(rig.pitch);
     frameBasis.cr = Math.cos(rig.roll);
     frameBasis.sr = Math.sin(rig.roll);
-    frameBasis.c4 = Math.cos(rig.dim4);
-    frameBasis.s4 = Math.sin(rig.dim4);
-    frameBasis.c5 = Math.cos(rig.dim5);
-    frameBasis.s5 = Math.sin(rig.dim5);
     frameBasis.cameraDistance = 3.30 - (rig.zoom-1)*1.22 - hyper*.32;
     frameBasis.rigScale = minSide * (1.40 + hyper*.14) * rig.zoom;
 
     for(let i=0;i<particles.length;i++) projectInto(particles[i], now, frameBasis);
-    const sortEvery = 3;
+    const sortEvery = quality===2 ? 2 : (quality===1 ? 3 : 5);
     if((frameNo - 1) % sortEvery === 0) drawOrder.sort((a,b)=>particles[a].sz-particles[b].sz);
 
     const linkLimit = quality===2
-      ? (reduced ? 94 : Math.max(86, Math.round(168 - rig.hyperspace*24)))
-      : (quality===1 ? 48 : 28);
+      ? Math.max(86,Math.round(156-rig.hyperspace*22))
+      : (quality===1 ? 72 : 36);
     const linkStep = quality===2 ? 1 : (quality===1 ? 2 : 3);
     const linkDist2 = quality===0 ? 2300 : (quality===1 ? 2650 : 3000);
-    const linkRebuildEvery = 8;
-    if(frameNo===1 || quality!==linkPairQuality || linkPairStamp < 0 || frameNo - linkPairStamp >= linkRebuildEvery){
+    const linkRebuildEvery = quality===2 ? 3 : (quality===1 ? 5 : 8);
+    if(frameNo===1 || quality!==linkPairQuality || linkLimit!==linkPairLimit || linkStep!==linkPairStep || frameNo % linkRebuildEvery===0){
       linkPairQuality = quality;
-      linkPairStamp = frameNo;
+      linkPairLimit = linkLimit;
+      linkPairStep = linkStep;
       linkNodes.length = 0;
       linkPairs.length = 0;
       for(let i=0;i<drawOrder.length && linkNodes.length<linkLimit;i++){
@@ -1397,7 +1398,7 @@
       }
     }
 
-    c.lineWidth = quality===0 ? .24 : .38;
+    c.lineWidth = quality===2 ? .38 : (quality===1 ? .32 : .26);
     const linkAlphaScale = (1 - rig.hyperspace*.35) * (quality===0 ? .62 : (quality===1 ? .82 : 1));
     for(let i=0;i<linkPairs.length;i+=5){
       const A=particles[linkPairs[i]], B=particles[linkPairs[i+1]];
@@ -1414,15 +1415,16 @@
       const qx = p.sx, qy = p.sy, qScale = p.ss;
       if(qx<-260 || qx>W+260 || qy<-260 || qy>H+260) continue;
 
-      const breathe = .76 + Math.sin(now*p.localMotion+p.phase)*.24;
+      const breathe = .78 + Math.sin(now*p.localMotion+p.phase)*.22;
       const twinkle = 1 - p.twinkAmt + p.twinkAmt*(.5 + .5*Math.sin(now*p.twinkSpd+p.twinkPh));
-      const flashTick = Math.floor(now / FRAME_60_MS);
-      const flashNoise = Math.sin((flashTick + 1) * 12.9898 + p.phase * 78.233) * 43758.5453;
-      const flashUnit = flashNoise - Math.floor(flashNoise);
-      const flash = reduced ? 1 : (flashUnit > p.flashP ? 1.92 : 1);
+      // Narrow but continuous glints replace frame-random 1.72x brightness jumps.
+      // This preserves living scintillation without stochastic flicker.
+      const glintWave = .5 + .5*Math.sin(now*p.glintSpd+p.glintPh);
+      const glintPower = glintWave*glintWave*glintWave*glintWave*glintWave*glintWave;
+      const glint = (quality===0 || reduced) ? 1 : 1 + p.glintAmt*glintPower*(quality===1 ? .72 : 1);
       const dB = .52 + qScale*1.95;
       const rad = p.r*(.28 + qScale*2.72);
-      const alpha = p.a*breathe*twinkle*flash*dB*(1+energy*.34)*(1+hyper*.14);
+      const alpha = p.a*breathe*twinkle*glint*dB*(1+energy*.34)*(1+hyper*.14);
       const isS = p.isSuper;
       const isGem = p.isGem;
       const sR = Math.max(isS ? 5.3 : (isGem ? 3.55 : 2.10), rad*(isS ? 3.48 : (isGem ? 2.08 : 1.72)));
@@ -1433,31 +1435,31 @@
       const warmedBase = warmDominantInto(baseCol,p.warmAmt,warmScratch);
       const scintCol = scintColInto(warmedBase,twinkle,isS,renderScratch);
       const baseRenderCol = p.metallicGold ? scintCol : honeyAmberizeInto(scintCol,honeyScratch);
-      const rigTint = sampleRainbowFloatInto(rigColorOrbit + p.phase*.22 + (p.isHalo ? .38 : 0), rigTintScratch);
-      const renderCol = mixColInto(baseRenderCol, rigTint, rigColorMix, finalScratch);
+      const rigTint = sampleRainbowFloatInto(rigColorOrbit + p.phase*.22 + p.rigTintOffset, rigTintScratch);
+      const renderCol = saturateColInto(
+        mixColInto(baseRenderCol, rigTint, rigColorMix, finalScratch), .46, saturatedScratch
+      );
 
 
-      const spikeOn = isS || isGem || (p.isArm&&alpha>.20&&rad>.88) || (p.isCore&&alpha>.18) || (p.prism&&alpha>.14);
+      const spikeOn = isS || isGem || (p.isArm&&alpha>.24&&rad>.98) || (p.isCore&&alpha>.22) || (p.prism&&alpha>.18);
       if(isS){
-        starGlow(qx,qy,sR*1.04,renderCol,alpha*.66,twinkle,true,phase);
-        drawNormalSprite(qx,qy,sR*.98,renderCol,alpha*.46,phase,twinkle,true);
-        const sl=Math.max(6.4,sR*(4.8 + hyper*.42));
+        starGlow(qx,qy,sR,renderCol,alpha*.58,twinkle,true,phase);
+        drawNormalSprite(qx,qy,sR*.96,renderCol,alpha*.38,phase,twinkle,true);
+        const sl=Math.max(6,sR*(4.4 + hyper*.38));
         spike(qx,qy,sl,renderCol,Math.min(.18,alpha*.22),p.phase+now*.00007);
       }else if(isGem){
-        starGlow(qx,qy,sR*1.16,renderCol,alpha*.96,twinkle,true,phase);
-        drawNormalSprite(qx,qy,sR*1.10,renderCol,alpha*.86,phase,twinkle,true);
-        const sl=Math.max(8.0,sR*(5.45 + hyper*.52));
+        starGlow(qx,qy,sR*1.12,renderCol,alpha*.88,twinkle,true,phase);
+        drawNormalSprite(qx,qy,sR*1.08,renderCol,alpha*.78,phase,twinkle,true);
+        const sl=Math.max(7.6,sR*(5.15 + hyper*.46));
         spike(qx,qy,sl,renderCol,Math.min(.28,alpha*.34),p.phase+now*.00007);
-        spike(qx,qy,sl*.78,renderCol,Math.min(.18,alpha*.22),p.phase+now*.00007 + Math.PI/4);
+        if(quality>0) spike(qx,qy,sl*.78,renderCol,Math.min(.18,alpha*.22),p.phase+now*.00007 + Math.PI/4);
       }else{
-        drawNormalSprite(qx,qy,sR*.98,renderCol,alpha*.68,phase,twinkle,spikeOn);
+        drawNormalSprite(qx,qy,sR*.96,renderCol,alpha*.60,phase,twinkle,spikeOn);
       }
 
-      const cA = Math.min(.98,alpha*(isGem ? 4.20 : 3.55));
-      // Normal sprites already contain their own hot core. Keep the expensive
-      // live vector core only where it materially changes the image.
-      const needsVectorCore = isS || isGem || p.isCore || (p.prism && alpha>.26 && (order&3)===0);
-      if(cA>.02 && needsVectorCore){
+      const cA = Math.min(.96,alpha*(isGem ? 3.85 : 3.20));
+      const vectorCore = isS || isGem || quality===2 || (quality===1 && (order&1)===0);
+      if(cA>.02 && vectorCore){
         c.fillStyle=`rgba(${renderCol[0]},${renderCol[1]},${renderCol[2]},${cA})`;
         stellarPath(qx,qy,Math.max(.56,rad*.62),Math.max(.11,rad*.088),4,p.phase+now*.0004);
         c.fill();
@@ -1465,12 +1467,8 @@
     }
 
     drawAmbientStars(now);
-    const renderCostMs = performance.now() - renderStarted;
-    updatePerformanceCadence(renderCostMs);
-    adaptiveRenderRestMs = smoothRenderCost > targetFrameMs
-      ? clamp(smoothRenderCost*.75, FRAME_MS, MAX_ADAPTIVE_RENDER_REST_MS)
-      : 0;
-    nextRenderAt = performance.now() + adaptiveRenderRestMs;
+    const renderCost = performance.now()-renderStart;
+    renderCostEma = renderCostEma ? renderCostEma+(renderCost-renderCostEma)*.10 : renderCost;
   }
 
   function getTwoPointerData(){
@@ -1504,7 +1502,6 @@
     pointer.lastX = e.clientX;
     pointer.lastY = e.clientY;
     document.body.classList.add('dragging');
-    try{ canvas.setPointerCapture(e.pointerId); }catch(_err){}
   }
 
   function endDrag(e){
@@ -1517,10 +1514,9 @@
   }
 
   function onPointerDown(e){
-    nextRenderAt = 0;
-    rafTick = 0;
-    activePointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(typeof canvas.focus==='function') canvas.focus({preventScroll:true});
     try{ canvas.setPointerCapture(e.pointerId); }catch(_err){}
+    activePointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
     normalizePointer(e.clientX,e.clientY);
     if(activePointers.size === 1){
       beginDrag(e);
@@ -1530,11 +1526,11 @@
   }
 
   function onPointerMove(e){
-    const coalesced = typeof e.getCoalescedEvents === 'function' ? e.getCoalescedEvents() : null;
-    const latest = coalesced && coalesced.length ? coalesced[coalesced.length-1] : e;
-    const tracked = activePointers.get(e.pointerId);
-    if(tracked){ tracked.x=latest.clientX; tracked.y=latest.clientY; }
-    if(tracked) nextRenderAt = 0;
+    const activePoint = activePointers.get(e.pointerId);
+    if(activePoint){
+      activePoint.x = e.clientX;
+      activePoint.y = e.clientY;
+    }
 
     if(activePointers.size >= 2 && gesture.pinchActive){
       const info = getTwoPointerData();
@@ -1542,22 +1538,23 @@
         normalizePointer(info.centerX, info.centerY);
         const distRatio = info.distance / Math.max(1, gesture.startDistance);
         rig.targetZoom = clamp(gesture.startZoom * distRatio, ZOOM_MIN, ZOOM_MAX);
-        rig.targetDim5 = clamp(gesture.startDim5 + (info.angle - gesture.startAngle)*.9, -Math.PI, Math.PI);
+        const twist = Math.atan2(Math.sin(info.angle-gesture.startAngle),Math.cos(info.angle-gesture.startAngle));
+        rig.targetDim5 = clamp(gesture.startDim5+twist*.9,-Math.PI,Math.PI);
         rig.targetHyperspace = clamp(gesture.startHyper + (distRatio - 1)*.55, HYPER_MIN, HYPER_MAX);
         energy = Math.min(1.4, energy + .035);
       }
       return;
     }
 
-    normalizePointer(latest.clientX,latest.clientY);
+    normalizePointer(e.clientX,e.clientY);
     if(!pointer.active || pointer.id !== e.pointerId) return;
 
-    const dx = latest.clientX - pointer.lastX;
-    const dy = latest.clientY - pointer.lastY;
-    pointer.lastX = latest.clientX;
-    pointer.lastY = latest.clientY;
+    const dx = e.clientX - pointer.lastX;
+    const dy = e.clientY - pointer.lastY;
+    pointer.lastX = e.clientX;
+    pointer.lastY = e.clientY;
 
-    if(latest.shiftKey || e.shiftKey){
+    if(e.shiftKey){
       rig.velDim4 += dx*.00044;
       rig.velDim5 += dy*.00038;
       rig.targetDim4 += dx*.00106;
@@ -1596,24 +1593,17 @@
 
   function onWheel(e){
     e.preventDefault();
-    nextRenderAt = 0;
-    rafTick = 0;
-    const modeScale = e.deltaMode===1 ? 16 : (e.deltaMode===2 ? Math.max(1,H) : 1);
-    const deltaPx = clamp(e.deltaY*modeScale,-240,240);
-    if(!Number.isFinite(deltaPx) || deltaPx===0) return;
-    const direction = deltaPx<0 ? 1 : -1;
-    const magnitude = clamp(Math.abs(deltaPx)/120,.12,1.6);
+    const unit = e.deltaMode===2 ? H : (e.deltaMode===1 ? 16 : 1);
+    const wheelPixels = clamp(e.deltaY*unit,-240,240);
+    const delta = -wheelPixels/120;
     if(e.altKey || e.shiftKey){
-      const delta = direction*.08*magnitude;
-      rig.targetHyperspace = clamp(rig.targetHyperspace + delta, HYPER_MIN, HYPER_MAX);
+      rig.targetHyperspace = clamp(rig.targetHyperspace+delta*.075,HYPER_MIN,HYPER_MAX);
     }else if(e.ctrlKey || e.metaKey){
-      const delta = direction*.08*magnitude;
-      rig.targetDim4 = clamp(rig.targetDim4 + delta, -Math.PI, Math.PI);
+      rig.targetDim4 = clamp(rig.targetDim4+delta*.07,-Math.PI,Math.PI);
     }else{
-      const delta = direction*.09*magnitude;
-      rig.targetZoom = clamp(rig.targetZoom + delta, ZOOM_MIN, ZOOM_MAX);
+      rig.targetZoom = clamp(rig.targetZoom*Math.exp(delta*.075),ZOOM_MIN,ZOOM_MAX);
     }
-    energy = Math.min(1.25, energy + .06);
+    energy = Math.min(1.25,energy+Math.min(.07,Math.abs(delta)*.045));
   }
 
   function cycleRigRainbowColor(clientX, clientY){
@@ -1633,8 +1623,6 @@
   }
 
   function onClick(e){
-    nextRenderAt = 0;
-    rafTick = 0;
     energy = Math.min(1.28, energy + .10);
     if(e.detail===2){
       cycleRigRainbowColor(e.clientX, e.clientY);
@@ -1665,9 +1653,6 @@
       e.preventDefault();
       resetRig(true);
     } else return;
-    e.preventDefault();
-    nextRenderAt = 0;
-    rafTick = 0;
     energy = Math.min(1.25, energy + .05);
   }
 
@@ -1677,11 +1662,14 @@
     pointer.ty = 0;
   }
 
+  let resizeQueued = false;
   function handleResize(){
-    linkPairStamp = -1;
-    nextRenderAt = 0;
-    rafTick = 0;
-    resize();
+    if(resizeQueued) return;
+    resizeQueued = true;
+    requestAnimationFrame(()=>{
+      resizeQueued = false;
+      resize();
+    });
   }
 
   function handleVisibilityChange(){
@@ -1689,11 +1677,12 @@
       activePointers.clear();
       gesture.pinchActive = false;
       endDrag();
+      pointer.tx = 0;
+      pointer.ty = 0;
     }
     last = performance.now();
     lastRaf = last;
     rafTick = 0;
-    nextRenderAt = 0;
     rafSampleCount = 0;
     rafSampleCursor = 0;
   }
@@ -1708,205 +1697,85 @@
 
   function handleMotionPreference(e){
     reduced = !!e.matches;
-    last = lastRaf = performance.now();
-    rafTick = 0;
-    nextRenderAt = 0;
+    qualityCeiling = reduced ? 1 : 2;
+    if(quality>qualityCeiling) applyQuality(qualityCeiling,performance.now());
   }
 
-  function handleContextLost(e){
-    if(e && e.cancelable) e.preventDefault();
-    contextLost = true;
-  }
-
-  function handleContextRestored(){
-    contextLost = false;
-    spriteCache.clear();
-    linkPairStamp = -1;
-    resize();
-    last = lastRaf = performance.now();
-    rafTick = 0;
-    nextRenderAt = 0;
-  }
-
-  const interactionControls = [
-    'a','button','input','textarea','select','label','summary','dialog',
-    '[contenteditable]','[role="button"]','[role="dialog"]','[data-action]',
-    '[data-page]','[data-world-focus]','[data-world-tab]','[data-owner-route]',
-    '[data-system]','[data-system-slug]','.universe-system-node','.universe-add-system',
-    '#front-nur-star','#nur-exact-brain-frame'
-  ].join(',');
-  const interactionPanelBlockers = [
-    '.nur-panel','.universe-panel','.universe-card','.nur-adjunct-root',
-    '.nur-rail','.clean-left-rail','.clean-right-rail','.nur-topbar',
-    '.global-composer','.scope-modal','.modal','.share-sheet'
-  ].join(',');
-  const galaxyInteractionSurfaces = '#page-systems .universe-map-panel';
-  function isBlockedInteractionTarget(target){
-    if(!(target instanceof Element)) return false;
-    if(target.closest(interactionControls)!==null) return true;
-    if(target.closest(galaxyInteractionSurfaces)!==null) return false;
-    return target.closest(interactionPanelBlockers)!==null;
-  }
-  function onDocumentPointerDown(e){
-    if(isBlockedInteractionTarget(e.target)) return;
-    onPointerDown(e);
-  }
-  function onDocumentPointerMove(e){
-    if(activePointers.has(e.pointerId) || !isBlockedInteractionTarget(e.target)) onPointerMove(e);
-  }
-  function onDocumentWheel(e){
-    if(isBlockedInteractionTarget(e.target)) return;
-    onWheel(e);
-  }
-  function onDocumentClick(e){
-    if(isBlockedInteractionTarget(e.target)) return;
-    onClick(e);
+  let dprQuery = null;
+  let dprQueryListener = null;
+  let layoutObserver = null;
+  function watchDevicePixelRatio(){
+    if(!window.matchMedia) return;
+    if(dprQuery && dprQueryListener){
+      if(dprQuery.removeEventListener) dprQuery.removeEventListener('change',dprQueryListener);
+      else if(dprQuery.removeListener) dprQuery.removeListener(dprQueryListener);
+    }
+    dprQuery = matchMedia(`(resolution: ${devicePixelRatio || 1}dppx)`);
+    dprQueryListener = ()=>{
+      watchDevicePixelRatio();
+      handleResize();
+    };
+    if(dprQuery.addEventListener) dprQuery.addEventListener('change',dprQueryListener);
+    else if(dprQuery.addListener) dprQuery.addListener(dprQueryListener);
   }
 
   addEventListener('resize',handleResize,{passive:true});
-  if(window.visualViewport) visualViewport.addEventListener('resize',handleResize,{passive:true});
-  document.addEventListener('pointerdown',onDocumentPointerDown,{passive:true,capture:true});
-  document.addEventListener('pointermove',onDocumentPointerMove,{passive:true,capture:true});
-  document.addEventListener('pointerup',endPointer,{passive:true,capture:true});
-  document.addEventListener('pointercancel',endPointer,{passive:true,capture:true});
+  canvas.addEventListener('pointerdown',onPointerDown,{passive:true});
+  canvas.addEventListener('pointermove',onPointerMove,{passive:true});
+  canvas.addEventListener('pointerup',endPointer,{passive:true});
+  canvas.addEventListener('pointercancel',endPointer,{passive:true});
   canvas.addEventListener('lostpointercapture',endPointer,{passive:true});
-  document.documentElement.addEventListener('pointerleave',onPointerLeave,{passive:true});
-  document.addEventListener('wheel',onDocumentWheel,{passive:false,capture:true});
-  document.addEventListener('click',onDocumentClick,{passive:true,capture:true});
-  canvas.addEventListener('contextlost',handleContextLost);
-  canvas.addEventListener('contextrestored',handleContextRestored);
+  canvas.addEventListener('pointerleave',onPointerLeave,{passive:true});
+  canvas.addEventListener('wheel',onWheel,{passive:false});
+  canvas.addEventListener('click',onClick,{passive:true});
   addEventListener('keydown',onKeyDown);
   document.addEventListener('visibilitychange',handleVisibilityChange);
   addEventListener('blur',handleWindowBlur);
+  if(window.visualViewport){
+    visualViewport.addEventListener('resize',handleResize,{passive:true});
+    visualViewport.addEventListener('scroll',handleResize,{passive:true});
+  }
+  if(typeof ResizeObserver==='function'){
+    layoutObserver = new ResizeObserver(handleResize);
+    layoutObserver.observe(document.documentElement);
+  }
   if(motionQuery){
     if(motionQuery.addEventListener) motionQuery.addEventListener('change',handleMotionPreference);
     else if(motionQuery.addListener) motionQuery.addListener(handleMotionPreference);
   }
-  if(typeof ResizeObserver==='function'){
-    layoutObserver = new ResizeObserver(handleResize);
-    layoutObserver.observe(canvas);
-  }
+  watchDevicePixelRatio();
 
   resize();
   seed();
-  const diagnostics = Object.freeze({
-    snapshot(){
-      return {
-        version:'NUR_V197_CANONICAL_CROSS_SCREEN_LAGFREE_2026-08-29',
-        cssWidth:W,
-        cssHeight:H,
-        backingWidth:canvas.width,
-        backingHeight:canvas.height,
-        nativeDpr:Number(window.devicePixelRatio)||1,
-        activeDpr,
-        canonicalTargetDpr:CANONICAL_TARGET_DPR,
-        maxBackingPixels:MAX_BACKING_PIXELS,
-        spriteDpr,
-        contextAttributes,
-        panelHz:refreshHz,
-        cadenceStride,
-        presentedHz:refreshHz/cadenceStride,
-        targetHz:1000/targetFrameMs,
-        renderCostMs:smoothRenderCost,
-        adaptiveRenderRestMs,
-        renderedFrames:frameNo,
-        stars:particles.length,
-        ambientStars:ambientOrbiters.length+ambientFloaters.length+ambientFireballs.length,
-        zoom:rig.zoom,
-        targetZoom:rig.targetZoom,
-        minZoom:ZOOM_MIN,
-        maxZoom:ZOOM_MAX,
-        cameraDistance:frameBasis.cameraDistance,
-        projectionScale:frameBasis.rigScale/Math.max(.08,frameBasis.cameraDistance),
-        activePointerCount:activePointers.size,
-        pinchActive:gesture.pinchActive,
+  Object.defineProperty(window,'__NUR__',{
+    configurable:false,
+    enumerable:false,
+    value:Object.freeze({
+      version:'V197-halo-free-2026.08',
+      reset:()=>resetRig(true),
+      getStats:()=>({
+        viewport:{width:W,height:H},
+        backingStore:{width:canvas.width,height:canvas.height,dpr:activeDpr},
+        quality,
+        qualityCeiling,
+        refreshHz,
+        presentedHz:refreshHz/(cadenceStride*emergencyStride),
+        renderCostMs:renderCostEma,
+        particles:particles.length,
+        ambient:ambientOrbiters.length+ambientFloaters.length+ambientFireballs.length,
+        spriteCache:spriteCache.size,
         reducedMotion:reduced,
-        haloLayer:false,
-        rayProfile:'canonical-soft-visible-lagfree',
-        contextLost
-      };
-    }
+        rig:{
+          yaw:rig.yaw,pitch:rig.pitch,roll:rig.roll,zoom:rig.zoom,
+          hyperspace:rig.hyperspace,dim4:rig.dim4,dim5:rig.dim5,
+          targetYaw:rig.targetYaw,targetPitch:rig.targetPitch,targetZoom:rig.targetZoom,
+          targetHyperspace:rig.targetHyperspace,targetDim4:rig.targetDim4,targetDim5:rig.targetDim5
+        }
+      })
+    })
   });
-  function setTheme(color,strength){
-    const amount = clamp(Number(strength)||0,0,1);
-    if(amount<=0){
-      rigColorMixTarget = 0;
-      return;
-    }
-    const match = /^#?([0-9a-f]{6})$/i.exec(String(color||''));
-    if(!match){
-      rigColorMixTarget = RIG_COLOR_BLEND*amount;
-      return;
-    }
-    const value = Number.parseInt(match[1],16);
-    const rgb = [(value>>16)&255,(value>>8)&255,value&255];
-    let bestIndex=0,bestDistance=Infinity;
-    for(let i=0;i<NUR_RAINBOW.length;i++){
-      const candidate=NUR_RAINBOW[i];
-      const dr=rgb[0]-candidate[0],dg=rgb[1]-candidate[1],db=rgb[2]-candidate[2];
-      const distance=dr*dr+dg*dg+db*db;
-      if(distance<bestDistance){ bestDistance=distance; bestIndex=i; }
-    }
-    rigColorTarget = bestIndex;
-    rigColorMixTarget = RIG_COLOR_BLEND*amount;
-  }
-  function dispose(){
-    if(disposed) return;
-    disposed = true;
-    if(frameRequest) cancelAnimationFrame(frameRequest);
-    frameRequest = 0;
-    activePointers.clear();
-    endDrag();
-    layoutObserver?.disconnect?.();
-    removeEventListener('resize',handleResize);
-    if(window.visualViewport) visualViewport.removeEventListener('resize',handleResize);
-    document.removeEventListener('pointerdown',onDocumentPointerDown,true);
-    document.removeEventListener('pointermove',onDocumentPointerMove,true);
-    document.removeEventListener('pointerup',endPointer,true);
-    document.removeEventListener('pointercancel',endPointer,true);
-    canvas.removeEventListener('lostpointercapture',endPointer);
-    document.documentElement.removeEventListener('pointerleave',onPointerLeave);
-    document.removeEventListener('wheel',onDocumentWheel,true);
-    document.removeEventListener('click',onDocumentClick,true);
-    canvas.removeEventListener('contextlost',handleContextLost);
-    canvas.removeEventListener('contextrestored',handleContextRestored);
-    removeEventListener('keydown',onKeyDown);
-    document.removeEventListener('visibilitychange',handleVisibilityChange);
-    removeEventListener('blur',handleWindowBlur);
-    if(motionQuery){
-      if(motionQuery.removeEventListener) motionQuery.removeEventListener('change',handleMotionPreference);
-      else if(motionQuery.removeListener) motionQuery.removeListener(handleMotionPreference);
-    }
-    if(window.nurGalaxy===galaxyApi) delete window.nurGalaxy;
-    if(window.__nurGalaxy===galaxyApi) delete window.__nurGalaxy;
-  }
-  const galaxyApi = Object.freeze({
-    addEvent(){ energy=Math.min(1.4,energy+.12); },
-    burst(_x,_y,intensity=.18){ energy=Math.min(1.45,energy+Math.max(.08,Number(intensity)||.18)); },
-    setMode(){},
-    setRotate(enabled){ rotationEnabled=enabled!==false; },
-    setTheme,
-    getParticleCount(){ return particles.length; },
-    getTransientParticleCount(){ return 0; },
-    getParticleDiagnostics(){ return diagnostics.snapshot(); },
-    dispose
-  });
-  window.nurGalaxy = galaxyApi;
-  window.__nurGalaxy = galaxyApi;
-  window.nur3dBurst = (_x,_y,intensity=1)=>{
-    energy=Math.min(1.45,energy+Math.max(.08,Number(intensity)||1)*.28);
-  };
-  window.nur3dWordmarkBurst = rect=>{
-    if(rect) normalizePointer(rect.left+rect.width/2,rect.top+rect.height/2);
-    energy=Math.min(1.45,energy+.34);
-  };
-  const initialThemeColor = getComputedStyle(document.documentElement)
-    .getPropertyValue('--nur-theme-accent').trim();
-  setTheme(initialThemeColor,document.documentElement.dataset.nurThemeAccent ? 1 : 0);
-  try{
-    Object.defineProperty(window,'NURDiagnostics',{value:diagnostics,configurable:true});
-  }catch(_err){
-    window.NURDiagnostics = diagnostics;
-  }
-  frameRequest = requestAnimationFrame(frame);
+  requestAnimationFrame(frame);
 })();
+</script>
+</body>
+</html>

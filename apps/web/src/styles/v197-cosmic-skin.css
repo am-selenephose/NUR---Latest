@@ -964,40 +964,6 @@ body.universe-edition .universe-map-panel > .universe-master-star > #front-nur-s
   height: 106% !important;
 }
 
-/* Systems receives the same three orbital halos that frame Entry. They are
- * real `.f4-ring` elements cloned by the bridge, with the exact Entry aspect
- * ratio and rotations, scaled to the larger Systems brain host. */
-body.universe-edition #nur-front-v61 .universe-master-star > .nur-v197-brain-orbit-halo {
-  position: absolute !important;
-  left: 50% !important;
-  top: 50% !important;
-  z-index: 7 !important;
-  display: block !important;
-  width: min(470px, 142%) !important;
-  aspect-ratio: 2.15 !important;
-  border: 1px solid rgba(248, 217, 138, .16) !important;
-  border-radius: 50% !important;
-  box-shadow:
-    inset 0 0 52px rgba(255, 151, 24, .025),
-    0 0 24px rgba(255, 173, 50, .025) !important;
-  transform: translate(-50%, -50%) rotate(-16deg) !important;
-  transform-origin: 50% 50% !important;
-  pointer-events: none !important;
-  opacity: 1 !important;
-}
-
-body.universe-edition #nur-front-v61 .universe-master-star > .nur-v197-brain-orbit-halo.two {
-  width: min(350px, 106%) !important;
-  border-color: rgba(255, 222, 150, .12) !important;
-  transform: translate(-50%, -50%) rotate(28deg) !important;
-}
-
-body.universe-edition #nur-front-v61 .universe-master-star > .nur-v197-brain-orbit-halo.three {
-  width: min(430px, 130%) !important;
-  border-color: rgba(255, 190, 122, .11) !important;
-  transform: translate(-50%, -50%) rotate(73deg) !important;
-}
-
 /* Today reuses the one approved renderer. The host moves with the active
  * route; no second canvas or simplified substitute is created. */
 body.universe-edition #nur-front-v61 #page-today .orbit-hero {
@@ -1864,7 +1830,7 @@ body.universe-edition #nur-front-v61 .universe-map-panel {
 
 @media (min-width: 901px) and (max-height: 760px) {
   body.universe-edition #nur-front-v61 #page-systems .universe-map-panel .universe-master-star {
-    top: calc(64% + 28px) !important;
+    top: calc(50% + 35px) !important;
   }
 
   body.universe-edition #nur-front-v61 #page-systems .universe-map-title > .nur-master-subtitle {

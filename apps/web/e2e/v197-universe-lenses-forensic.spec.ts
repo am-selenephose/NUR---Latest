@@ -141,7 +141,7 @@ test("all four active Universe routes retain one bounded canonical V197 surface"
   }
 });
 
-test("Systems owns the exact V43 brain while Map owns a dedicated causal surface", async ({ page }) => {
+test("Systems owns the exact supplied brain while Map owns a dedicated causal surface", async ({ page }) => {
   test.setTimeout(60_000);
   await authenticate(page);
 
@@ -154,9 +154,16 @@ test("Systems owns the exact V43 brain while Map owns a dedicated causal surface
 
     const brain = panel.locator(".universe-master-star > #front-nur-star");
     await expect(brain).toBeVisible();
-    await expect(brain).toHaveAttribute("data-nur-source", "v43-anatomy-three-celestial-runtime");
+    await expect(brain).toHaveAttribute("data-nur-source", "founder-exact-radiant-outer-anatomy");
     await expect(brain).toHaveAttribute("data-nur-dispersal", "radial-circle");
-    await expect(brain.locator("#nur-brain-canvas")).toBeVisible();
+    await expect(brain).toHaveAttribute("data-nur-engine", "canvas2d-exact-artifact-v1");
+    await expect(brain).toHaveAttribute(
+      "data-nur-artifact-sha256",
+      "3c0b36f9d9732ed8fd0013e924754bbf3fe1f9c932a3498342af2df0084538b0",
+    );
+    await expect(frame.frameLocator("#nur-exact-brain-frame").locator("#nur-brain-canvas-v197"))
+      .toBeVisible();
+    await expect(panel.locator("#nur-brain-canvas")).toHaveCount(0);
     await expect(panel.locator(".universe-master-star > .f4-core, .universe-master-star > .f4-master-star"))
       .toHaveCount(0);
     await expect(panel.locator(".universe-rings:visible")).toHaveCount(0);

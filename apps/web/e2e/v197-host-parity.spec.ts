@@ -57,7 +57,10 @@ test("current bridge hydrates six founder Systems without replacing canonical V1
   const systemLabels = await universe.locator(".universe-system-node:visible b").allTextContents();
   expect(systemLabels.join(" ")).not.toMatch(/Quiet Ambition|Study|Money|Body|Neural Upgrade/);
   await expect(universe.locator("#front-nur-star")).toHaveCount(1);
-  await expect(universe.locator("#nur-brain-canvas")).toHaveCount(1);
+  await expect(universe.locator("#nur-exact-brain-frame")).toHaveCount(1);
+  await expect(universe.frameLocator("#nur-exact-brain-frame").locator("#nur-brain-canvas-v197"))
+    .toBeVisible();
+  await expect(universe.locator("#nur-brain-canvas")).toHaveCount(0);
   await expect(universe.locator("#root")).toHaveCount(0);
   await expect(universe.locator("#nur-v197-adjunct-root")).toHaveCount(0);
 

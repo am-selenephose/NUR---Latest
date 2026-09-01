@@ -295,64 +295,160 @@ async function box(name: string, locator: Locator) {
   return value!;
 }
 
-const canonicalGalaxyVersion = "NUR_V197_CANONICAL_CROSS_SCREEN_LAGFREE_2026-08-29";
-const canonicalGalaxyOwner = "canonical-cross-screen-lagfree-v1";
-const canonicalGalaxyInteraction = "5d-drag-pinch-wheel-double-triple-click";
+const canonicalGalaxyVersion = "V197-halo-free-2026.08";
+const exactGalaxySha256 = "315071e23bd82cad1b68179f7efc3728b274ac5b7ffcae5941ceb919efa7773a";
+const exactBrainSha256 = "3c0b36f9d9732ed8fd0013e924754bbf3fe1f9c932a3498342af2df0084538b0";
 
-async function assertCanonicalGalaxyRuntime(frame: FrameLocator, viewportLabel: string) {
-  const canvas = frame.locator("canvas#space3d");
-  await expect(canvas, `${viewportLabel} has exactly one celestial canvas`).toHaveCount(1);
-  await expect(canvas, `${viewportLabel} canonical galaxy is visible`).toBeVisible();
-  await expect(frame.locator("html"), `${viewportLabel} canonical runtime finished loading`)
-    .toHaveAttribute("data-nur-canonical-galaxy", "ready");
-  await expect(canvas).toHaveAttribute("data-nur-canvas-owner", canonicalGalaxyOwner);
-  await expect(canvas).toHaveAttribute("data-nur-galaxy-rig", canonicalGalaxyOwner);
-  await expect(canvas).toHaveAttribute("data-nur-galaxy-version", canonicalGalaxyVersion);
-  await expect(canvas).toHaveAttribute("data-nur-interaction-profile", canonicalGalaxyInteraction);
-  await expect(
-    frame.locator("#front-nur-star, #nur-brain-canvas, #nur-brain-canvas-v197"),
-    `${viewportLabel} has no superseded star-brain owner`,
-  ).toHaveCount(0);
-
-  type GalaxyEvidence = {
-    rect: { left: number; top: number; width: number; height: number };
+async function assertCanonicalGalaxyRuntime(page: Page, viewportLabel: string) {
+  type ExactGalaxyDiagnostics = {
+    version: string;
+    sourceArtifact: string;
+    artifactSha256: string;
     viewport: { width: number; height: number };
-    backing: { width: number; height: number };
-    style: { display: string; position: string; opacity: number; pointerEvents: string; visibility: string };
-    diagnostics: {
-      version: string;
-      cssWidth: number;
-      cssHeight: number;
-      backingWidth: number;
-      backingHeight: number;
-      stars: number;
-      ambientStars: number;
-      renderedFrames: number;
-      contextLost: boolean;
-    } | null;
-    pixelSignal: { litSamples: number; spreadWidth: number; spreadHeight: number };
+    backingStore: { width: number; height: number; dpr: number };
+    particles: number;
+    ambient: number;
+    stars: number;
+    ambientStars: number;
+    presentedHz: number;
+    haloLayer: boolean;
+    renderer: string;
+  };
+  type RuntimeEvidence = {
+    ready: boolean;
+    legacyCanvasCount: number;
+    htmlState: string | null;
+    viewport: { width: number; height: number };
+    galaxyFrame: {
+      count: number;
+      src: string | null;
+      sha256: string | null;
+      state: string | null;
+      rect: { left: number; top: number; width: number; height: number };
+      style: {
+        display: string;
+        position: string;
+        opacity: number;
+        pointerEvents: string;
+        visibility: string;
+      };
+    };
+    galaxyCanvas: {
+      present: boolean;
+      rect: { left: number; top: number; width: number; height: number };
+      backing: { width: number; height: number };
+      style: {
+        display: string;
+        position: string;
+        opacity: number;
+        pointerEvents: string;
+        visibility: string;
+      };
+      pixelSignal: { litSamples: number; spreadWidth: number; spreadHeight: number };
+    };
+    diagnostics: ExactGalaxyDiagnostics | null;
+    brain: {
+      hostCount: number;
+      visible: boolean;
+      state: string | null;
+      sha256: string | null;
+      engine: string | null;
+      frameCount: number;
+      frameState: string | null;
+      frameSha256: string | null;
+      legacyCanvasCount: number;
+      canvasPresent: boolean;
+      title: string | null;
+      paintedSamples: number;
+    };
   };
 
-  let evidence: GalaxyEvidence | null = null;
   await expect.poll(async () => {
-    evidence = await canvas.evaluate((element: HTMLCanvasElement) => {
-      const frameWindow = element.ownerDocument.defaultView as (Window & {
-        NURDiagnostics?: { snapshot?: () => GalaxyEvidence["diagnostics"] };
-      }) | null;
+    return page.evaluate(() => {
+      const stageElement = globalThis.document.getElementById("nur-universe-stage") as HTMLIFrameElement | null;
+      const stageDocument = stageElement?.contentDocument ?? null;
+      const stageWindow = stageElement?.contentWindow ?? null;
+      if (!stageDocument || !stageWindow) return false;
+      const galaxyFrame = stageDocument.getElementById("nur-v197-halo-free-galaxy-frame") as HTMLIFrameElement | null;
+      const brainHost = stageDocument.getElementById("front-nur-star") as HTMLElement | null;
+      const brainFrame = stageDocument.getElementById("nur-exact-brain-frame") as HTMLIFrameElement | null;
+      const diagnostics = (stageWindow as unknown as {
+        NURDiagnostics?: { snapshot?: () => ExactGalaxyDiagnostics };
+      }).NURDiagnostics?.snapshot?.() ?? null;
+      return galaxyFrame?.dataset.nurExactGalaxyState === "ready"
+        && brainHost?.dataset.nurExactBrainState === "ready"
+        && brainFrame?.dataset.nurExactBrainState === "ready"
+        && diagnostics?.particles === 2662;
+    });
+  }, { message: `${viewportLabel} exact celestial artifacts become ready` }).toBe(true);
+
+  const proof = await page.evaluate<RuntimeEvidence>(() => {
+    const hostDocument = globalThis.document;
+    const stageElement = hostDocument.getElementById("nur-universe-stage") as HTMLIFrameElement | null;
+    const stageDocument = stageElement?.contentDocument ?? null;
+    const stageWindow = stageElement?.contentWindow ?? null;
+    if (!stageDocument || !stageWindow) throw new Error("V197 stage document is unavailable");
+    const document = stageDocument;
+    const window = stageWindow;
+    const innerWidth = stageWindow.innerWidth;
+    const innerHeight = stageWindow.innerHeight;
+    const getComputedStyle = stageWindow.getComputedStyle.bind(stageWindow);
+    const galaxyFrames = document.querySelectorAll<HTMLIFrameElement>("#nur-v197-halo-free-galaxy-frame");
+    const galaxyFrame = galaxyFrames[0];
+    const galaxyDocument = galaxyFrame?.contentDocument ?? null;
+    const galaxyCanvas = galaxyDocument?.getElementById("galaxy") as HTMLCanvasElement | null;
+    const brainHosts = document.querySelectorAll<HTMLElement>("#front-nur-star");
+    const brainHost = brainHosts[0];
+    const brainFrames = document.querySelectorAll<HTMLIFrameElement>("#nur-exact-brain-frame");
+    const brainFrame = brainFrames[0];
+    const brainDocument = brainFrame?.contentDocument ?? null;
+    const brainCanvas = brainDocument?.getElementById("nur-brain-canvas-v197") as HTMLCanvasElement | null;
+    const brainInnerHost = brainDocument?.getElementById("front-nur-star") as HTMLElement | null;
+    const diagnostics = (window as unknown as {
+      NURDiagnostics?: { snapshot?: () => ExactGalaxyDiagnostics };
+    }).NURDiagnostics?.snapshot?.() ?? null;
+
+    const blankRect = { left: 0, top: 0, width: 0, height: 0 };
+    const blankStyle = {
+      display: "none",
+      position: "static",
+      opacity: 0,
+      pointerEvents: "none",
+      visibility: "hidden",
+    };
+    const geometry = (element: HTMLElement | null) => {
+      if (!element) return { rect: blankRect, style: blankStyle };
       const rect = element.getBoundingClientRect();
       const style = getComputedStyle(element);
-      const context = element.getContext("2d");
+      return {
+        rect: { left: rect.left, top: rect.top, width: rect.width, height: rect.height },
+        style: {
+          display: style.display,
+          position: style.position,
+          opacity: Number(style.opacity),
+          pointerEvents: style.pointerEvents,
+          visibility: style.visibility,
+        },
+      };
+    };
+    const galaxyGeometry = geometry(galaxyFrame ?? null);
+    const canvasGeometry = geometry(galaxyCanvas);
+    const brainGeometry = geometry(brainHost ?? null);
+
+    let galaxySignal = { litSamples: 0, spreadWidth: 0, spreadHeight: 0 };
+    if (galaxyCanvas && galaxyCanvas.width > 1 && galaxyCanvas.height > 1) {
+      const context = galaxyCanvas.getContext("2d");
       let litSamples = 0;
-      let minX = element.width;
+      let minX = galaxyCanvas.width;
       let maxX = -1;
-      let minY = element.height;
+      let minY = galaxyCanvas.height;
       let maxY = -1;
-      if (context && element.width > 1 && element.height > 1) {
-        const pixels = context.getImageData(0, 0, element.width, element.height).data;
-        const step = Math.max(1, Math.floor(Math.min(element.width, element.height) / 320));
-        for (let y = 0; y < element.height; y += step) {
-          for (let x = 0; x < element.width; x += step) {
-            const index = (y * element.width + x) * 4;
+      if (context) {
+        const pixels = context.getImageData(0, 0, galaxyCanvas.width, galaxyCanvas.height).data;
+        const step = Math.max(1, Math.floor(Math.min(galaxyCanvas.width, galaxyCanvas.height) / 240));
+        for (let y = 0; y < galaxyCanvas.height; y += step) {
+          for (let x = 0; x < galaxyCanvas.width; x += step) {
+            const index = (y * galaxyCanvas.width + x) * 4;
             const brightness = (pixels[index] ?? 0) + (pixels[index + 1] ?? 0) + (pixels[index + 2] ?? 0);
             if ((pixels[index + 3] ?? 0) <= 20 || brightness <= 150) continue;
             litSamples += 1;
@@ -363,54 +459,133 @@ async function assertCanonicalGalaxyRuntime(frame: FrameLocator, viewportLabel: 
           }
         }
       }
-      const scaleX = rect.width / Math.max(1, element.width);
-      const scaleY = rect.height / Math.max(1, element.height);
-      return {
-        rect: { left: rect.left, top: rect.top, width: rect.width, height: rect.height },
-        viewport: { width: frameWindow?.innerWidth ?? 0, height: frameWindow?.innerHeight ?? 0 },
-        backing: { width: element.width, height: element.height },
-        style: {
-          display: style.display,
-          position: style.position,
-          opacity: Number(style.opacity),
-          pointerEvents: style.pointerEvents,
-          visibility: style.visibility,
-        },
-        diagnostics: frameWindow?.NURDiagnostics?.snapshot?.() ?? null,
-        pixelSignal: {
-          litSamples,
-          spreadWidth: maxX >= minX ? (maxX - minX + 1) * scaleX : 0,
-          spreadHeight: maxY >= minY ? (maxY - minY + 1) * scaleY : 0,
-        },
+      const scaleX = canvasGeometry.rect.width / Math.max(1, galaxyCanvas.width);
+      const scaleY = canvasGeometry.rect.height / Math.max(1, galaxyCanvas.height);
+      galaxySignal = {
+        litSamples,
+        spreadWidth: maxX >= minX ? (maxX - minX + 1) * scaleX : 0,
+        spreadHeight: maxY >= minY ? (maxY - minY + 1) * scaleY : 0,
       };
-    });
-    return evidence?.diagnostics?.renderedFrames ?? 0;
-  }, { message: `${viewportLabel} canonical galaxy paints live frames` }).toBeGreaterThan(0);
+    }
 
-  expect(evidence).not.toBeNull();
-  const proof = evidence!;
-  expect(proof.style.display).toBe("block");
-  expect(proof.style.position).toBe("fixed");
-  expect(proof.style.visibility).toBe("visible");
-  expect(proof.style.opacity).toBe(1);
-  expect(proof.style.pointerEvents).toBe("none");
-  expect(Math.abs(proof.rect.left), `${viewportLabel} canvas begins at the viewport left`).toBeLessThanOrEqual(1);
-  expect(Math.abs(proof.rect.top), `${viewportLabel} canvas begins at the viewport top`).toBeLessThanOrEqual(1);
-  expect(Math.abs(proof.rect.width - proof.viewport.width), `${viewportLabel} canvas spans the viewport width`).toBeLessThanOrEqual(1);
-  expect(Math.abs(proof.rect.height - proof.viewport.height), `${viewportLabel} canvas spans the viewport height`).toBeLessThanOrEqual(1);
-  expect(proof.backing.width, `${viewportLabel} canvas has a real backing buffer`).toBeGreaterThanOrEqual(proof.rect.width);
-  expect(proof.backing.height, `${viewportLabel} canvas has a real backing buffer`).toBeGreaterThanOrEqual(proof.rect.height);
-  expect(proof.diagnostics?.version).toBe(canonicalGalaxyVersion);
-  expect(proof.diagnostics?.cssWidth).toBe(proof.viewport.width);
-  expect(proof.diagnostics?.cssHeight).toBe(proof.viewport.height);
-  expect(proof.diagnostics?.backingWidth).toBe(proof.backing.width);
-  expect(proof.diagnostics?.backingHeight).toBe(proof.backing.height);
-  expect(proof.diagnostics?.stars, `${viewportLabel} keeps the exact canonical star population`).toBe(2662);
-  expect(proof.diagnostics?.ambientStars, `${viewportLabel} keeps every ambient star`).toBe(222);
-  expect(proof.diagnostics?.contextLost, `${viewportLabel} canvas context remains active`).toBe(false);
-  expect(proof.pixelSignal.litSamples, `${viewportLabel} canvas contains painted stars`).toBeGreaterThan(30);
-  expect(proof.pixelSignal.spreadWidth, `${viewportLabel} star field has horizontal depth`).toBeGreaterThan(proof.viewport.width * .2);
-  expect(proof.pixelSignal.spreadHeight, `${viewportLabel} star field has vertical depth`).toBeGreaterThan(proof.viewport.height * .15);
+    let paintedSamples = 0;
+    if (brainCanvas && brainCanvas.width > 1 && brainCanvas.height > 1) {
+      const context = brainCanvas.getContext("2d");
+      if (context) {
+        const pixels = context.getImageData(0, 0, brainCanvas.width, brainCanvas.height).data;
+        const stride = Math.max(4, Math.floor(pixels.length / 8_000 / 4) * 4);
+        for (let index = 3; index < pixels.length; index += stride) {
+          if ((pixels[index] ?? 0) > 8) paintedSamples += 1;
+        }
+      }
+    }
+
+    return {
+      ready: Boolean(galaxyFrame && galaxyCanvas && brainHost && brainFrame && brainCanvas && diagnostics),
+      legacyCanvasCount: document.querySelectorAll("canvas#space3d").length,
+      htmlState: document.documentElement.dataset.nurCanonicalGalaxy ?? null,
+      viewport: { width: innerWidth, height: innerHeight },
+      galaxyFrame: {
+        count: galaxyFrames.length,
+        src: galaxyFrame?.getAttribute("src") ?? null,
+        sha256: galaxyFrame?.dataset.nurArtifactSha256 ?? null,
+        state: galaxyFrame?.dataset.nurExactGalaxyState ?? null,
+        ...galaxyGeometry,
+      },
+      galaxyCanvas: {
+        present: Boolean(galaxyCanvas),
+        ...canvasGeometry,
+        backing: { width: galaxyCanvas?.width ?? 0, height: galaxyCanvas?.height ?? 0 },
+        pixelSignal: galaxySignal,
+      },
+      diagnostics,
+      brain: {
+        hostCount: brainHosts.length,
+        visible: brainGeometry.style.display !== "none"
+          && brainGeometry.style.visibility !== "hidden"
+          && brainGeometry.style.opacity > 0
+          && brainGeometry.rect.width > 0
+          && brainGeometry.rect.height > 0,
+        state: brainHost?.dataset.nurExactBrainState ?? null,
+        sha256: brainHost?.dataset.nurArtifactSha256 ?? null,
+        engine: brainHost?.dataset.nurEngine ?? null,
+        frameCount: brainFrames.length,
+        frameState: brainFrame?.dataset.nurExactBrainState ?? null,
+        frameSha256: brainFrame?.dataset.nurArtifactSha256 ?? null,
+        legacyCanvasCount: document.querySelectorAll("#nur-brain-canvas").length,
+        canvasPresent: Boolean(brainCanvas),
+        title: brainInnerHost?.getAttribute("title") ?? null,
+        paintedSamples,
+      },
+    };
+  });
+
+  expect(proof.ready, `${viewportLabel} exact runtime snapshot is complete`).toBe(true);
+  expect(proof.legacyCanvasCount, `${viewportLabel} removes the superseded parent galaxy canvas`).toBe(0);
+  expect(proof.htmlState).toBe("ready");
+  expect(proof.galaxyFrame.count, `${viewportLabel} has one exact galaxy owner`).toBe(1);
+  expect(proof.galaxyFrame.src).toBe("/v197/NUR_V197_HALO_FREE.html");
+  expect(proof.galaxyFrame.sha256).toBe(exactGalaxySha256);
+  expect(proof.galaxyFrame.state).toBe("ready");
+  expect(proof.galaxyFrame.style.display).toBe("block");
+  expect(proof.galaxyFrame.style.position).toBe("fixed");
+  expect(proof.galaxyFrame.style.visibility).toBe("visible");
+  expect(proof.galaxyFrame.style.opacity).toBe(1);
+  expect(proof.galaxyFrame.style.pointerEvents).toBe("none");
+  expect(Math.abs(proof.galaxyFrame.rect.left), `${viewportLabel} exact frame begins at viewport left`)
+    .toBeLessThanOrEqual(1);
+  expect(Math.abs(proof.galaxyFrame.rect.top), `${viewportLabel} exact frame begins at viewport top`)
+    .toBeLessThanOrEqual(1);
+  expect(Math.abs(proof.galaxyFrame.rect.width - proof.viewport.width), `${viewportLabel} exact frame spans viewport width`)
+    .toBeLessThanOrEqual(1);
+  expect(Math.abs(proof.galaxyFrame.rect.height - proof.viewport.height), `${viewportLabel} exact frame spans viewport height`)
+    .toBeLessThanOrEqual(1);
+
+  expect(proof.galaxyCanvas.present).toBe(true);
+  expect(proof.galaxyCanvas.style.display).toBe("block");
+  expect(proof.galaxyCanvas.style.position).toBe("fixed");
+  expect(proof.galaxyCanvas.style.visibility).toBe("visible");
+  expect(proof.galaxyCanvas.style.opacity).toBe(1);
+  expect(proof.galaxyCanvas.style.pointerEvents).toBe("auto");
+  expect(Math.abs(proof.galaxyCanvas.rect.left), `${viewportLabel} canvas begins at viewport left`).toBeLessThanOrEqual(1);
+  expect(Math.abs(proof.galaxyCanvas.rect.top), `${viewportLabel} canvas begins at viewport top`).toBeLessThanOrEqual(1);
+  expect(Math.abs(proof.galaxyCanvas.rect.width - proof.viewport.width), `${viewportLabel} canvas spans viewport width`).toBeLessThanOrEqual(1);
+  expect(Math.abs(proof.galaxyCanvas.rect.height - proof.viewport.height), `${viewportLabel} canvas spans viewport height`).toBeLessThanOrEqual(1);
+  expect(proof.galaxyCanvas.backing.width).toBeGreaterThanOrEqual(proof.galaxyCanvas.rect.width);
+  expect(proof.galaxyCanvas.backing.height).toBeGreaterThanOrEqual(proof.galaxyCanvas.rect.height);
+
+  const exactDiagnostics = proof.diagnostics!;
+  expect(exactDiagnostics.version).toBe(canonicalGalaxyVersion);
+  expect(exactDiagnostics.sourceArtifact).toBe("NUR_V197_HALO_FREE.html");
+  expect(exactDiagnostics.artifactSha256).toBe(exactGalaxySha256);
+  expect(exactDiagnostics.stars).toBe(2662);
+  expect(exactDiagnostics.particles).toBe(2662);
+  expect(exactDiagnostics.ambient).toBe(222);
+  expect(exactDiagnostics.ambientStars).toBe(222);
+  expect(exactDiagnostics.presentedHz).toBeGreaterThan(0);
+  expect(exactDiagnostics.haloLayer).toBe(false);
+  expect(exactDiagnostics.renderer).toBe("exact-halo-free-iframe");
+  expect(exactDiagnostics.viewport).toEqual(proof.viewport);
+  expect(exactDiagnostics.backingStore.width).toBe(proof.galaxyCanvas.backing.width);
+  expect(exactDiagnostics.backingStore.height).toBe(proof.galaxyCanvas.backing.height);
+  expect(proof.galaxyCanvas.pixelSignal.litSamples, `${viewportLabel} canvas contains painted stars`).toBeGreaterThan(30);
+  expect(proof.galaxyCanvas.pixelSignal.spreadWidth, `${viewportLabel} star field has horizontal depth`)
+    .toBeGreaterThan(proof.viewport.width * .2);
+  expect(proof.galaxyCanvas.pixelSignal.spreadHeight, `${viewportLabel} star field has vertical depth`)
+    .toBeGreaterThan(proof.viewport.height * .15);
+
+  expect(proof.brain.hostCount, `${viewportLabel} restores one exact star-brain host`).toBe(1);
+  expect(proof.brain.visible, `${viewportLabel} exact star-brain host is visible`).toBe(true);
+  expect(proof.brain.state).toBe("ready");
+  expect(proof.brain.sha256).toBe(exactBrainSha256);
+  expect(proof.brain.engine).toBe("canvas2d-exact-artifact-v1");
+  expect(proof.brain.frameCount, `${viewportLabel} exact artifact frame is singular`).toBe(1);
+  expect(proof.brain.frameState).toBe("ready");
+  expect(proof.brain.frameSha256).toBe(exactBrainSha256);
+  expect(proof.brain.legacyCanvasCount).toBe(0);
+  expect(proof.brain.canvasPresent).toBe(true);
+  expect(proof.brain.title).toMatch(/click: cycle rainbow color.+double-click: dissolve\/spread.+scroll to zoom/);
+  expect(proof.brain.paintedSamples, `${viewportLabel} exact brain paints real star pixels`).toBeGreaterThan(100);
   return proof;
 }
 
@@ -459,25 +634,6 @@ async function assertNoHorizontalOverflow(frame: FrameLocator) {
   }));
   expect(overflow.documentScrollWidth, "document has no horizontal overflow").toBeLessThanOrEqual(overflow.documentClientWidth + 1);
   expect(overflow.bodyScrollWidth, "body has no horizontal overflow").toBeLessThanOrEqual(overflow.bodyClientWidth + 1);
-}
-
-async function assertMetricReadable(metric: Locator, label: string, expected: string | RegExp) {
-  await expect(metric).toBeVisible();
-  await expect(metric).toContainText(expected);
-  const fit = await metric.evaluate(el => {
-    const rect = el.getBoundingClientRect();
-    return {
-      text: el.textContent ?? "",
-      width: rect.width,
-      scrollWidth: el.scrollWidth,
-      height: rect.height,
-      scrollHeight: el.scrollHeight,
-      whiteSpace: getComputedStyle(el).whiteSpace,
-    };
-  });
-  expect(fit.text).not.toMatch(/ev\.\.\.|insights ev\.\.\./i);
-  expect(fit.scrollWidth, `${label} does not clip horizontally`).toBeLessThanOrEqual(fit.width + 3);
-  expect(fit.scrollHeight, `${label} does not clip vertically`).toBeLessThanOrEqual(fit.height + 3);
 }
 
 async function assertEqualControlGroup(locator: Locator, count: number, label: string) {
@@ -583,22 +739,111 @@ async function assertSystemsMapGeometry(
   const frame = universeFrame(page);
   await expect(frame.locator("#page-systems")).toBeVisible();
   const viewport = page.viewportSize();
-  const title = await box(`${viewportLabel} NUR wordmark`, frame.locator(".universe-map-title .nur-v197-stable-wordmark"));
-  const subtitle = await box(`${viewportLabel} map subtitle`, frame.locator(".universe-map-title small"));
-  await expect(frame.locator(".universe-master-star")).toBeVisible();
-  await assertCanonicalGalaxyRuntime(frame, viewportLabel);
-  const addControl = frame.locator(".universe-add-system");
-  const addIsVisible = await addControl.isVisible();
-  const add = addIsVisible
-    ? await box(`${viewportLabel} add system`, addControl)
-    : { x: -1000, y: -1000, width: 1, height: 1 };
-  const visibleNodes = frame.locator(".universe-system-node:visible");
-  const nodeBoxes = await visibleNodes.evaluateAll(elements => elements.map(element => {
-    const rect = element.getBoundingClientRect();
-    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
-  }));
+  const mapPanelLocator = frame.locator(".universe-map-panel");
+  await expect(mapPanelLocator).toBeVisible();
+  const snapshot = await mapPanelLocator.evaluate(mapPanelElement => {
+    const document = mapPanelElement.ownerDocument;
+    const stageWindow = document.defaultView;
+    if (!stageWindow) throw new Error("V197 stage window is unavailable");
+    const getComputedStyle = stageWindow.getComputedStyle.bind(stageWindow);
+    type Rect = { x: number; y: number; width: number; height: number };
+    const visible = (element: Element | null) => {
+      if (!(element instanceof HTMLElement)) return false;
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return rect.width > 0
+        && rect.height > 0
+        && style.display !== "none"
+        && style.visibility !== "hidden";
+    };
+    const rect = (element: Element | null): Rect | null => {
+      if (!visible(element)) return null;
+      const value = element!.getBoundingClientRect();
+      return { x: value.x, y: value.y, width: value.width, height: value.height };
+    };
+    const title = document.querySelector(".universe-map-title .nur-v197-stable-wordmark");
+    const subtitle = document.querySelector(".universe-map-title small");
+    const addControl = document.querySelector(".universe-add-system");
+    const commandRow = document.querySelector<HTMLElement>(".universe-command-row");
+    const commandRect = rect(commandRow);
+    const commandStyle = commandRow ? getComputedStyle(commandRow) : null;
+    const metrics = [...document.querySelectorAll<HTMLElement>(".universe-hero-stats > span")].map(element => {
+      const value = element.getBoundingClientRect();
+      return {
+        visible: visible(element),
+        text: element.textContent ?? "",
+        width: value.width,
+        scrollWidth: element.scrollWidth,
+        height: value.height,
+        scrollHeight: element.scrollHeight,
+        whiteSpace: getComputedStyle(element).whiteSpace,
+      };
+    });
+    return {
+      title: rect(title),
+      subtitle: rect(subtitle),
+      masterVisible: visible(document.querySelector(".universe-master-star")),
+      add: { visible: visible(addControl), rect: rect(addControl) },
+      field: rect(document.querySelector(".universe-field-readout")),
+      nodes: [...document.querySelectorAll<HTMLElement>(".universe-system-node")]
+        .filter(visible)
+        .map(element => ({
+          rect: rect(element)!,
+          classes: [...element.classList],
+          labelVisible: visible(element.querySelector("b")),
+          fit: {
+            width: element.clientWidth,
+            scrollWidth: element.scrollWidth,
+            height: element.clientHeight,
+            scrollHeight: element.scrollHeight,
+          },
+        })),
+      topbar: rect(document.querySelector(".nur-topbar")),
+      command: {
+        rect: commandRect,
+        display: commandStyle?.display ?? "none",
+        gridTemplateColumns: commandStyle?.gridTemplateColumns ?? "",
+        scrollWidth: commandRow?.scrollWidth ?? 0,
+        clientWidth: commandRow?.clientWidth ?? 0,
+        scrollHeight: commandRow?.scrollHeight ?? 0,
+        clientHeight: commandRow?.clientHeight ?? 0,
+        controls: commandRow && commandRect
+          ? [...commandRow.querySelectorAll<HTMLElement>(".world-command")].map(control => {
+              const value = control.getBoundingClientRect();
+              return {
+                inside: value.left >= commandRect.x - 1
+                  && value.right <= commandRect.x + commandRect.width + 1,
+                height: value.height,
+              };
+            })
+          : [],
+      },
+      metrics,
+      mapPanel: rect(mapPanelElement),
+      overflow: {
+        documentScrollWidth: document.documentElement.scrollWidth,
+        documentClientWidth: document.documentElement.clientWidth,
+        bodyScrollWidth: document.body.scrollWidth,
+        bodyClientWidth: document.body.clientWidth,
+      },
+    };
+  });
+  await assertCanonicalGalaxyRuntime(page, viewportLabel);
 
-  assertNoOverlap(`${viewportLabel}: System Field/title collision`, title, await maybeBox(frame.locator(".universe-field-readout")), 6);
+  expect(snapshot.title, `${viewportLabel} NUR wordmark is visible`).not.toBeNull();
+  expect(snapshot.subtitle, `${viewportLabel} map subtitle is visible`).not.toBeNull();
+  expect(snapshot.masterVisible, `${viewportLabel} exact star-brain host is visible`).toBe(true);
+  const title = snapshot.title!;
+  const subtitle = snapshot.subtitle!;
+  const add = snapshot.add.rect ?? { x: -1000, y: -1000, width: 1, height: 1 };
+  const nodeBoxes = snapshot.nodes.map(node => node.rect);
+
+  assertNoOverlap(
+    `${viewportLabel}: System Field/title collision`,
+    title,
+    snapshot.field ?? { x: -1000, y: -1000, width: 1, height: 1 },
+    6,
+  );
   assertNoOverlap(`${viewportLabel}: Add System/title collision`, add, title, 8);
 
   for (const [index, node] of nodeBoxes.entries()) {
@@ -610,54 +855,36 @@ async function assertSystemsMapGeometry(
   }
 
   if (viewport?.width === 1280) {
-    const ambition = await box("1280 Ambition label", frame.locator(".universe-system-node.quiet"));
-    const introspection = await box("1280 Introspection label", frame.locator(".universe-system-node.embodied"));
-    const connection = await box("1280 Connection label", frame.locator(".universe-system-node.relational"));
+    const node = (className: string) => snapshot.nodes.find(value => value.classes.includes(className));
+    const ambitionNode = node("quiet");
+    const introspectionNode = node("embodied");
+    const connectionNode = node("relational");
+    expect(ambitionNode, "1280 Ambition label is present").toBeDefined();
+    expect(introspectionNode, "1280 Introspection label is present").toBeDefined();
+    expect(connectionNode, "1280 Connection label is present").toBeDefined();
+    const ambition = ambitionNode!.rect;
+    const introspection = introspectionNode!.rect;
+    const connection = connectionNode!.rect;
     assertNoOverlap("1280: Ambition and Introspection have horizontal air", ambition, introspection, 18);
     assertNoOverlap("1280: Ambition and Connection have diagonal air", ambition, connection, 18);
     assertNoOverlap("1280: Introspection and Connection have vertical air", introspection, connection, 18);
-    await expect(frame.locator(".universe-system-node.quiet b")).toBeVisible();
-    await expect(frame.locator(".universe-system-node.embodied b")).toBeVisible();
-    await expect(frame.locator(".universe-system-node.relational b")).toBeVisible();
-    for (const node of [
-      frame.locator(".universe-system-node.quiet"),
-      frame.locator(".universe-system-node.embodied"),
-      frame.locator(".universe-system-node.relational"),
-    ]) {
-      const fit = await node.evaluate(el => ({
-        width: el.clientWidth,
-        scrollWidth: el.scrollWidth,
-        height: el.clientHeight,
-        scrollHeight: el.scrollHeight,
-      }));
+    for (const selectedNode of [ambitionNode!, introspectionNode!, connectionNode!]) {
+      expect(selectedNode.labelVisible, "1280 node label is visible").toBe(true);
+      const fit = selectedNode.fit;
       expect(fit.scrollWidth, "1280 selected label text does not clip horizontally").toBeLessThanOrEqual(fit.width + 2);
       expect(fit.scrollHeight, "1280 selected label text does not clip vertically").toBeLessThanOrEqual(fit.height + 2);
     }
   }
 
   if (viewport && viewport.width <= 620) {
-    const topbar = await box("mobile top nav", frame.locator(".nur-topbar"));
+    expect(snapshot.topbar, "mobile top nav is visible").not.toBeNull();
+    const topbar = snapshot.topbar!;
     expect(topbar.y, "mobile top nav is not clipped at the top").toBeGreaterThanOrEqual(0);
     expect(topbar.y + topbar.height, "mobile top nav stays inside its own opening area").toBeLessThanOrEqual(92);
 
-    const commandRow = frame.locator(".universe-command-row");
-    const command = await box("mobile chips row", commandRow);
-    const commandFlow = await commandRow.evaluate(el => ({
-      display: getComputedStyle(el).display,
-      gridTemplateColumns: getComputedStyle(el).gridTemplateColumns,
-      scrollWidth: el.scrollWidth,
-      clientWidth: el.clientWidth,
-      scrollHeight: el.scrollHeight,
-      clientHeight: el.clientHeight,
-      controls: [...el.querySelectorAll<HTMLElement>(".world-command")].map(control => {
-        const row = el.getBoundingClientRect();
-        const rect = control.getBoundingClientRect();
-        return {
-          inside: rect.left >= row.left - 1 && rect.right <= row.right + 1,
-          height: rect.height,
-        };
-      }),
-    }));
+    expect(snapshot.command.rect, "mobile chips row is visible").not.toBeNull();
+    const command = snapshot.command.rect!;
+    const commandFlow = snapshot.command;
     expect(commandFlow.display, "mobile commands use the approved wrapped grid").toBe("grid");
     expect(commandFlow.gridTemplateColumns.split(" ")).toHaveLength(2);
     expect(commandFlow.scrollWidth, "mobile commands do not clip horizontally").toBeLessThanOrEqual(commandFlow.clientWidth + 1);
@@ -667,19 +894,21 @@ async function assertSystemsMapGeometry(
     expect(Math.min(...commandFlow.controls.map(control => control.height)), "mobile commands keep a 44px hit height").toBeGreaterThanOrEqual(44);
     expect(command.height, "mobile command grid has a visible layout box").toBeGreaterThanOrEqual(44);
 
-    const metrics = frame.locator(".universe-hero-stats > span");
-    await assertMetricReadable(
-      metrics.nth(1),
-      "outcomes returned metric",
-      await activeCatalogCopy(locale, writingPreference, "ui.0747"),
-    );
-    await assertMetricReadable(
-      metrics.nth(2),
-      "insights evolving metric",
-      await activeCatalogCopy(locale, writingPreference, "ui.0748"),
-    );
-    await expect(addControl, "mobile intentionally removes the desktop-only Add System control").toBeHidden();
-    const mapPanel = await box("mobile systems map", frame.locator(".universe-map-panel"));
+    const expectedMetrics = [
+      { index: 1, label: "outcomes returned metric", text: await activeCatalogCopy(locale, writingPreference, "ui.0747") },
+      { index: 2, label: "insights evolving metric", text: await activeCatalogCopy(locale, writingPreference, "ui.0748") },
+    ];
+    for (const expected of expectedMetrics) {
+      const metric = snapshot.metrics[expected.index];
+      expect(metric?.visible, `${expected.label} is visible`).toBe(true);
+      expect(metric?.text, `${expected.label} contains its localized label`).toContain(expected.text);
+      expect(metric?.text ?? "").not.toMatch(/ev\.\.\.|insights ev\.\.\./i);
+      expect(metric!.scrollWidth, `${expected.label} does not clip horizontally`).toBeLessThanOrEqual(metric!.width + 3);
+      expect(metric!.scrollHeight, `${expected.label} does not clip vertically`).toBeLessThanOrEqual(metric!.height + 3);
+    }
+    expect(snapshot.add.visible, "mobile intentionally removes the desktop-only Add System control").toBe(false);
+    expect(snapshot.mapPanel, "mobile systems map is visible").not.toBeNull();
+    const mapPanel = snapshot.mapPanel!;
     for (const [index, node] of nodeBoxes.entries()) {
       expect(node.x, `mobile map node ${index} begins inside the map`).toBeGreaterThanOrEqual(mapPanel.x - 1);
       expect(node.x + node.width, `mobile map node ${index} stays inside the map width`).toBeLessThanOrEqual(mapPanel.x + mapPanel.width + 1);
@@ -688,14 +917,10 @@ async function assertSystemsMapGeometry(
     }
   }
 
-  await assertNoHorizontalOverflow(frame);
-}
-
-async function maybeBox(locator: Locator) {
-  if (await locator.count() === 0 || !(await locator.first().isVisible())) {
-    return { x: -1000, y: -1000, width: 1, height: 1 };
-  }
-  return box("optional system field", locator.first());
+  expect(snapshot.overflow.documentScrollWidth, "document has no horizontal overflow")
+    .toBeLessThanOrEqual(snapshot.overflow.documentClientWidth + 1);
+  expect(snapshot.overflow.bodyScrollWidth, "body has no horizontal overflow")
+    .toBeLessThanOrEqual(snapshot.overflow.bodyClientWidth + 1);
 }
 
 test("systems map has DOM anti-overlap proof at primary desktop and mobile breakpoints", async ({ page }, testInfo) => {
@@ -706,6 +931,10 @@ test("systems map has DOM anti-overlap proof at primary desktop and mobile break
   await page.setViewportSize(viewport);
   await page.goto("/systems");
   await assertSystemsMapGeometry(page, label);
+  await locatorScreenshot(
+    universeFrame(page).locator(".universe-map-panel"),
+    `systems-map-exact-brain-${label}.png`,
+  );
   if (mobileProject) {
     const source = "systems-overlap-proof-393x852.png";
     await screenshot(page, source);
@@ -746,7 +975,7 @@ test("Today and Systems controls keep one proportional geometry contract with lo
   await expect(frame.locator("#research-query")).toBeVisible();
   await expect(frame.locator("[data-research-submit]")).toBeVisible();
   await expect(frame.locator(".universe-command-row .world-command")).toHaveCount(2);
-  await assertCanonicalGalaxyRuntime(frame, mobile ? "393x852 Systems" : "1440x900 Systems");
+  await assertCanonicalGalaxyRuntime(page, mobile ? "393x852 Systems" : "1440x900 Systems");
 
   if (!mobile) {
     const fit = await frame.locator("#page-systems").evaluate(element => {
@@ -818,7 +1047,7 @@ test("Today and Systems controls keep one proportional geometry contract with lo
   await page.goto("/today");
   await expect(frame.locator("#page-today")).toBeVisible();
   await assertEqualControlGroup(frame.locator("#page-today .tiny-link"), 3, "Today panel actions");
-  await assertCanonicalGalaxyRuntime(frame, mobile ? "393x852 Today" : "1440x900 Today");
+  await assertCanonicalGalaxyRuntime(page, mobile ? "393x852 Today" : "1440x900 Today");
   const sendStar = frame.locator("#page-today .thought-send-button[data-send='today'] .nur-v197-sigil-star");
   await expect(sendStar).toBeVisible();
   await expect(sendStar).toHaveCSS("display", "block");
@@ -865,7 +1094,7 @@ test("Today and Systems controls keep one proportional geometry contract with lo
   }
 });
 
-test("RTL screenshots cover Talk, Systems, Share Orbit, and Capsule", async ({ page }, testInfo) => {
+test("RTL screenshots cover Talk and Systems", async ({ page }, testInfo) => {
   await installVisualMocks(page, "ur", "script");
   const mobileProject = testInfo.project.name.endsWith("-mobile");
   const viewport = mobileProject ? { width: 393, height: 852 } : { width: 1280, height: 720 };
@@ -881,6 +1110,18 @@ test("RTL screenshots cover Talk, Systems, Share Orbit, and Capsule", async ({ p
   await page.goto("/systems");
   await expect(frame.locator("#page-systems")).toBeVisible();
   await screenshot(page, `rtl-systems-${suffix}.png`);
+});
+
+test("RTL screenshots cover Share Orbit", async ({ page }, testInfo) => {
+  await installVisualMocks(page, "ur", "script");
+  const mobileProject = testInfo.project.name.endsWith("-mobile");
+  const viewport = mobileProject ? { width: 393, height: 852 } : { width: 1280, height: 720 };
+  const suffix = mobileProject ? "mobile-393x852" : "1280x720";
+  await page.setViewportSize(viewport);
+  const frame = universeFrame(page);
+
+  await page.goto("/systems");
+  await expect(frame.locator("#page-systems")).toBeVisible();
   await frame.locator("#scope-open").click();
   const sheet = frame.locator("#scope-modal .scope-modal");
   await expect(sheet).toBeVisible();
@@ -889,6 +1130,15 @@ test("RTL screenshots cover Talk, Systems, Share Orbit, and Capsule", async ({ p
   await sheet.evaluate(el => { el.scrollTop = 0; });
   await screenshot(page, `rtl-share-orbit-${suffix}.png`);
   await locatorScreenshot(sheet, `rtl-share-orbit-full-modal-top-${suffix}.png`);
+});
+
+test("RTL screenshot covers Capsule", async ({ page }, testInfo) => {
+  await installVisualMocks(page, "ur", "script");
+  const mobileProject = testInfo.project.name.endsWith("-mobile");
+  const viewport = mobileProject ? { width: 393, height: 852 } : { width: 1280, height: 720 };
+  const suffix = mobileProject ? "mobile-393x852" : "1280x720";
+  await page.setViewportSize(viewport);
+  const frame = universeFrame(page);
 
   await page.goto("/capsule/cap-active");
   await expect(frame.locator("#nur-v197-adjunct-root")).toBeVisible();

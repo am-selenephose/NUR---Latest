@@ -159,8 +159,9 @@ test.describe("NUR static 35-locale offline localization", () => {
     await page.goto("/talk");
     await expect(universe.locator("body")).toContainText(userAuthored);
     await expect(universe.locator("body")).toContainText(modelAuthored);
-    expect(await universe.locator("body").innerText()).toContain(userAuthored);
-    expect(await universe.locator("body").innerText()).toContain(modelAuthored);
+    const after = await universe.locator("body").innerText();
+    expect(after).toContain(userAuthored);
+    expect(after).toContain(modelAuthored);
     expect(before).toContain(userAuthored);
     expect(before).toContain(modelAuthored);
   });

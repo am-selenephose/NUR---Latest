@@ -32,17 +32,51 @@ describe("V197 canonical cross-screen celestial runtime", () => {
     expect(runtime).toContain("NUR_V197_CANONICAL_CROSS_SCREEN_LAGFREE_2026-08-29");
     expect(runtime).toContain("document.getElementById('space3d')");
     expect(runtime).toContain("nurGalaxy?.dispose?.()");
-    expect(runtime).toContain("nurStarBrain?.dispose?.()");
+    expect(runtime).not.toContain("nurStarBrain?.dispose?.()");
     expect(runtime).toContain("canonical-cross-screen-lagfree-v1");
   });
 
-  it("mounts the cross-screen renderer instead of the superseded brain runtime", () => {
+  it("rests between expensive paints without reducing the canonical star field", () => {
+    const runtime = read(runtimeArtifact);
+    expect(runtime).toContain("const MAX_ADAPTIVE_RENDER_REST_MS = 180");
+    expect(runtime).toContain("if(now < nextRenderAt) return");
+    expect(runtime).toContain("adaptiveRenderRestMs = smoothRenderCost > targetFrameMs");
+    expect(runtime).toContain("nextRenderAt = performance.now() + adaptiveRenderRestMs");
+    expect(runtime).toContain("stars:particles.length");
+    expect(runtime).toContain("ambientStars:ambientOrbiters.length+ambientFloaters.length+ambientFireballs.length");
+  });
+
+  it("exposes bounded depth-motion state without changing celestial geometry", () => {
+    const runtime = read(runtimeArtifact);
+    expect(runtime).toContain("zoom:rig.zoom");
+    expect(runtime).toContain("targetZoom:rig.targetZoom");
+    expect(runtime).toContain("minZoom:ZOOM_MIN");
+    expect(runtime).toContain("maxZoom:ZOOM_MAX");
+    expect(runtime).toContain("cameraDistance:frameBasis.cameraDistance");
+    expect(runtime).toContain("projectionScale:frameBasis.rigScale/Math.max(.08,frameBasis.cameraDistance)");
+    expect(runtime).toContain("activePointerCount:activePointers.size");
+    expect(runtime).toContain("pinchActive:gesture.pinchActive");
+  });
+
+  it("accepts spatial input on the Systems celestial field without hijacking controls", () => {
+    const runtime = read(runtimeArtifact);
+    expect(runtime).toContain("const interactionControls = [");
+    expect(runtime).toContain("const interactionPanelBlockers = [");
+    expect(runtime).toContain("const galaxyInteractionSurfaces = '#page-systems .universe-map-panel'");
+    expect(runtime).toContain("if(target.closest(interactionControls)!==null) return true");
+    expect(runtime).toContain("if(target.closest(galaxyInteractionSurfaces)!==null) return false");
+  });
+
+  it("mounts the exact halo-free galaxy beside the exact supplied brain runtime", () => {
     const polish = read("apps/web/src/bridge/v197Polish.ts");
     const css = read("apps/web/src/styles/v197-canonical-galaxy.css");
     expect(polish).toContain('from "./v197CanonicalGalaxy"');
     expect(polish).toContain("ensureV197CanonicalGalaxy(document)");
-    expect(polish).not.toContain("ensureV197StarBrain(document)");
-    expect(css).toContain("html.nur-canonical-cross-screen-runtime #nur-front-v61");
+    expect(polish).toContain('from "./v197StarBrain"');
+    expect(polish).toContain("ensureV197StarBrain(document)");
+    expect(css).toContain("html.nur-exact-halo-free-runtime #nur-front-v61");
+    expect(css).toContain("html.nur-exact-halo-free-runtime #nur-v197-halo-free-galaxy-frame");
+    expect(css).not.toContain("html.nur-canonical-cross-screen-runtime #nur-front-v61");
     expect(css).toContain("background-color: transparent !important");
   });
 });

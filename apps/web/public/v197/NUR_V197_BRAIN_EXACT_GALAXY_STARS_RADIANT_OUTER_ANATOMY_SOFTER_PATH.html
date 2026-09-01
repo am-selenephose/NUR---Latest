@@ -1,0 +1,1758 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>NUR V197 — Rainbow Click + Double Shatter OG Reset</title>
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000}
+body{user-select:none}
+#welcome{position:fixed;inset:0;display:flex!important;align-items:center;justify-content:center;background:#000}
+.front-orbit{position:relative;width:100vw;height:100vh;overflow:hidden}
+.front-core-light{position:absolute;left:50%;top:50%}
+#front-nur-star{
+  width:min(56vw,700px)!important;height:min(56vw,700px)!important;
+  background:none!important;filter:none!important;animation:none!important;
+  transform:translate(-50%,-50%)!important;
+  border-radius:0!important;overflow:visible!important;clip-path:none!important;
+  -webkit-mask-image:none!important;mask-image:none!important;
+  pointer-events:auto!important;cursor:grab;touch-action:none;
+}
+#front-nur-star.is-grabbing{cursor:grabbing!important}
+#nur-brain-canvas-v197{position:absolute;inset:0;width:100%;height:100%;display:block}
+@media(max-width:600px){
+  #front-nur-star{width:min(98vw,470px)!important;height:min(98vw,470px)!important;top:66%!important}
+  .front-orbit{opacity:.38!important}
+}
+@media(prefers-reduced-motion:reduce){#front-nur-star{cursor:default}}
+</style>
+</head>
+<body>
+<div id="welcome">
+  <div class="front-orbit" aria-hidden="false">
+    <span class="front-core-light" id="front-nur-star" aria-hidden="false"></span>
+  </div>
+</div>
+<script id="nur-v197-star-brain-galaxy-port">
+(() => {
+  'use strict';
+  const REDUCED = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const host = document.getElementById('front-nur-star');
+  if(!host) return;
+
+  host.setAttribute('role','button');
+  host.setAttribute('tabindex','0');
+
+  host.setAttribute('title','drag to spin the mind - click: cycle rainbow color - double-click: dissolve/spread + reform into original palette - enter/space: stardust shatter - scroll to zoom');
+  host.setAttribute('aria-label','A living brain made of real stars. Drag to spin it. Click and it dissolves into star glitter, then flows back together.');
+
+  const canvas = document.createElement('canvas');
+  canvas.id = 'nur-brain-canvas-v197';
+  host.appendChild(canvas);
+  const c = canvas.getContext('2d', { alpha:true, desynchronized:true });
+  if(!c) return;
+  c.imageSmoothingEnabled = true;
+  if('imageSmoothingQuality' in c) c.imageSmoothingQuality = 'high';
+
+  const rnd=(a,b)=>a+Math.random()*(b-a);
+  const pick=arr=>arr[(Math.random()*arr.length)|0];
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const FRAME_MS = 1000/60;
+  const DEVICE_MEMORY = /** @type {Navigator & {deviceMemory?:number}} */ (navigator).deviceMemory || 8;
+  const HW_THREADS = navigator.hardwareConcurrency || 8;
+  const PHONE = innerWidth < 700;
+  const LOW_SPEC = REDUCED || DEVICE_MEMORY <= 4 || HW_THREADS <= 4;
+  const MID_SPEC = !LOW_SPEC && (PHONE || DEVICE_MEMORY <= 8 || HW_THREADS <= 8);
+  const MAX_DPR = LOW_SPEC ? 1 : (PHONE ? 1.05 : (MID_SPEC ? 1.12 : 1.32));
+  const TRACE_MULT = LOW_SPEC ? .90 : (MID_SPEC ? .98 : 1.08);
+  const MICRO_MULT = LOW_SPEC ? .62 : (MID_SPEC ? .92 : 1.22);
+  const COUNT_MULT = LOW_SPEC ? .68 : (MID_SPEC ? .86 : 1);
+  const FX_LEVEL = LOW_SPEC ? 0 : (MID_SPEC ? 1 : 2);
+  if('imageSmoothingQuality' in c) c.imageSmoothingQuality = LOW_SPEC ? 'low' : (PHONE ? 'medium' : 'high');
+  const scaledCount = (n) => Math.max(1, Math.round(n * COUNT_MULT));
+
+  /* stellar rendering pipeline — exact galaxy-rig star language */
+  const SPEC = {
+    O: [[128,154,245],[144,168,248],[108,138,236]],
+    B: [[148,176,245],[166,190,248],[138,164,238]],
+    F: [[242,174,92],[230,156,66],[216,139,46]],
+    G: [[238,164,66],[224,146,46],[208,128,30]],
+    K: [[255,176,66],[244,160,48],[228,142,38]],
+    M: [[255,136,72],[236,116,54],[214,98,40]],
+    N: [[118,221,132],[102,214,124],[84,196,112]]
+  };
+  const DIST = [
+    {t:'M',w:.34},{t:'K',w:.25},{t:'G',w:.18},{t:'F',w:.10},
+    {t:'N',w:.05},{t:'B',w:.05},{t:'O',w:.03}
+  ];
+  const BRIGHT_TYPES = ['G','G','K','K','K','F','M','M','N','B','O'];
+  const NUR_RAINBOW = [
+    [255,64,64],   // red
+    [255,140,48],  // orange
+    [232,148,48],  // honey amber
+    [84,214,118],  // green
+    [84,164,255],  // blue
+    [96,92,255],   // indigo
+    [188,96,255]   // violet
+  ];
+  const GOLD_STARS = [
+    [244,174,88],[238,162,72],[232,150,58],[224,140,46],[216,130,38],
+    [206,120,32],[196,110,28],[184,100,24],[170,90,20],[156,80,18]
+  ];
+  const METALLIC_GOLD_STARS = [
+    [226,186,102],[214,174,88],[202,160,74],[192,150,66],[182,140,58],[170,130,52]
+  ];
+  const COOL_YELLOW_STARS = [
+    [226,238,92],[220,232,86],[214,226,80],[208,220,74],[202,214,70],[194,206,64]
+  ];
+  const INDIGO_STARS = [
+    [56,96,242],[64,108,248],[72,118,255],[48,88,228],[42,80,216],[84,128,255]
+  ];
+  const CORE_RADIANT_COLORS = [
+    [255,110,110],[255,160,82],[236,170,92],[124,232,148],[96,196,255],
+    [146,124,255],[210,120,255],[226,186,102],[238,162,72]
+  ];
+  const RAINBOW_STAR_CHANCE = Object.freeze({ arm:.18, core:.14, halo:.10, super:.34 });
+  const GOLD_STAR_CHANCE = Object.freeze({ arm:.28, core:.34, halo:.24, super:.42 });
+  const METALLIC_GOLD_STAR_CHANCE = Object.freeze({ arm:.16, core:.22, halo:.14, super:.30 });
+  const COOL_YELLOW_STAR_CHANCE = Object.freeze({ arm:.10, core:.08, halo:.06, super:.05 });
+  const INDIGO_STAR_CHANCE = Object.freeze({ arm:.08, core:.10, halo:.14, super:.12 });
+  const CORE_RADIANT_STAR_CHANCE = .42;
+
+  function mixColInto(a,b,t,out){
+    out[0]=Math.round(a[0]+(b[0]-a[0])*t);
+    out[1]=Math.round(a[1]+(b[1]-a[1])*t);
+    out[2]=Math.round(a[2]+(b[2]-a[2])*t);
+    return out;
+  }
+  const prismScratch=[0,0,0], warmScratch=[0,0,0], renderScratch=[0,0,0], honeyScratch=[0,0,0], rainbowClickScratch=[0,0,0];
+  const SCINT_WARM = [236,156,82];
+  const DOMINANT_WARM = [232,142,54];
+  const HONEY_AMBER_LIGHT = [240,166,82];
+  const HONEY_AMBER_DEEP = [214,128,38];
+  const PRISM_CHANCE = Object.freeze({super:.76, core:.60, arm:.50, halo:.42});
+
+  function rndCol(bright=false){
+    if(bright){
+      const t = BRIGHT_TYPES[(Math.random()*BRIGHT_TYPES.length)|0];
+      return SPEC[t][(Math.random()*SPEC[t].length)|0];
+    }
+    let r = Math.random(), cum = 0;
+    for(const {t,w} of DIST){
+      cum += w;
+      if(r < cum) return SPEC[t][(Math.random()*SPEC[t].length)|0];
+    }
+    return SPEC.G[0];
+  }
+  function rainbowCol(){ return NUR_RAINBOW[(Math.random()*NUR_RAINBOW.length)|0]; }
+  function goldCol(){ return GOLD_STARS[(Math.random()*GOLD_STARS.length)|0]; }
+  function metallicGoldCol(){ return METALLIC_GOLD_STARS[(Math.random()*METALLIC_GOLD_STARS.length)|0]; }
+  function coolYellowCol(){ return COOL_YELLOW_STARS[(Math.random()*COOL_YELLOW_STARS.length)|0]; }
+  function indigoCol(){ return INDIGO_STARS[(Math.random()*INDIGO_STARS.length)|0]; }
+  function coreRadiantCol(){ return CORE_RADIANT_COLORS[(Math.random()*CORE_RADIANT_COLORS.length)|0]; }
+  function isGreenish(col){ return col[1] > col[0] + 8 && col[1] > col[2]; }
+  function shouldPrismStar(kind){ return Math.random() < PRISM_CHANCE[kind]; }
+  function pickStarColor(kind, bright){
+    if(kind==='core' && Math.random() < CORE_RADIANT_STAR_CHANCE) return coreRadiantCol();
+    if(Math.random() < (METALLIC_GOLD_STAR_CHANCE[kind] || 0)) return metallicGoldCol();
+    if(Math.random() < (GOLD_STAR_CHANCE[kind] || 0)) return goldCol();
+    if(Math.random() < (COOL_YELLOW_STAR_CHANCE[kind] || 0)) return coolYellowCol();
+    if(Math.random() < (INDIGO_STAR_CHANCE[kind] || 0)) return indigoCol();
+    if(Math.random() < (RAINBOW_STAR_CHANCE[kind] || 0)) return rainbowCol();
+    return rndCol(bright);
+  }
+
+  function isSameCol(a,b){ return a[0]===b[0] && a[1]===b[1] && a[2]===b[2]; }
+  function isGoldPaletteCol(col){
+    return GOLD_STARS.some(gc => isSameCol(gc,col)) || METALLIC_GOLD_STARS.some(gc => isSameCol(gc,col));
+  }
+  function isCoolYellowCol(col){
+    return COOL_YELLOW_STARS.some(gc => isSameCol(gc,col));
+  }
+  function isIndigoCol(col){
+    return INDIGO_STARS.some(ic => isSameCol(ic,col));
+  }
+  function applyBrainYellowBias(col, starKind, group, bright){
+    if(isGoldPaletteCol(col)) return col;
+    const micro = group==='micro';
+    const guideish = group==='guide' || group==='cerebrumGuide' || group==='cerebGuide' || group==='stemGuide';
+    const deepish = group==='deep' || group==='cal';
+    let bias = bright ? .14 : .08;
+    if(starKind==='core') bias += .10;
+    if(starKind==='super') bias += .12;
+    if(guideish) bias += .18;
+    if(group==='cortex' || group==='cereb' || group==='stem') bias += .08;
+    if(micro) bias += .04;
+    if(deepish) bias -= .02;
+    bias = clamp(bias, 0, .46);
+    if(Math.random() >= bias) return col;
+    return Math.random() < (bright || starKind==='super' ? .48 : .34) ? metallicGoldCol() : goldCol();
+  }
+
+  function rainbowPhaseCol(seed){
+    const orbit = (((seed%(Math.PI*2))+(Math.PI*2))/(Math.PI*2))*NUR_RAINBOW.length;
+    return NUR_RAINBOW[Math.floor(orbit)%NUR_RAINBOW.length];
+  }
+  function isRainbowPaletteCol(col){
+    return NUR_RAINBOW.some(rc => isSameCol(rc,col));
+  }
+  function applyRainbowSevenBias(col, starKind, group, bright, seed=0){
+    if(isGoldPaletteCol(col) || isRainbowPaletteCol(col)) return col;
+    const guideish = group==='guide' || group==='cerebrumGuide' || group==='cerebGuide' || group==='stemGuide';
+    const micro = group==='micro';
+    let bias = bright ? .24 : .18;
+    if(group==='cortex' || group==='cereb' || group==='stem') bias += .10;
+    if(micro) bias += .08;
+    if(starKind==='super' || starKind==='core') bias += .08;
+    if(guideish) bias -= .10;
+    bias = clamp(bias, .10, .52);
+    if(Math.random() >= bias) return col;
+    return Math.random() < .66 ? rainbowPhaseCol(seed) : rainbowCol();
+  }
+  function applyCoolYellowIndigoBias(col, starKind, group, bright){
+    if(isGoldPaletteCol(col) || isCoolYellowCol(col) || isIndigoCol(col)) return col;
+    const micro = group==='micro';
+    const guideish = group==='guide' || group==='cerebrumGuide' || group==='cerebGuide' || group==='stemGuide';
+    const deepish = group==='deep' || group==='cal';
+    let coolBias = bright ? .05 : .10;
+    if(group==='cortex' || group==='cereb' || group==='stem') coolBias += .08;
+    if(micro) coolBias += .10;
+    if(guideish) coolBias -= .06;
+    coolBias = clamp(coolBias, .04, .32);
+    if(Math.random() < coolBias) return coolYellowCol();
+    let indigoBias = bright ? .10 : .07;
+    if(deepish) indigoBias += .08;
+    if(starKind==='core' || starKind==='super') indigoBias += .04;
+    indigoBias = clamp(indigoBias, .04, .26);
+    if(Math.random() < indigoBias) return indigoCol();
+    return col;
+  }
+  function prismShiftInto(col,phase,twinkle,isS,out){
+    const orbit = (((phase%(Math.PI*2))+(Math.PI*2))/(Math.PI*2))*NUR_RAINBOW.length;
+    const i0 = Math.floor(orbit)%NUR_RAINBOW.length;
+    const i1 = (i0+1)%NUR_RAINBOW.length;
+    const t = orbit-i0;
+    mixColInto(NUR_RAINBOW[i0], NUR_RAINBOW[i1], t, prismScratch);
+    const amt = Math.min(.82,(isS ? .56 : .42)+twinkle*(isS ? .24 : .18));
+    return mixColInto(col,prismScratch,amt,out);
+  }
+  function sampleRainbowFloatInto(orbit,out){
+    const wrapped = ((orbit % NUR_RAINBOW.length) + NUR_RAINBOW.length) % NUR_RAINBOW.length;
+    const i0 = Math.floor(wrapped) % NUR_RAINBOW.length;
+    const i1 = (i0 + 1) % NUR_RAINBOW.length;
+    const t = wrapped - Math.floor(wrapped);
+    return mixColInto(NUR_RAINBOW[i0], NUR_RAINBOW[i1], t, out);
+  }
+  function scintColInto(col,twinkle,isS,out){
+    const amt = (isS ? .16 : .05) + twinkle*(isS ? .15 : .05);
+    return mixColInto(col,SCINT_WARM,amt,out);
+  }
+  function warmDominantInto(col,amt,out){ return mixColInto(col,DOMINANT_WARM,amt,out); }
+  function honeyAmberizeInto(col,out){
+    const r=col[0], g=col[1], b=col[2];
+    const yellowLike = r >= 190 && g >= 145 && b <= 145 && g > b*1.15;
+    if(!yellowLike){ out[0]=r; out[1]=g; out[2]=b; return out; }
+    const brightness = clamp((r+g+b-430)/280,0,1);
+    return mixColInto(HONEY_AMBER_DEEP,HONEY_AMBER_LIGHT,brightness,out);
+  }
+
+  const SPRITE_DPR = 2;
+  const SPRITE_REF_ALPHA = .20;
+  const SPRITE_SIZES = [2.75,3.75,5.0,6.5];
+  const SPRITE_COLORS = [
+    [238,154,72],[230,140,56],[218,124,44],[236,160,72],[224,142,48],[232,166,92],[216,132,58],[192,111,60],
+    [226,186,102],[214,174,88],[202,160,74],[192,150,66],[182,140,58],[170,130,52],
+    [129,187,218],[111,164,231],[146,151,237],[184,133,225],[220,123,191],
+    [239,120,111],[232,142,62],[226,150,50],[210,132,34],[141,207,181],[118,221,132],[92,198,116]
+  ];
+  const spriteCache = [];
+  const SPRITE_COLOR_LUT = new Uint8Array(4096);
+  for(let rr=0;rr<16;rr++) for(let gg=0;gg<16;gg++) for(let bb=0;bb<16;bb++){
+    const r=rr*17, g=gg*17, b=bb*17;
+    let best=0,bestD=Infinity;
+    for(let i=0;i<SPRITE_COLORS.length;i++){
+      const q=SPRITE_COLORS[i], dr=r-q[0], dg=g-q[1], db=b-q[2];
+      const d=dr*dr+dg*dg+db*db;
+      if(d<bestD){ bestD=d; best=i; }
+    }
+    SPRITE_COLOR_LUT[(rr<<8)|(gg<<4)|bb]=best;
+  }
+  function nearestSpriteColor(col){
+    const r=(clamp(col[0],0,255)|0)>>4, g=(clamp(col[1],0,255)|0)>>4, b=(clamp(col[2],0,255)|0)>>4;
+    return SPRITE_COLOR_LUT[(r<<8)|(g<<4)|b];
+  }
+  function spriteSizeIndex(r){ if(r<3.25) return 0; if(r<4.4) return 1; if(r<5.75) return 2; return 3; }
+  function starPathCtx(ctx,x,y,outer,inner,rot=-Math.PI/2){
+    ctx.beginPath();
+    for(let i=0;i<8;i++){
+      const rr=(i&1)?inner:outer;
+      const a=rot+i*Math.PI/4;
+      const px=x+Math.cos(a)*rr;
+      const py=y+Math.sin(a)*rr;
+      if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+    }
+    ctx.closePath();
+  }
+  function shardCtx(ctx,x,y,len,col,a,rot){
+    ctx.save(); ctx.translate(x,y); ctx.rotate(rot);
+    const g=ctx.createLinearGradient(-len,0,len,0);
+    g.addColorStop(0,`rgba(${col[0]},${col[1]},${col[2]},0)`);
+    g.addColorStop(.46,`rgba(${col[0]},${col[1]},${col[2]},${a*.42})`);
+    g.addColorStop(.5,`rgba(238,154,78,${a})`);
+    g.addColorStop(.54,`rgba(${col[0]},${col[1]},${col[2]},${a*.42})`);
+    g.addColorStop(1,`rgba(${col[0]},${col[1]},${col[2]},0)`);
+    ctx.strokeStyle=g; ctx.lineWidth=.48;
+    ctx.beginPath(); ctx.moveTo(-len,0); ctx.lineTo(len,0); ctx.stroke();
+    ctx.rotate(Math.PI/2); ctx.globalAlpha*=.78;
+    ctx.beginPath(); ctx.moveTo(-len*.42,0); ctx.lineTo(len*.42,0); ctx.stroke();
+    ctx.restore();
+  }
+  function buildNormalSprite(colorIndex,sizeIndex,withSpike){
+    const col=SPRITE_COLORS[colorIndex], r=SPRITE_SIZES[sizeIndex];
+    const hR=r*2.68, bodyR=Math.max(1.05,Math.min(3.1,r*.12)), spikeLen=Math.max(6,r*2.6);
+    const half=Math.ceil(Math.max(hR,spikeLen)+5), logical=half*2;
+    const el=document.createElement('canvas');
+    el.width=logical*SPRITE_DPR; el.height=logical*SPRITE_DPR;
+    const ctx=el.getContext('2d',{alpha:true});
+    ctx.setTransform(SPRITE_DPR,0,0,SPRITE_DPR,half*SPRITE_DPR,half*SPRITE_DPR);
+    const a=SPRITE_REF_ALPHA, tw=1, rot=.72;
+    const hg=ctx.createRadialGradient(0,0,r*.45,0,0,hR);
+    hg.addColorStop(0,`rgba(${col[0]},${col[1]},${col[2]},${a*.065*tw})`);
+    hg.addColorStop(.34,`rgba(${col[0]},${col[1]},${col[2]},${a*.022})`);
+    hg.addColorStop(1,`rgba(${col[0]},${col[1]},${col[2]},0)`);
+    ctx.fillStyle=hg; ctx.beginPath(); ctx.arc(0,0,hR,0,Math.PI*2); ctx.fill();
+    shardCtx(ctx,0,0,bodyR*3.7,col,Math.min(.28,a*1.32),rot);
+    shardCtx(ctx,0,0,bodyR*2.2,col,Math.min(.15,a*.98),rot+Math.PI/4);
+    shardCtx(ctx,0,0,bodyR*1.28,col,Math.min(.09,a*.78),rot+Math.PI/8);
+    const ig=ctx.createRadialGradient(0,0,0,0,0,bodyR);
+    ig.addColorStop(0,`rgba(244,170,92,${Math.min(.90,a*tw*3.9)})`);
+    ig.addColorStop(.22,`rgba(${col[0]},${col[1]},${col[2]},${Math.min(.82,a*tw*2.1)})`);
+    ig.addColorStop(.64,`rgba(${col[0]},${col[1]},${col[2]},${Math.min(.24,a*.62)})`);
+    ig.addColorStop(1,`rgba(${col[0]},${col[1]},${col[2]},0)`);
+    ctx.fillStyle=ig; starPathCtx(ctx,0,0,bodyR,Math.max(.18,bodyR*.105),rot-Math.PI/2); ctx.fill();
+    ctx.strokeStyle=`rgba(232,142,62,${Math.min(.30,a*1.28)})`;
+    ctx.lineWidth=.42; starPathCtx(ctx,0,0,bodyR*.78,Math.max(.18,bodyR*.105)*.78,rot-Math.PI/2); ctx.stroke();
+    const cA=Math.min(a*tw*4.2,.84);
+    ctx.fillStyle=`rgba(${Math.min(255,col[0]+45)},${Math.min(255,col[1]+38)},${Math.min(255,col[2]+28)},${cA})`;
+    starPathCtx(ctx,0,0,Math.max(.95,bodyR*.24+tw*.35),Math.max(.20,bodyR*.045),rot); ctx.fill();
+    if(withSpike){
+      const spikeA=.15; ctx.save(); ctx.rotate(.3);
+      for(const ang of [0,Math.PI/2]){
+        ctx.save(); ctx.rotate(ang);
+        const sg=ctx.createLinearGradient(-spikeLen*.54,0,spikeLen*.54,0);
+        sg.addColorStop(0,`rgba(${Math.min(255,col[0]+25)},${Math.min(255,col[1]+18)},${Math.min(255,col[2]+12)},0)`);
+        sg.addColorStop(.26,`rgba(${col[0]},${col[1]},${col[2]},${spikeA*.44})`);
+        sg.addColorStop(.5,`rgba(232,142,62,${spikeA*.66})`);
+        sg.addColorStop(.74,`rgba(${col[0]},${col[1]},${col[2]},${spikeA*.44})`);
+        sg.addColorStop(1,`rgba(${Math.min(255,col[0]+25)},${Math.min(255,col[1]+18)},${Math.min(255,col[2]+12)},0)`);
+        ctx.strokeStyle=sg; ctx.lineWidth=.55; ctx.beginPath(); ctx.moveTo(-spikeLen*.54,0); ctx.lineTo(spikeLen*.54,0); ctx.stroke();
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+    return {canvas:el,half,logical};
+  }
+  function getNormalSprite(col,r,withSpike){
+    const ci=nearestSpriteColor(col), si=spriteSizeIndex(r), key=(ci<<3)|(si<<1)|(withSpike?1:0);
+    let sp=spriteCache[key];
+    if(!sp){ sp=buildNormalSprite(ci,si,withSpike); spriteCache[key]=sp; }
+    return sp;
+  }
+  function drawNormalSprite(x,y,r,col,alpha,phase,twinkle,withSpike){
+    const sp=getNormalSprite(col,r,withSpike), scale=r/SPRITE_SIZES[spriteSizeIndex(r)], opacity=Math.min(1,alpha/SPRITE_REF_ALPHA);
+    c.save(); c.translate(x,y); c.rotate(phase*.37+twinkle*.82-.72); c.scale(scale,scale); c.globalAlpha=opacity;
+    c.drawImage(sp.canvas,-sp.half,-sp.half,sp.logical,sp.logical); c.restore();
+  }
+  function stellarPath(x,y,outer,inner,points=4,rot=-Math.PI/2){
+    c.beginPath();
+    for(let i=0;i<points*2;i++){
+      const rr=i%2===0?outer:inner, a=rot+i*Math.PI/points, px=x+Math.cos(a)*rr, py=y+Math.sin(a)*rr;
+      if(i===0)c.moveTo(px,py);else c.lineTo(px,py);
+    }
+    c.closePath();
+  }
+  function glitterShard(x,y,len,col,a,rot){
+    c.save(); c.translate(x,y); c.rotate(rot);
+    const g=c.createLinearGradient(-len,0,len,0);
+    g.addColorStop(0,`rgba(${col[0]},${col[1]},${col[2]},0)`);
+    g.addColorStop(.46,`rgba(${col[0]},${col[1]},${col[2]},${a*.42})`);
+    g.addColorStop(.5,`rgba(238,154,78,${a})`);
+    g.addColorStop(.54,`rgba(${col[0]},${col[1]},${col[2]},${a*.42})`);
+    g.addColorStop(1,`rgba(${col[0]},${col[1]},${col[2]},0)`);
+    c.strokeStyle=g; c.lineWidth=.48; c.beginPath(); c.moveTo(-len,0); c.lineTo(len,0); c.stroke();
+    c.rotate(Math.PI/2); c.globalAlpha*=.78; c.beginPath(); c.moveTo(-len*.42,0); c.lineTo(len*.42,0); c.stroke();
+    c.restore();
+  }
+  function starGlow(x,y,r,sCol,alpha,twinkle,isS,phase=0){
+    const hR = r*(isS?5.10:2.72);
+    const hg = c.createRadialGradient(x,y,r*.45,x,y,hR);
+    hg.addColorStop(0,`rgba(${sCol[0]},${sCol[1]},${sCol[2]},${alpha*0.062*twinkle})`);
+    hg.addColorStop(.34,`rgba(${sCol[0]},${sCol[1]},${sCol[2]},${alpha*0.020})`);
+    hg.addColorStop(1,`rgba(${sCol[0]},${sCol[1]},${sCol[2]},0)`);
+    c.fillStyle=hg; c.beginPath(); c.arc(x,y,hR,0,Math.PI*2); c.fill();
+    const bodyR = isS ? clamp(r*.18,2.5,7.8) : clamp(r*.12,1.05,3.1);
+    const innerR = Math.max(.18, bodyR*.105);
+    const rot = phase*.37 + twinkle*.82 + (isS ? Math.PI/8 : 0);
+    glitterShard(x,y,bodyR*(isS?5.7:3.5),sCol,Math.min(.24,alpha*1.08),rot);
+    glitterShard(x,y,bodyR*(isS?3.0:2.0),sCol,Math.min(.12,alpha*0.82),rot+Math.PI/4);
+    glitterShard(x,y,bodyR*(isS?1.75:1.25),sCol,Math.min(.07,alpha*0.58),rot+Math.PI/8);
+    const ig = c.createRadialGradient(x,y,0,x,y,bodyR);
+    ig.addColorStop(0,`rgba(244,170,92,${Math.min(.88,alpha*twinkle*3.7)})`);
+    ig.addColorStop(.22,`rgba(${sCol[0]},${sCol[1]},${sCol[2]},${Math.min(.80,alpha*twinkle*1.9)})`);
+    ig.addColorStop(.64,`rgba(${sCol[0]},${sCol[1]},${sCol[2]},${Math.min(.22,alpha*.56)})`);
+    ig.addColorStop(1,`rgba(${sCol[0]},${sCol[1]},${sCol[2]},0)`);
+    c.fillStyle=ig; stellarPath(x,y,bodyR,innerR,4,rot-Math.PI/2); c.fill();
+    c.strokeStyle=`rgba(232,142,62,${Math.min(.28,alpha*1.18)})`;
+    c.lineWidth=.42; stellarPath(x,y,bodyR*.78,innerR*.78,4,rot-Math.PI/2); c.stroke();
+    const cA = Math.min(alpha*twinkle*4.0,.82);
+    if(cA>0.04){
+      const wr=Math.min(255,sCol[0]+45), wg=Math.min(255,sCol[1]+38), wb=Math.min(255,sCol[2]+28);
+      c.fillStyle=`rgba(${wr},${wg},${wb},${cA})`;
+      stellarPath(x,y,Math.max(.95,bodyR*.24+twinkle*.35),Math.max(.20,bodyR*.045),4,rot); c.fill();
+    }
+  }
+  function spike(x,y,len,col,a,rot=0){
+    c.save(); c.translate(x,y); c.rotate(rot);
+    const drawS=(l,angle,opFrac)=>{
+      c.rotate(angle);
+      const sg=c.createLinearGradient(-l,0,l,0);
+      sg.addColorStop(0,`rgba(${Math.min(255,col[0]+25)},${Math.min(255,col[1]+18)},${Math.min(255,col[2]+12)},0)`);
+      sg.addColorStop(.26,`rgba(${col[0]},${col[1]},${col[2]},${a*opFrac*.44})`);
+      sg.addColorStop(.5,`rgba(232,142,62,${a*opFrac*.66})`);
+      sg.addColorStop(.74,`rgba(${col[0]},${col[1]},${col[2]},${a*opFrac*.44})`);
+      sg.addColorStop(1,`rgba(${Math.min(255,col[0]+25)},${Math.min(255,col[1]+18)},${Math.min(255,col[2]+12)},0)`);
+      c.strokeStyle=sg; c.lineWidth=.55; c.beginPath(); c.moveTo(-l,0); c.lineTo(l,0); c.stroke(); c.rotate(-angle);
+    };
+    drawS(len*.54,0,.66); drawS(len*.54,Math.PI/2,.66); c.restore();
+  }
+
+  /* anatomy: layered point cloud — volume, not shell
+     axes: x = left/right (hemispheres), y = up, z = front(+)/back(−) */
+  const MOBILE   = PHONE;
+  const N_CORTEX = scaledCount(MOBILE ? 1460 : 2240);
+  const N_DEEP   = scaledCount(MOBILE ? 420 : 690);
+  const N_CEREB  = scaledCount(MOBILE ? 300 : 470);
+  const N_STEM   = scaledCount(MOBILE ? 86  : 128);
+  const N_CAL    = scaledCount(MOBILE ? 56  : 88);
+  const N_HEMI_TRACE = Math.max(28, Math.round((MOBILE ? 104 : 168) * TRACE_MULT * COUNT_MULT));
+  const N_PONS_TRACE = Math.max(20, Math.round((MOBILE ? 58 : 88) * TRACE_MULT * COUNT_MULT));
+  const N_MEDULLA_TRACE = Math.max(18, Math.round((MOBILE ? 56 : 84) * TRACE_MULT * COUNT_MULT));
+  const N_MICRO_CORTEX = Math.max(140, Math.round((MOBILE ? 860 : 1520) * MICRO_MULT));
+  const N_MICRO_CEREB = Math.max(42, Math.round((MOBILE ? 184 : 312) * MICRO_MULT));
+  const N_OUTER_ANATOMY = Math.max(58, Math.round((MOBILE ? 146 : 236) * TRACE_MULT * COUNT_MULT));
+  const N_ZOOM_MICRO_CORTEX = Math.max(92, Math.round((MOBILE ? 460 : 760) * MICRO_MULT));
+  const N_ZOOM_MICRO_CEREB = Math.max(30, Math.round((MOBILE ? 124 : 216) * MICRO_MULT));
+  const N_ZOOM_OUTER_TRACE = Math.max(34, Math.round((MOBILE ? 86 : 132) * TRACE_MULT * COUNT_MULT));
+  const GOLD_SET = [[245,214,123],[255,233,168],[255,244,190]];
+  const AMBER_SET = [[255,168,72],[255,182,88],[255,196,110]];
+  const SULCUS_SET = [[104,188,192],[118,202,205],[138,214,207]];
+  const FOLD_SET   = [[255,244,190],[255,233,168],[245,214,123]];
+  const pts = [];
+
+  function pickGoldToAmberHalf(setName='gold'){
+    const base = setName==='fold' ? FOLD_SET : GOLD_SET;
+    return Math.random() < .5 ? pick(AMBER_SET) : pick(base);
+  }
+
+  function addPoint(x,y,z,group,lum,opts){
+    opts = opts||{};
+    const bright = opts.bright ?? (group==='cortex' && Math.random()<.10);
+    const starKind = opts.starKind || (
+      bright ? 'super' :
+      (group==='deep' || group==='cal') ? 'halo' :
+      (group==='guide' || group==='cerebrumGuide' || group==='cerebGuide' || group==='stemGuide') ? 'core' :
+      'arm'
+    );
+    const baseCol = opts.col || pickStarColor(starKind, bright);
+    const yellowBiased = opts.col ? baseCol : applyBrainYellowBias(baseCol, starKind, group, bright);
+    const rainbowBiased = opts.col ? yellowBiased : applyRainbowSevenBias(yellowBiased, starKind, group, bright, x*2.7 + y*5.1 + z*3.3 + (opts.revealZoom ?? 0));
+    const col = opts.col ? rainbowBiased : applyCoolYellowIndigoBias(rainbowBiased, starKind, group, bright);
+    const metallicGold = METALLIC_GOLD_STARS.some(gc => gc[0]===col[0] && gc[1]===col[1] && gc[2]===col[2]);
+    const coolYellow = isCoolYellowCol(col);
+    const indigo = isIndigoCol(col);
+    const coreRadiant = starKind==='core' && CORE_RADIANT_COLORS.some(cc => cc[0]===col[0] && cc[1]===col[1] && cc[2]===col[2]);
+    const greenish = isGreenish(col);
+    const rainbowish = NUR_RAINBOW.some(rc => rc[0]===col[0] && rc[1]===col[1] && rc[2]===col[2]);
+    const goldish = GOLD_STARS.some(gc => gc[0]===col[0] && gc[1]===col[1] && gc[2]===col[2]);
+    const prism = opts.prism ?? ((metallicGold || coreRadiant) ? false : shouldPrismStar(starKind));
+    let sizeVariance = opts.sizeVariance ?? (bright ? rnd(.98,1.78) : ((opts.micro || group==='micro') ? rnd(.70,1.44) : rnd(.82,1.52)));
+    if(coolYellow) sizeVariance *= (opts.micro || group==='micro') ? rnd(.72,.90) : rnd(.82,.96);
+    if(indigo) sizeVariance *= (opts.micro || group==='micro') ? rnd(.78,.96) : rnd(.88,1.02);
+    const sparkTier = opts.sparkTier ?? (bright ? (Math.random()<.42 ? 2 : 1) : (Math.random()<.11 ? 2 : (Math.random()<.32 ? 1 : 0)));
+    const sparkBias = opts.sparkBias ?? (bright ? rnd(.24,.62) : rnd(.02,.34)) + sparkTier*.11;
+    const fireAmp = opts.fireAmp ?? ((opts.micro || group==='micro') ? rnd(.28,.72) : (bright ? rnd(.24,.58) : rnd(.18,.48)));
+    pts.push({
+      x,y,z, group, bright, starKind,
+      micro:!!opts.micro,
+      sizeScale:(opts.sizeScale ?? 1) * sizeVariance,
+      revealZoom: opts.revealZoom ?? 0,
+      microGate: Math.random(),
+      detailGate: Math.random(),
+      ox:0, oy:0, oz:0, vx:0, vy:0, vz:0,
+      r: (opts.r ?? rnd(.7,2.1)*(group==='stem'?.8:1)) * (bright ? rnd(1.02,1.18) : 1),
+      col,
+      prism,
+      metallicGold,
+      coolYellow,
+      indigo,
+      coreRadiant,
+      sparkTier,
+      sparkBias,
+      fireAmp,
+      firePhase: rnd(0,Math.PI*2),
+      fireFreq: rnd(.0018,.0042),
+      fireDrift: rnd(.4,1.2),
+      warmAmt:(metallicGold || coreRadiant || coolYellow || indigo) ? 0 : ((greenish || rainbowish || goldish) ? (starKind==='halo' ? .01 : .02) : (starKind==='halo' ? .08 : (bright ? .10 : .18))),
+      prismPhase: rnd(0,Math.PI*2), prismSpeed: rnd(.00018,.00056),
+      phase: rnd(0,Math.PI*2),
+      twinkAmt: clamp((bright?rnd(.12,.24):rnd(.18,.42)) + sparkBias*.18, .06, .76),
+      twinkSpd: rnd(.00055,.00225) * (1 + sparkBias*.55),
+      twinkPh: rnd(0,Math.PI*2),
+      nextFlash: rnd(bright?4200:1800, bright?18000:9000) / (1 + sparkBias*.55),
+      flashUntil: 0,
+      lum: clamp(lum,0.05,1.25),
+      tag: opts.tag || ''
+    });
+  }
+
+
+  /* multi-octave gyri fold field: >0 crest, <0 sulcus */
+  function foldField(az,inc){
+    return .052*Math.sin(az*7 + Math.sin(inc*4)*1.8)
+         + .030*Math.sin(az*13 + inc*9)
+         + .016*Math.sin(az*21 - inc*13.5);
+  }
+
+  /* cortex surface: golden-spiral sphere → hemispheres with real features */
+  for(let i=0;i<N_CORTEX;i++){
+    const t=(i+.5)/N_CORTEX;
+    const inc=Math.acos(1-2*t), az=Math.PI*(1+Math.sqrt(5))*i;
+    let x=Math.sin(inc)*Math.cos(az), y=Math.cos(inc), z=Math.sin(inc)*Math.sin(az);
+    let fold = foldField(az,inc);
+    let lum  = fold>0 ? Math.min(1.22, 1+fold*3.2) : Math.max(.55, 1+fold*5.5);
+
+    // central sulcus: crown groove, upper end posterior
+    const cs = Math.abs(z - (.06 - y*.26));
+    if(cs<.05 && y>.12 && Math.abs(x)>.14){ fold=-.075; lum=Math.min(lum,.52); }
+
+    // lateral (Sylvian) fissure + temporal-lobe bulge below it
+    const syl = y - (-.18 + z*.16);
+    if(Math.abs(syl)<.055 && Math.abs(x)>.42 && z>-.42 && z<.82){
+      fold=-.09; lum=Math.min(lum,.46);
+    } else if(syl<-.055 && syl>-.52 && Math.abs(x)>.38 && z>-.30 && z<.72){
+      x*=1.055; y-=.045; lum*=1.04;
+    }
+
+    const f=1+fold;
+    x*=f; y*=f; z*=f;
+    x*=1.00; y*=.84; z*=1.27;
+
+    // longitudinal fissure: hemispheres apart at the midline
+    if(Math.abs(x)<.11 && y>-.12){
+      x=Math.sign(x||rnd(-1,1))*(.11+Math.abs(x)*.35);
+      lum=Math.min(lum,.55);
+    }
+    // frontal taper + flattened underside
+    if(z>.62) x*=1-.16*(z-.62);
+    if(y<-.44) y=-.44+(y+.44)*.45;
+    const outer = Math.abs(x)>.78 || y>.60 || z>.98 || z<-.98;
+    addPoint(x,y,z,'cortex',outer?Math.max(.86,lum):lum, outer ? {
+      r:rnd(1.15,2.85), bright:Math.random()<.18, sizeScale:rnd(1.02,1.26), sparkBias:rnd(.14,.34), tag:'outline'
+    } : undefined);
+  }
+
+  function microRadius(){
+    const u=Math.random();
+    if(u<.72) return rnd(.18,.36);
+    if(u<.94) return rnd(.36,.58);
+    return rnd(.58,.82);
+  }
+  const ZOOM_REVEAL_MIN = 1.00;
+  const ZOOM_REVEAL_MAX = 1.48;
+  function zoomReveal(min=1.04,max=1.48){
+    return rnd(Math.max(ZOOM_REVEAL_MIN,min), Math.min(ZOOM_REVEAL_MAX,max));
+  }
+
+  /* extra micro-stars: same renderer, smaller size bands, no extra wireframe */
+  for(let i=0;i<N_MICRO_CORTEX;i++){
+    const t=(i+.5)/N_MICRO_CORTEX;
+    const inc=Math.acos(1-2*t), az=Math.PI*(1+Math.sqrt(5))*(i+.37);
+    let x=Math.sin(inc)*Math.cos(az), y=Math.cos(inc), z=Math.sin(inc)*Math.sin(az);
+    const fold=foldField(az,inc)*.62;
+    const f=1+fold;
+    x*=f; y*=f; z*=f;
+    x*=1.00; y*=.84; z*=1.27;
+    if(Math.abs(x)<.105 && y>-.12) x=Math.sign(x||rnd(-1,1))*(.105+Math.abs(x)*.34);
+    if(z>.62) x*=1-.16*(z-.62);
+    if(y<-.44) y=-.44+(y+.44)*.45;
+    addPoint(x,y,z,'micro',rnd(.56,.90),{
+      r:microRadius(), bright:false, prism:false, starKind:'arm', micro:true, sizeScale:rnd(.94,1.18), sparkBias:rnd(.04,.18)
+    });
+  }
+  for(let i=0;i<N_ZOOM_MICRO_CORTEX;i++){
+    const t=(i+.5)/N_ZOOM_MICRO_CORTEX;
+    const inc=Math.acos(1-2*t), az=Math.PI*(1+Math.sqrt(5))*(i+.83);
+    let x=Math.sin(inc)*Math.cos(az), y=Math.cos(inc), z=Math.sin(inc)*Math.sin(az);
+    const fold=foldField(az,inc)*.68;
+    const f=1+fold;
+    x*=f; y*=f; z*=f;
+    x*=1.00; y*=.84; z*=1.27;
+    if(Math.abs(x)<.105 && y>-.12) x=Math.sign(x||rnd(-1,1))*(.105+Math.abs(x)*.34);
+    if(z>.62) x*=1-.16*(z-.62);
+    if(y<-.44) y=-.44+(y+.44)*.45;
+    addPoint(x,y,z,'micro',rnd(.56,.94),{
+      r:microRadius(), bright:false, prism:false, starKind:'arm', micro:true, sizeScale:rnd(.98,1.26), sparkBias:rnd(.06,.20),
+      revealZoom: zoomReveal(1.02,1.48)
+    });
+  }
+
+  /* sparse anatomical landmark stars — readable folds, never wireframe */
+  function cortexSurface(side,y,z,inflate=1.018){
+    const yy=y/.84, zz=z/1.27;
+    const rem=Math.max(.018,1-yy*yy-zz*zz);
+    let x=side*Math.sqrt(rem)*inflate;
+    if(z>.62) x*=1-.16*(z-.62);
+    return {x,y,z};
+  }
+  function addCortexTrace(side,n,curve,tag='sulcus'){
+    for(let i=0;i<n;i++){
+      const t=n===1?0:i/(n-1);
+      let {y,z}=curve(t);
+      y+=rnd(-.010,.010); z+=rnd(-.012,.012);
+      const q=cortexSurface(side,y,z,1.024+rnd(-.006,.008));
+      const isFold=tag==='fold';
+      addPoint(q.x,q.y,q.z,'guide',isFold?rnd(.88,1.02):rnd(.56,.70),{
+        r:isFold?rnd(.74,1.18):rnd(.52,.88), col:pick(isFold?FOLD_SET:SULCUS_SET),
+        bright:false, prism:false, tag
+      });
+    }
+  }
+  for(const side of [-1,1]){
+    addCortexTrace(side,MOBILE?12:17,t=>{ const y=.60-t*.58; return {y,z:.06-y*.26}; },'sulcus');
+    addCortexTrace(side,MOBILE?12:18,t=>{ const z=.70-t*1.00; return {y:-.18+z*.16,z}; },'sulcus');
+    addCortexTrace(side,MOBILE?9:13,t=>{ const z=.58-t*.80; return {y:-.31+z*.11,z}; },'sulcus');
+    addCortexTrace(side,MOBILE?8:11,t=>{ const y=.48-t*.42; return {y,z:-.47-y*.12}; },'fold');
+  }
+
+  function addCerebrumContour(side,n,curve){
+    for(let i=0;i<n;i++){
+      const t=n===1?0:i/(n-1);
+      let {y,z,inflate}=curve(t);
+      y+=rnd(-.007,.007); z+=rnd(-.008,.008);
+      const q=cortexSurface(side,y,z,inflate ?? (1.05+rnd(-.005,.010)));
+      addPoint(q.x,q.y,q.z,'cerebrumGuide',rnd(.92,1.08),{
+        r:rnd(1.08,1.74), col:pickGoldToAmberHalf('fold'), bright:Math.random()<.24, prism:false, sizeScale:rnd(1.08,1.32), sparkBias:rnd(.16,.38), tag:'cerebrum-outline'
+      });
+    }
+  }
+  for(const side of [-1,1]){
+    addCerebrumContour(side,MOBILE?16:24,t=>({ y:.64-t*.80, z:.04-.12*Math.cos(t*Math.PI), inflate:1.058 }));   // tall outer arch
+    addCerebrumContour(side,MOBILE?13:20,t=>({ y:.22-t*.52, z:.92-t*.46, inflate:1.05 }));                     // frontal roundness
+    addCerebrumContour(side,MOBILE?11:17,t=>({ y:-.10-t*.28, z:-.64+.30*Math.sin(t*Math.PI*.9), inflate:1.048 })); // occipital underside
+    addCerebrumContour(side,MOBILE?12:18,t=>({ y:-.18+.06*Math.sin(t*Math.PI), z:.54-t*.96, inflate:1.046 }));      // temporal/lower flank
+  }
+
+  function addFineHemisphereTrace(side,n,curve){
+    for(let i=0;i<n;i++){
+      const t=n===1?0:i/(n-1);
+      let {y,z,inflate}=curve(t);
+      y+=rnd(-.004,.004); z+=rnd(-.005,.005);
+      const q=cortexSurface(side,y,z,inflate ?? (1.066+rnd(-.003,.006)));
+      addPoint(q.x,q.y,q.z,'cerebrumGuide',rnd(.88,1.00),{
+        r:microRadius(), col:pickGoldToAmberHalf('fold'), bright:false, prism:false,
+        starKind:'arm', micro:true, sizeScale:rnd(.82,1.00), tag:'hemi-trace'
+      });
+    }
+  }
+  for(const side of [-1,1]){
+    addFineHemisphereTrace(side,N_HEMI_TRACE,t=>({ y:.66-t*.82, z:.02-.10*Math.cos(t*Math.PI), inflate:1.067 }));
+    addFineHemisphereTrace(side,Math.max(12,N_HEMI_TRACE-2),t=>({ y:-.16+.05*Math.sin(t*Math.PI), z:.62-t*1.06, inflate:1.056 }));
+    addFineHemisphereTrace(side,Math.max(11,N_HEMI_TRACE-4),t=>({ y:.18-t*.46, z:.88-t*.42, inflate:1.058 }));
+    addFineHemisphereTrace(side,Math.max(10,N_HEMI_TRACE-6),t=>({ y:.50-t*.58, z:-.56+.24*Math.sin(t*Math.PI), inflate:1.058 }));
+    addFineHemisphereTrace(side,Math.max(12,Math.round(N_HEMI_TRACE*.72)),t=>({ y:.58-t*.70, z:.28-.22*Math.sin(t*Math.PI), inflate:1.062 }));
+    addFineHemisphereTrace(side,Math.max(11,Math.round(N_HEMI_TRACE*.68)),t=>({ y:.06-t*.34, z:-.82+.44*t, inflate:1.050 }));
+  }
+
+  function addOuterAnatomyTrace(side,n,curve,tag='outer-anatomy'){
+    for(let i=0;i<n;i++){
+      const t=n===1?0:i/(n-1);
+      let {y,z,inflate}=curve(t);
+      y+=rnd(-.003,.003); z+=rnd(-.004,.004);
+      const q=cortexSurface(side,y,z,inflate ?? (1.072+rnd(-.002,.006)));
+      addPoint(q.x,q.y,q.z,'cerebrumGuide',rnd(.92,1.04),{
+        r:rnd(.28,.76), col:pickGoldToAmberHalf('fold'), bright:false, prism:false,
+        starKind:'arm', micro:true, sizeScale:rnd(1.12,1.46), sparkBias:rnd(.12,.34), tag
+      });
+    }
+  }
+  for(const side of [-1,1]){
+    addOuterAnatomyTrace(side,N_OUTER_ANATOMY,t=>({ y:.74-t*.88, z:.00-.08*Math.cos(t*Math.PI), inflate:1.076 }));      // outer silhouette arch
+    addOuterAnatomyTrace(side,Math.max(14,Math.round(N_OUTER_ANATOMY*.78)),t=>({ y:.28-t*.44, z:1.00-t*.38, inflate:1.070 })); // frontal bulge
+    addOuterAnatomyTrace(side,Math.max(14,Math.round(N_OUTER_ANATOMY*.74)),t=>({ y:.04-t*.28, z:-.88+.34*t, inflate:1.062 })); // occipital rear edge
+    addOuterAnatomyTrace(side,Math.max(16,Math.round(N_OUTER_ANATOMY*.84)),t=>({ y:-.18+.05*Math.sin(t*Math.PI), z:.72-t*1.22, inflate:1.060 })); // temporal lower rim
+    addOuterAnatomyTrace(side,Math.max(12,Math.round(N_OUTER_ANATOMY*.70)),t=>({ y:.62-t*.56, z:.44-.30*Math.sin(t*Math.PI), inflate:1.074 })); // parietal side arc
+    addOuterAnatomyTrace(side,Math.max(16,Math.round(N_OUTER_ANATOMY*.88)),t=>({ y:.70-t*.76, z:-.30+.18*Math.sin(t*Math.PI), inflate:1.078 })); // dorsal outer shell
+    addOuterAnatomyTrace(side,Math.max(16,Math.round(N_OUTER_ANATOMY*.82)),t=>({ y:.36-t*.48, z:.78-.78*t, inflate:1.068 })); // frontal-temporal shell
+    addOuterAnatomyTrace(side,Math.max(14,Math.round(N_OUTER_ANATOMY*.74)),t=>({ y:.20-.42*t, z:-.62+.52*t, inflate:1.064 })); // occipital-temporal shell
+    addOuterAnatomyTrace(side,Math.max(18,Math.round(N_OUTER_ANATOMY*.92)),t=>({ y:.78-t*.96, z:.10-.12*Math.sin(t*Math.PI), inflate:1.084 }), 'dorsal-crown-shell'); // crown silhouette
+    addOuterAnatomyTrace(side,Math.max(16,Math.round(N_OUTER_ANATOMY*.80)),t=>({ y:-.06-.26*t, z:.96-.76*t, inflate:1.072 }), 'frontal-lower-shell'); // front lower flank
+    addOuterAnatomyTrace(side,Math.max(14,Math.round(N_OUTER_ANATOMY*.76)),t=>({ y:.40-.56*t, z:-.96+.26*Math.sin(t*Math.PI*.9), inflate:1.070 }), 'rear-shell'); // rear sweep
+  }
+  function addZoomOuterAnatomyTrace(side,n,curve,tag='outer-anatomy'){
+    for(let i=0;i<n;i++){
+      const t=n===1?0:i/(n-1);
+      let {y,z,inflate}=curve(t);
+      y+=rnd(-.003,.003); z+=rnd(-.004,.004);
+      const q=cortexSurface(side,y,z,inflate ?? (1.074+rnd(-.002,.006)));
+      addPoint(q.x,q.y,q.z,'cerebrumGuide',rnd(.92,1.04),{
+        r:rnd(.30,.82), col:pickGoldToAmberHalf('fold'), bright:false, prism:false,
+        starKind:'arm', micro:true, sizeScale:rnd(1.14,1.52), sparkBias:rnd(.14,.36), tag,
+        revealZoom: zoomReveal(1.06,1.48)
+      });
+    }
+  }
+  for(const side of [-1,1]){
+    addZoomOuterAnatomyTrace(side,N_ZOOM_OUTER_TRACE,t=>({ y:.74-t*.88, z:.00-.08*Math.cos(t*Math.PI), inflate:1.078 }));
+    addZoomOuterAnatomyTrace(side,Math.max(10,Math.round(N_ZOOM_OUTER_TRACE*.82)),t=>({ y:.28-t*.44, z:1.00-t*.38, inflate:1.072 }));
+    addZoomOuterAnatomyTrace(side,Math.max(10,Math.round(N_ZOOM_OUTER_TRACE*.78)),t=>({ y:-.18+.05*Math.sin(t*Math.PI), z:.72-t*1.22, inflate:1.062 }));
+    addZoomOuterAnatomyTrace(side,Math.max(12,Math.round(N_ZOOM_OUTER_TRACE*.76)),t=>({ y:.66-t*.62, z:.16-.18*Math.cos(t*Math.PI), inflate:1.082 }), 'dorsal-outline');
+    addZoomOuterAnatomyTrace(side,Math.max(12,Math.round(N_ZOOM_OUTER_TRACE*.72)),t=>({ y:.46-t*.52, z:-.92+.50*t, inflate:1.070 }), 'rear-outline');
+    addZoomOuterAnatomyTrace(side,Math.max(12,Math.round(N_ZOOM_OUTER_TRACE*.74)),t=>({ y:.14-t*.28, z:.92-.96*t, inflate:1.066 }), 'lower-flank-outline');
+    addZoomOuterAnatomyTrace(side,Math.max(14,Math.round(N_ZOOM_OUTER_TRACE*.82)),t=>({ y:.80-t*.98, z:.12-.14*Math.sin(t*Math.PI), inflate:1.088 }), 'crown-outline');
+    addZoomOuterAnatomyTrace(side,Math.max(12,Math.round(N_ZOOM_OUTER_TRACE*.76)),t=>({ y:-.04-.28*t, z:.98-.82*t, inflate:1.074 }), 'frontal-rim-outline');
+  }
+
+  /* subsurface volume: dim interior stars — the mind reads as a solid */
+  function normal(){
+    let u=0,v=0;
+    while(u===0)u=Math.random();
+    while(v===0)v=Math.random();
+    return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+  }
+  for(let i=0;i<N_DEEP;i++){
+    let dx=normal(),dy=normal(),dz=normal();
+    const m=Math.hypot(dx,dy,dz)||1; dx/=m;dy/=m;dz/=m;
+    const rr=.12+Math.cbrt(Math.random())*.68;
+    let x=dx*rr*1.0, y=dy*rr*.84, z=dz*rr*1.27;
+    if(Math.abs(x)<.06 && y>0) x=Math.sign(x||(Math.random()-.5))*.06;
+    if(y<-.42) y=-.42+(y+.42)*.5;
+    addPoint(x,y,z,'deep',rnd(.34,.58),{r:rnd(.45,1.15),bright:false,prism:false});
+  }
+
+  /* cerebellum: finely foliated small ellipsoid, lower back + vermis groove */
+  for(let i=0;i<N_CEREB;i++){
+    const t=(i+.5)/N_CEREB;
+    const inc=Math.acos(1-2*t), az=Math.PI*(1+Math.sqrt(5))*i;
+    let x=Math.sin(inc)*Math.cos(az), y=Math.cos(inc), z=Math.sin(inc)*Math.sin(az);
+    const stripe=Math.sin(inc*17);
+    const f=1+.035*stripe;
+    let lum=(.62+.38*(0.5+0.5*stripe))*.96;
+    if(Math.abs(x)<.09) lum*=.8;
+    const rim=Math.abs(x)>.82 || Math.abs(y)>.82 || Math.abs(z)>.86;
+    addPoint(x*.56*f, -.56+y*.30*f, -.84+z*.44*f, 'cereb', rim?Math.max(.84,lum):lum, {
+      r:rim?rnd(.8,1.65):rnd(.6,1.6), tag:rim?'cereb-outline':''
+    });
+  }
+  for(let i=0;i<N_MICRO_CEREB;i++){
+    const t=(i+.5)/N_MICRO_CEREB;
+    const inc=Math.acos(1-2*t), az=Math.PI*(1+Math.sqrt(5))*(i+.61);
+    let x=Math.sin(inc)*Math.cos(az), y=Math.cos(inc), z=Math.sin(inc)*Math.sin(az);
+    const f=1+.025*Math.sin(inc*17);
+    addPoint(x*.56*f,-.56+y*.30*f,-.84+z*.44*f,'micro',rnd(.62,.88),{
+      r:microRadius(), bright:false, prism:false, starKind:'arm', micro:true, sizeScale:rnd(.80,.98)
+    });
+  }
+  for(let i=0;i<N_ZOOM_MICRO_CEREB;i++){
+    const t=(i+.5)/N_ZOOM_MICRO_CEREB;
+    const inc=Math.acos(1-2*t), az=Math.PI*(1+Math.sqrt(5))*(i+.97);
+    let x=Math.sin(inc)*Math.cos(az), y=Math.cos(inc), z=Math.sin(inc)*Math.sin(az);
+    const f=1+.028*Math.sin(inc*17);
+    addPoint(x*.56*f,-.56+y*.30*f,-.84+z*.44*f,'micro',rnd(.62,.90),{
+      r:microRadius(), bright:false, prism:false, starKind:'arm', micro:true, sizeScale:rnd(.78,.96),
+      revealZoom: zoomReveal(1.05,1.46)
+    });
+  }
+
+  const FOLIA_LEVELS = MOBILE ? [-.62,-.30,.02,.34,.62] : [-.68,-.46,-.23,0,.23,.46,.68];
+  for(const v of FOLIA_LEVELS){
+    const ring=Math.sqrt(Math.max(.04,1-v*v));
+    const n=MOBILE?12:17;
+    for(let i=0;i<n;i++){
+      const a=(i/n)*Math.PI*2 + (v+.7)*.31;
+      addPoint(Math.cos(a)*.56*ring+rnd(-.006,.006),-.56+v*.30+rnd(-.005,.005),-.84+Math.sin(a)*.44*ring+rnd(-.006,.006),'cerebGuide',rnd(.74,.92),{
+        r:rnd(.48,.82), col:pickGoldToAmberHalf('fold'), bright:false, prism:false, tag:'folia'
+      });
+    }
+  }
+  for(let i=0;i<(MOBILE?18:28);i++){
+    const a=(i/(MOBILE?18:28))*Math.PI*2;
+    addPoint(Math.cos(a)*.565,-.56,-.84+Math.sin(a)*.445,'cerebGuide',.94,{
+      r:rnd(.62,.96), col:pickGoldToAmberHalf('fold'), bright:false, prism:false, tag:'cereb-outline'
+    });
+  }
+
+  /* brainstem: clearer pons bulge + tapered medulla + stellar contour */
+  function stemBase(t){
+    const pons=.060*Math.exp(-Math.pow((t-.22)/.14,2));
+    const medullaNarrow=t>.52 ? (t-.52)*.030 : 0;
+    return Math.max(.030,.108-t*.046+pons-medullaNarrow);
+  }
+  for(let i=0;i<N_STEM;i++){
+    const t=i/Math.max(1,N_STEM-1), a=rnd(0,Math.PI*2);
+    const rr=stemBase(t)*Math.sqrt(rnd(0,1));
+    const ponsFront=.050*Math.exp(-Math.pow((t-.22)/.12,2));
+    const medBack=t>.56 ? (t-.56)*.030 : 0;
+    addPoint(Math.cos(a)*rr, -.40-t*.56, -.30+t*.18 + ponsFront + Math.sin(a)*rr - medBack, 'stem', .82, {
+      r:rnd(.58,1.52), tag:(t>.10&&t<.34)?'pons':(t>.58?'medulla':'')
+    });
+  }
+  // pons: anterior rounded bridge made of denser warm stars
+  for(let i=0;i<(MOBILE?18:30);i++){
+    const a=(i/(MOBILE?18:30))*Math.PI*2;
+    const rr=.108 + .020*Math.cos(a)*Math.cos(a);
+    addPoint(Math.cos(a)*rr*.92, -.52 + Math.sin(a)*.050, -.18 + Math.sin(a)*rr*.82, 'stemGuide', rnd(.94,1.06), {
+      r:rnd(.72,1.14), col:pickGoldToAmberHalf('fold'), bright:Math.random()<.14, prism:false, tag:'pons'
+    });
+  }
+  // extra fine pons trace stars
+  for(const side of [-1,1]){
+    for(let i=0;i<N_PONS_TRACE;i++){
+      const t=i/Math.max(1,N_PONS_TRACE-1);
+      const a=-Math.PI*.62 + t*Math.PI*1.24;
+      const rr=.094 + .010*Math.cos(a)*Math.cos(a);
+      addPoint(side*Math.cos(a)*rr*.42, -.515 + Math.sin(a)*.045, -.178 + Math.cos(a)*rr*.42, 'stemGuide', rnd(.96,1.08), {
+        r:microRadius(), col:pickGoldToAmberHalf('fold'), bright:false, prism:false,
+        starKind:'arm', micro:true, sizeScale:rnd(.80,.98), tag:'pons-trace'
+      });
+    }
+  }
+
+  for(let i=0;i<Math.max(10,Math.round(N_PONS_TRACE*.72));i++){
+    const a=(i/Math.max(1,Math.round(N_PONS_TRACE*.72)-1))*Math.PI*2;
+    addPoint(Math.cos(a)*.060,-.515+Math.sin(a)*.032,-.175+Math.sin(a)*.060,'stemGuide',rnd(.90,1.00),{
+      r:microRadius(), col:pickGoldToAmberHalf('fold'), bright:false, prism:false,
+      starKind:'arm', micro:true, sizeScale:rnd(.74,.92), tag:'pons-trace'
+    });
+  }
+
+  // medulla: slimmer taper with two readable rails
+  for(const side of [-1,1]){
+    const n=MOBILE?12:20;
+    for(let i=0;i<n;i++){
+      const t=i/(n-1);
+      const rr=.062 - t*.026;
+      addPoint(side*rr, -.68-t*.28, -.16+t*.02, 'stemGuide', rnd(.86,.98), {
+        r:rnd(.56,.90), col:pickGoldToAmberHalf('fold'), bright:false, prism:false, tag:'medulla'
+      });
+    }
+  }
+  // extra fine medulla trace stars
+  for(const side of [-1,1]){
+    for(let i=0;i<N_MEDULLA_TRACE;i++){
+      const t=i/Math.max(1,N_MEDULLA_TRACE-1);
+      const rr=.048 - t*.018;
+      addPoint(side*rr, -.70-t*.27, -.16+t*.025, 'stemGuide', rnd(.90,1.00), {
+        r:microRadius(), col:pickGoldToAmberHalf('fold'), bright:false, prism:false,
+        starKind:'arm', micro:true, sizeScale:rnd(.76,.94), tag:'medulla-trace'
+      });
+    }
+  }
+
+  for(let i=0;i<Math.max(10,Math.round(N_MEDULLA_TRACE*.70));i++){
+    const t=i/Math.max(1,Math.round(N_MEDULLA_TRACE*.70)-1);
+    addPoint(rnd(-.014,.014),-.70-t*.27,-.16+t*.025,'stemGuide',rnd(.84,.96),{
+      r:microRadius(), col:pickGoldToAmberHalf('fold'), bright:false, prism:false,
+      starKind:'arm', micro:true, sizeScale:rnd(.72,.90), tag:'medulla-trace'
+    });
+  }
+
+  // overall stem silhouette rails
+  for(const side of [-1,1]){
+    const n=MOBILE?12:18;
+    for(let i=0;i<n;i++){
+      const t=i/(n-1), rr=stemBase(t);
+      const ponsFront=.040*Math.exp(-Math.pow((t-.22)/.14,2));
+      addPoint(side*rr,-.40-t*.56,-.30+t*.18+ponsFront,'stemGuide',rnd(.82,.96),{
+        r:rnd(.58,.94), col:pickGoldToAmberHalf('fold'), bright:false, prism:false, tag:'stem-outline'
+      });
+    }
+  }
+  for(const t of [.10,.22,.34,.56,.78]){
+    const rr=stemBase(t);
+    const zc=-.30+t*.18+.040*Math.exp(-Math.pow((t-.22)/.14,2));
+    const n=MOBILE?6:9;
+    for(let i=0;i<n;i++){
+      const a=i/n*Math.PI*2;
+      addPoint(Math.cos(a)*rr,-.40-t*.56,zc+Math.sin(a)*rr,'stemGuide',rnd(.68,.84),{
+        r:rnd(.42,.72), col:pick(SULCUS_SET), bright:false, prism:false, tag:'stem-ring'
+      });
+    }
+  }
+
+  /* corpus callosum: faint gold arc bridging the hemispheres */
+  for(let i=0;i<N_CAL;i++){
+    const t=(i+.5)/N_CAL;
+    const a=-.35+t*(Math.PI+.80)+rnd(-.04,.04);
+    const px=rnd(-.028,.028);
+    const py=.03+Math.sin(a)*.235;
+    const pz=-.05+Math.cos(a)*.40;
+    addPoint(px,py,pz,'cal',rnd(.42,.62),{r:rnd(.5,1.05),col:pickGoldToAmberHalf('gold'),bright:false,prism:false});
+  }
+
+  /* synapse web: exact local k-nearest via spatial buckets (same .09 radius, no quadratic startup scan) */
+  const LINKABLE = p => p.group==='cortex'||p.group==='cereb'||p.group==='stem';
+  const edges=[]; const adj=pts.map(()=>[]);
+  const edgeSet=new Set();
+  const EDGE_CELL=.30;
+  const edgeBuckets=new Map();
+  const edgeCellKey=(group,x,y,z)=>group+'|'+Math.floor(x/EDGE_CELL)+'|'+Math.floor(y/EDGE_CELL)+'|'+Math.floor(z/EDGE_CELL);
+  for(let i=0;i<pts.length;i++){
+    const p=pts[i];
+    if(!LINKABLE(p)) continue;
+    const key=edgeCellKey(p.group,p.x,p.y,p.z);
+    let bucket=edgeBuckets.get(key);
+    if(!bucket){ bucket=[]; edgeBuckets.set(key,bucket); }
+    bucket.push(i);
+  }
+  for(let i=0;i<pts.length;i++){
+    const p=pts[i];
+    if(!LINKABLE(p)) continue;
+    const ix=Math.floor(p.x/EDGE_CELL), iy=Math.floor(p.y/EDGE_CELL), iz=Math.floor(p.z/EDGE_CELL);
+    let n1=-1,n2=-1,d1=.0900001,d2=.0900001;
+    for(let ox=-1;ox<=1;ox++) for(let oy=-1;oy<=1;oy++) for(let oz=-1;oz<=1;oz++){
+      const bucket=edgeBuckets.get(p.group+'|'+(ix+ox)+'|'+(iy+oy)+'|'+(iz+oz));
+      if(!bucket) continue;
+      for(let bi=0;bi<bucket.length;bi++){
+        const j=bucket[bi];
+        if(i===j) continue;
+        const q=pts[j], dx=p.x-q.x, dy=p.y-q.y, dz=p.z-q.z;
+        const d=dx*dx+dy*dy+dz*dz;
+        if(d<d1){ d2=d1; n2=n1; d1=d; n1=j; }
+        else if(d<d2){ d2=d; n2=j; }
+      }
+    }
+    const candidates=[[n1,d1],[n2,d2]];
+    for(let ci=0;ci<2;ci++){
+      const j=candidates[ci][0], dd=candidates[ci][1];
+      if(j<0 || dd>.09) continue;
+      const key=i<j?i+'-'+j:j+'-'+i;
+      if(edgeSet.has(key)) continue;
+      edgeSet.add(key);
+      edges.push({a:i,b:j});
+      adj[i].push(j); adj[j].push(i);
+    }
+  }
+
+  /* neural pulses along the synapses */
+  const PULSE_COLS=[[78,218,168],[78,218,168],[78,158,255],[245,214,123],[255,108,128]];
+  const pulses=[];
+  function firePulse(from){
+    const start = from ?? (Math.random()*pts.length)|0;
+    if(!adj[start] || !adj[start].length) return;
+    const path=[start]; let cur=start;
+    for(let h=0;h<3+((Math.random()*4)|0);h++){
+      const next=adj[cur][(Math.random()*adj[cur].length)|0];
+      if(next==null) break;
+      path.push(next); cur=next;
+    }
+    if(path.length>1) pulses.push({path, t:0, speed:rnd(.028,.05), col:pick(PULSE_COLS)});
+  }
+
+  /* glitter motes drifting off the surface */
+  const motes=[];
+  function emitMote(p, px, py){
+    if(motes.length>(LOW_SPEC ? 36 : 64)) return;
+    const dx=px-cx, dy=py-cy, m=Math.hypot(dx,dy)||1;
+    const radial=rnd(.10,.42);
+    motes.push({x:px, y:py,
+      vx:(dx/m)*radial+rnd(-.16,.16), vy:(dy/m)*radial+rnd(-.16,.16),
+      life:rnd(42,94), max:94, col:p?p.col:pickGoldToAmberHalf('gold'), r:rnd(.48,1.45)});
+  }
+
+  /* independently moving glitter stars inside the brain volume */
+  const BRAIN_FLOATER_COUNT = LOW_SPEC ? (PHONE ? 28 : 36) : (PHONE ? 42 : (MID_SPEC ? 64 : 92));
+  const brainFloaters=[];
+  const brainFloaterProjected = Array.from({length:BRAIN_FLOATER_COUNT},()=>({x:0,y:0,z:0,sc:0,edge:0,active:1,fire:0}));
+  const brainFloaterOrder = Array.from({length:BRAIN_FLOATER_COUNT},(_,i)=>i);
+  function insideCerebrumVolume(x,y,z){
+    const xx=x/1.02, yy=(y+.02)/.84, zz=z/1.27;
+    return (xx*xx + yy*yy + zz*zz) <= 1.02 && !(Math.abs(x)<.052 && y>.08 && z>-.26 && z<.34);
+  }
+  function insideCerebellumVolume(x,y,z){
+    const xx=x/.58, yy=(y+.56)/.31, zz=(z+.84)/.46;
+    return (xx*xx + yy*yy + zz*zz) <= 1.04;
+  }
+  function stemCenterAt(t){
+    const ponsFront=.050*Math.exp(-Math.pow((t-.22)/.12,2));
+    const medBack=t>.56 ? (t-.56)*.030 : 0;
+    return -.30 + t*.18 + ponsFront - medBack;
+  }
+  function insideStemVolume(x,y,z){
+    if(y<-.98 || y>-.38) return false;
+    const t=clamp((-y-.40)/.56, 0, 1);
+    const zc=stemCenterAt(t);
+    const r=stemBase(t)+.024;
+    const dz=z-zc;
+    return x*x + dz*dz <= r*r;
+  }
+  function wholeBrainContains(x,y,z){
+    return insideCerebrumVolume(x,y,z) || insideCerebellumVolume(x,y,z) || insideStemVolume(x,y,z);
+  }
+  function randomWholeBrainPoint(){
+    for(let tries=0; tries<1600; tries++){
+      const x=rnd(-.98,.98), y=rnd(-.98,.78), z=rnd(-1.22,1.14);
+      if(wholeBrainContains(x,y,z)) return {x,y,z};
+    }
+    return {x:0,y:-.04,z:0};
+  }
+  function pickFloaterColor(){
+    const r=Math.random();
+    return r<.20 ? coolYellowCol() : r<.34 ? indigoCol() : r<.56 ? rainbowCol() : r<.78 ? goldCol() : metallicGoldCol();
+  }
+  function resetFloaterTarget(f){
+    const p=randomWholeBrainPoint();
+    f.tx=p.x; f.ty=p.y; f.tz=p.z; f.targetLife=rnd(1100,2800);
+  }
+  function makeBrainFloater(){
+    const p=randomWholeBrainPoint();
+    const col=pickFloaterColor();
+    const bright=Math.random()<.28;
+    const sparkBias=rnd(.18,.54);
+    const floater={
+      x:p.x, y:p.y, z:p.z,
+      vx:rnd(-.0044,.0044), vy:rnd(-.0048,.0048), vz:rnd(-.0042,.0042),
+      tx:p.x, ty:p.y, tz:p.z, targetLife:0,
+      r:rnd(.22,.74), col,
+      metallicGold:METALLIC_GOLD_STARS.some(gc => isSameCol(gc,col)),
+      coolYellow:isCoolYellowCol(col), indigo:isIndigoCol(col),
+      prism:Math.random()<.24,
+      bright,
+      sparkBias,
+      twinkAmt:clamp((bright?rnd(.16,.30):rnd(.24,.52))+sparkBias*.22,.10,.88),
+      twinkSpd:rnd(.0012,.0036) * (1 + sparkBias*.55),
+      twinkPh:rnd(0,Math.PI*2),
+      nextFlash:rnd(bright?1500:900, bright?7200:4200),
+      flashUntil:0,
+      phase:rnd(0,Math.PI*2),
+      firePhase:rnd(0,Math.PI*2),
+      orbitA:rnd(.010,.036), orbitB:rnd(.014,.044), orbitC:rnd(.010,.034),
+      lum:rnd(.72,1.05), gate:Math.random()
+    };
+    resetFloaterTarget(floater);
+    return floater;
+  }
+  for(let i=0;i<BRAIN_FLOATER_COUNT;i++) brainFloaters.push(makeBrainFloater());
+  function stepBrainFloaters(dt, now, quality, density, frameNo){
+    const activeDensity = density ?? (quality===2 ? 1 : (quality===1 ? (LOW_SPEC ? .62 : .82) : (LOW_SPEC ? .34 : .50)));
+    const dtK=clamp(dt/16.666, .65, 1.45);
+    const loadStagger = activeDensity < .42 ? 3 : (activeDensity < .68 ? 2 : 1);
+    const tick = frameNo || 0;
+    for(let i=0;i<brainFloaters.length;i++){
+      const f=brainFloaters[i];
+      if(f.gate > activeDensity){ brainFloaterProjected[i].active=0; continue; }
+      brainFloaterProjected[i].active=1;
+      const shouldStep = loadStagger===1 || ((i + tick) % loadStagger === 0);
+      if(!shouldStep) continue;
+      f.targetLife -= dt;
+      const dx=f.tx-f.x, dy=f.ty-f.y, dz=f.tz-f.z;
+      const d2=dx*dx+dy*dy+dz*dz;
+      if(f.targetLife<=0 || d2<.0055) resetFloaterTarget(f);
+      const verticalBias = Math.sin(now*.00092 + f.phase + f.x*2.8 - f.z*1.8);
+      const crossBias = Math.cos(now*.00076 + f.twinkPh + f.y*2.4);
+      const pull = .0044;
+      const swirl = .0020 + f.sparkBias*.0015;
+      f.vx += (f.tx-f.x)*pull*dtK + Math.sin(now*.00082 + f.phase)*swirl*dtK + crossBias*.0009*dtK;
+      f.vy += (f.ty-f.y)*pull*dtK + Math.cos(now*.00074 + f.twinkPh)*swirl*dtK + verticalBias*.0015*dtK;
+      f.vz += (f.tz-f.z)*pull*dtK + Math.sin(now*.00093 + f.firePhase)*swirl*dtK + Math.sin(now*.00068 + f.phase*1.2)*.0008*dtK;
+      f.vx *= .974; f.vy *= .974; f.vz *= .974;
+      f.x += f.vx*dtK + Math.sin(now*.00135 + f.phase)*f.orbitA;
+      f.y += f.vy*dtK + Math.cos(now*.00112 + f.twinkPh)*f.orbitB + Math.sin(now*.00148 + f.firePhase)*f.orbitB*.42;
+      f.z += f.vz*dtK + Math.sin(now*.00128 + f.firePhase)*f.orbitC;
+      if(!wholeBrainContains(f.x,f.y,f.z)){
+        f.vx *= -.52; f.vy *= -.52; f.vz *= -.52;
+        f.x += (f.tx-f.x)*.22; f.y += (f.ty-f.y)*.22; f.z += (f.tz-f.z)*.22;
+        if(!wholeBrainContains(f.x,f.y,f.z)){
+          const p=randomWholeBrainPoint();
+          f.x=p.x; f.y=p.y; f.z=p.z;
+          f.vx=rnd(-.0028,.0028); f.vy=rnd(-.0030,.0030); f.vz=rnd(-.0028,.0028);
+          resetFloaterTarget(f);
+        }
+      }
+    }
+  }
+
+  /* camera / interaction / modes */
+  let W=0,H=0,cx=0,cy=0,scale=1,edgeInner2=1,edgeOuter2=1;
+  let hostVisible=true, hostLeft=0, hostTop=0;
+  const VIEW_PAD = 26;
+  const LOCKED_PITCH = -.10;
+  const rig = {
+    yaw:.28, pitch:LOCKED_PITCH,
+    targetYaw:.28,
+    zoom:1, targetZoom:1,
+    velYaw:0
+  };
+  const pointer = { x:0, tx:0, active:false, id:null, lastX:0, lastY:0 };
+  let smoothDt = FRAME_MS;
+  let dragging=false, dragDist=0;
+  let hoverX=-1e4, hoverY=-1e4, hoverActive=false;
+  let mode='live', modeT=0;
+  let energy=0;
+  let breath=0;
+  let microDensity = LOW_SPEC ? .54 : (MID_SPEC ? .76 : .96);
+  let bodyDensity = 1;
+  let webDensity = LOW_SPEC ? .42 : (MID_SPEC ? .62 : .84);
+  let floaterDensity = LOW_SPEC ? .46 : (PHONE ? .66 : (MID_SPEC ? .78 : .92));
+  let physicsWakeUntil = 0;
+  let rainbowClickOrbit = 0, rainbowClickTarget = 0, rainbowClickMix = 0, rainbowClickMixTarget = 0;
+  const RAINBOW_CLICK_BLEND = .80;
+  let auraCanvas=null, auraCtx=null, auraDrawSize=0, auraDrawX=0, auraDrawY=0;
+  let webCanvas=null, webCtx=null, webStamp=-1, webRenderScale=1;
+  const projectionBasis={cyw:1,syw:0,cp:1,sp:0,screenScale:1};
+  const HOVER_R2 = 58*58;
+  const INV_HOVER_R2 = 1 / HOVER_R2;
+
+  function rebuildAuraCache(){
+    const auraResolution = LOW_SPEC ? .54 : (PHONE ? .66 : (MID_SPEC ? .80 : 1));
+    const auraSize=Math.max(96,Math.round(Math.min(W,H)*1.06*auraResolution));
+    if(!auraCanvas){
+      auraCanvas=document.createElement('canvas');
+      auraCtx=auraCanvas.getContext('2d',{alpha:true});
+    }
+    if(!auraCtx) return;
+    auraCanvas.width=auraSize; auraCanvas.height=auraSize;
+    const ac=auraCtx, ax=auraSize*.5, ay=auraSize*.5, ar=auraSize*.46;
+    ac.clearRect(0,0,auraSize,auraSize);
+    const g=ac.createRadialGradient(ax,ay,0,ax,ay,ar);
+    g.addColorStop(0,'rgba(255,166,64,.98)');
+    g.addColorStop(.20,'rgba(255,198,96,.52)');
+    g.addColorStop(.46,'rgba(255,164,74,.24)');
+    g.addColorStop(.72,'rgba(112,188,255,.12)');
+    g.addColorStop(1,'rgba(0,0,0,0)');
+    ac.fillStyle=g;
+    ac.fillRect(0,0,auraSize,auraSize);
+  }
+
+  function resize(){
+    const r=host.getBoundingClientRect();
+    W=Math.max(2,r.width); H=Math.max(2,r.height);
+    hostLeft=r.left; hostTop=r.top;
+    let dpr=Math.min(devicePixelRatio||1, MAX_DPR);
+    const maxPixels = LOW_SPEC ? 650000 : (PHONE ? 820000 : (MID_SPEC ? 1400000 : 2200000));
+    const area = W * H;
+    if(area > 0){
+      const safeDpr = Math.sqrt(maxPixels / area);
+      dpr = Math.max(.75, Math.min(dpr, safeDpr));
+    }
+    const pixelW=Math.max(2,Math.round(W*dpr));
+    const pixelH=Math.max(2,Math.round(H*dpr));
+    if(canvas.width!==pixelW || canvas.height!==pixelH){
+      canvas.width=pixelW;
+      canvas.height=pixelH;
+    }
+    c.setTransform(dpr,0,0,dpr,0,0);
+    cx=W/2; cy=H/2; scale=Math.min(W,H)*.35;
+    const edgeRadius=Math.min(W,H)*.545, edgeInner=edgeRadius*.48, edgeOuter=edgeRadius*1.030;
+    edgeInner2=edgeInner*edgeInner; edgeOuter2=edgeOuter*edgeOuter;
+    auraDrawSize = scale * 3.26;
+    auraDrawX = cx - auraDrawSize * .5;
+    auraDrawY = cy - auraDrawSize * .5;
+    rebuildAuraCache();
+    webRenderScale = LOW_SPEC ? .52 : (PHONE ? .64 : (MID_SPEC ? .78 : 1));
+    const webW=Math.max(2,Math.round(W*webRenderScale)), webH=Math.max(2,Math.round(H*webRenderScale));
+    if(!webCanvas || webCanvas.width!==webW || webCanvas.height!==webH){
+      webCanvas=document.createElement('canvas');
+      webCanvas.width=webW; webCanvas.height=webH;
+      webCtx=webCanvas.getContext('2d',{alpha:true});
+      webStamp=-1;
+    }
+  }
+  let resizeQueued=false;
+  function scheduleResize(){
+    if(resizeQueued) return;
+    resizeQueued=true;
+    requestAnimationFrame(()=>{ resizeQueued=false; resize(); });
+  }
+  resize();
+  addEventListener('resize',scheduleResize,{passive:true});
+  if(typeof ResizeObserver!=='undefined') new ResizeObserver(scheduleResize).observe(host);
+  if(typeof IntersectionObserver!=='undefined'){
+    new IntersectionObserver((entries)=>{
+      hostVisible = !!(entries[0] && entries[0].isIntersecting);
+      if(hostVisible) lastNow = performance.now();
+    }, {threshold:0.01}).observe(host);
+  }
+
+  function projectInto(p,out,bob,basis){
+    const X=p.x+p.ox, Y=p.y+bob+p.oy, Z=p.z+p.oz;
+    const x1=X*basis.cyw - Z*basis.syw, z1=X*basis.syw + Z*basis.cyw;
+    const y1=Y*basis.cp - z1*basis.sp, z2=Y*basis.sp + z1*basis.cp;
+    const sc=1/(2.95 - z2*.62);
+    out.x=cx + x1*basis.screenScale*sc;
+    out.y=cy - y1*basis.screenScale*sc;
+    out.z=z2;
+    out.sc=sc;
+  }
+
+  function normalizePointer(clientX){
+    pointer.tx = clamp((clientX-hostLeft) / Math.max(1,W) - .5, -.5, .5);
+  }
+
+  function updateSpin(now, dt){
+    smoothDt += (dt - smoothDt) * .12;
+    const frameScale = clamp(smoothDt/FRAME_MS, .20, 2.4);
+    const pointerEase = 1 - Math.pow(.968, frameScale);
+    pointer.x += (pointer.tx - pointer.x) * pointerEase;
+
+    const driftYaw = REDUCED ? 0 : (Math.sin(now*.000058)*.36 + Math.sin(now*.000016)*.14);
+    const autoInfluence = pointer.active ? .15 : .28;
+
+    rig.targetYaw += rig.velYaw*frameScale;
+
+    const yawSeek = 1 - Math.pow(.996, frameScale);
+    rig.targetYaw += ((driftYaw + pointer.x*autoInfluence) - rig.targetYaw) * yawSeek;
+    rig.targetZoom = clamp(rig.targetZoom, .74, 1.48);
+
+    rig.velYaw *= Math.pow(pointer.active ? .986 : .958, frameScale);
+
+    const yawEase = 1 - Math.pow(.956, frameScale);
+    const zoomEase = 1 - Math.pow(.966, frameScale);
+    rig.yaw += (rig.targetYaw-rig.yaw)*yawEase;
+    rig.pitch += (LOCKED_PITCH-rig.pitch)*Math.max(yawEase,.08);
+    rig.zoom += (rig.targetZoom-rig.zoom)*zoomEase;
+  }
+  function edgeFeather(x,y){
+    const dx=x-cx, dy=y-cy, d2=dx*dx+dy*dy;
+    if(d2<=edgeInner2) return 1;
+    if(d2>=edgeOuter2) return 0;
+    const t=clamp((d2-edgeInner2)/(edgeOuter2-edgeInner2),0,1);
+    const smooth=t*t*t*(t*(t*6-15)+10);
+    return Math.pow(1-smooth, .82);
+  }
+
+
+  let pendingBurstPulses = 0;
+  function storm(power=1){
+    energy=Math.min(1.6, energy+power);
+    physicsWakeUntil = Math.max(physicsWakeUntil, performance.now()+2600);
+    pendingBurstPulses += Math.round(10+16*power);
+    for(const p of pts){
+      const m=Math.hypot(p.x,p.y,p.z)||1;
+      const k=.028*power;
+      p.vx+=p.x/m*k*rnd(.4,1); p.vy+=p.y/m*k*rnd(.4,1); p.vz+=p.z/m*k*rnd(.4,1);
+    }
+  }
+  function shatter(){
+    if(mode==='shatter' || mode==='reform') return;
+    physicsWakeUntil = Math.max(physicsWakeUntil, performance.now()+3200);
+    mode='shatter'; modeT=0;
+    pulses.length=0;
+    energy=Math.min(1.6, energy+1);
+    for(const p of pts){
+      const m=Math.hypot(p.x,p.y,p.z)||1;
+      const s=rnd(.055,.16);
+      p.vx += p.x/m*s + rnd(-.045,.045);
+      p.vy += p.y/m*s + rnd(-.045,.045) + .015;
+      p.vz += p.z/m*s + rnd(-.045,.045);
+    }
+    for(let i=0;i<28;i++){
+      const q=projected[(Math.random()*pts.length)|0];
+      if(q) emitMote(null,q.x,q.y);
+    }
+  }
+  canvas.addEventListener('pointerdown',e=>{
+    dragging=true; dragDist=0;
+    pointer.active=true; pointer.id=e.pointerId; pointer.lastX=e.clientX; pointer.lastY=e.clientY;
+    normalizePointer(e.clientX);
+    host.classList.add('is-grabbing');
+    try{canvas.setPointerCapture(e.pointerId)}catch(err){}
+    e.stopPropagation();
+  });
+  canvas.addEventListener('pointermove',e=>{
+    hoverX=e.clientX-hostLeft; hoverY=e.clientY-hostTop; hoverActive=true;
+    physicsWakeUntil = Math.max(physicsWakeUntil, performance.now()+900);
+    normalizePointer(e.clientX);
+    if(!dragging || !pointer.active || pointer.id!==e.pointerId) return;
+    const dx=e.clientX-pointer.lastX, dy=e.clientY-pointer.lastY;
+    dragDist+=Math.abs(dx)+Math.abs(dy);
+    pointer.lastX=e.clientX; pointer.lastY=e.clientY;
+    rig.velYaw += dx*.00056;
+    rig.targetYaw += dx*.00128;
+  });
+  const endDrag=(e)=>{
+    if(e && pointer.id!=null && e.pointerId!==pointer.id) return;
+    dragging=false;
+    pointer.active=false; pointer.id=null;
+    host.classList.remove('is-grabbing');
+  };
+  canvas.addEventListener('pointerup',endDrag);
+  canvas.addEventListener('pointercancel',endDrag);
+  canvas.addEventListener('lostpointercapture',endDrag);
+  canvas.addEventListener('pointerleave',()=>{hoverX=hoverY=-1e4; hoverActive=false; if(!pointer.active) pointer.tx=0;});
+  let singleClickTimer=0;
+  function triggerCanvasShatter(){
+    if(mode==='live') shatter();
+  }
+  function cycleRainbowClickColor(){
+    rainbowClickTarget += 1;
+    rainbowClickMixTarget = RAINBOW_CLICK_BLEND;
+    energy = Math.min(1.35, energy + .16);
+    physicsWakeUntil = Math.max(physicsWakeUntil, performance.now()+900);
+    for(let i=0;i<16;i++){
+      const q=projected[(Math.random()*pts.length)|0];
+      if(q && Number.isFinite(q.x) && Number.isFinite(q.y)) emitMote(null,q.x,q.y);
+    }
+  }
+  function resetToOriginalPaletteShatter(){
+    // Keep the exact legacy shatter/reform physics; only fade the click tint away.
+    rainbowClickMixTarget = 0;
+    shatter();
+  }
+  canvas.addEventListener('click',e=>{
+    e.stopPropagation();
+    if(dragDist>7) return;
+    window.clearTimeout(singleClickTimer);
+    // Delay single click just long enough to know whether it is a double click.
+    if(e.detail===1) singleClickTimer=window.setTimeout(cycleRainbowClickColor,220);
+  });
+  canvas.addEventListener('wheel',e=>{
+    e.preventDefault();
+    rig.targetZoom=Math.max(.74,Math.min(1.48,rig.targetZoom + (e.deltaY<0?.07:-.07)));
+  },{passive:false});
+  host.addEventListener('keydown',e=>{
+    if(e.key==='Enter'||e.key===' '){
+      e.preventDefault();
+      triggerCanvasShatter();
+    }
+  });
+  canvas.addEventListener('dblclick',e=>{
+    e.preventDefault(); e.stopPropagation();
+    window.clearTimeout(singleClickTimer);
+    resetToOriginalPaletteShatter();
+  });
+
+  let pulseClock = 0;
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden){
+      endDrag();
+      hoverX=hoverY=-1e4; hoverActive=false;
+      pointer.tx=0;
+    }
+    lastNow = performance.now();
+  }, {passive:true});
+  addEventListener('blur',()=>{
+    endDrag();
+    hoverX=hoverY=-1e4; hoverActive=false;
+    pointer.tx=0;
+  }, {passive:true});
+
+  /* render loop: adaptive quality */
+  const projected = Array.from({length:pts.length},()=>({x:0,y:0,z:0,sc:0,edge:1,active:1,fire:0,wave:0}));
+  const drawOrder = Array.from({length:pts.length},(_,i)=>i);
+  let emaDt=LOW_SPEC?27:(PHONE?21:(MID_SPEC?19:16)), quality=LOW_SPEC?0:((PHONE||MID_SPEC)?1:2), lastNow=performance.now(), frameNo=0;
+  function frame(now){
+    requestAnimationFrame(frame);
+    if(document.hidden || !hostVisible) return;
+    if(W<10){ resize(); if(W<10) return; }
+
+    const dt=Math.min(50,now-lastNow); lastNow=now;
+    const frameStep=Math.max(.25,dt/16.667);
+    emaDt+=(dt-emaDt)*.07;
+    // Hysteresis prevents quality from flickering around a threshold.
+    if(quality===2 && emaDt>24.5) quality=1;
+    else if(quality===1){
+      if(emaDt>33.5) quality=0;
+      else if(emaDt<18.5 && !PHONE && !LOW_SPEC) quality=2;
+    } else if(quality===0 && emaDt<25.5) quality=1;
+
+    breath += .012*frameStep;
+    energy *= Math.pow(.97,frameStep);
+    updateSpin(now, dt);
+    const zoomRevealT = clamp((rig.zoom - 1) / (ZOOM_REVEAL_MAX - 1), 0, 1);
+    let targetMicroDensity = quality===2 ? (LOW_SPEC ? .74 : (MID_SPEC ? .90 : 1)) : (quality===1 ? (LOW_SPEC ? .48 : (MID_SPEC ? .68 : .82)) : (LOW_SPEC ? .18 : (MID_SPEC ? .26 : .34)));
+    let targetBodyDensity = quality===2 ? 1 : (quality===1 ? (LOW_SPEC ? .82 : (MID_SPEC ? .90 : .96)) : (LOW_SPEC ? .40 : (MID_SPEC ? .50 : .58)));
+    let targetWebDensity = quality===2 ? (LOW_SPEC ? .42 : (MID_SPEC ? .58 : .80)) : (quality===1 ? (LOW_SPEC ? .22 : (MID_SPEC ? .34 : .50)) : 0);
+    let targetFloaterDensity = quality===2 ? (LOW_SPEC ? .54 : (PHONE ? .78 : (MID_SPEC ? .88 : 1))) : (quality===1 ? (LOW_SPEC ? .34 : (PHONE ? .52 : (MID_SPEC ? .66 : .78))) : (LOW_SPEC ? .14 : (PHONE ? .22 : .34)));
+    targetMicroDensity = Math.min(1, targetMicroDensity + zoomRevealT * (LOW_SPEC ? .22 : .30));
+    targetBodyDensity = Math.min(1, targetBodyDensity + zoomRevealT * (LOW_SPEC ? .10 : .18));
+    targetFloaterDensity = Math.min(1, targetFloaterDensity + zoomRevealT * (LOW_SPEC ? .08 : .14));
+    if(pointer.active){ targetMicroDensity*=.90; targetBodyDensity*=.94; targetWebDensity*=.55; targetFloaterDensity*=.82; }
+    if(emaDt > 22){ targetMicroDensity *= .88; targetBodyDensity *= .94; targetWebDensity *= .80; targetFloaterDensity *= .78; }
+    if(emaDt > 28){ targetMicroDensity *= .76; targetBodyDensity *= .88; targetWebDensity *= .62; targetFloaterDensity *= .62; }
+    if(emaDt > 35){ targetMicroDensity *= .66; targetBodyDensity *= .82; targetWebDensity *= .48; targetFloaterDensity *= .48; }
+    if(emaDt < 17 && quality===2 && !LOW_SPEC){ targetMicroDensity = Math.min(1, targetMicroDensity + .04); targetWebDensity = Math.min(1, targetWebDensity + .03); targetFloaterDensity = Math.min(1, targetFloaterDensity + .03); }
+    microDensity += (targetMicroDensity - microDensity) * .12;
+    bodyDensity += (targetBodyDensity - bodyDensity) * .10;
+    webDensity += (targetWebDensity - webDensity) * .12;
+    floaterDensity += (targetFloaterDensity - floaterDensity) * .12;
+    if(!REDUCED && mode==='live' && FX_LEVEL>0 && quality>0){
+      pulseClock += dt;
+      const pulseEveryBase = LOW_SPEC ? 840 : (MID_SPEC ? 720 : 620);
+      const pulseCapBase = LOW_SPEC ? 4 : (MID_SPEC ? 7 : 10);
+      const pulseEvery = pulseEveryBase + (emaDt>28 ? 120 : 0) + (emaDt>35 ? 180 : 0);
+      const pulseCap = Math.max(2, pulseCapBase - (emaDt>28 ? 1 : 0) - (emaDt>35 ? 2 : 0));
+      while(pulseClock >= pulseEvery){
+        pulseClock -= pulseEvery;
+        if(pulses.length < pulseCap) firePulse();
+        else break;
+      }
+      while(pendingBurstPulses > 0 && pulses.length < pulseCap){
+        firePulse();
+        pendingBurstPulses--;
+      }
+    } else if(FX_LEVEL===0 || quality===0){
+      pendingBurstPulses = 0;
+      if(quality===0){ pulses.length=0; motes.length=0; }
+    }
+
+    let cohesion=1, springK=.06, dampK=.86;
+    if(mode==='shatter'){
+      modeT+=frameStep; springK=.0022; dampK=.986;
+      cohesion=Math.max(0,1-modeT*.055);
+      if(modeT>80){ mode='reform'; modeT=0; }
+    } else if(mode==='reform'){
+      modeT+=frameStep; springK=.026; dampK=.885;
+      cohesion=Math.min(1,modeT*.018);
+      if(modeT>95) mode='live';
+    }
+
+    if(mode!=='live' || now<physicsWakeUntil){
+      for(const p of pts){
+        p.vx+=-springK*p.ox; p.vy+=-springK*p.oy; p.vz+=-springK*p.oz;
+        p.vx*=dampK; p.vy*=dampK; p.vz*=dampK;
+        p.ox+=p.vx; p.oy+=p.vy; p.oz+=p.vz;
+      }
+    }
+    stepBrainFloaters(dt, now, quality, floaterDensity, frameNo);
+    rainbowClickOrbit += (rainbowClickTarget - rainbowClickOrbit) * .16;
+    rainbowClickMix += (rainbowClickMixTarget - rainbowClickMix) * .14;
+
+    c.clearRect(0,0,W,H);
+
+    /* aurora core glow behind the mind: cached for cheaper render */
+    if(auraCanvas){
+      c.save();
+      c.globalCompositeOperation='screen';
+      c.globalAlpha = .12 + energy*.08 + (.018 + (quality===2 ? .016 : .010))*Math.sin(now*.00125 + rig.yaw*3.5);
+      c.drawImage(auraCanvas, auraDrawX, auraDrawY, auraDrawSize, auraDrawSize);
+      c.restore();
+    }
+
+
+    const bob = REDUCED?0:Math.sin(breath*.7)*.02;
+    projectionBasis.cyw=Math.cos(rig.yaw); projectionBasis.syw=Math.sin(rig.yaw);
+    projectionBasis.cp=Math.cos(rig.pitch); projectionBasis.sp=Math.sin(rig.pitch);
+    projectionBasis.screenScale=scale*rig.zoom*1.60;
+    const deepSkip = quality===0;
+    const deepFlip = (Math.floor(now / 500) & 1);
+    const lowSpecHalfMicro = quality===1 && LOW_SPEC;
+    const wf1x = Math.sin(now*.00058)*.52, wf1y = Math.cos(now*.00044)*.36, wf1z = Math.sin(now*.00073)*.42;
+    const wf2x = Math.cos(now*.00049 + 1.3)*.44, wf2y = Math.sin(now*.00067 + .8)*.30, wf2z = Math.cos(now*.00061 + 2.1)*.50;
+    const wf3x = Math.sin(now*.00031 + 2.6)*.34, wf3y = Math.cos(now*.00053 + 1.7)*.42, wf3z = Math.sin(now*.00047 + .4)*.28;
+    for(let i=0;i<pts.length;i++){
+      const p=pts[i], q=projected[i];
+      const cheap = p.group==='deep' || p.group==='cal';
+      const anatomyCritical = !!p.tag || p.bright || p.coreRadiant;
+      let active = 1;
+      if(p.revealZoom > rig.zoom) active = 0;
+      else if(p.micro){
+        if(p.microGate > microDensity) active = 0;
+        else if((deepSkip || LOW_SPEC) && (i%3===0)) active = 0;
+        else if(lowSpecHalfMicro && (i%2===0)) active = 0;
+      } else if(!anatomyCritical){
+        const densityLimit = cheap ? bodyDensity*.72 : bodyDensity;
+        if(p.detailGate > densityLimit) active = 0;
+        else if(cheap && deepSkip && (i % 2) === deepFlip) active = 0;
+      }
+      q.active = active;
+      if(!active){
+        q.x=-1e6; q.y=-1e6; q.z=-9; q.sc=0; q.edge=0;
+        continue;
+      }
+      projectInto(p,q,bob,projectionBasis);
+      let fire=0;
+      if(!REDUCED && FX_LEVEL>0){
+        const waveA = Math.max(0, Math.sin(now*p.fireFreq + p.firePhase + p.x*7.2 - p.z*5.4 + p.y*2.1));
+        const waveB = Math.max(0, Math.sin(now*(p.fireFreq*.82) + p.firePhase*1.7 + p.y*8.8 + p.x*3.6));
+        fire = Math.pow(Math.max(waveA*.92, waveB*.72), 2.35) * p.fireAmp * (1 + energy*.18);
+        if(fire > .003){
+          const drift = fire * (p.micro ? 2.4 : 3.0) * q.sc * rig.zoom;
+          const ang = p.firePhase + now*.0028 + p.z*p.fireDrift;
+          q.x += Math.cos(ang) * drift;
+          q.y += Math.sin(ang) * drift * .72 - fire * (p.micro ? 1.1 : 1.6);
+        }
+      }
+      let waveField = 0;
+      if(!REDUCED && FX_LEVEL>0){
+        const d1 = Math.hypot(p.x-wf1x, (p.y-wf1y)*1.06, p.z-wf1z);
+        const d2 = Math.hypot((p.x-wf2x)*1.08, p.y-wf2y, p.z-wf2z);
+        const d3 = Math.hypot(p.x-wf3x, (p.y-wf3y)*.92, p.z-wf3z);
+        const wA = Math.max(0, 1 - d1/1.36) * (.58 + .42*Math.sin(now*.0022 + p.phase));
+        const wB = Math.max(0, 1 - d2/1.18) * (.56 + .44*Math.sin(now*.0018 + p.twinkPh));
+        const wC = Math.max(0, 1 - d3/1.08) * (.54 + .46*Math.sin(now*.0026 + p.firePhase));
+        waveField = Math.max(0, wA, wB*.92, wC*.86);
+      }
+      if(!REDUCED){
+        const wander = (p.micro ? .84 : 1.14) * (0.58 + p.sparkBias*.62 + waveField*.34) * q.sc * rig.zoom;
+        const w1 = now*(p.micro ? .00145 : .00110) + p.phase*1.7 + p.x*4.6 - p.z*2.2;
+        const w2 = now*(p.micro ? .00120 : .00096) + p.twinkPh*1.3 + p.y*5.4 + p.z*2.8;
+        const w3 = now*(p.micro ? .00106 : .00082) + p.firePhase*1.15 + p.x*2.4 + p.y*2.0 - p.z*1.2;
+        q.x += Math.sin(w1) * wander + Math.cos(w3) * waveField * (p.micro ? 1.2 : 1.7) * q.sc * rig.zoom;
+        q.y += Math.cos(w2) * wander * .82 + Math.sin(w3*.92) * waveField * (p.micro ? .9 : 1.3) * q.sc * rig.zoom;
+      }
+      q.fire = fire;
+      q.wave = waveField;
+      q.edge = edgeFeather(q.x,q.y);
+    }
+    for(let i=0;i<brainFloaters.length;i++){
+      const f=brainFloaters[i], q=brainFloaterProjected[i];
+      if(!q.active) continue;
+      projectInto(f,q,bob,projectionBasis);
+      q.edge = edgeFeather(q.x,q.y);
+      q.fire = Math.max(0, Math.sin(now*f.twinkSpd*220 + f.firePhase))*0.28;
+      if(!Number.isFinite(q.x) || !Number.isFinite(q.y) || !Number.isFinite(q.sc)) q.active=0;
+    }
+
+    /* synapse web: cached + adaptive refresh, same projected geometry */
+    if(webCanvas && webCtx && cohesion>.06 && quality>0 && FX_LEVEL>0 && webDensity>.08){
+      const webRefreshEvery = (quality===2 ? (pointer.active?1:2) : (pointer.active?2:4)) + (emaDt>26 ? 1 : 0) + (emaDt>34 ? 1 : 0);
+      if(webStamp<0 || frameNo-webStamp>=webRefreshEvery){
+        webStamp=frameNo;
+        const wc=webCtx;
+        wc.setTransform(1,0,0,1,0,0); wc.clearRect(0,0,webCanvas.width,webCanvas.height);
+        wc.setTransform(webRenderScale,0,0,webRenderScale,0,0);
+        wc.lineWidth=.42 + webDensity*.18;
+        const er=78+Math.round(energy*100), eg=218-Math.round(energy*4), eb=168-Math.round(energy*24);
+        const edgeStepBase = quality===2 ? (MID_SPEC ? 4 : 3) : (LOW_SPEC ? 8 : 6);
+        const edgeStep=Math.max(1,Math.round(edgeStepBase / Math.max(.20,webDensity)));
+        for(let ei=0;ei<edges.length;ei+=edgeStep){
+          const e=edges[ei], A=projected[e.a], B=projected[e.b];
+          if(!A.active || !B.active) continue;
+          const depth=(A.z+B.z)*.5, edgeA=Math.min(A.edge,B.edge);
+          const pulseK = 1 + ((A.fire+B.fire)*.28) + ((A.wave+B.wave)*.34);
+          const al=(.04+Math.max(0,depth)*.06)*(1+energy*.55)*cohesion*edgeA*webDensity*pulseK;
+          if(al<.03) continue;
+          wc.strokeStyle=`rgba(${er},${eg},${eb},${Math.min(.22,al)})`;
+          wc.beginPath(); wc.moveTo(A.x,A.y); wc.lineTo(B.x,B.y); wc.stroke();
+        }
+      }
+      c.drawImage(webCanvas,0,0,W,H);
+    } else if(webCanvas && webStamp!==-1){
+      webCtx.setTransform(1,0,0,1,0,0); webCtx.clearRect(0,0,webCanvas.width,webCanvas.height); webStamp=-1;
+    }
+
+    /* stars, back-to-front — exact galaxy-rig star language */
+    frameNo++;
+    const sortEvery = (pointer.active ? (quality===2 ? 3 : 4) : (quality===2 ? 6 : (quality===1 ? 8 : 10))) + (emaDt>26 ? 1 : 0) + (emaDt>34 ? 2 : 0);
+    if(frameNo===1 || frameNo%sortEvery===0) drawOrder.sort((a,b)=>projected[a].z-projected[b].z);
+    for(const i of drawOrder){
+      const p=pts[i], q=projected[i];
+      if(!q.active) continue;
+      if(q.x < -VIEW_PAD || q.x > W + VIEW_PAD || q.y < -VIEW_PAD || q.y > H + VIEW_PAD) continue;
+
+      const twinkle = 1 - p.twinkAmt + p.twinkAmt*(.5 + .5*Math.sin(now*p.twinkSpd+p.twinkPh));
+      if(now>=p.nextFlash){
+        p.flashUntil=now+34;
+        p.nextFlash=now+rnd(p.bright?5000:2500,p.bright?23000:11500);
+      }
+      const flash = now<p.flashUntil ? 1.72 : 1;
+      const lit=.40+.60*clamp((q.z+.9)/1.7,0,1);
+      let a=(.26+.74*lit)*twinkle*flash*p.lum*(1+energy*.55)*(.35+.65*cohesion);
+      if(p.tag==='outline') a*=1.16;
+      else if(p.tag==='fold') a*=1.08;
+      else if(p.tag==='sulcus') a*=.90;
+      else if(p.tag==='folia') a*=1.03;
+      else if(p.tag==='cerebrum-outline') a*=1.22;
+      else if(p.tag==='hemi-trace') a*=1.14;
+      else if(p.tag==='outer-anatomy' || p.tag==='dorsal-crown-shell' || p.tag==='frontal-lower-shell' || p.tag==='rear-shell') a*=1.20;
+      else if(p.tag==='pons') a*=1.20;
+      else if(p.tag==='pons-trace') a*=1.14;
+      else if(p.tag==='medulla') a*=1.16;
+      else if(p.tag==='medulla-trace') a*=1.12;
+      else if(p.tag==='cereb-outline'||p.tag==='stem-outline') a*=1.10;
+
+      if(hoverActive){
+        const dx=q.x-hoverX, dy=q.y-hoverY, hd2=dx*dx+dy*dy;
+        if(hd2<HOVER_R2){
+          const k=1-hd2*INV_HOVER_R2;
+          a*=1+.9*k;
+          p.vx+=(p.x)*.0016*k; p.vy+=(p.y)*.0016*k; p.vz+=(p.z)*.0016*k;
+          if(FX_LEVEL>0 && quality>0 && emaDt < 30 && Math.random() < ((LOW_SPEC ? .008 : .02) * k)) emitMote(p,q.x,q.y);
+        }
+      }
+      a *= 1 + p.sparkBias*.26 + q.fire*(p.micro ? .34 : .54) + q.wave*(p.micro ? .24 : .38) + (p.coolYellow ? .06 : 0) + (p.indigo ? .04 : 0);
+      a*=q.edge;
+      a=Math.min(1,a);
+      if(a<.02) continue;
+
+      const anatomyScale = p.tag==='outline' ? 1.26 :
+                           p.tag==='cerebrum-outline' ? 1.40 :
+                           p.tag==='hemi-trace' ? 1.12 :
+                           (p.tag==='outer-anatomy' || p.tag==='dorsal-crown-shell' || p.tag==='frontal-lower-shell' || p.tag==='rear-shell') ? 1.28 :
+                           (p.tag==='dorsal-outline' || p.tag==='crown-outline' || p.tag==='frontal-rim-outline') ? 1.26 :
+                           p.tag==='rear-outline' ? 1.18 :
+                           p.tag==='lower-flank-outline' ? 1.14 :
+                           p.tag==='pons' ? 1.18 :
+                           p.tag==='pons-trace' ? 1.00 :
+                           p.tag==='medulla' ? 1.14 :
+                           p.tag==='medulla-trace' ? .98 :
+                           (p.tag==='cereb-outline'||p.tag==='stem-outline') ? 1.10 : 1;
+      const accentScale = p.coolYellow ? .88 : (p.indigo ? .94 : 1);
+      const fireBoost = 1 + q.fire * (p.micro ? .24 : .42) + q.wave*(p.micro ? .12 : .20) + p.sparkBias*.10;
+      const rawR=p.r*q.sc*2.06*rig.zoom*(.62+.38*cohesion)*anatomyScale*p.sizeScale*fireBoost*accentScale;
+      const r=p.micro?Math.max(.22,rawR):Math.max(.55,rawR);
+      if(cohesion<1) p.twinkPh+=p.twinkSpd*(1-cohesion)*22;
+      const isS=p.bright;
+      const phase=p.phase+now*.00024;
+      const baseCol = p.prism
+        ? prismShiftInto(p.col,p.prismPhase+now*p.prismSpeed+phase*.18,twinkle,isS,prismScratch)
+        : p.col;
+      const warmedBase = warmDominantInto(baseCol,p.warmAmt,warmScratch);
+      const scintCol = scintColInto(warmedBase,twinkle,isS,renderScratch);
+      const baseRenderCol = (p.metallicGold || p.coreRadiant) ? scintCol : honeyAmberizeInto(scintCol,honeyScratch);
+      const rainbowTint = sampleRainbowFloatInto(rainbowClickOrbit + p.phase*.18 + (p.micro ? .35 : 0), rainbowClickScratch);
+      const renderCol = mixColInto(baseRenderCol, rainbowTint, rainbowClickMix, renderScratch);
+      const sR = p.micro ? Math.max(.82,r*1.26) : Math.max(isS ? 4.55 : 1.72, r*(isS ? 3.00 : 1.48));
+
+      const spikeOn = !p.micro && (isS || p.coreRadiant || p.sparkTier>0 || q.fire>.10 || q.wave>.16 || (p.starKind==='arm'&&a>.16&&r>.82) || (p.starKind==='core'&&a>.14) || (p.prism&&a>.14));
+      if(quality===0){
+        drawNormalSprite(q.x,q.y,Math.max(.92,sR*(isS?1.00:.84)),renderCol,a*(isS?.58:.50)*(1+p.sparkBias*.18+q.fire*.14+q.wave*.10),phase,twinkle,spikeOn);
+        continue;
+      }
+      if(quality===1 && (isS || p.starKind==='core')){
+        drawNormalSprite(q.x,q.y,sR*(p.starKind==='core'?.96:.98),renderCol,a*(isS?.60:.54)*(1+p.sparkBias*.18+q.fire*.16+q.wave*.12),phase,twinkle,spikeOn);
+        continue;
+      }
+
+      if(isS){
+        starGlow(q.x,q.y,sR*.98,renderCol,a*(.70 + p.sparkBias*.12 + q.fire*.14 + q.wave*.12),twinkle,true,phase);
+        const sl=Math.max(6.5,sR*(5.3 + p.sparkBias*.45 + q.fire*.55 + q.wave*.42));
+        spike(q.x,q.y,sl,renderCol,Math.min(.20,a*.23),p.twinkPh+now*.00007);
+      }else if(p.starKind==='core'){
+        starGlow(q.x,q.y,sR*1.02,renderCol,a*((p.coreRadiant ? .72 : .58) + p.sparkBias*.08 + q.fire*.12 + q.wave*.10),twinkle,false,phase);
+        if(spikeOn){
+          const sl=Math.max(5.8,sR*((p.coreRadiant ? 3.5 : 2.9) + p.sparkBias*.20 + q.fire*.30 + q.wave*.22));
+          spike(q.x,q.y,sl,renderCol,Math.min(p.coreRadiant ? .18 : .12,a*(p.coreRadiant ? .20 : .12)),p.twinkPh+now*.00007);
+        }
+        drawNormalSprite(q.x,q.y,sR*.96,renderCol,a*((p.coreRadiant ? .64 : .54) + p.sparkBias*.05 + q.fire*.10 + q.wave*.08),phase,twinkle,spikeOn);
+      }else{
+        drawNormalSprite(q.x,q.y,sR*(.94 + p.sparkBias*.06 + q.fire*.07 + q.wave*.06),renderCol,a*(.58 + p.sparkBias*.10 + q.fire*.12 + q.wave*.10),phase,twinkle,spikeOn);
+      }
+
+      const cA=Math.min(.98,a*(3.7 + p.sparkBias*1.35 + q.fire*1.8 + q.wave*.6));
+      const drawCoreDetail = quality===2 || (quality===1 && !p.micro && (!!p.tag || isS || p.coreRadiant || p.starKind==='core'));
+      if(cA>0.02 && drawCoreDetail){
+        c.fillStyle=`rgba(${renderCol[0]},${renderCol[1]},${renderCol[2]},${cA})`;
+        const coreOuter=p.micro?Math.max(.28,r*.68):Math.max(.62,r*.68);
+        const coreInner=p.micro?Math.max(.07,r*.10):Math.max(.12,r*.10);
+        stellarPath(q.x,q.y,coreOuter,coreInner,4,p.twinkPh+now*.0004);
+        c.fill();
+      }
+    }
+
+    /* independently moving internal glitter stars */
+    if(frameNo===1 || frameNo%4===0) brainFloaterOrder.sort((a,b)=>brainFloaterProjected[a].z-brainFloaterProjected[b].z);
+    for(const fi of brainFloaterOrder){
+      const f=brainFloaters[fi], q=brainFloaterProjected[fi];
+      if(!q.active || q.edge<.03) continue;
+      if(q.x < -VIEW_PAD || q.x > W + VIEW_PAD || q.y < -VIEW_PAD || q.y > H + VIEW_PAD) continue;
+      const twinkle = 1 - f.twinkAmt + f.twinkAmt*(.5 + .5*Math.sin(now*f.twinkSpd + f.twinkPh));
+      if(now>=f.nextFlash){
+        f.flashUntil=now+42;
+        f.nextFlash=now+rnd(f.bright?1500:900, f.bright?7200:4200);
+      }
+      const flash = now<f.flashUntil ? 1.82 : 1;
+      let a=(.36 + .64*twinkle) * flash * f.lum * (1 + energy*.48) * (.82 + q.edge*.18);
+      a *= 1 + f.sparkBias*.32 + q.fire*.28 + (f.coolYellow?.08:0) + (f.indigo?.05:0);
+      a *= q.edge;
+      a = Math.min(1, a);
+      if(a<.03) continue;
+      const rawR=f.r*q.sc*2.18*rig.zoom*(1 + f.sparkBias*.10 + q.fire*.14);
+      if(!Number.isFinite(q.x) || !Number.isFinite(q.y) || !Number.isFinite(rawR) || !Number.isFinite(a)) continue;
+      const r=Math.max(.16, rawR);
+      const baseCol = f.prism ? prismShiftInto(f.col,f.phase+now*.00052,twinkle,f.bright,prismScratch) : f.col;
+      const warmedBase = warmDominantInto(baseCol,0,warmScratch);
+      const scintCol = scintColInto(warmedBase,twinkle,f.bright,renderScratch);
+      const baseRenderCol = (f.metallicGold || f.coolYellow || f.indigo) ? scintCol : honeyAmberizeInto(scintCol,honeyScratch);
+      const rainbowTint = sampleRainbowFloatInto(rainbowClickOrbit + f.phase*.22 + .4, rainbowClickScratch);
+      const renderCol = mixColInto(baseRenderCol, rainbowTint, rainbowClickMix, renderScratch);
+      const sR = Math.max(.72, r*1.28);
+      const spikeOn = f.bright || f.sparkBias>.30 || q.fire>.10;
+      if(quality===0){
+        drawNormalSprite(q.x,q.y,sR*.88,renderCol,a*(.52 + f.sparkBias*.10),f.phase+now*.00024,twinkle,spikeOn);
+        continue;
+      }
+      starGlow(q.x,q.y,sR*1.04,renderCol,a*(f.bright ? .82 : .64),twinkle,f.bright,f.phase+now*.00024);
+      if(spikeOn){
+        const sl=Math.max(5.4,sR*(3.8 + f.sparkBias*.8 + q.fire*.7));
+        spike(q.x,q.y,sl,renderCol,Math.min(.18, a*(f.bright ? .22 : .14)), f.twinkPh+now*.00008);
+      }
+      drawNormalSprite(q.x,q.y,sR*(f.bright?1.06:.96),renderCol,a*(f.bright ? .72 : .62),f.phase+now*.00024,twinkle,spikeOn);
+      const cA=Math.min(.98,a*(3.8 + f.sparkBias*1.4 + q.fire*1.8));
+      if(cA>.03){
+        c.fillStyle=`rgba(${renderCol[0]},${renderCol[1]},${renderCol[2]},${cA})`;
+        stellarPath(q.x,q.y,Math.max(.24,r*.72),Math.max(.08,r*.12),4,f.twinkPh+now*.0005);
+        c.fill();
+      }
+    }
+
+    /* travelling neural pulses */
+    if(FX_LEVEL>0 && quality>0){
+    for(let i=pulses.length-1;i>=0;i--){
+      const pu=pulses[i];
+      pu.t+=pu.speed;
+      const seg=Math.floor(pu.t), f=pu.t-seg;
+      if(seg>=pu.path.length-1){ pulses.splice(i,1); continue; }
+      const A=projected[pu.path[seg]], B=projected[pu.path[seg+1]];
+      const x=A.x+(B.x-A.x)*f, y=A.y+(B.y-A.y)*f;
+      const pulseFade=edgeFeather(x,y)*Math.min(edgeFeather(A.x,A.y),edgeFeather(B.x,B.y));
+      if(pulseFade<.03) continue;
+      const [cr,cg,cb]=pu.col;
+      c.strokeStyle=`rgba(${cr},${cg},${cb},${.58*pulseFade})`;
+      c.lineWidth=1.15 + (quality===2 ? .25 : .10);
+      c.beginPath(); c.moveTo(A.x,A.y); c.lineTo(x,y); c.stroke();
+      const trailG=c.createLinearGradient(A.x,A.y,x,y);
+      trailG.addColorStop(0,`rgba(${cr},${cg},${cb},0)`);
+      trailG.addColorStop(.55,`rgba(${cr},${cg},${cb},${.16*pulseFade})`);
+      trailG.addColorStop(1,`rgba(${cr},${cg},${cb},${.34*pulseFade})`);
+      c.strokeStyle=trailG;
+      c.lineWidth=quality===2 ? 2.0 : 1.35;
+      c.beginPath(); c.moveTo(A.x,A.y); c.lineTo(x,y); c.stroke();
+      const pg=c.createRadialGradient(x,y,0,x,y,8.5);
+      pg.addColorStop(0,`rgba(255,252,232,${.95*pulseFade})`);
+      pg.addColorStop(.3,`rgba(${cr},${cg},${cb},${.75*pulseFade})`);
+      pg.addColorStop(1,'rgba(0,0,0,0)');
+      c.fillStyle=pg; c.beginPath(); c.arc(x,y,7,0,Math.PI*2); c.fill();
+    }
+
+    }
+
+    /* drifting glitter motes */
+    if(FX_LEVEL>0 && quality>0){
+    for(let i=motes.length-1;i>=0;i--){
+      const m=motes[i];
+      m.x+=m.vx; m.y+=m.vy; m.life--;
+      if(m.life<=0){ motes.splice(i,1); continue; }
+      const ma=(m.life/m.max)*.8*edgeFeather(m.x,m.y);
+      if(ma<.015){ motes.splice(i,1); continue; }
+      const [cr,cg,cb]=m.col;
+      c.fillStyle=`rgba(${cr},${cg},${cb},${ma})`;
+      stellarPath(m.x,m.y,m.r+.6,Math.max(.14,(m.r+.6)*.3),4,m.life*.2);
+      c.fill();
+    }
+
+    }
+
+    if(FX_LEVEL>0 && !REDUCED && quality>0 && Math.random() < (quality===2 ? (MID_SPEC ? .16 : .22) : (LOW_SPEC ? .04 : .08)) && mode==='live'){
+      const i=(Math.random()*pts.length)|0;
+      const q=projected[i];
+      if(q && q.z>-.2) emitMote(pts[i],q.x,q.y);
+    }
+  }
+  requestAnimationFrame(frame);
+
+})();
+</script>
+</body>
+</html>
