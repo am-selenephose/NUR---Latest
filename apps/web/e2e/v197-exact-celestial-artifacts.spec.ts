@@ -23,6 +23,25 @@ test("Entry uses native-scale exact brain with zero external halos and the exact
   await expect(brainFrame).toBeVisible();
   await expect(exactCanvas).toBeVisible();
 
+  const entryTransparency = await brainFrame.evaluate(frame => ({
+    backgroundColor: getComputedStyle(frame).backgroundColor,
+    backgroundImage: getComputedStyle(frame).backgroundImage,
+  }));
+  const innerTransparency = await exactBrain.locator("body").evaluate(() => ({
+    html: getComputedStyle(document.documentElement).backgroundColor,
+    body: getComputedStyle(document.body).backgroundColor,
+    welcome: getComputedStyle(document.getElementById("welcome")!).backgroundColor,
+  }));
+  expect(entryTransparency).toEqual({
+    backgroundColor: "rgba(0, 0, 0, 0)",
+    backgroundImage: "none",
+  });
+  expect(innerTransparency).toEqual({
+    html: "rgba(0, 0, 0, 0)",
+    body: "rgba(0, 0, 0, 0)",
+    welcome: "rgba(0, 0, 0, 0)",
+  });
+
   const viewportWidth = page.viewportSize()!.width;
   const expectedNativeSize = testInfo.project.name.includes("mobile")
     ? Math.min(viewportWidth * .98, 470)
@@ -81,6 +100,28 @@ test("Entry uses native-scale exact brain with zero external halos and the exact
     (window as unknown as { __NUR__?: { getStats?: () => { particles: number } } })
       .__NUR__?.getStats?.().particles ?? 0
   ))).toBe(2662);
+  const schedulers = await entry.locator("body").evaluate(() => {
+    const outerWindow = window as unknown as {
+      NURDiagnostics?: { snapshot?: () => { scheduler?: Record<string, unknown> } };
+      nurStarBrain?: { getDiagnostics?: () => { scheduler?: Record<string, unknown> } };
+    };
+    return {
+      galaxy: outerWindow.NURDiagnostics?.snapshot?.().scheduler ?? null,
+      brain: outerWindow.nurStarBrain?.getDiagnostics?.().scheduler ?? null,
+    };
+  });
+  expect(schedulers.galaxy).toMatchObject({
+    owner: "shared-parent-raf",
+    mode: "cooperative-idle",
+    client: "galaxy",
+    clients: 2,
+  });
+  expect(schedulers.brain).toMatchObject({
+    owner: "shared-parent-raf",
+    mode: "cooperative-idle",
+    client: "brain",
+    clients: 2,
+  });
   await page.screenshot({
     path: testInfo.outputPath(`entry-exact-celestial-${testInfo.project.name}.png`),
     fullPage: true,
@@ -117,11 +158,22 @@ test("Today keeps the exact native-scale brain interactive with no external halo
   await expect(brainFrame).toBeVisible();
   await expect(brainFrame).toHaveAttribute(
     "src",
-    "/v197/NUR_V197_BRAIN_EXACT_GALAXY_STARS_RADIANT_OUTER_ANATOMY_SOFTER_PATH.html",
+    "/v197/NUR_V197_BRAIN_EXACT_GALAXY_STARS_RADIANT_OUTER_ANATOMY_TRANSPARENT_ULTRA_SMOOTH.html",
   );
   await expect(brainHost).toHaveAttribute("data-nur-surface", "today");
   await expect(brainHost).toHaveAttribute("data-nur-halo-contract", "halo-free");
   await expect(exactCanvas).toBeVisible();
+
+  const todayTransparency = await exactBrain.locator("body").evaluate(() => ({
+    html: getComputedStyle(document.documentElement).backgroundColor,
+    body: getComputedStyle(document.body).backgroundColor,
+    welcome: getComputedStyle(document.getElementById("welcome")!).backgroundColor,
+  }));
+  expect(todayTransparency).toEqual({
+    html: "rgba(0, 0, 0, 0)",
+    body: "rgba(0, 0, 0, 0)",
+    welcome: "rgba(0, 0, 0, 0)",
+  });
 
   const geometry = await brainHost.evaluate(host => {
     const rect = host.getBoundingClientRect();
@@ -293,6 +345,37 @@ test("Systems uses the same native-scale exact brain and halo-free galaxy withou
   ]) expect(size).toBeCloseTo(geometry.expectedNativeSize, 1);
   expect(geometry.shellPosition).toBe("fixed");
   expect(geometry.shellInset).toEqual(["0px", "0px", "0px", "0px"]);
+  expect(geometry.hostBackground).toBe("rgba(0, 0, 0, 0)");
+  expect(geometry.frameBackground).toBe("rgba(0, 0, 0, 0)");
+  expect(Object.values(innerGeometry.backgrounds)).toEqual([
+    "rgba(0, 0, 0, 0)",
+    "rgba(0, 0, 0, 0)",
+    "rgba(0, 0, 0, 0)",
+    "rgba(0, 0, 0, 0)",
+    "rgba(0, 0, 0, 0)",
+    "rgba(0, 0, 0, 0)",
+  ]);
+
+  const panelStyles = await universe.locator(
+    ".nur-rail, .universe-map-panel, .universe-insight-panel, .nur-context",
+  ).evaluateAll(surfaces => surfaces.map(surface => {
+    const style = getComputedStyle(surface);
+    return {
+      backgroundColor: style.backgroundColor,
+      backgroundImage: style.backgroundImage,
+      boxShadow: style.boxShadow,
+      backdropFilter: style.backdropFilter,
+    };
+  }));
+  expect(panelStyles.length).toBeGreaterThanOrEqual(4);
+  for (const style of panelStyles) {
+    expect(style).toEqual({
+      backgroundColor: "rgba(0, 0, 0, 0)",
+      backgroundImage: "none",
+      boxShadow: "none",
+      backdropFilter: "none",
+    });
+  }
 
   await expect(universe.locator(
     ".universe-master-star > .nur-v197-brain-orbit-halo, #f4-orbit > .f4-ring",

@@ -297,7 +297,7 @@ async function box(name: string, locator: Locator) {
 
 const canonicalGalaxyVersion = "V197-halo-free-2026.08";
 const exactGalaxySha256 = "315071e23bd82cad1b68179f7efc3728b274ac5b7ffcae5941ceb919efa7773a";
-const exactBrainSha256 = "3c0b36f9d9732ed8fd0013e924754bbf3fe1f9c932a3498342af2df0084538b0";
+const exactBrainSha256 = "60c8e2db5b3457fb079b075808e537c63441e233d72b0f3301f4bff4e9db2ce0";
 
 async function assertCanonicalGalaxyRuntime(page: Page, viewportLabel: string) {
   type ExactGalaxyDiagnostics = {
@@ -688,6 +688,8 @@ async function assertBoundaryControlsStyled(frame: FrameLocator) {
       modalStyle: {
         backgroundColor: modalStyle.backgroundColor,
         backgroundImage: modalStyle.backgroundImage,
+        boxShadow: modalStyle.boxShadow,
+        backdropFilter: modalStyle.backdropFilter,
         borderRadius: modalStyle.borderRadius,
       },
       allControlCount: document.querySelectorAll("#scope-modal .scope-option").length,
@@ -698,8 +700,10 @@ async function assertBoundaryControlsStyled(frame: FrameLocator) {
     };
   });
   const { modalStyle } = snapshot;
-  expect(modalStyle.backgroundColor, "boundary modal is not native white").not.toBe("rgb(255, 255, 255)");
-  expect(modalStyle.backgroundImage, "boundary modal has NUR material styling").not.toBe("none");
+  expect(modalStyle.backgroundColor, "boundary modal is transparent").toBe("rgba(0, 0, 0, 0)");
+  expect(modalStyle.backgroundImage, "boundary modal has no opaque material layer").toBe("none");
+  expect(modalStyle.boxShadow, "boundary modal has no panel glow").toBe("none");
+  expect(modalStyle.backdropFilter, "boundary modal has no frosted tint").toBe("none");
   expect(Number.parseFloat(modalStyle.borderRadius), "boundary modal keeps the approved V197 radius").toBe(8);
 
   expect(snapshot.allControlCount, "boundary modal control count").toBe(7);
@@ -741,6 +745,9 @@ async function assertSystemsMapGeometry(
   const viewport = page.viewportSize();
   const mapPanelLocator = frame.locator(".universe-map-panel");
   await expect(mapPanelLocator).toBeVisible();
+  await expect(frame.locator(".universe-map-title .nur-v197-stable-wordmark")).toBeVisible();
+  await expect(frame.locator(".universe-map-title small")).toBeVisible();
+  await assertCanonicalGalaxyRuntime(page, viewportLabel);
   const snapshot = await mapPanelLocator.evaluate(mapPanelElement => {
     const document = mapPanelElement.ownerDocument;
     const stageWindow = document.defaultView;
@@ -828,8 +835,6 @@ async function assertSystemsMapGeometry(
       },
     };
   });
-  await assertCanonicalGalaxyRuntime(page, viewportLabel);
-
   expect(snapshot.title, `${viewportLabel} NUR wordmark is visible`).not.toBeNull();
   expect(snapshot.subtitle, `${viewportLabel} map subtitle is visible`).not.toBeNull();
   expect(snapshot.masterVisible, `${viewportLabel} exact star-brain host is visible`).toBe(true);

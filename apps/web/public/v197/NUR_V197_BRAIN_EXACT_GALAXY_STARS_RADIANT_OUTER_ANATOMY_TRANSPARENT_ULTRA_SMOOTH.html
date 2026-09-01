@@ -6,9 +6,9 @@
 <title>NUR V197 — Rainbow Click + Double Shatter OG Reset</title>
 <style>
 *,*::before,*::after{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:transparent}
 body{user-select:none}
-#welcome{position:fixed;inset:0;display:flex!important;align-items:center;justify-content:center;background:#000}
+#welcome{position:fixed;inset:0;display:flex!important;align-items:center;justify-content:center;background:transparent}
 .front-orbit{position:relative;width:100vw;height:100vh;overflow:hidden}
 .front-core-light{position:absolute;left:50%;top:50%}
 #front-nur-star{
@@ -259,7 +259,10 @@ body{user-select:none}
 
   const SPRITE_DPR = 2;
   const SPRITE_REF_ALPHA = .20;
-  const SPRITE_SIZES = [2.75,3.75,5.0,6.5];
+  const SPRITE_SIZES = [.92,1.18,1.48,1.85,2.32,2.90,3.62,4.52,5.65,7.06,8.83,11.04,13.80,17.25];
+  const SPRITE_ROT_BINS = 4;
+  const SPRITE_ROT_PERIOD = Math.PI/2;
+  const SPRITE_ROT_STEP = SPRITE_ROT_PERIOD/SPRITE_ROT_BINS;
   const SPRITE_COLORS = [
     [238,154,72],[230,140,56],[218,124,44],[236,160,72],[224,142,48],[232,166,92],[216,132,58],[192,111,60],
     [226,186,102],[214,174,88],[202,160,74],[192,150,66],[182,140,58],[170,130,52],
@@ -282,7 +285,12 @@ body{user-select:none}
     const r=(clamp(col[0],0,255)|0)>>4, g=(clamp(col[1],0,255)|0)>>4, b=(clamp(col[2],0,255)|0)>>4;
     return SPRITE_COLOR_LUT[(r<<8)|(g<<4)|b];
   }
-  function spriteSizeIndex(r){ if(r<3.25) return 0; if(r<4.4) return 1; if(r<5.75) return 2; return 3; }
+  function spriteSizeIndex(r){
+    if(r<1.05)return 0; if(r<1.33)return 1; if(r<1.66)return 2; if(r<2.08)return 3;
+    if(r<2.61)return 4; if(r<3.26)return 5; if(r<4.07)return 6; if(r<5.09)return 7;
+    if(r<6.36)return 8; if(r<7.95)return 9; if(r<9.94)return 10; if(r<12.42)return 11;
+    if(r<15.53)return 12; return 13;
+  }
   function starPathCtx(ctx,x,y,outer,inner,rot=-Math.PI/2){
     ctx.beginPath();
     for(let i=0;i<8;i++){
@@ -308,7 +316,7 @@ body{user-select:none}
     ctx.beginPath(); ctx.moveTo(-len*.42,0); ctx.lineTo(len*.42,0); ctx.stroke();
     ctx.restore();
   }
-  function buildNormalSprite(colorIndex,sizeIndex,withSpike){
+  function buildNormalSprite(colorIndex,sizeIndex,withSpike,rotBin){
     const col=SPRITE_COLORS[colorIndex], r=SPRITE_SIZES[sizeIndex];
     const hR=r*2.68, bodyR=Math.max(1.05,Math.min(3.1,r*.12)), spikeLen=Math.max(6,r*2.6);
     const half=Math.ceil(Math.max(hR,spikeLen)+5), logical=half*2;
@@ -316,6 +324,7 @@ body{user-select:none}
     el.width=logical*SPRITE_DPR; el.height=logical*SPRITE_DPR;
     const ctx=el.getContext('2d',{alpha:true});
     ctx.setTransform(SPRITE_DPR,0,0,SPRITE_DPR,half*SPRITE_DPR,half*SPRITE_DPR);
+    ctx.rotate(rotBin*SPRITE_ROT_STEP);
     const a=SPRITE_REF_ALPHA, tw=1, rot=.72;
     const hg=ctx.createRadialGradient(0,0,r*.45,0,0,hR);
     hg.addColorStop(0,`rgba(${col[0]},${col[1]},${col[2]},${a*.065*tw})`);
@@ -353,16 +362,21 @@ body{user-select:none}
     }
     return {canvas:el,half,logical};
   }
-  function getNormalSprite(col,r,withSpike){
-    const ci=nearestSpriteColor(col), si=spriteSizeIndex(r), key=(ci<<3)|(si<<1)|(withSpike?1:0);
+  function getNormalSprite(col,sizeIndex,withSpike,rotBin){
+    const ci=nearestSpriteColor(col), key=((((ci*SPRITE_SIZES.length)+sizeIndex)*2+(withSpike?1:0))*SPRITE_ROT_BINS)+rotBin;
     let sp=spriteCache[key];
-    if(!sp){ sp=buildNormalSprite(ci,si,withSpike); spriteCache[key]=sp; }
+    if(!sp){ sp=buildNormalSprite(ci,sizeIndex,withSpike,rotBin); spriteCache[key]=sp; }
     return sp;
   }
   function drawNormalSprite(x,y,r,col,alpha,phase,twinkle,withSpike){
-    const sp=getNormalSprite(col,r,withSpike), scale=r/SPRITE_SIZES[spriteSizeIndex(r)], opacity=Math.min(1,alpha/SPRITE_REF_ALPHA);
-    c.save(); c.translate(x,y); c.rotate(phase*.37+twinkle*.82-.72); c.scale(scale,scale); c.globalAlpha=opacity;
-    c.drawImage(sp.canvas,-sp.half,-sp.half,sp.logical,sp.logical); c.restore();
+    const si=spriteSizeIndex(r);
+    const rot=phase*.37+twinkle*.82-.72;
+    let wrapped=rot%SPRITE_ROT_PERIOD; if(wrapped<0)wrapped+=SPRITE_ROT_PERIOD;
+    const rotBin=((wrapped/SPRITE_ROT_STEP+.5)|0)%SPRITE_ROT_BINS;
+    const sp=getNormalSprite(col,si,withSpike,rotBin), opacity=Math.min(1,alpha/SPRITE_REF_ALPHA);
+    c.globalAlpha=opacity;
+    c.drawImage(sp.canvas,x-sp.half,y-sp.half,sp.logical,sp.logical);
+    c.globalAlpha=1;
   }
   function stellarPath(x,y,outer,inner,points=4,rot=-Math.PI/2){
     c.beginPath();
@@ -1611,8 +1625,9 @@ body{user-select:none}
       const warmedBase = warmDominantInto(baseCol,p.warmAmt,warmScratch);
       const scintCol = scintColInto(warmedBase,twinkle,isS,renderScratch);
       const baseRenderCol = (p.metallicGold || p.coreRadiant) ? scintCol : honeyAmberizeInto(scintCol,honeyScratch);
-      const rainbowTint = sampleRainbowFloatInto(rainbowClickOrbit + p.phase*.18 + (p.micro ? .35 : 0), rainbowClickScratch);
-      const renderCol = mixColInto(baseRenderCol, rainbowTint, rainbowClickMix, renderScratch);
+      const renderCol = rainbowClickMix>.001
+        ? mixColInto(baseRenderCol, sampleRainbowFloatInto(rainbowClickOrbit + p.phase*.18 + (p.micro ? .35 : 0), rainbowClickScratch), rainbowClickMix, renderScratch)
+        : baseRenderCol;
       const sR = p.micro ? Math.max(.82,r*1.26) : Math.max(isS ? 4.55 : 1.72, r*(isS ? 3.00 : 1.48));
 
       const spikeOn = !p.micro && (isS || p.coreRadiant || p.sparkTier>0 || q.fire>.10 || q.wave>.16 || (p.starKind==='arm'&&a>.16&&r>.82) || (p.starKind==='core'&&a>.14) || (p.prism&&a>.14));
@@ -1675,8 +1690,9 @@ body{user-select:none}
       const warmedBase = warmDominantInto(baseCol,0,warmScratch);
       const scintCol = scintColInto(warmedBase,twinkle,f.bright,renderScratch);
       const baseRenderCol = (f.metallicGold || f.coolYellow || f.indigo) ? scintCol : honeyAmberizeInto(scintCol,honeyScratch);
-      const rainbowTint = sampleRainbowFloatInto(rainbowClickOrbit + f.phase*.22 + .4, rainbowClickScratch);
-      const renderCol = mixColInto(baseRenderCol, rainbowTint, rainbowClickMix, renderScratch);
+      const renderCol = rainbowClickMix>.001
+        ? mixColInto(baseRenderCol, sampleRainbowFloatInto(rainbowClickOrbit + f.phase*.22 + .4, rainbowClickScratch), rainbowClickMix, renderScratch)
+        : baseRenderCol;
       const sR = Math.max(.72, r*1.28);
       const spikeOn = f.bright || f.sparkBias>.30 || q.fire>.10;
       if(quality===0){

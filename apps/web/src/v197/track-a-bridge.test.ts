@@ -215,6 +215,10 @@ describe("Track A V197 premium polish", () => {
     expect(document.querySelector(".nur-holo-word")?.getAttribute("data-nur-holographic-wordmark")).toBe("animated");
     expect(document.querySelector(".universe-map-title small")?.classList.contains(V197_LOCKUP_SUBTITLE_CLASS)).toBe(true);
     expect(document.querySelector(".universe-map-panel")).toBe(originalMap);
+    expect(originalMap.style.getPropertyValue("background-color")).toBe("transparent");
+    expect(originalMap.style.getPropertyValue("background-image")).toBe("none");
+    expect(originalMap.style.getPropertyValue("box-shadow")).toBe("none");
+    expect(originalMap.style.getPropertyValue("backdrop-filter")).toBe("none");
     expect(miniHost.dataset.nurMiniCompacted).toBe("true");
     expect(miniHost.querySelectorAll(`.${V197_COMPACT_MINI_STAR_CLASS}`)).toHaveLength(1);
     expect(miniHost.querySelector(".nur-star-module")).toBeNull();
@@ -254,6 +258,11 @@ describe("Track A V197 premium polish", () => {
     expect(document.querySelector(".f4-brand-word")?.getAttribute("data-nur-holographic-wordmark")).toBe("animated");
     expect(document.querySelector(".f4-brand-sub")?.classList.contains(V197_LOCKUP_SUBTITLE_CLASS)).toBe(true);
     expect(document.body.classList.contains("nur-v197-auth-open")).toBe(true);
+    const sheet = document.getElementById("f4-sheet") as HTMLElement;
+    expect(sheet.style.getPropertyValue("background-color")).toBe("transparent");
+    expect(sheet.style.getPropertyValue("background-image")).toBe("none");
+    expect(sheet.style.getPropertyValue("box-shadow")).toBe("none");
+    expect(sheet.style.getPropertyValue("backdrop-filter")).toBe("none");
   });
 
   it("compacts only newly expanded mini stars and stays idempotent", () => {

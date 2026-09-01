@@ -1,13 +1,17 @@
 import { v197Copy } from "./v197I18n";
 import { ensureV197AccessibleViewport } from "./v197Accessibility";
 import { disposeV197CelestialRuntime } from "./v197CelestialRuntime";
+import {
+  installV197CooperativeFrameClient,
+  type V197CooperativeFrameClient,
+} from "./v197CooperativeFrameHub";
 
 export const V197_STAR_BRAIN_HOST_ID = "front-nur-star";
 export const V197_EXACT_STAR_BRAIN_FRAME_ID = "nur-exact-brain-frame";
 export const V197_EXACT_STAR_BRAIN_PATH =
-  "/v197/NUR_V197_BRAIN_EXACT_GALAXY_STARS_RADIANT_OUTER_ANATOMY_SOFTER_PATH.html";
+  "/v197/NUR_V197_BRAIN_EXACT_GALAXY_STARS_RADIANT_OUTER_ANATOMY_TRANSPARENT_ULTRA_SMOOTH.html";
 export const V197_EXACT_STAR_BRAIN_SHA256 =
-  "3c0b36f9d9732ed8fd0013e924754bbf3fe1f9c932a3498342af2df0084538b0";
+  "60c8e2db5b3457fb079b075808e537c63441e233d72b0f3301f4bff4e9db2ce0";
 const V197_SPECTRUM_NAMES = [
   "red", "orange", "yellow", "green", "blue", "indigo", "violet",
 ] as const;
@@ -29,6 +33,7 @@ const starBrainControllers = new WeakMap<Document, V197StarBrainController>();
 const starBrainHosts = new WeakMap<Document, HTMLElement>();
 const starBrainFrames = new WeakMap<Document, HTMLIFrameElement>();
 const configuredExactBrainCanvases = new WeakSet<HTMLCanvasElement>();
+const exactBrainSchedulers = new WeakMap<Document, V197CooperativeFrameClient>();
 
 type ExactBrainApi = {
   shatter: () => void;
@@ -72,6 +77,22 @@ function applyExactBrainHostGeometry(frameWindow: Window, brainHost: HTMLElement
   brainHost.style.setProperty("-webkit-mask-image", "none", "important");
   brainHost.dataset.nurNativeSize = String(size);
   return size;
+}
+
+function exactBrainPaintedSamples(canvas: HTMLCanvasElement): number {
+  const context = canvas.getContext("2d");
+  if (!context || canvas.width < 2 || canvas.height < 2) return 0;
+  try {
+    const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+    const stride = Math.max(4, Math.floor(pixels.length / 8_000 / 4) * 4);
+    let painted = 0;
+    for (let index = 3; index < pixels.length; index += stride) {
+      if ((pixels[index] ?? 0) > 8) painted += 1;
+    }
+    return painted;
+  } catch {
+    return 0;
+  }
 }
 
 function resolveV197StarBrainHost(document: Document): {
@@ -215,6 +236,15 @@ function configureExactBrainFrame(
     return;
   }
 
+  let scheduler = exactBrainSchedulers.get(document);
+  if (!scheduler) {
+    scheduler = installV197CooperativeFrameClient(frameWindow, embeddedWindow, {
+      label: "brain",
+    });
+    exactBrainSchedulers.set(document, scheduler);
+  }
+  brainFrame.dataset.nurFrameOwner = "shared-parent-raf";
+
   // The exact file calculates vw inside its nested iframe. Reapply the same
   // standalone formula against the real outer viewport so it does not shrink
   // from 700px to 299px merely because it is embedded in NUR.
@@ -242,19 +272,24 @@ function configureExactBrainFrame(
     // Observe the supplied handlers without replacing or modifying them. These
     // markers make the exact click/drag/zoom contract testable from the parent.
     canvas.addEventListener("pointerdown", () => {
+      scheduler?.boost();
       markInteraction("pointer-drag");
     }, { capture: true });
     canvas.addEventListener("wheel", () => {
+      scheduler?.boost();
       markInteraction("wheel-zoom");
     }, { capture: true });
     canvas.addEventListener("click", () => {
+      scheduler?.boost();
       markInteraction("rainbow-cycle");
     }, { capture: true });
     canvas.addEventListener("dblclick", () => {
+      scheduler?.boost();
       markInteraction("original-palette-shatter");
     }, { capture: true });
     innerHost.addEventListener("keydown", event => {
       if (event.key === "Enter" || event.key === " ") {
+        scheduler?.boost();
         markInteraction("keyboard-shatter");
       }
     }, { capture: true });
@@ -262,6 +297,7 @@ function configureExactBrainFrame(
 
   const exactApi: ExactBrainApi = Object.freeze({
     shatter: () => {
+      scheduler?.boost();
       const EventConstructor = (
         embeddedWindow as unknown as { MouseEvent: typeof MouseEvent }
       ).MouseEvent;
@@ -275,12 +311,13 @@ function configureExactBrainFrame(
     // changes must not rewrite that exact palette or its interaction state.
     setTheme: () => undefined,
     getDiagnostics: () => ({
-      version: "NUR_V197_BRAIN_EXACT_GALAXY_STARS_RADIANT_OUTER_ANATOMY_SOFTER_PATH",
+      version: "NUR_V197_BRAIN_EXACT_GALAXY_STARS_RADIANT_OUTER_ANATOMY_TRANSPARENT_ULTRA_SMOOTH",
       artifactSha256: V197_EXACT_STAR_BRAIN_SHA256,
       canvasWidth: canvas.width,
       canvasHeight: canvas.height,
       surface: brainHost.dataset.nurSurface ?? null,
       connected: brainFrame.isConnected,
+      scheduler: scheduler?.diagnostics() ?? null,
     }),
     dispose: () => {
       disposeV197StarBrain(document);
@@ -288,8 +325,32 @@ function configureExactBrainFrame(
   });
   exactBrainApis.set(document, exactApi);
   frameWindow.nurStarBrain = exactApi;
-  brainHost.dataset.nurExactBrainState = "ready";
-  brainFrame.dataset.nurExactBrainState = "ready";
+  if (
+    brainFrame.dataset.nurExactBrainState !== "ready"
+    && brainFrame.dataset.nurExactBrainState !== "warming"
+  ) {
+    scheduler.boost(1_000);
+    brainHost.dataset.nurExactBrainState = "warming";
+    brainFrame.dataset.nurExactBrainState = "warming";
+    const settlePaint = (attempt = 0): void => {
+      if (!brainFrame.isConnected || brainFrame.contentDocument !== embeddedDocument) return;
+      const paintedSamples = exactBrainPaintedSamples(canvas);
+      brainHost.dataset.nurPaintedSamples = String(paintedSamples);
+      brainFrame.dataset.nurPaintedSamples = String(paintedSamples);
+      if (paintedSamples > 100) {
+        brainHost.dataset.nurExactBrainState = "ready";
+        brainFrame.dataset.nurExactBrainState = "ready";
+        return;
+      }
+      if (attempt >= 45) {
+        brainHost.dataset.nurExactBrainState = "paint-timeout";
+        brainFrame.dataset.nurExactBrainState = "paint-timeout";
+        return;
+      }
+      embeddedWindow.requestAnimationFrame(() => settlePaint(attempt + 1));
+    };
+    embeddedWindow.requestAnimationFrame(() => settlePaint());
+  }
 }
 
 export function ensureV197StarBrain(document: Document): HTMLIFrameElement | null {
@@ -303,7 +364,7 @@ export function ensureV197StarBrain(document: Document): HTMLIFrameElement | nul
     return null;
   }
   brainHost.dataset.nurModel = "exact-galaxy-stars-radiant-outer-anatomy";
-  brainHost.dataset.nurVariant = "softer-path-rainbow-click-double-shatter";
+  brainHost.dataset.nurVariant = "transparent-ultra-smooth-rainbow-click-double-shatter";
   brainHost.dataset.nurInteractionContract =
     "pointer-drag-wheel-single-rainbow-double-shatter-keyboard-shatter";
 
@@ -323,6 +384,8 @@ export function ensureV197StarBrain(document: Document): HTMLIFrameElement | nul
   const brainFrame = document.createElement("iframe");
   brainFrame.id = "nur-exact-brain-frame";
   brainFrame.src = V197_EXACT_STAR_BRAIN_PATH;
+  brainFrame.setAttribute("allowtransparency", "true");
+  brainFrame.style.setProperty("background", "transparent", "important");
   brainFrame.title = v197Copy(
     "A living brain made of stars. Drag to spin it. Click and it dissolves into tiny star glitter, then flows back together.",
   );
@@ -348,6 +411,12 @@ function detachV197StarBrainMount(document: Document): boolean {
   const brainFrame = (
     document.getElementById(V197_EXACT_STAR_BRAIN_FRAME_ID) as HTMLIFrameElement | null
   ) ?? starBrainFrames.get(document) ?? null;
+  const scheduler = exactBrainSchedulers.get(document);
+  if (scheduler) {
+    scheduler.dispose();
+    exactBrainSchedulers.delete(document);
+    stopped = true;
+  }
   if (brainFrame) {
     brainFrame.src = "about:blank";
     brainFrame.remove();

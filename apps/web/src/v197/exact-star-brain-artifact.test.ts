@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 const repositoryRoot = resolve(process.cwd(), "../..");
 const artifactPath = resolve(
   repositoryRoot,
-  "apps/web/public/v197/NUR_V197_BRAIN_EXACT_GALAXY_STARS_RADIANT_OUTER_ANATOMY_SOFTER_PATH.html",
+  "apps/web/public/v197/NUR_V197_BRAIN_EXACT_GALAXY_STARS_RADIANT_OUTER_ANATOMY_TRANSPARENT_ULTRA_SMOOTH.html",
 );
 const bridgePath = resolve(repositoryRoot, "apps/web/src/bridge/v197StarBrain.ts");
 const polishPath = resolve(repositoryRoot, "apps/web/src/bridge/v197Polish.ts");
@@ -23,7 +23,10 @@ describe("founder-supplied exact V197 star brain", () => {
 
     const source = readFileSync(artifactPath, "utf8");
     expect(createHash("sha256").update(source).digest("hex"))
-      .toBe("3c0b36f9d9732ed8fd0013e924754bbf3fe1f9c932a3498342af2df0084538b0");
+      .toBe("60c8e2db5b3457fb079b075808e537c63441e233d72b0f3301f4bff4e9db2ce0");
+    expect(source).toContain("html,body{margin:0;width:100%;height:100%;overflow:hidden;background:transparent}");
+    expect(source).toContain("#welcome{position:fixed;inset:0;display:flex!important;align-items:center;justify-content:center;background:transparent}");
+    expect(source).not.toContain("background:#000");
     expect(source).toContain("const NUR_RAINBOW = [");
     expect(source).toContain("[255,64,64]");
     expect(source).toContain("[255,140,48]");
@@ -45,9 +48,11 @@ describe("founder-supplied exact V197 star brain", () => {
     const polish = readFileSync(polishPath, "utf8");
 
     expect(bridge).toContain("V197_EXACT_STAR_BRAIN_PATH");
-    expect(bridge).toContain("NUR_V197_BRAIN_EXACT_GALAXY_STARS_RADIANT_OUTER_ANATOMY_SOFTER_PATH.html");
+    expect(bridge).toContain("NUR_V197_BRAIN_EXACT_GALAXY_STARS_RADIANT_OUTER_ANATOMY_TRANSPARENT_ULTRA_SMOOTH.html");
     expect(bridge).toContain('brainFrame.id = "nur-exact-brain-frame"');
     expect(bridge).toContain("brainFrame.src = V197_EXACT_STAR_BRAIN_PATH");
+    expect(bridge).toContain('brainFrame.setAttribute("allowtransparency", "true")');
+    expect(bridge).toContain('brainFrame.style.setProperty("background", "transparent", "important")');
     expect(bridge).not.toContain('element.style.setProperty("background", "transparent"');
     expect(bridge).not.toContain('innerHost.style.setProperty("width", "100%"');
     expect(bridge).not.toContain("ensureV197CelestialRuntime(document, brainHost)");
@@ -61,6 +66,10 @@ describe("founder-supplied exact V197 star brain", () => {
 
     expect(galaxy).not.toContain("nurStarBrain?.dispose?.()");
     expect(css).toContain("#nur-exact-brain-frame");
+    expect(css).toMatch(/#nur-exact-brain-frame\s*\{[^}]*background:\s*transparent\s*!important/s);
+    expect(css).toMatch(/#nur-exact-brain-frame\s*\{[^}]*color-scheme:\s*normal\s*!important/s);
+    expect(css).not.toMatch(/#nur-exact-brain-frame\s*\{[^}]*background:\s*#000\s*!important/s);
+    expect(css).not.toMatch(/#nur-exact-brain-frame\s*\{[^}]*color-scheme:\s*dark\s*!important/s);
     expect(css).not.toMatch(/:is\([^)]*#front-nur-star[^)]*\)\s*\{\s*display:\s*none/s);
   });
 });

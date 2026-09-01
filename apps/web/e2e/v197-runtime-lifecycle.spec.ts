@@ -2,7 +2,7 @@ import { expect, test, type FrameLocator, type Page } from "@playwright/test";
 
 import { installNurMocks } from "./helpers/nurMocks";
 
-const exactBrainSha256 = "3c0b36f9d9732ed8fd0013e924754bbf3fe1f9c932a3498342af2df0084538b0";
+const exactBrainSha256 = "60c8e2db5b3457fb079b075808e537c63441e233d72b0f3301f4bff4e9db2ce0";
 
 async function assertExactBrain(frame: FrameLocator, surface: "entry" | "today" | "universe") {
   const host = frame.locator("#front-nur-star");

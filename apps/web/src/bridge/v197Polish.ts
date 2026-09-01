@@ -21,6 +21,54 @@ export {
   V197_WORDMARK_CLASS,
 } from "./v197Brand";
 
+const V197_TRANSPARENT_PANEL_SELECTOR = [
+  "#f4-sheet",
+  ".nur-panel",
+  ".universe-map-panel",
+  ".universe-insight-panel",
+  ".universe-card",
+  ".clean-audit-card",
+  ".nur-rail",
+  ".clean-left-rail",
+  ".clean-right-rail",
+  ".nur-context",
+  ".context-rail-card",
+  ".nur-topbar",
+  ".global-composer",
+  ".thought-composer",
+  ".talk-composer",
+  ".journal-composer",
+  ".universe-composer-shell",
+  ".scope-modal",
+  ".modal",
+  ".share-sheet",
+  ".nur-adjunct-root",
+  ".nur-v197-system-dialog__chamber",
+  ":is(section, aside, article, div, main, form)[class*='-panel']",
+  ":is(section, aside, article, div, main, form)[class*='-card']:not([class*='heading']):not([class*='kicker'])",
+  ":is(section, aside, article, div, main, form)[class*='-rail']:not([class*='heading'])",
+  ":is(section, aside, article, div, main, form)[class*='-sheet']:not([class*='backdrop'])",
+  ":is(section, aside, article, div, main, form)[class*='-drawer']",
+  ":is(section, aside, article, div, main, form)[class*='-chamber']",
+].join(",");
+
+const V197_TRANSPARENT_PANEL_CSS = `
+html.nur-exact-halo-free-runtime body :is(${V197_TRANSPARENT_PANEL_SELECTOR}) {
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html.nur-exact-halo-free-runtime body :is(${V197_TRANSPARENT_PANEL_SELECTOR})::before,
+html.nur-exact-halo-free-runtime body :is(${V197_TRANSPARENT_PANEL_SELECTOR})::after {
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}`;
+
 const V197_PRESENTATION_CSS = [
   V197_FONT_FACE_CSS,
   V197_FUNCTIONAL_CSS,
@@ -29,6 +77,7 @@ const V197_PRESENTATION_CSS = [
   V197_HOLOGRAPHIC_CSS,
   V197_ADAPTIVE_PERFORMANCE_CSS,
   V197_CANONICAL_GALAXY_CSS,
+  V197_TRANSPARENT_PANEL_CSS,
 ].join("\n");
 
 function ensureStableMapWordmark(document: Document): HTMLElement | null {
@@ -222,6 +271,19 @@ function installHolographicFilm(document: Document): number {
   return added;
 }
 
+export function makeV197PanelsTransparent(document: Document): number {
+  const surfaces = document.querySelectorAll<HTMLElement>(V197_TRANSPARENT_PANEL_SELECTOR);
+  for (const surface of surfaces) {
+    surface.style.setProperty("background-color", "transparent", "important");
+    surface.style.setProperty("background-image", "none", "important");
+    surface.style.setProperty("box-shadow", "none", "important");
+    surface.style.setProperty("backdrop-filter", "none", "important");
+    surface.style.setProperty("-webkit-backdrop-filter", "none", "important");
+    surface.dataset.nurTransparentPanel = "true";
+  }
+  return surfaces.length;
+}
+
 /**
  * Canonical hydration and bridge-native routes both add controls after the
  * first presentation pass. Observe those mounts once per document and batch a
@@ -243,6 +305,7 @@ function observeHolographicControls(document: Document): void {
     controller.frame = frameWindow.requestAnimationFrame(() => {
       controller.frame = null;
       installHolographicFilm(document);
+      makeV197PanelsTransparent(document);
     });
   });
   controller.observer = observer;
@@ -260,6 +323,7 @@ export function ensureV197EntryPolish(document: Document): HTMLStyleElement {
   lockV197BrandIdentity(document);
   installV197StarSeals(document);
   installHolographicFilm(document);
+  makeV197PanelsTransparent(document);
   observeHolographicControls(document);
   ensureV197CanonicalGalaxy(document);
   ensureV197StarBrain(document);
@@ -310,6 +374,7 @@ export function ensureV197PremiumPolish(document: Document): HTMLStyleElement {
   labelCompactTopbarControls(document);
   labelOwnerSignOutControl(document);
   installHolographicFilm(document);
+  makeV197PanelsTransparent(document);
   observeHolographicControls(document);
   matchUniverseBackgroundToEntry(document);
   ensureV197CanonicalGalaxy(document);

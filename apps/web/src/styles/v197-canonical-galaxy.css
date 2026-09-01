@@ -70,8 +70,8 @@ html.nur-exact-halo-free-runtime #nur-exact-brain-frame {
   width: 100% !important;
   height: 100% !important;
   border: 0 !important;
-  background: #000 !important;
-  color-scheme: dark !important;
+  background: transparent !important;
+  color-scheme: normal !important;
   mix-blend-mode: normal !important;
   pointer-events: auto !important;
 }

@@ -1,4 +1,8 @@
 import { v197Copy } from "./v197I18n";
+import {
+  installV197CooperativeFrameClient,
+  type V197CooperativeFrameClient,
+} from "./v197CooperativeFrameHub";
 
 export const V197_EXACT_GALAXY_VERSION = "V197-halo-free-2026.08";
 export const V197_EXACT_GALAXY_FRAME_ID = "nur-v197-halo-free-galaxy-frame";
@@ -71,6 +75,7 @@ type ExactGalaxyController = {
   frame: HTMLIFrameElement;
   activePointers: Set<number>;
   cleanups: Array<() => void>;
+  scheduler: V197CooperativeFrameClient | null;
 };
 
 const galaxyControllers = new WeakMap<Document, ExactGalaxyController>();
@@ -148,6 +153,7 @@ function exactDiagnostics(
     targetDim5: stats.rig.targetDim5,
     activePointerCount: controller.activePointers.size,
     pinchActive: controller.activePointers.size >= 2,
+    scheduler: controller.scheduler?.diagnostics() ?? null,
     haloLayer: false,
     renderer: "exact-halo-free-iframe",
   };
@@ -159,7 +165,7 @@ function installExactGalaxyInputBridge(
   embeddedWindow: BrowserWindow,
   canvas: HTMLCanvasElement,
 ): void {
-  const { activePointers, cleanups } = controller;
+  const { activePointers, cleanups, scheduler } = controller;
 
   const forwardPointer = (event: PointerEvent) => {
     const PointerEventConstructor = embeddedWindow.PointerEvent;
@@ -187,6 +193,7 @@ function installExactGalaxyInputBridge(
 
   const onPointerDown = (event: PointerEvent) => {
     if (isBlockedInteractionTarget(event.target)) return;
+    scheduler?.boost();
     activePointers.add(event.pointerId);
     // The embedded artifact focuses its canvas on pointerdown. For a bridged
     // event that focus is immediately lost to the real parent pointer target,
@@ -202,15 +209,18 @@ function installExactGalaxyInputBridge(
   };
   const onPointerMove = (event: PointerEvent) => {
     if (!activePointers.has(event.pointerId) && isBlockedInteractionTarget(event.target)) return;
+    scheduler?.boost();
     forwardPointer(event);
   };
   const onPointerEnd = (event: PointerEvent) => {
     if (!activePointers.has(event.pointerId)) return;
+    scheduler?.boost();
     forwardPointer(event);
     activePointers.delete(event.pointerId);
   };
   const onWheel = (event: WheelEvent) => {
     if (isBlockedInteractionTarget(event.target)) return;
+    scheduler?.boost();
     event.preventDefault();
     const WheelEventConstructor = embeddedWindow.WheelEvent;
     canvas.dispatchEvent(new WheelEventConstructor("wheel", {
@@ -230,6 +240,7 @@ function installExactGalaxyInputBridge(
   };
   const onClick = (event: MouseEvent) => {
     if (isBlockedInteractionTarget(event.target)) return;
+    scheduler?.boost();
     const MouseEventConstructor = embeddedWindow.MouseEvent;
     canvas.dispatchEvent(new MouseEventConstructor("click", {
       bubbles: true,
@@ -247,6 +258,7 @@ function installExactGalaxyInputBridge(
   };
   const onKeyDown = (event: KeyboardEvent) => {
     if (isBlockedInteractionTarget(event.target)) return;
+    scheduler?.boost();
     const KeyboardEventConstructor = embeddedWindow.KeyboardEvent;
     const forwarded = new KeyboardEventConstructor("keydown", {
       bubbles: true,
@@ -302,16 +314,31 @@ function configureExactGalaxyFrame(
     hud.hidden = true;
     hud.setAttribute("aria-hidden", "true");
   }
+  controller.scheduler ??= installV197CooperativeFrameClient(
+    frameWindow,
+    embeddedWindow,
+    { label: "galaxy" },
+  );
+  frame.dataset.nurFrameOwner = "shared-parent-raf";
   installExactGalaxyInputBridge(document, controller, embeddedWindow, canvas);
 
   const diagnostics = () => exactDiagnostics(source, controller);
   const runtime: ExactGalaxyRuntime = Object.freeze({
-    addEvent: () => canvas.dispatchEvent(new embeddedWindow.MouseEvent("click", { detail: 1 })),
-    burst: () => canvas.dispatchEvent(new embeddedWindow.MouseEvent("click", { detail: 1 })),
+    addEvent: () => {
+      controller.scheduler?.boost();
+      canvas.dispatchEvent(new embeddedWindow.MouseEvent("click", { detail: 1 }));
+    },
+    burst: () => {
+      controller.scheduler?.boost();
+      canvas.dispatchEvent(new embeddedWindow.MouseEvent("click", { detail: 1 }));
+    },
     setMode: () => undefined,
     setRotate: () => undefined,
     setTheme: () => undefined,
-    reset: () => source.reset(),
+    reset: () => {
+      controller.scheduler?.boost();
+      source.reset();
+    },
     getParticleCount: () => source.getStats().particles,
     getTransientParticleCount: () => 0,
     getParticleDiagnostics: diagnostics,
@@ -336,6 +363,8 @@ export function disposeV197CanonicalGalaxy(document: Document): boolean {
   if (!controller) return false;
   controller.cleanups.splice(0).forEach(cleanup => cleanup());
   controller.activePointers.clear();
+  controller.scheduler?.dispose();
+  controller.scheduler = null;
   controller.frame.src = "about:blank";
   controller.frame.remove();
   galaxyControllers.delete(document);
@@ -379,6 +408,7 @@ export function ensureV197CanonicalGalaxy(document: Document): HTMLIFrameElement
     frame: galaxyFrame,
     activePointers: new Set(),
     cleanups: [],
+    scheduler: null,
   };
   galaxyControllers.set(document, controller);
   galaxyFrame.addEventListener("load", () => configureExactGalaxyFrame(document, controller), {

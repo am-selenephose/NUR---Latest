@@ -159,7 +159,7 @@ test("Systems owns the exact supplied brain while Map owns a dedicated causal su
     await expect(brain).toHaveAttribute("data-nur-engine", "canvas2d-exact-artifact-v1");
     await expect(brain).toHaveAttribute(
       "data-nur-artifact-sha256",
-      "3c0b36f9d9732ed8fd0013e924754bbf3fe1f9c932a3498342af2df0084538b0",
+      "60c8e2db5b3457fb079b075808e537c63441e233d72b0f3301f4bff4e9db2ce0",
     );
     await expect(frame.frameLocator("#nur-exact-brain-frame").locator("#nur-brain-canvas-v197"))
       .toBeVisible();
