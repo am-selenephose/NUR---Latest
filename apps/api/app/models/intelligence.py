@@ -195,6 +195,7 @@ class Insight(Base):
 
     id = uuid_pk()
     owner_user_id = _owner()
+    canonical_omega_claim_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     orbit_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("orbits.id", ondelete="SET NULL"))
     insight_type: Mapped[str] = mapped_column(String(48), nullable=False)
     title: Mapped[str] = mapped_column(String(500), nullable=False)

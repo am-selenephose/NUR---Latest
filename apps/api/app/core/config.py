@@ -1,7 +1,14 @@
 from functools import lru_cache
 from urllib.parse import urlparse
 
-from pydantic import AliasChoices, EmailStr, Field, SecretStr, field_validator, model_validator
+from pydantic import (
+    AliasChoices,
+    EmailStr,
+    Field,
+    SecretStr,
+    field_validator,
+    model_validator,
+)
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _PLACEHOLDER_MARKERS = ("change_me", "dev_only")
@@ -177,6 +184,9 @@ class Settings(BaseSettings):
     omega_scheduled_consolidation: bool = Field(default=True, validation_alias="NUR_OMEGA_SCHEDULED_CONSOLIDATION")
     omega_consolidation_interval_hours: int = Field(default=24, validation_alias="NUR_OMEGA_CONSOLIDATION_INTERVAL_HOURS")
     omega_max_experiences_per_run: int = Field(default=100, validation_alias="NUR_OMEGA_MAX_EXPERIENCES_PER_RUN")
+    bplus_canonical_claims: bool = Field(
+        default=False, validation_alias="NUR_BPLUS_CANONICAL_CLAIMS"
+    )
 
     # Agentic Insights runs are deterministic, owner-scoped and bounded. Beat
     # dispatches owner IDs only; private source text is loaded after RLS context.

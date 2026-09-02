@@ -3,13 +3,22 @@ import datetime as dt
 import decimal
 import uuid
 
-from sqlalchemy import Boolean, Float, ForeignKey, Integer, String, UniqueConstraint, text
-from sqlalchemy.dialects.postgresql import ENUM as PGEnum, JSONB, UUID
+from sqlalchemy import (
+    Boolean,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    UniqueConstraint,
+    text,
+)
+from sqlalchemy.dialects.postgresql import ENUM as PGEnum
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import DateTime, Numeric
 
 from app.db.base import Base
-from app.models._mixins import uuid_pk, now_utc
+from app.models._mixins import now_utc, uuid_pk
 
 
 def _owner() -> Mapped[uuid.UUID]:
@@ -158,6 +167,7 @@ class SemanticClaim(Base):
     __tablename__ = "semantic_claims"
     id = uuid_pk()
     owner_user_id = _owner()
+    canonical_omega_claim_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     claim_text: Mapped[str] = mapped_column(String, nullable=False)
     subject_ref: Mapped[str | None] = mapped_column(String)
     predicate: Mapped[str | None] = mapped_column(String)
