@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import OmegaClaim
+from app.omega.contracts import authority_from_provenance, epistemic_from_truth_status
 from app.omega.evidence_graph import link_evidence
 from app.omega.safety_law import allowed_truth_status_for_provenance, redact_secrets
 from app.omega.schemas import OmegaClaimIn
@@ -26,6 +27,17 @@ async def create_claim(
         claim_text=text,
         claim_type=payload.claim_type,
         truth_status=truth_status,
+        subject_ref=payload.subject_ref,
+        predicate=payload.predicate,
+        object_value=payload.object_value,
+        scope=payload.scope,
+        valid_from=payload.valid_from,
+        valid_until=payload.valid_until,
+        epistemic_status=epistemic_from_truth_status(truth_status).value,
+        authority_status=authority_from_provenance(payload.provenance_label).value,
+        uncertainty_kind=payload.uncertainty_kind,
+        falsification_condition=payload.falsification_condition,
+        current_version=1,
         confidence=payload.confidence,
     )
     db.add(row)

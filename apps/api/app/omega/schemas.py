@@ -66,6 +66,14 @@ class OmegaClaimIn(BaseModel):
     truth_status: str = "HYPOTHESIS"
     provenance_label: str = "MODEL_GENERATED"
     orbit_id: uuid.UUID | None = None
+    subject_ref: str | None = Field(default=None, max_length=240)
+    predicate: str | None = Field(default=None, max_length=120)
+    object_value: dict = Field(default_factory=dict)
+    scope: str = "PRIVATE_ORBIT"
+    valid_from: dt.datetime | None = None
+    valid_until: dt.datetime | None = None
+    uncertainty_kind: str | None = Field(default=None, max_length=48)
+    falsification_condition: str | None = Field(default=None, max_length=2000)
     confidence: float = 0.5
     evidence_id: uuid.UUID | None = None
     evidence_kind: str = "EXPERIENCE"
@@ -77,6 +85,17 @@ class OmegaClaimOut(BaseModel):
     claim_text: str
     claim_type: str
     truth_status: str
+    subject_ref: str | None
+    predicate: str | None
+    object_value: dict
+    scope: str
+    valid_from: dt.datetime | None
+    valid_until: dt.datetime | None
+    epistemic_status: str
+    authority_status: str
+    uncertainty_kind: str | None
+    falsification_condition: str | None
+    current_version: int
     confidence: float
     support_count: int
     contradiction_count: int

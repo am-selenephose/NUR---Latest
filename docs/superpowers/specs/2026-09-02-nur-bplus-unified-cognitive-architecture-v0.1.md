@@ -114,9 +114,12 @@ OWNER_CONFIRMED
 OWNER_CORRECTED
 SYSTEM_MEASURED
 RESEARCH_DERIVED
+LEGACY_UNRESOLVED
 ```
 
 Owner confirmation changes authority. It does not automatically rewrite epistemic state to `OBSERVED`.
+
+`LEGACY_UNRESOLVED` is migration-only: use it when an old claim predates persisted authority provenance and no surviving evidence proves who established it. B+ must not fabricate owner/model authority during backfill. New canonical writes may not use this state.
 
 ## Claim Versioning
 

@@ -7,7 +7,17 @@ and no hidden autonomous action state.
 import datetime as dt
 import uuid
 
-from sqlalchemy import CheckConstraint, Float, ForeignKey, Integer, String, text
+from sqlalchemy import (
+    CheckConstraint,
+    Float,
+    ForeignKey,
+    ForeignKeyConstraint,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    text,
+)
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import DateTime
@@ -73,6 +83,10 @@ class OmegaClaim(Base):
     __table_args__ = (
         CheckConstraint("claim_type IN ('FACT','PREFERENCE','CONSTRAINT','DECISION','PATTERN','RISK','HYPOTHESIS','UNKNOWN')", name="ck_omega_claim_type"),
         CheckConstraint("truth_status IN ('OBSERVED','INFERRED','HYPOTHESIS','CONTRADICTED','SUPERSEDED','RETIRED')", name="ck_omega_claim_truth"),
+        CheckConstraint("epistemic_status IN ('OBSERVED','INFERRED','HYPOTHESIS','CONTESTED','CONTRADICTED','SUPERSEDED','RETIRED')", name="ck_omega_claim_epistemic_status"),
+        CheckConstraint("authority_status IN ('MODEL_PROPOSED','OWNER_STATED','OWNER_CONFIRMED','OWNER_CORRECTED','SYSTEM_MEASURED','RESEARCH_DERIVED','LEGACY_UNRESOLVED')", name="ck_omega_claim_authority_status"),
+        CheckConstraint("current_version >= 1", name="ck_omega_claim_current_version"),
+        UniqueConstraint("id", "owner_user_id", name="uq_omega_claim_id_owner"),
     )
 
     id = uuid_pk()
@@ -81,6 +95,17 @@ class OmegaClaim(Base):
     claim_text: Mapped[str] = mapped_column(String, nullable=False)
     claim_type: Mapped[str] = mapped_column(String, nullable=False, default="UNKNOWN", server_default="UNKNOWN")
     truth_status: Mapped[str] = mapped_column(String, nullable=False, default="HYPOTHESIS", server_default="HYPOTHESIS")
+    subject_ref: Mapped[str | None] = mapped_column(String(240))
+    predicate: Mapped[str | None] = mapped_column(String(120))
+    object_value: Mapped[dict] = mapped_column(JSONB, default=dict, server_default=text("'{}'::jsonb"))
+    scope: Mapped[str] = mapped_column(String(32), nullable=False, default="PRIVATE_ORBIT", server_default="PRIVATE_ORBIT")
+    valid_from: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+    valid_until: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+    epistemic_status: Mapped[str] = mapped_column(String(24), nullable=False, default="HYPOTHESIS", server_default="HYPOTHESIS")
+    authority_status: Mapped[str] = mapped_column(String(32), nullable=False, default="LEGACY_UNRESOLVED", server_default="LEGACY_UNRESOLVED")
+    uncertainty_kind: Mapped[str | None] = mapped_column(String(48))
+    falsification_condition: Mapped[str | None] = mapped_column(Text)
+    current_version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default=text("1"))
     confidence: Mapped[float] = mapped_column(Float, default=0.5, server_default=text("0.5"))
     support_count: Mapped[int] = mapped_column(Integer, default=0, server_default=text("0"))
     contradiction_count: Mapped[int] = mapped_column(Integer, default=0, server_default=text("0"))
@@ -88,6 +113,40 @@ class OmegaClaim(Base):
     last_contradicted_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
     created_at = _created()
     updated_at = _updated()
+
+
+class OmegaClaimVersion(Base):
+    __tablename__ = "omega_claim_versions"
+    __table_args__ = (
+        UniqueConstraint(
+            "owner_user_id", "claim_id", "version", name="uq_omega_claim_version"
+        ),
+        ForeignKeyConstraint(
+            ["claim_id", "owner_user_id"],
+            ["omega_claims.id", "omega_claims.owner_user_id"],
+            name="fk_omega_claim_version_owner",
+            ondelete="CASCADE",
+        ),
+    )
+
+    id = uuid_pk()
+    owner_user_id = _owner()
+    claim_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    snapshot: Mapped[dict] = mapped_column(
+        JSONB, nullable=False, default=dict, server_default=text("'{}'::jsonb")
+    )
+    why_changed_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("why_changed_records.id", ondelete="SET NULL")
+    )
+    change_class: Mapped[str] = mapped_column(
+        String(48), nullable=False, default="CREATED", server_default="CREATED"
+    )
+    actor: Mapped[str] = mapped_column(
+        String(32), nullable=False, default="system", server_default="system"
+    )
+    evidence_digest: Mapped[str | None] = mapped_column(String(64))
+    created_at = _created()
 
 
 class OmegaEvidenceEdge(Base):

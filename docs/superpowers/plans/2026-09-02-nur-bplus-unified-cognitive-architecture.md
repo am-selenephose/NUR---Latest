@@ -104,6 +104,7 @@ USER_CORRECTION            -> authority_status OWNER_CORRECTED
 SYSTEM_MEASURED            -> authority_status SYSTEM_MEASURED
 MODEL_GENERATED            -> authority_status MODEL_PROPOSED
 OBSERVED_OUTCOME           -> authority_status SYSTEM_MEASURED
+legacy without proven provenance -> authority_status LEGACY_UNRESOLVED
 ```
 
 Create `omega_claim_versions` with owner RLS, `(claim_id, version)` uniqueness, snapshot JSONB, `why_changed_id`, `change_class`, `actor`, `evidence_digest`, and timestamp.

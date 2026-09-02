@@ -11,6 +11,7 @@ SET_USER = "SELECT set_config('app.current_user_id', :uid, true)"
 OMEGA_TABLES = [
     "omega_experiences",
     "omega_claims",
+    "omega_claim_versions",
     "omega_evidence_edges",
     "omega_contradictions",
     "omega_workspace_frames",
