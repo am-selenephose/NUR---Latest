@@ -5,8 +5,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import OmegaClaim, OmegaReviewQueue
-from app.omega.claim_service import create_claim
-from app.omega.schemas import OmegaClaimIn, OmegaClaimCandidate
+from app.omega.canonical_claim_service import create_canonical_claim
+from app.omega.contracts import AuthorityStatus
+from app.omega.schemas import OmegaClaimCandidate, OmegaClaimIn
 
 
 async def queue_claim_candidate(
@@ -67,7 +68,7 @@ async def approve_review_item(
     row = await _review_item(db, owner_user_id=owner_user_id, review_id=review_id)
     if row.status not in {"PENDING_REVIEW", "EDITED"}:
         raise ValueError("Review item has already been closed.")
-    claim = await create_claim(
+    claim = await create_canonical_claim(
         db,
         owner_user_id=owner_user_id,
         payload=OmegaClaimIn(
@@ -80,6 +81,9 @@ async def approve_review_item(
             evidence_id=row.experience_id,
             evidence_kind="EXPERIENCE",
         ),
+        authority_override=AuthorityStatus.OWNER_CONFIRMED,
+        actor_override="owner",
+        trigger="Owner approved this reviewed Omega claim candidate.",
     )
     now = dt.datetime.now(dt.timezone.utc)
     row.status = "APPROVED"

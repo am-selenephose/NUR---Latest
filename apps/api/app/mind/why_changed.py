@@ -16,7 +16,6 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
 # ── Change classes ─────────────────────────────────────────────────────────
 
 class ChangeClass(StrEnum):
@@ -52,6 +51,7 @@ class EntityType(StrEnum):
     MODEL_CHECKPOINT = "model_checkpoint"
     CURRICULUM = "curriculum"
     INSIGHT = "insight"
+    OMEGA_CLAIM = "omega_claim"
 
 
 # ── WhyChangedRecord Pydantic model ───────────────────────────────────────
@@ -169,8 +169,9 @@ class WhyChangedService:
         limit: int = 50,
     ) -> list[WhyChangedRecord]:
         """Retrieve one entity's governed history, newest first."""
-        from app.models import WhyChangedRecordRow
         from sqlalchemy import desc
+
+        from app.models import WhyChangedRecordRow
 
         stmt = (
             select(WhyChangedRecordRow)

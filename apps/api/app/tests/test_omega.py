@@ -295,7 +295,10 @@ async def test_sensitive_model_generated_claim_waits_for_owner_review_then_appro
     approved = (await client.post(f"/api/v1/omega/review-queue/{reviews[0]['id']}/approve", headers=H(client))).json()
     claims = (await client.get("/api/v1/omega/claims")).json()
     assert approved["status"] == "APPROVED"
-    assert any(c["id"] == approved["created_claim_id"] and c["truth_status"] == "INFERRED" for c in claims)
+    created = next(c for c in claims if c["id"] == approved["created_claim_id"])
+    assert created["truth_status"] == "INFERRED"
+    assert created["epistemic_status"] == "INFERRED"
+    assert created["authority_status"] == "OWNER_CONFIRMED"
 
 
 async def test_owner_omega_export_excludes_raw_capsule_and_chain_of_thought(client):
