@@ -36,7 +36,11 @@ from app.mind.context import build_cognitive_task_packet, load_semantic_hydratio
 from app.mind.metacognition import run_metacognitive_review
 from app.mind.scope import ScopeResolutionError, resolve_scope
 from app.models import CognitiveEvent, ModelRun, ModelRunSource
-from app.omega.workspace_service import build_workspace_frame, mark_frame_used, talk_summary
+from app.omega.workspace_service import (
+    build_workspace_frame,
+    mark_frame_used,
+    talk_summary,
+)
 from app.services.glow_service import award_glow_if_eligible
 
 
@@ -153,6 +157,7 @@ async def run_mind_cognitive_loop(
         db,
         owner_user_id=owner_user_id,
         orbit_id=orbit_id,
+        scope_envelope=scope_envelope,
     )
     if resolution.selected_capability is not None:
         hydrated_ctx = await ContextHydrator.hydrate(
@@ -170,6 +175,7 @@ async def run_mind_cognitive_loop(
             owner_user_id=owner_user_id,
             task_mode=task_class,
             active_question=user_line,
+            scope_envelope=scope_envelope,
             orbit_id=orbit_id,
             trigger_event_id=turn.id,
         )
@@ -182,6 +188,7 @@ async def run_mind_cognitive_loop(
             owner_user_id=owner_user_id,
             task_mode=task_class,
             active_question=user_line,
+            scope_envelope=scope_envelope,
             orbit_id=orbit_id,
             trigger_event_id=turn.id,
         )

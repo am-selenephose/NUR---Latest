@@ -118,18 +118,31 @@ class ContextHydrator:
         def owned(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
             return [item for item in items if str(item.get("owner_user_id")) == owner]
 
+        def scoped(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+            rows = owned(items)
+            boundaries = (
+                ("orbit_id", scope_envelope.orbit_id),
+                ("project_id", scope_envelope.project_id),
+                ("capsule_id", scope_envelope.capsule_id),
+                ("community_id", scope_envelope.community_id),
+            )
+            for key, expected in boundaries:
+                if expected is not None:
+                    rows = [item for item in rows if str(item.get(key, "")) == str(expected)]
+            return rows
+
         approved = [
-            item for item in owned(approved_memory)
+            item for item in scoped(approved_memory)
             if str(item.get("status", "APPROVED")).upper() in {"APPROVED", "OWNER_APPROVED"}
         ]
         # Candidates are always excluded from Brain context even when owner-scoped.
-        excluded_candidate = owned(memory_candidates)
+        excluded_candidate = scoped(memory_candidates)
         families = {
             "approved_memory": approved,
-            "beliefs": owned(beliefs),
-            "user_model": owned(user_model_claims),
-            "research": owned(research_results),
-            "semantic_context": owned(semantic_context),
+            "beliefs": scoped(beliefs),
+            "user_model": scoped(user_model_claims),
+            "research": scoped(research_results),
+            "semantic_context": scoped(semantic_context),
         }
         included: list[ContextSource] = []
         excluded: list[ContextSource] = []
@@ -300,6 +313,7 @@ class ContextHydrator:
                         owner_user_id=owner_user_id,
                         task_mode=scope_envelope.surface,
                         active_question=query,
+                        scope_envelope=scope_envelope,
                         orbit_id=effective_orbit_id,
                         trigger_event_id=trigger_event_id,
                     )
@@ -427,8 +441,9 @@ class ContextHydrator:
             elif source_key == "orbit_context":
                 if effective_orbit_id:
                     try:
-                        from app.models.orbit import Orbit
                         from sqlalchemy import select
+
+                        from app.models.orbit import Orbit
                         stmt = select(Orbit).where(Orbit.owner_user_id == owner_user_id, Orbit.id == effective_orbit_id)
                         orb = (await db.execute(stmt)).scalars().first()
                         raw_orb = None

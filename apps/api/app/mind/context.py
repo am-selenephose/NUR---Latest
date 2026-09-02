@@ -25,6 +25,7 @@ async def load_semantic_hydration_inputs(
     *,
     owner_user_id: uuid.UUID,
     orbit_id: uuid.UUID | None = None,
+    scope_envelope: ScopeEnvelope | None = None,
     limit: int = 20,
 ) -> dict[str, list[dict[str, Any]]]:
     """Load only owner-scoped semantic families before Brain context assembly.
@@ -38,6 +39,10 @@ async def load_semantic_hydration_inputs(
     from app.models.product import ResearchSourceNote
 
     bounded = max(1, min(int(limit), 100))
+    if scope_envelope is not None:
+        if scope_envelope.owner_user_id != owner_user_id:
+            raise PermissionError("ScopeEnvelope owner mismatch blocks semantic hydration.")
+        orbit_id = scope_envelope.orbit_id or orbit_id
     memory_stmt = select(PersonalMemory).where(
         PersonalMemory.owner_user_id == owner_user_id,
         PersonalMemory.status == "APPROVED",
@@ -49,30 +54,20 @@ async def load_semantic_hydration_inputs(
         )
     memory_rows = (await db.execute(memory_stmt)).scalars().all()
 
-    claims = (
-        await db.execute(
-            select(SemanticClaim)
-            .where(SemanticClaim.owner_user_id == owner_user_id, SemanticClaim.status != "ARCHIVED")
-            .order_by(SemanticClaim.created_at.desc())
-            .limit(bounded)
-        )
-    ).scalars().all()
-    drafts = (
-        await db.execute(
-            select(ResearchDraft)
-            .where(ResearchDraft.owner_user_id == owner_user_id)
-            .order_by(ResearchDraft.created_at.desc())
-            .limit(bounded)
-        )
-    ).scalars().all()
-    notes = (
-        await db.execute(
-            select(ResearchSourceNote)
-            .where(ResearchSourceNote.owner_user_id == owner_user_id)
-            .order_by(ResearchSourceNote.created_at.desc())
-            .limit(bounded)
-        )
-    ).scalars().all()
+    claim_stmt = select(SemanticClaim).where(
+        SemanticClaim.owner_user_id == owner_user_id, SemanticClaim.status != "ARCHIVED"
+    ).order_by(SemanticClaim.created_at.desc()).limit(bounded)
+    if orbit_id is not None and hasattr(SemanticClaim, "orbit_id"):
+        claim_stmt = claim_stmt.where(SemanticClaim.orbit_id == orbit_id)
+    claims = (await db.execute(claim_stmt)).scalars().all()
+    draft_stmt = select(ResearchDraft).where(ResearchDraft.owner_user_id == owner_user_id).order_by(ResearchDraft.created_at.desc()).limit(bounded)
+    if orbit_id is not None and hasattr(ResearchDraft, "orbit_id"):
+        draft_stmt = draft_stmt.where(ResearchDraft.orbit_id == orbit_id)
+    drafts = (await db.execute(draft_stmt)).scalars().all()
+    note_stmt = select(ResearchSourceNote).where(ResearchSourceNote.owner_user_id == owner_user_id).order_by(ResearchSourceNote.created_at.desc()).limit(bounded)
+    if orbit_id is not None and hasattr(ResearchSourceNote, "orbit_id"):
+        note_stmt = note_stmt.where(ResearchSourceNote.orbit_id == orbit_id)
+    notes = (await db.execute(note_stmt)).scalars().all()
 
     approved_memory = [
         {
@@ -82,6 +77,7 @@ async def load_semantic_hydration_inputs(
             "content": row.canonical_text,
             "provenance_label": row.provenance_label,
             "confidence": row.confidence,
+            "orbit_id": str(row.orbit_id) if row.orbit_id else None,
         }
         for row in memory_rows
     ]
@@ -94,6 +90,7 @@ async def load_semantic_hydration_inputs(
             "confidence": row.confidence,
             "evidence_count": row.evidence_count,
             "counterevidence_count": row.counterevidence_count,
+            "orbit_id": str(row.orbit_id) if getattr(row, "orbit_id", None) else None,
         }
         for row in claims
     ]
