@@ -380,8 +380,12 @@ async def test_omega_stress_105_experiences_is_idempotent_and_count_only(client)
         })
     first = (await client.post("/api/v1/omega/consolidate", headers=H(client), json={"run_kind": "MANUAL"})).json()
     second = (await client.post("/api/v1/omega/consolidate", headers=H(client), json={"run_kind": "MANUAL"})).json()
+    third = (await client.post("/api/v1/omega/consolidate", headers=H(client), json={"run_kind": "MANUAL"})).json()
     assert first["input_counts"]["recent_events"] == 100
     assert first["input_counts"]["created_experiences"] == 100
     assert first["created_claims"] == 100
-    assert second["input_counts"]["created_experiences"] == 0
+    assert second["input_counts"]["recent_events"] == 5
+    assert second["input_counts"]["created_experiences"] == 5
+    assert second["created_claims"] == 5
+    assert third["input_counts"]["created_experiences"] == 0
     assert "stress marker" not in str(first["input_counts"])

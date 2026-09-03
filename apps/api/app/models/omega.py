@@ -257,6 +257,40 @@ class OmegaLearningProposal(Base):
     updated_at = _updated()
 
 
+class OmegaIngestionReceipt(Base):
+    __tablename__ = "omega_ingestion_receipts"
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('PROCESSED','IGNORED','RETRYABLE','QUARANTINED','INVALIDATED')",
+            name="ck_omega_ingestion_receipt_status",
+        ),
+        CheckConstraint("attempt_count >= 0", name="ck_omega_ingestion_receipt_attempts"),
+        UniqueConstraint(
+            "owner_user_id", "source_kind", "source_id",
+            name="uq_omega_ingestion_receipt_source",
+        ),
+    )
+
+    id = uuid_pk()
+    owner_user_id = _owner()
+    source_kind: Mapped[str] = mapped_column(String(48), nullable=False)
+    source_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    status: Mapped[str] = mapped_column(
+        String(24), nullable=False, default="RETRYABLE", server_default="RETRYABLE"
+    )
+    experience_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("omega_experiences.id", ondelete="SET NULL")
+    )
+    attempt_count: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default=text("0")
+    )
+    error_code: Mapped[str | None] = mapped_column(String(96))
+    error_summary: Mapped[str | None] = mapped_column(String(240))
+    first_seen_at = _created()
+    last_attempt_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))
+
+
 class OmegaConsolidationRun(Base):
     __tablename__ = "omega_consolidation_runs"
     __table_args__ = (
