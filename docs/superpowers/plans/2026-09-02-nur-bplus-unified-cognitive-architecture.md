@@ -526,7 +526,7 @@ git commit -m "feat(nur): unify predictions with outcome calibration"
 - Produces `ContradictionCandidate` and `verify_contradiction(candidate, claim_a, claim_b)`.
 - Candidate generation may use structured model output; verification remains deterministic and owner/scope-aware.
 
-- [ ] **Step 1: Write false-positive and false-negative fixtures**
+- [x] **Step 1: Write false-positive and false-negative fixtures**
 
 ```python
 def test_never_avoid_exercise_is_not_opposite_of_do_exercise():
@@ -541,19 +541,19 @@ async def test_cross_scope_conflict_is_not_auto_persisted():
     assert verify_contradiction(candidate(a, b), a, b).persist is False
 ```
 
-- [ ] **Step 2: Implement normalized proposition candidates**
+- [x] **Step 2: Implement normalized proposition candidates**
 
 `ContradictionCandidate` carries claim IDs, normalized subject/predicate/object polarity, temporal overlap, scope compatibility, semantic rationale code, generator confidence, and sensitivity flag. No free-form chain-of-thought field.
 
-- [ ] **Step 3: Gate persistence**
+- [x] **Step 3: Gate persistence**
 
 Persist automatically only when: same owner; scopes overlap; validity windows overlap; evidence sources still exist; relation is structurally incompatible; sensitivity policy permits auto-persist. Otherwise queue review or return no contradiction.
 
-- [ ] **Step 4: Keep lexical detector only as fallback candidate generator**
+- [x] **Step 4: Keep lexical detector only as fallback candidate generator**
 
 Existing keyword logic may propose candidates when no semantic provider is available, but it cannot bypass the deterministic verifier.
 
-- [ ] **Step 5: Verify and commit**
+- [x] **Step 5: Verify and commit**
 
 Run `pytest -q app/tests/test_bplus_contradictions.py app/tests/test_omega.py`.
 
@@ -561,6 +561,9 @@ Run `pytest -q app/tests/test_bplus_contradictions.py app/tests/test_omega.py`.
 git add apps/api/app/omega/semantic_relations.py apps/api/app/omega/contradiction_service.py apps/api/app/omega/confirmation_policy.py apps/api/app/tests/test_bplus_contradictions.py
 git commit -m "feat(nur): verify semantic contradictions before belief revision"
 ```
+
+**Closure — 2026-09-03:** PASS. Lexical contradiction logic is now candidate generation only. `ContradictionCandidate` stores normalized propositions, temporal/scope compatibility, generator confidence, sensitivity and evidence-source validity without hidden reasoning. `verify_contradiction()` deterministically blocks owner mismatch, cross-Orbit scope, disjoint validity windows, stale evidence, sensitive auto-persistence, predicate mismatch, non-opposed polarity, and object mismatch. Sensitive structurally valid conflicts return review-required rather than silently persisting. Verified structural conflicts preserve the existing Omega contradiction flow. Verification: Task-7 + Omega suite 24 passed; full API suite 1112 passed.
+
 
 ---
 
