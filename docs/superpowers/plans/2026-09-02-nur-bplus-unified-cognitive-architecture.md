@@ -469,7 +469,7 @@ git commit -m "feat(nur): make Omega consolidation complete and starvation-free"
 - Canonical storage remains `predictions`; legacy `omega_predictions` reads bridge through `prediction_v2`.
 - Produces `register_prediction()`, `resolve_prediction()`, and `calibration_report()`.
 
-- [ ] **Step 1: Write failing structured prediction test**
+- [x] **Step 1: Write failing structured prediction test**
 
 ```python
 async def test_prediction_requires_observable_contract(client):
@@ -484,23 +484,23 @@ async def test_prediction_requires_observable_contract(client):
     assert row.confidence == Decimal('0.750')
 ```
 
-- [ ] **Step 2: Extend prediction schema without breaking current rows**
+- [x] **Step 2: Extend prediction schema without breaking current rows**
 
 Add `metric`, `falsification_condition`, `resolution_rule`, `resolved_outcome_id`, and `prediction_error`; preserve `outcome_event_id`, `resolution`, `learning`, assumptions, confidence, horizon and review date.
 
-- [ ] **Step 3: Resolve from observed outcomes**
+- [x] **Step 3: Resolve from observed outcomes**
 
 Resolution accepts an explicit evaluator result: `CONFIRMED`, `PARTIALLY_CONFIRMED`, or `CONTRADICTED`; computes a numeric error only where metric semantics support it. Resolution writes a WhyChanged receipt and emits an Omega evidence edge when linked to a claim.
 
-- [ ] **Step 4: Add reproducible calibration**
+- [x] **Step 4: Add reproducible calibration**
 
 `calibration_report()` groups resolved binary predictions into 0.1 confidence buckets and returns count, mean forecast, observed frequency, absolute calibration error, and Brier score. Exclude predictions lacking a binary-compatible resolution; never fabricate a score.
 
-- [ ] **Step 5: Bridge legacy Omega predictions**
+- [x] **Step 5: Bridge legacy Omega predictions**
 
 Migration/service maps legacy rows into canonical predictions idempotently and records source IDs. New Omega API writes canonical predictions only.
 
-- [ ] **Step 6: Verify and commit**
+- [x] **Step 6: Verify and commit**
 
 Run `pytest -q app/tests/test_bplus_predictions.py app/tests/test_cognition.py app/tests/test_omega.py`.
 
@@ -508,6 +508,9 @@ Run `pytest -q app/tests/test_bplus_predictions.py app/tests/test_cognition.py a
 git add apps/api/alembic/versions/0063_nur_bplus_prediction_semantics.py apps/api/app/models/cognition.py apps/api/app/cognition/prediction_service.py apps/api/app/omega apps/api/app/tests/test_bplus_predictions.py
 git commit -m "feat(nur): unify predictions with outcome calibration"
 ```
+
+**Closure — 2026-09-03:** PASS. Canonical `predictions` now owns new Omega prediction writes; legacy `omega_predictions` is bridged idempotently through `prediction_v2` without read-side mutation. Explicit resolution records `CONFIRMED` / `PARTIALLY_CONFIRMED` / `CONTRADICTED`, persists WhyChanged lineage, links observed outcomes into Omega evidence when a canonical claim is attached, and computes numeric error only for supported metric semantics. Calibration uses only binary-compatible resolved predictions in 0.1 confidence buckets and reports count, mean forecast, observed frequency, absolute calibration error, and Brier score. Free-form Talk hypotheses are not promoted into fake measurable predictions; Map manual resolution and Talk summary both use the canonical ledger. Verification: Task-6 exact suite 30 passed; Map regression 39 passed; migration reachability 1 passed; full API suite 1103 passed.
+
 
 ---
 

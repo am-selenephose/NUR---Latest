@@ -7,8 +7,10 @@ from sqlalchemy import (
     Boolean,
     Float,
     ForeignKey,
+    ForeignKeyConstraint,
     Integer,
     String,
+    Text,
     UniqueConstraint,
     text,
 )
@@ -273,12 +275,35 @@ class MemoryCandidate(Base):
 
 class Prediction(Base):
     __tablename__ = "predictions"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["omega_claim_id", "owner_user_id"],
+            ["omega_claims.id", "omega_claims.owner_user_id"],
+            name="fk_predictions_omega_claim_owner",
+        ),
+        ForeignKeyConstraint(
+            ["legacy_omega_prediction_id", "owner_user_id"],
+            ["omega_predictions.id", "omega_predictions.owner_user_id"],
+            name="fk_predictions_legacy_omega_owner",
+        ),
+    )
     id = uuid_pk()
     owner_user_id = _owner()
     orbit_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("orbits.id", ondelete="SET NULL"))
     source_event_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("cognitive_events.id", ondelete="SET NULL"))
     statement: Mapped[str] = mapped_column(String, nullable=False)
     expected_observation: Mapped[dict] = mapped_column(JSONB, default=dict, server_default=text("'{}'::jsonb"))
+    metric: Mapped[str | None] = mapped_column(String(120))
+    falsification_condition: Mapped[str | None] = mapped_column(Text)
+    resolution_rule: Mapped[dict] = mapped_column(
+        JSONB, default=dict, server_default=text("'{}'::jsonb"), nullable=False
+    )
+    resolved_outcome_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("outcomes.id", ondelete="SET NULL")
+    )
+    prediction_error: Mapped[decimal.Decimal | None] = mapped_column(Numeric(12, 6))
+    omega_claim_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    legacy_omega_prediction_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     status: Mapped[str] = mapped_column(String, default="OPEN", server_default="OPEN")
     outcome_event_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("cognitive_events.id", ondelete="SET NULL"))
     resolved_at: Mapped[dt.datetime | None] = mapped_column(DateTime(timezone=True))

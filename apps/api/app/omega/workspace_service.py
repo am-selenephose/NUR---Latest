@@ -8,8 +8,8 @@ from app.mind.scope import ScopeResolutionError
 from app.models import (
     OmegaClaim,
     OmegaContradiction,
-    OmegaPrediction,
     OmegaWorkspaceFrame,
+    Prediction,
 )
 from app.omega.retrieval import retrieve_canonical_context
 from app.omega.schemas import OmegaTalkSummary
@@ -92,13 +92,15 @@ async def talk_summary(
     contradiction_q = select(OmegaContradiction).where(
         OmegaContradiction.owner_user_id == owner_user_id, OmegaContradiction.status == "OPEN"
     )
-    prediction_q = select(OmegaPrediction).where(
-        OmegaPrediction.owner_user_id == owner_user_id, OmegaPrediction.status == "OPEN"
+    prediction_q = select(Prediction).where(
+        Prediction.owner_user_id == owner_user_id,
+        Prediction.status == "OPEN",
+        Prediction.resolution.is_(None),
     )
     if scope_envelope.orbit_id is not None:
         claim_q = claim_q.where(OmegaClaim.orbit_id == scope_envelope.orbit_id)
         contradiction_q = contradiction_q.where(OmegaContradiction.orbit_id == scope_envelope.orbit_id)
-        prediction_q = prediction_q.where(OmegaPrediction.orbit_id == scope_envelope.orbit_id)
+        prediction_q = prediction_q.where(Prediction.orbit_id == scope_envelope.orbit_id)
 
     claims = (await db.execute(
         claim_q.order_by(OmegaClaim.updated_at.desc()).limit(1)
@@ -107,11 +109,11 @@ async def talk_summary(
         contradiction_q.order_by(OmegaContradiction.created_at.desc()).limit(1)
     )).scalars().all()
     predictions = (await db.execute(
-        prediction_q.order_by(OmegaPrediction.created_at.desc()).limit(1)
+        prediction_q.order_by(Prediction.created_at.desc()).limit(1)
     )).scalars().all()
     return OmegaTalkSummary(
         workspace_frame_id=workspace_frame_id,
         what_changed=[f"Claim strengthened: {c.claim_text}" for c in claims],
         open_contradictions=[c.description for c in contradictions],
-        unresolved_predictions=[p.prediction_text for p in predictions],
+        unresolved_predictions=[p.statement for p in predictions],
     )

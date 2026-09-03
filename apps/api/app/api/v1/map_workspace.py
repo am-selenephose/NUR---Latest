@@ -72,6 +72,7 @@ from app.models.map_layer import (
     SENSITIVE_BLOCKER_CATEGORIES,
     VIEW_TYPES,
 )
+from app.omega.prediction_v2 import resolve_prediction as resolve_canonical_prediction
 
 router = APIRouter(prefix="/map", tags=["map"])
 
@@ -1793,20 +1794,20 @@ async def resolve_prediction(
         ("CONFIRMED", "PARTIALLY_CONFIRMED", "CONTRADICTED"),
         "resolution",
     )
-    row = (await db.execute(select(Prediction).where(
-        Prediction.id == prediction_id, Prediction.owner_user_id == owner_user_id,
-    ))).scalar_one_or_none()
-    if row is None:
-        raise HTTPException(404, "That prediction does not exist.")
-    if row.resolution is not None:
-        raise HTTPException(
-            409, f"That prediction was already resolved as {row.resolution}."
+    try:
+        row = await resolve_canonical_prediction(
+            db,
+            owner_user_id=owner_user_id,
+            prediction_id=prediction_id,
+            evaluator_result=payload.resolution,
+            learning=payload.learning,
         )
-    row.resolution = payload.resolution
-    row.learning = payload.learning
-    row.resolved_at = dt.datetime.now(dt.UTC)
-    row.status = "RESOLVED"
-    await db.flush()
+    except PermissionError as exc:
+        raise HTTPException(404, "That prediction does not exist.") from exc
+    except ValueError as exc:
+        if "already resolved" in str(exc):
+            raise HTTPException(409, str(exc)) from exc
+        raise HTTPException(422, str(exc)) from exc
     out = {
         "id": str(row.id),
         "statement": row.statement,

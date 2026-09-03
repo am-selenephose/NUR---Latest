@@ -211,7 +211,7 @@ class OmegaPredictionOut(BaseModel):
     expected_observation: str
     metric: str | None
     time_window: str | None
-    confidence: float
+    confidence: float | None
     status: str
     outcome_id: uuid.UUID | None
     prediction_error: float | None
