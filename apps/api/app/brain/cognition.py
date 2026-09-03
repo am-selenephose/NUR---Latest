@@ -37,6 +37,12 @@ async def run_brain_step(
     trace.profile_key = profile.key
     trace.route_reason = decision.reason
     trace.record_step("route_selected", profile=profile.key, stakes=decision.stakes_level, reason=decision.reason)
+    if packet.cognitive_state_digest:
+        trace.record_step(
+            "cognitive_state_received",
+            version=packet.cognitive_state_version,
+            digest=packet.cognitive_state_digest,
+        )
 
     # 2. Build prompts
     system_prompt = build_system_prompt(packet, profile.key)

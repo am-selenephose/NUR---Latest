@@ -742,13 +742,17 @@ git commit -m "feat(nur): record brokered tool effects as Agency receipts"
 **Interfaces:**
 - `build_unified_cognitive_state()` returns one transient owner-scoped state carrying identity, scope, attention, canonical claims, memories, world refs, self/user projections, predictions, contradictions, capabilities and evidence.
 
-- [ ] **Step 1: Write a failing turn-level continuity test**
-- [ ] **Step 2: Build unified state only after `resolve_scope()` and before provider/worker dispatch**
-- [ ] **Step 3: Make `CognitiveTaskPacket` consume projections from unified state instead of parallel legacy hydration lists**
-- [ ] **Step 4: Keep Talk response schema backward compatible and preserve existing streaming events**
-- [ ] **Step 5: Enable `NUR_BPLUS_CANONICAL_CLAIMS` in tests and run shadow parity against legacy mode**
-- [ ] **Step 6: Run `pytest -q app/tests/test_bplus_unified_loop.py app/tests/test_mind_brain_vertical_slice.py app/tests/test_cognition.py app/tests/test_cognition_streaming.py`**
-- [ ] **Step 7: Commit `feat(nur): assemble one scoped unified cognitive state per turn`**
+- [x] **Step 1: Write a failing turn-level continuity test**
+- [x] **Step 2: Build unified state only after `resolve_scope()` and before provider/worker dispatch**
+- [x] **Step 3: Make `CognitiveTaskPacket` consume projections from unified state instead of parallel legacy hydration lists**
+- [x] **Step 4: Keep Talk response schema backward compatible and preserve existing streaming events**
+- [x] **Step 5: Enable `NUR_BPLUS_CANONICAL_CLAIMS` in tests and run shadow parity against legacy mode**
+- [x] **Step 6: Run `pytest -q app/tests/test_bplus_unified_loop.py app/tests/test_mind_brain_vertical_slice.py app/tests/test_cognition.py app/tests/test_cognition_streaming.py`**
+- [x] **Step 7: Commit `feat(nur): assemble one scoped unified cognitive state per turn`**
+
+
+**Closure — 2026-09-03:** PASS. Task 11 assembles one transient `bplus-cognitive-state-v1` only after `resolve_scope()` and scoped hydration, then projects the Mind→Brain packet from that state instead of passing parallel workspace/semantic lists. The state is owner/scope fail-closed, uses the canonical Omega frame for claims/attention, carries only scoped/budgeted memory/user projections and bounded world/evidence refs, includes open canonical predictions/contradictions where their scope is provable, and records a deterministic state digest/version into both packet lineage and `ModelRun` metadata. Narrow Project/Capsule/Community boundaries do not widen unsupported Omega families. Legacy mode preserves the pre-Task11 workspace-frame belief projection; `NUR_BPLUS_CANONICAL_CLAIMS=true` swaps that visible projection to the same selected canonical proposition for shadow parity. No new Talk/SSE event or response field was introduced. Verification: Task11 exact plan suite 28 passed; Task11 + scope/hydrator regression 99 passed; full API suite 1138 passed.
+
 
 ---
 
