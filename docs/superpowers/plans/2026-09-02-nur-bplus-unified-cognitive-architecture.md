@@ -341,7 +341,7 @@ git commit -m "feat(nur): project legacy cognition from canonical Omega claims"
 - Produces `retrieve_canonical_context(db, *, owner_user_id, scope_envelope, query, active_goal, limit)` and `UnifiedCognitiveState`.
 - Requires a `ScopeEnvelope`; calling without one raises `ScopeResolutionError`.
 
-- [ ] **Step 1: Write adversarial cross-Orbit tests**
+- [x] **Step 1: Write adversarial cross-Orbit tests**
 
 ```python
 async def test_workspace_frame_never_reads_other_orbit_claim(client):
@@ -354,19 +354,19 @@ async def test_workspace_frame_never_reads_other_orbit_claim(client):
 
 Add project/capsule variants proving unrelated private Omega and Memories are absent.
 
-- [ ] **Step 2: Add deterministic rank contract**
+- [x] **Step 2: Add deterministic rank contract**
 
 Implement `AttentionScore` from normalized features `query_relevance`, `scope_match`, `goal_relevance`, `contradiction_urgency`, `outcome_relevance`, `authority_weight`, `freshness`, `evidence_quality`, `owner_pin`, `correction_relevance`. Owner pin dominates; scope mismatch is a hard exclusion, not a negative score.
 
-- [ ] **Step 3: Replace latest-N workspace reads**
+- [x] **Step 3: Replace latest-N workspace reads**
 
 `build_workspace_frame()` calls `retrieve_canonical_context()` and stores selected IDs + score explanations. `load_semantic_hydration_inputs()` applies the same Orbit/project scope to every family, not only `memories`.
 
-- [ ] **Step 4: Add relevance fixture**
+- [x] **Step 4: Add relevance fixture**
 
 A relevant 30-day-old claim must outrank six irrelevant one-hour-old claims for a matching query.
 
-- [ ] **Step 5: Verify and commit**
+- [x] **Step 5: Verify and commit**
 
 Run `pytest -q app/tests/test_bplus_scope_attention.py app/tests/test_scope_identity_phase1.py app/tests/test_omega.py app/tests/test_mind_brain_vertical_slice.py`.
 
@@ -374,6 +374,8 @@ Run `pytest -q app/tests/test_bplus_scope_attention.py app/tests/test_scope_iden
 git add apps/api/app/omega/retrieval.py apps/api/app/omega/workspace_service.py apps/api/app/mind apps/api/app/tests/test_bplus_scope_attention.py
 git commit -m "feat(nur): make scoped attention the canonical context gate"
 ```
+
+**Closure receipt — 2026-09-03:** PASS. Initial implementation `8f68aa3`; corrective scope-completeness commit `593f1df`. Fresh Task-4 verification: 70 tests passed; scoped Ruff and `git diff --check` clean. Adversarial coverage now includes Orbit, Project, Capsule, Community, scope/argument disagreement, semantic projection Orbit derivation, final Talk summary scoping, and missing-ScopeEnvelope rejection.
 
 ---
 
