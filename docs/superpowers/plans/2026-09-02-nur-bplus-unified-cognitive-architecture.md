@@ -772,7 +772,7 @@ git commit -m "feat(nur): record brokered tool effects as Agency receipts"
 - Adds owner-visible epistemic receipts: `whyChanged`, `epistemicStatus`, `authorityStatus`, `confidence`, `openContradictions`, `predictionState`, and `learningState`.
 - Does not change the V197 visual ownership contract; it hydrates existing surfaces with governed state.
 
-- [ ] **Step 1: Write bridge contract tests**
+- [x] **Step 1: Write bridge contract tests**
 
 ```ts
 it('keeps observation, inference, and owner authority visually distinguishable', () => {
@@ -783,10 +783,12 @@ it('keeps observation, inference, and owner authority visually distinguishable',
 })
 ```
 
-- [ ] **Step 2: Add ambient state to Talk/Insights/Timeline/Map bridge models only where the current surface already has a semantic home**
-- [ ] **Step 3: Add E2E proof that a WhyChanged receipt can be opened from an Insight/Timeline transition without exposing raw chain-of-thought**
-- [ ] **Step 4: Run V197 contract/performance/accessibility tests plus `omega-research.spec.ts`, `insights-seeded-review.spec.ts`, `timeline-surface.spec.ts`, and `map-surface.spec.ts`**
-- [ ] **Step 5: Commit `feat(nur): surface unified cognition through V197 receipts`**
+- [x] **Step 2: Add ambient state to Talk/Insights/Timeline/Map bridge models only where the current surface already has a semantic home**
+- [x] **Step 3: Add E2E proof that a WhyChanged receipt can be opened from an Insight/Timeline transition without exposing raw chain-of-thought**
+- [x] **Step 4: Run V197 contract/performance/accessibility tests plus `omega-research.spec.ts`, `insights-seeded-review.spec.ts`, `timeline-surface.spec.ts`, and `map-surface.spec.ts`**
+- [x] **Step 5: Commit `feat(nur): surface unified cognition through V197 receipts`**
+
+**Closure — 2026-09-04:** PASS. V197 now hydrates canonical Omega epistemic/authority/confidence receipts into existing Insights, Map and Timeline semantic homes without taking visual ownership away from V197 or exposing raw reasoning. WhyChanged navigation resolves to the canonical governed route; open contradictions, predictions and owner-gated learning proposal state remain derived from Omega. Live browser verification uncovered and repaired a pre-existing Map anchor mismatch (`nur:nur` storage ref versus `nur` graph node) plus a false empty-state gate that hid owner-confirmed semantic structure. Verification: V197 contract/performance/accessibility 19 passed; Task-12 ambient cognition E2E 3 passed; flagged Omega E2E 3 passed; Map workspace API 40 passed; full API suite 1139 passed; fresh seeded isolated Chromium matrix with Omega enabled 43 passed, 0 skipped, 0 failed, no retries. Visual evidence capture for Insight/Map/Timeline passed without tracking proof artifacts.
 
 ---
 

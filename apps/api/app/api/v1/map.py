@@ -95,6 +95,13 @@ def _layout_of(nodes: list[dict], node_id: str) -> dict | None:
     return None
 
 
+def _graph_ref(ref_type: str, ref_id: str) -> str:
+    """Map storage names the master anchor as (nur, nur); graph IDs use `nur`."""
+    if ref_type == "nur" and ref_id == "nur":
+        return "nur"
+    return f"{ref_type}:{ref_id}"
+
+
 def _system_signals(snapshot: dict, blockers: list) -> tuple[int, int, int, int]:
     """The four counts every System state is decided from, and nothing else."""
     open_blockers = sum(
@@ -754,8 +761,8 @@ async def _map_snapshot(
     ).order_by(MapEdge.created_at.desc()).limit(400))).scalars().all()
     node_ids = {row["id"] for row in nodes}
     for edge in semantic:
-        source = f"{edge.source_ref_type}:{edge.source_ref_id}"
-        target = f"{edge.target_ref_type}:{edge.target_ref_id}"
+        source = _graph_ref(edge.source_ref_type, edge.source_ref_id)
+        target = _graph_ref(edge.target_ref_type, edge.target_ref_id)
         payload = {
             "id": f"semantic:{edge.id}",
             "source": source,

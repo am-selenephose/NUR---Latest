@@ -32,6 +32,7 @@ import {
 import { createV197StarSeal } from "./v197StarSeal";
 import { claimV197SurfaceHost, releaseV197SurfaceHost } from "./v197SurfaceHost";
 import type { V197ApiClient } from "./v197ApiClient";
+import { cognitionSummaryLines, type V197CognitionState } from "./v197Cognition";
 
 const ROOT_ID = "nur-timeline-root";
 const STYLE_ID = "nur-timeline-style";
@@ -268,7 +269,7 @@ function dayLabel(key: string, now: Date): string {
 }
 
 export async function renderV197Timeline(
-  doc: Document, route: string, api: V197ApiClient,
+  doc: Document, route: string, api: V197ApiClient, cognition: V197CognitionState | null = null,
 ): Promise<boolean> {
   cancelV197SearchCommit(doc, SEARCH_KEY);
   if (route !== TIMELINE_ROUTE) {
@@ -1223,6 +1224,29 @@ export async function renderV197Timeline(
   }
 
   function nurViewTab(into: HTMLElement, entry: Entry): void {
+    if (cognition) {
+      const receipt = el(doc, "div", "nur-timeline-doubt");
+      receipt.dataset.cognitionAmbient = "true";
+      receipt.append(el(doc, "p", "nur-timeline-doubt-label", "Governed cognition"));
+      const latest = cognition.claims[0];
+      if (latest) {
+        const confidence = latest.confidence === null ? "confidence not measured" : `${Math.round(latest.confidence * 100)}% confidence`;
+        receipt.append(el(
+          doc, "p", "nur-timeline-field-value",
+          `${latest.epistemicStatus} · ${latest.authorityStatus} · ${confidence}`,
+        ));
+        const why = capsule(doc, "Why changed");
+        why.classList.add("nur-timeline-capsule-sm");
+        why.dataset.ownerRoute = latest.whyChangedHref;
+        why.dataset.cognitionReceipt = latest.claimId;
+        receipt.append(why);
+      }
+      for (const line of cognitionSummaryLines(cognition)) {
+        receipt.append(el(doc, "p", "nur-timeline-entry-meta", line));
+      }
+      into.append(receipt);
+    }
+
     const doubt = el(doc, "div", "nur-timeline-doubt");
     doubt.dataset.timelineDoubt = "true";
     doubt.append(el(doc, "p", "nur-timeline-doubt-label", "What NUR may be wrong about"));

@@ -1046,6 +1046,7 @@ export interface V197BridgeSnapshot {
   orbits: V197OrbitsSummary | null;
   timeline: V197Timeline | null;
   insights: V197Insights | null;
+  cognition?: V197OmegaDashboard | null;
   today?: V197TodaySnapshot | null;
   systems?: V197SystemsSnapshot | null;
   mapGraph?: V197MapGraph | null;
@@ -2113,7 +2114,7 @@ export class V197ApiClient {
       daily_quest: {},
       weekly_mission: {},
     };
-    const [health, live, ownerState, map, orbits, timeline, insights, mapGraph, scoreboard, preferences, talkThread, journal, plans, glow, researchBriefs, projects, communityRooms] = await Promise.all([
+    const [health, live, ownerState, map, orbits, timeline, insights, cognition, mapGraph, scoreboard, preferences, talkThread, journal, plans, glow, researchBriefs, projects, communityRooms] = await Promise.all([
       this.health().catch(() => null),
       required<V197LiveUniverse>("/universe/live"),
       required<V197OwnerState>("/orbits/current-state"),
@@ -2121,6 +2122,7 @@ export class V197ApiClient {
       read<V197OrbitsSummary | null>("/universe/orbits-summary", null),
       read<V197Timeline | null>("/universe/timeline", null),
       read<V197Insights | null>("/universe/insights-summary", null),
+      read<V197OmegaDashboard | null>("/omega/dashboard", null),
       read<V197MapGraph | null>("/map", null),
       read<V197GlowScoreboard | null>("/glow/scoreboard", null),
       required<V197Preferences>("/profile/preferences"),
@@ -2142,6 +2144,7 @@ export class V197ApiClient {
       orbits,
       timeline,
       insights,
+      cognition,
       today: live?.state.today ?? null,
       systems: live ? { provenance_label: live.provenance_label, systems: live.active_systems } : null,
       mapGraph,

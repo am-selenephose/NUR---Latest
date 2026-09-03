@@ -291,6 +291,27 @@ async def test_an_owner_drawn_edge_is_confirmed_and_appears_as_structure(client,
 
 
 @pytest.mark.asyncio
+async def test_owner_edge_from_nur_anchor_is_resolvable_structure(client, owner):
+    created = await client.post(
+        f"{API}/map/edges",
+        json={
+            "source_ref_type": "nur", "source_ref_id": "nur",
+            "target_ref_type": "system", "target_ref_id": "ambition",
+            "edge_type": "SUPPORTS",
+        },
+        headers=await _csrf(client),
+    )
+    assert created.status_code == 201, created.text
+
+    graph = (await client.get(f"{API}/map")).json()
+    semantic = [row for row in graph["edges"] if row.get("semantic")]
+    assert len(semantic) == 1
+    assert semantic[0]["source"] == "nur"
+    assert semantic[0]["target"] == "system:ambition"
+    assert semantic[0]["resolvable"] is True
+
+
+@pytest.mark.asyncio
 async def test_an_object_cannot_be_connected_to_itself(client, owner):
     goal = await _goal(client)
     response = await client.post(
