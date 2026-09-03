@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 import datetime as dt
-from enum import Enum
 import uuid
+from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -33,6 +33,7 @@ class LearningIntervention(str, Enum):
     PREFERENCE_TRAINING = "PREFERENCE_TRAINING"
     RL = "RL"
     CODE_CHANGE_PROPOSAL = "CODE_CHANGE_PROPOSAL"
+    POLICY_REPLAY = "POLICY_REPLAY"
 
 
 class LearningScope(str, Enum):
@@ -76,6 +77,7 @@ class HardnessSliceStatus(str, Enum):
 
 class TrainerType(str, Enum):
     DRY_RUN = "DRY_RUN"
+    POLICY_REPLAY = "POLICY_REPLAY"
 
 
 class PromotionRecommendation(str, Enum):

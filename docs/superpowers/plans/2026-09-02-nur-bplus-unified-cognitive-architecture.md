@@ -582,7 +582,7 @@ git commit -m "feat(nur): verify semantic contradictions before belief revision"
 - Adds `LearningIntervention.POLICY_REPLAY` and `TrainerType.POLICY_REPLAY`.
 - Produces a candidate artifact containing a bounded policy delta, replay corpus hash, target metrics, critical gate results, and rollback payload.
 
-- [ ] **Step 1: Write a failing replay-improvement test**
+- [x] **Step 1: Write a failing replay-improvement test**
 
 ```python
 async def test_retrieval_weight_candidate_must_beat_baseline_before_promotion(app_engine):
@@ -600,23 +600,23 @@ async def test_retrieval_weight_candidate_must_beat_baseline_before_promotion(ap
     assert result.critical_gates_passed is True
 ```
 
-- [ ] **Step 2: Implement replay corpus construction**
+- [x] **Step 2: Implement replay corpus construction**
 
 Build frozen cases from owner-approved historical `ModelRunSource`, `ModelEvaluation`, `UserCorrection`, prediction/outcome pairs, and explicit scope metadata. Hash the manifest; do not include raw secrets or Capsule-recipient-excluded material.
 
-- [ ] **Step 3: Implement POLICY_REPLAY trainer**
+- [x] **Step 3: Implement POLICY_REPLAY trainer**
 
 Supported v0.1 policy deltas: retrieval weights, context recipes, prompt rules, planning heuristics, and router policies. Execute baseline and candidate against the same frozen fixtures. Store only structured scores/results, not hidden reasoning.
 
-- [ ] **Step 4: Add critical gates**
+- [x] **Step 4: Add critical gates**
 
 Always evaluate `scope_leaks == 0`, no new forbidden capability, no authority widening, no increase in owner-correction rate on heldout fixtures, and no critical Agency regression. A target win with a failed critical gate is `REJECTED`.
 
-- [ ] **Step 5: Bridge Omega learning proposals**
+- [x] **Step 5: Bridge Omega learning proposals**
 
 Creating an eligible Omega proposal emits a Hardness learning signal/candidate; approval never skips Hardness evaluation. Legacy UI status mirrors Hardness result.
 
-- [ ] **Step 6: Verify and commit**
+- [x] **Step 6: Verify and commit**
 
 Run `pytest -q app/tests/test_bplus_learning_replay.py app/tests/test_hardness_unit.py app/tests/test_hardness_e2e.py app/tests/test_omega.py`.
 
@@ -624,6 +624,10 @@ Run `pytest -q app/tests/test_bplus_learning_replay.py app/tests/test_hardness_u
 git add apps/api/app/learning/hardness apps/api/app/omega/learning_proposal_service.py apps/api/app/tests/test_bplus_learning_replay.py
 git commit -m "feat(nur): evaluate learning changes with real policy replay"
 ```
+
+
+**Closure — 2026-09-03:** PASS. Hardness now supports `POLICY_REPLAY` as a real bounded intervention/trainer over a frozen replay corpus instead of simulated improvement. Replay manifests are deterministic and sanitized; raw secrets and Capsule-recipient-excluded material are not persisted in the corpus artifact. Baseline and candidate policies run against the same fixtures, and promotion is vetoed by any scope leak, authority widening, forbidden capability, owner-correction regression, or critical Agency regression. Eligible Omega policy proposals emit canonical Hardness signals/candidates and owner approval cannot bypass replay evaluation; legacy proposal status mirrors the Hardness verdict. Forward migration `0064_bplus_policy_replay` extends only the existing Hardness intervention/trainer constraints. Verification: Task-8 + Hardness/Omega regression 47 passed; full API suite 1121 passed.
+
 
 ---
 

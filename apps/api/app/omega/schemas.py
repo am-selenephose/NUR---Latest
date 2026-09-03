@@ -225,6 +225,8 @@ class OmegaLearningProposalIn(BaseModel):
     description: str = Field(min_length=1, max_length=2000)
     evidence_summary: str = Field(min_length=1, max_length=2000)
     supporting_evaluation_ids: list[uuid.UUID] = Field(default_factory=list)
+    baseline_policy: dict = Field(default_factory=dict)
+    candidate_policy: dict = Field(default_factory=dict)
 
 
 class OmegaLearningProposalOut(BaseModel):

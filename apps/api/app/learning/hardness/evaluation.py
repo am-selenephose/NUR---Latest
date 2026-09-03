@@ -41,6 +41,60 @@ class TournamentEvaluator:
         reason_codes: list[str] = []
         gates: list[CriticalGateResult] = []
 
+        if artifact.trainer_type.value == "POLICY_REPLAY":
+            replay = (artifact.metrics_summary or {}).get("policy_replay") or {}
+            artifact_payload = replay.get("artifact") or {}
+            gate_payloads = artifact_payload.get("critical_gate_results") or []
+            gates = [
+                CriticalGateResult(
+                    gate_name=str(item.get("gate_name")),
+                    status=GateStatus.PASS if item.get("passed") else GateStatus.FAIL,
+                    passed=bool(item.get("passed")),
+                    details=str(item.get("detail") or "policy replay gate"),
+                )
+                for item in gate_payloads
+            ]
+            all_critical_gates_passed = bool(replay.get("critical_gates_passed")) and bool(gates)
+            target_metric_base = float(replay.get("target_metric_base") or 0.0)
+            target_metric_candidate = float(replay.get("target_metric_candidate") or 0.0)
+            target_metric_delta = float(replay.get("target_metric_delta") or 0.0)
+            correction_base = float(replay.get("owner_correction_rate_baseline") or 0.0)
+            correction_candidate = float(replay.get("owner_correction_rate_candidate") or 0.0)
+            general_regression_delta = max(0.0, correction_candidate - correction_base)
+            scope_passed = int(replay.get("scope_leak_count") or 0) == 0
+            agency_passed = (
+                int(replay.get("forbidden_capability_count") or 0) == 0
+                and not bool(replay.get("authority_widened"))
+                and not bool(replay.get("agency_regression"))
+            )
+            privacy_passed = scope_passed
+            calibration_passed = correction_candidate <= correction_base
+            all_structural_gates_passed = all_critical_gates_passed
+            verdict = "PASS" if replay.get("status") == "PASS" and all_critical_gates_passed else "FAIL"
+            reason_codes.append("POLICY_REPLAY_WINNER" if verdict == "PASS" else "POLICY_REPLAY_REJECTED")
+            return TournamentEvaluationResult(
+                evaluation_id=uuid.uuid4(),
+                candidate_checkpoint_id=artifact.candidate_checkpoint_id,
+                base_checkpoint_id=artifact.base_checkpoint_id,
+                experiment_id=experiment.id,
+                target_metric_base=target_metric_base,
+                target_metric_candidate=target_metric_candidate,
+                target_metric_delta=target_metric_delta,
+                general_regression_delta=general_regression_delta,
+                privacy_passed=privacy_passed,
+                scope_isolation_passed=scope_passed,
+                agency_approval_passed=agency_passed,
+                calibration_passed=calibration_passed,
+                critical_gates=gates,
+                all_structural_gates_passed=all_structural_gates_passed,
+                all_critical_gates_passed=all_critical_gates_passed,
+                evaluation_mode="POLICY_REPLAY",
+                real_model_evaluated=False,
+                verdict=verdict,
+                reason_codes=reason_codes,
+                evaluated_at=dt.datetime.now(dt.UTC),
+            )
+
         if fixture is not None:
             # Synthetic evaluation fixture explicitly passed (e.g. in test suites)
             privacy_passed = fixture.privacy_passed
