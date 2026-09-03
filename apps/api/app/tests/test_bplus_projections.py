@@ -161,3 +161,22 @@ async def test_flagged_outcome_write_is_omega_first(
         assert row["current_version"] >= 2
     finally:
         get_settings.cache_clear()
+
+async def test_orbit_context_link_has_canonical_omega_projection_column(super_engine):
+    async with super_engine.connect() as conn:
+        columns = {
+            row[0]
+            for row in (await conn.execute(text(
+                "SELECT column_name FROM information_schema.columns "
+                "WHERE table_schema = 'public' AND table_name = 'orbit_context_links'"
+            ))).all()
+        }
+        constraints = {
+            row[0]
+            for row in (await conn.execute(text(
+                "SELECT conname FROM pg_constraint "
+                "WHERE conrelid = 'orbit_context_links'::regclass"
+            ))).all()
+        }
+    assert 'canonical_omega_claim_id' in columns
+    assert 'fk_orbit_context_links_canonical_omega_owner' in constraints

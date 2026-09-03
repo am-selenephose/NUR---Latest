@@ -273,7 +273,7 @@ git commit -m "feat(nur): version canonical claims with WhyChanged lineage"
 - Produces `project_belief()`, `project_user_model_claim()`, `sync_semantic_claim_projection()`, `link_memory_projection()`, and `link_insight_projection()`.
 - Adds nullable `canonical_omega_claim_id` FKs to legacy/projection tables; existing IDs remain stable.
 
-- [ ] **Step 1: Write failing single-truth tests**
+- [x] **Step 1: Write failing single-truth tests**
 
 ```python
 async def test_belief_and_user_model_project_same_canonical_claim(client, app_engine):
@@ -286,13 +286,15 @@ async def test_belief_and_user_model_project_same_canonical_claim(client, app_en
     assert belief.claim_text == user_claim.claim_text == claim['claim_text']
 ```
 
-Also test that a `semantic_claims` compatibility row links to the Omega claim instead of becoming an unrelated truth row.- [ ] **Step 2: Add projection-link migration**
+Also test that a `semantic_claims` compatibility row links to the Omega claim instead of becoming an unrelated truth row.
+
+- [x] **Step 2: Add projection-link migration**
 
 `0060` adds `canonical_omega_claim_id` to `semantic_claims`, `memories`, `insights`, and `orbit_relational_insights`, with owner-safe indexes and uniqueness only where the product guarantees one projection row per claim.
 
 Do not drop legacy fields. Backfill only rows that can be matched unambiguously by existing evidence/source references; ambiguous legacy rows remain unlinked and are reported by a migration audit query.
 
-- [ ] **Step 3: Implement pure projection functions**
+- [x] **Step 3: Implement pure projection functions**
 
 ```python
 def project_belief(claim: OmegaClaim) -> Belief:
@@ -311,11 +313,11 @@ def project_belief(claim: OmegaClaim) -> Belief:
 
 `UserModelClaim` projection maps authority separately from epistemic state; high-sensitivity policy remains enforced by the projection/service boundary.
 
-- [ ] **Step 4: Redirect new semantic-claim writes**
+- [x] **Step 4: Redirect new semantic-claim writes**
 
 New write paths call canonical Omega service first, then sync the compatibility row. Add a feature flag `NUR_BPLUS_CANONICAL_CLAIMS` defaulting `false` until Task 10 integration; tests run both modes.
 
-- [ ] **Step 5: Verify and commit**
+- [x] **Step 5: Verify and commit**
 
 Run `pytest -q app/tests/test_bplus_projections.py app/tests/test_cognition.py app/tests/test_personal_memory.py app/tests/test_agentic_insights.py app/tests/test_beliefs_attention_phase3.py`.
 
@@ -323,6 +325,10 @@ Run `pytest -q app/tests/test_bplus_projections.py app/tests/test_cognition.py a
 git add apps/api/alembic/versions/0060_nur_bplus_projection_links.py apps/api/app/omega/projections.py apps/api/app/models apps/api/app/mind apps/api/app/tests/test_bplus_projections.py
 git commit -m "feat(nur): project legacy cognition from canonical Omega claims"
 ```
+
+
+**Closure repair — 2026-09-03:** PASS. Original Task-3 commit `5dd5b9e` added the `OrbitContextLink.canonical_omega_claim_id` ORM field but `0060_nur_bplus_projection_links` omitted `orbit_context_links`, causing fresh PostgreSQL schemas to diverge from ORM metadata. Forward repair migration `0062_bplus_orbit_ctx_link` adds the missing owner-safe canonical Omega FK + partial index without rewriting historical migration `0060`. Fresh standalone `0062` verification passes the schema assertion and the previously crashing private context-link runtime test; Task-3 + Orbit regression suite: 93 passed; full API commit-candidate suite with pending Task 6 removed: 1094 passed.
+
 
 ---
 
@@ -451,7 +457,7 @@ git commit -m "feat(nur): make Omega consolidation complete and starvation-free"
 ### Task 6: Canonical Prediction Ledger and Calibration
 
 **Files:**
-- Create: `apps/api/alembic/versions/0062_nur_bplus_prediction_semantics.py`
+- Create: `apps/api/alembic/versions/0063_nur_bplus_prediction_semantics.py`
 - Create: `apps/api/app/omega/prediction_v2.py`
 - Create: `apps/api/app/omega/calibration.py`
 - Modify: `apps/api/app/models/cognition.py`
@@ -499,7 +505,7 @@ Migration/service maps legacy rows into canonical predictions idempotently and r
 Run `pytest -q app/tests/test_bplus_predictions.py app/tests/test_cognition.py app/tests/test_omega.py`.
 
 ```bash
-git add apps/api/alembic/versions/0062_nur_bplus_prediction_semantics.py apps/api/app/models/cognition.py apps/api/app/cognition/prediction_service.py apps/api/app/omega apps/api/app/tests/test_bplus_predictions.py
+git add apps/api/alembic/versions/0063_nur_bplus_prediction_semantics.py apps/api/app/models/cognition.py apps/api/app/cognition/prediction_service.py apps/api/app/omega apps/api/app/tests/test_bplus_predictions.py
 git commit -m "feat(nur): unify predictions with outcome calibration"
 ```
 
