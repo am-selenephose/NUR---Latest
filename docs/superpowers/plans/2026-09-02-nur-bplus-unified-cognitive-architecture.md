@@ -645,7 +645,7 @@ git commit -m "feat(nur): evaluate learning changes with real policy replay"
 - Produces stable `CapabilityKey`, `AdapterSpec`, `CapabilityRequest`, and `CapabilityResult` contracts.
 - Existing `agentic.registry` remains risk/authority owner; broker only chooses an implementation adapter after Agency has authorized the capability.
 
-- [ ] **Step 1: Write the broker contract test**
+- [x] **Step 1: Write the broker contract test**
 
 ```python
 def test_broker_resolves_capability_without_exposing_donor_api():
@@ -656,21 +656,21 @@ def test_broker_resolves_capability_without_exposing_donor_api():
     assert 'playwright' not in CapabilityKey.BROWSER_NAVIGATE.value
 ```
 
-- [ ] **Step 2: Implement read-only donor auditor**
+- [x] **Step 2: Implement read-only donor auditor**
 
 `audit_donors.py` receives local repo paths, reads Git remote/HEAD, license files, package manifests, executable hooks, network/secrets/config references, and recent commit metadata without running setup scripts. It writes one row per donor with evidence and classification `USE|DONOR|REWRITE|QUARANTINE|KILL`.
 
 Audit at minimum: OpenClaw/Animantum adapter, Playwright, browser-use, Letta, Graphiti, Mem0, LangGraph, OpenHands, Agent Lightning, Composio, Nango, Firecracker, gVisor, cosign, TUF.
 
-- [ ] **Step 3: Add broker contracts only; no donor execution yet**
+- [x] **Step 3: Add broker contracts only; no donor execution yet**
 
 Initial stable capability keys: `browser.navigate`, `browser.extract`, `research.fetch`, `worker.background`, `worker.code`, `app.read`, `app.write`, `model.run`.
 
-- [ ] **Step 4: Enforce adapter enablement from audit evidence**
+- [x] **Step 4: Enforce adapter enablement from audit evidence**
 
 Registry refuses `QUARANTINE`/`KILL` adapters and requires explicit code-level allow-list for `USE` or `REWRITE` adapters. `DONOR` means study-only and cannot be resolved at runtime.
 
-- [ ] **Step 5: Verify and commit**
+- [x] **Step 5: Verify and commit**
 
 Run `pytest -q app/tests/test_bplus_tool_broker.py app/tests/agentic/test_tool_registry.py`.
 
@@ -679,12 +679,16 @@ git add tools/bplus/audit_donors.py apps/api/app/tool_broker docs/research/NUR_B
 git commit -m "feat(nur): add audited capability broker boundary"
 ```
 
+
+**Closure — 2026-09-03:** PASS. Task 9 adds a donor-agnostic capability contract and a fail-closed broker boundary; Agency authorization remains upstream and mandatory before adapter selection. `USE`/`REWRITE` adapters require an explicit code allow-list, while `DONOR`/`QUARANTINE`/`KILL` never resolve at runtime. No donor execution adapter ships in this task. The local donor auditor reads only files and root Git metadata, never package hooks/setup/repo code, never collects secret values, and avoids inheriting parent Git identity for nested packages. Fifteen roadmap donors were audited from local evidence and recorded in `NUR_BPLUS_DONOR_AUDIT.md`. Verification: broker + Agency registry regression 25 passed; full API suite 1130 passed.
+
+
 ---
 
 ### Task 10: Brokered Execution Receipts Through Agency
 
 **Files:**
-- Create: `apps/api/alembic/versions/0063_nur_bplus_execution_receipts.py`
+- Create: `apps/api/alembic/versions/0065_nur_bplus_execution_receipts.py`
 - Modify: `apps/api/app/models/agentic.py`
 - Modify: `apps/api/app/agentic/handlers.py`
 - Modify: `apps/api/app/agentic/registry.py`
@@ -715,7 +719,7 @@ async def test_authorized_broker_call_writes_complete_receipt(client, app_engine
 - [ ] **Step 6: Commit**
 
 ```bash
-git add apps/api/alembic/versions/0063_nur_bplus_execution_receipts.py apps/api/app/models/agentic.py apps/api/app/agentic apps/api/app/tool_broker apps/api/app/tests/test_bplus_execution_receipts.py
+git add apps/api/alembic/versions/0065_nur_bplus_execution_receipts.py apps/api/app/models/agentic.py apps/api/app/agentic apps/api/app/tool_broker apps/api/app/tests/test_bplus_execution_receipts.py
 git commit -m "feat(nur): record brokered tool effects as Agency receipts"
 ```
 
