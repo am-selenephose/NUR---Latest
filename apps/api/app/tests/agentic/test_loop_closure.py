@@ -249,12 +249,17 @@ def test_workflow_reports_needs_revision():
 
 # ── central exact-resume + approval row (4.5) ────────────────────────────────
 
-def test_resume_is_evaluated_centrally_before_the_handler():
-    """A row that merely says APPROVED is not sufficient."""
+def test_resume_is_evaluated_centrally_before_broker_execution():
+    """A row that merely says APPROVED is not sufficient.
+
+    Task execution now crosses the audited capability broker; direct handler
+    resolution in the runtime would bypass that boundary.
+    """
     source = inspect.getsource(runtime.execute_step)
     resume = source.index("evaluate_resume(")
-    handler = source.index("registry.handler(")
-    assert resume < handler
+    broker = source.index("broker.execute(")
+    assert resume < broker
+    assert "registry.handler(" not in source
 
 
 def test_central_resume_applies_to_every_risk_class():
@@ -319,9 +324,11 @@ def test_no_suffix_guessing_remains():
 
 
 def test_references_come_from_the_contract():
-    source = inspect.getsource(runtime._persist_step_result)
-    for field in ("artifact_ref_keys", "evidence_ref_keys", "entity_refs"):
-        assert field in source
+    receipt_source = inspect.getsource(runtime._receipt_result_metadata)
+    step_source = inspect.getsource(runtime._persist_step_result)
+    assert "artifact_ref_keys" in receipt_source
+    for field in ("evidence_ref_keys", "entity_refs"):
+        assert field in step_source
 
 
 def test_entity_kinds_are_declared_per_tool():

@@ -27,6 +27,7 @@ from dataclasses import dataclass
 
 from app.agentic.enums import RiskClass
 from app.agentic.policy import ToolContract
+from app.tool_broker.contracts import CapabilityKey
 
 
 @dataclass(frozen=True)
@@ -48,6 +49,8 @@ class ToolSpec:
     entity_refs: tuple[tuple[str, str], ...] = ()
     artifact_ref_keys: tuple[str, ...] = ()
     evidence_ref_keys: tuple[str, ...] = ()
+    rollback_ref_key: str | None = None
+    broker_capability: CapabilityKey = CapabilityKey.APP_READ
 
 
 def _tool(
@@ -65,6 +68,7 @@ def _tool(
     entity_refs: tuple[tuple[str, str], ...] = (),
     artifact_ref_keys: tuple[str, ...] = (),
     evidence_ref_keys: tuple[str, ...] = (),
+    rollback_ref_key: str | None = None,
 ) -> ToolSpec:
     return ToolSpec(
         contract=ToolContract(
@@ -83,6 +87,10 @@ def _tool(
         entity_refs=entity_refs,
         artifact_ref_keys=artifact_ref_keys,
         evidence_ref_keys=evidence_ref_keys,
+        rollback_ref_key=rollback_ref_key,
+        broker_capability=(
+            CapabilityKey.APP_READ if risk is RiskClass.R0_READ_ONLY else CapabilityKey.APP_WRITE
+        ),
     )
 
 

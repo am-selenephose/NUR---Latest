@@ -29,16 +29,18 @@ def test_policy_is_evaluated_after_the_claim_and_before_the_handler():
     assert claim < load_policy < execute
 
     inner = inspect.getsource(runtime.execute_step)
-    gate, handler = _order(inner, "evaluate(contract", "registry.handler(")
-    assert gate < handler
+    gate, broker = _order(inner, "evaluate(contract", "broker.execute(")
+    assert gate < broker
+    assert "registry.handler(" not in inner
     # And the inner function must never claim again.
     assert "claim_step(" not in inner
 
 
-def test_approval_is_checked_before_the_handler_resolves():
+def test_approval_is_checked_before_broker_execution():
     source = inspect.getsource(runtime.execute_step)
-    approval, handler = _order(source, "REQUIRE_APPROVAL", "registry.handler(")
-    assert approval < handler
+    approval, broker = _order(source, "REQUIRE_APPROVAL", "broker.execute(")
+    assert approval < broker
+    assert "registry.handler(" not in source
 
 
 def test_the_result_is_recorded_before_verification():

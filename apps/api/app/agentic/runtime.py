@@ -30,7 +30,6 @@ from __future__ import annotations
 
 import asyncio
 import datetime as dt
-import inspect
 import time
 import uuid
 from dataclasses import dataclass
@@ -55,6 +54,8 @@ from app.agentic.orchestrator import (
 from app.agentic.policy import Decision, OwnerPolicy, evaluate
 from app.agentic.redaction import redact_arguments, telemetry_safe
 from app.core.config import get_settings
+from app.tool_broker.contracts import CapabilityRequest
+from app.tool_broker.registry import default_registry
 
 
 @dataclass(frozen=True)
@@ -64,6 +65,7 @@ class StepOutcome:
     reason: str
     result: dict[str, Any] | None = None
     duration_ms: int = 0
+    tool_call_id: uuid.UUID | None = None
 
 
 class RuntimeRefusal(RuntimeError):
@@ -86,6 +88,13 @@ async def _load_step(db: AsyncSession, owner_user_id: uuid.UUID, step_id: uuid.U
     return row.mappings().first()
 
 
+def _redacted_argument_digest(
+    tool_key: str, tool_version: str, arguments: dict[str, Any]
+) -> str:
+    """Receipt-safe input digest; exact consent binding lives on AgentApproval."""
+    return argument_digest(tool_key, tool_version, redact_arguments(arguments))
+
+
 async def _record_tool_call(
     db: AsyncSession,
     *,
@@ -102,31 +111,41 @@ async def _record_tool_call(
     trace_id: str,
     approval_id: uuid.UUID | None = None,
     cost_cents: int = 0,
-) -> None:
-    """Every invocation is recorded, including the ones that were refused.
+    capability_key: str | None = None,
+    adapter_key: str | None = None,
+    adapter_version: str | None = None,
+    result_digest: str | None = None,
+    external_effects: list[str] | None = None,
+    artifact_refs: list[str] | None = None,
+    verification_verdict: str | None = None,
+    rollback_ref: str | None = None,
+) -> uuid.UUID:
+    """Record every attempted invocation, including refusals and failures.
 
-    A denial is the more interesting row: it is the evidence that the gate did
-    its job. An audit trail holding only successful calls cannot demonstrate
-    that anything was ever prevented.
-
-    `cost_cents` is charged only for a call that actually ran. This column was
-    previously never written at all, which meant `daily_spend_cents` summed
-    zeros forever and the owner's budget ceiling could never bind no matter what
-    it was set to. A denied or refused call costs nothing, so charging it would
-    let a policy that correctly refused work consume the budget anyway.
+    Broker identity is nullable for historical and pre-broker refusal rows. A
+    successful brokered execution supplies capability/adapter identity plus only
+    bounded receipt metadata: digests and declared refs/effects, never raw result
+    content or secret-bearing arguments.
     """
-    await db.execute(
+    import json
+
+    row = await db.execute(
         text(
             """
             INSERT INTO agent_tool_calls (
                 owner_user_id, workflow_id, step_id, tool_key, tool_version,
                 risk_class, argument_digest, redacted_arguments, outcome,
-                denial_reason, duration_ms, trace_id, approval_id, cost_cents
+                denial_reason, duration_ms, trace_id, approval_id, cost_cents,
+                capability_key, adapter_key, adapter_version, result_digest,
+                external_effects, artifact_refs, verification_verdict, rollback_ref
             ) VALUES (
                 :owner, :workflow, :step, :tool, :version, :risk, :digest,
                 CAST(:args AS jsonb), :outcome, :denial, :duration, :trace,
-                :approval, :cost
+                :approval, :cost, :capability, :adapter, :adapter_version,
+                :result_digest, CAST(:effects AS jsonb), CAST(:artifacts AS jsonb),
+                :verification, :rollback
             )
+            RETURNING id
             """
         ),
         {
@@ -137,18 +156,24 @@ async def _record_tool_call(
             "tool": tool_key,
             "version": tool_version,
             "risk": risk_class,
-            "digest": argument_digest(tool_key, tool_version, arguments),
-            "args": __import__("json").dumps(redact_arguments(arguments)),
+            "digest": _redacted_argument_digest(tool_key, tool_version, arguments),
+            "args": json.dumps(redact_arguments(arguments)),
             "outcome": outcome,
             "denial": denial_reason,
             "duration": duration_ms,
             "trace": trace_id,
-            # NULL for auto-run work; the authorising row for approved or edited
-            # execution, so a durable effect can always be traced to the consent
-            # that permitted it.
             "approval": approval_id,
+            "capability": capability_key,
+            "adapter": adapter_key,
+            "adapter_version": adapter_version,
+            "result_digest": result_digest,
+            "effects": json.dumps(list(external_effects or [])),
+            "artifacts": json.dumps(list(artifact_refs or [])),
+            "verification": verification_verdict,
+            "rollback": rollback_ref,
         },
     )
+    return row.scalar_one()
 
 
 async def _ensure_approval_row(
@@ -166,7 +191,7 @@ async def _ensure_approval_row(
     cost_ceiling_cents: int,
     expected_result: str | None = None,
     scope_summary: str | None = None,
-    expires_at: "dt.datetime | None" = None,
+    expires_at: dt.datetime | None = None,
 ) -> uuid.UUID:
     """Create exactly one actionable approval for this step, bound to this call.
 
@@ -340,7 +365,7 @@ async def execute_step(
 
     # ── Gate. After the claim so only one worker asks; before the handler so a
     #    refusal costs nothing. ──
-    policy_now = dt.datetime.now(dt.timezone.utc)
+    policy_now = dt.datetime.now(dt.UTC)
     verdict = evaluate(contract, policy, now=policy_now, within_scope=within_scope)
     if verdict.decision is Decision.DENY:
         await _record_tool_call(
@@ -395,7 +420,7 @@ async def execute_step(
                 tool_key=tool_key,
                 tool_version=contract.version,
                 arguments=effective_arguments,
-                now=_dt.datetime.now(_dt.timezone.utc),
+                now=_dt.datetime.now(_dt.UTC),
                 estimated_cost_cents=contract.estimated_cost_cents,
                 current_plan_version=plan_version,
             )
@@ -468,97 +493,150 @@ async def execute_step(
             )
             return StepOutcome(False, StepState.WAITING_APPROVAL, verdict.reason)
 
-    # ── Execute, under a hard ceiling. The handler re-checks approval for
-    #    durable tools; that duplication is intentional defence in depth. ──
-    handler = registry.handler(tool_key)
+    # ── Execute through the audited capability broker. Agency remains the
+    #    authority owner: this point is reached only after policy and, when
+    #    required, owner approval have already authorized the exact tool call.
+    capability = registry.broker_capability(tool_key)
+    broker = default_registry()
+    adapter = None
     started = time.monotonic()
-    # Strictly shorter than the lease. A handler allowed to run past its lease
-    # would be reclaimed while still executing, so two workers would hold the
-    # same step; timing out first turns that into an explicit, retryable failure
-    # and guarantees no immortal RUNNING row.
     budget = step["timeout_seconds"] or get_settings().agentic_step_timeout_seconds
     timeout_seconds = max(1, min(int(budget), DEFAULT_LEASE_SECONDS - 1))
     try:
-        kwargs = dict(arguments)
-        # Only durable handlers re-check consent; read and draft handlers do not
-        # accept an `approval` keyword and passing it blindly is a TypeError that
-        # surfaces as a step failure rather than as the wiring bug it is.
-        if approval is not None and "approval" in inspect.signature(handler).parameters:
-            kwargs["approval"] = approval
-        result = await asyncio.wait_for(
-            handler(db, owner_user_id, **kwargs), timeout=timeout_seconds
+        adapter = broker.resolve(capability, agency_authorized=True)
+        broker_result = await asyncio.wait_for(
+            broker.execute(
+                CapabilityRequest(
+                    capability=capability,
+                    agency_authorized=True,
+                    adapter_key=adapter.key,
+                ),
+                db=db,
+                owner_user_id=owner_user_id,
+                tool_key=tool_key,
+                arguments=arguments,
+                approval=approval,
+            ),
+            timeout=timeout_seconds,
         )
+        result = broker_result.data
         duration_ms = int((time.monotonic() - started) * 1000)
     except TimeoutError:
-        # `asyncio.wait_for` cancelled the handler, possibly mid-statement, which
-        # leaves the underlying asyncpg connection in an indeterminate state: a
-        # plain rollback on it raises MissingGreenlet and the timeout path would
-        # crash instead of recording the failure. `invalidate()` discards that
-        # connection rather than returning a poisoned one to the pool, so the
-        # bookkeeping below runs on a fresh one.
         duration_ms = int((time.monotonic() - started) * 1000)
         await db.invalidate()
 
-        # A fresh connection means a fresh transaction, and the RLS context is
-        # transaction-local — without re-establishing it every write below would
-        # silently affect zero rows and the step would stay RUNNING.
         from app.db.rls import set_user_context
 
         await set_user_context(db, owner_user_id)
-
+        await _record_tool_call(
+            db,
+            owner_user_id=owner_user_id,
+            workflow_id=workflow_id,
+            step_id=step_id,
+            tool_key=tool_key,
+            tool_version=contract.version,
+            risk_class=contract.risk_class.value,
+            arguments=arguments,
+            outcome="FAILED",
+            denial_reason="TimeoutError",
+            duration_ms=duration_ms,
+            trace_id=trace.trace_id,
+            approval_id=approval.approval_id if approval else None,
+            capability_key=capability.value,
+            adapter_key=adapter.key if adapter else None,
+            adapter_version=adapter.version if adapter else None,
+        )
         await record_event(
-            db, owner_user_id=owner_user_id, workflow_id=workflow_id, step_id=step_id,
+            db,
+            owner_user_id=owner_user_id,
+            workflow_id=workflow_id,
+            step_id=step_id,
             event_type="STEP_TIMEOUT",
             summary=f"{tool_key} exceeded its {timeout_seconds}s ceiling and was cancelled",
-            from_state=StepState.RUNNING.value, to_state=StepState.FAILED.value,
+            from_state=StepState.RUNNING.value,
+            to_state=StepState.FAILED.value,
             trace_id=trace.trace_id,
         )
         await transition_step(
-            db, owner_user_id=owner_user_id, step_id=step_id,
-            current=StepState.RUNNING, nxt=StepState.FAILED,
+            db,
+            owner_user_id=owner_user_id,
+            step_id=step_id,
+            current=StepState.RUNNING,
+            nxt=StepState.FAILED,
             execution_attempt=execution_attempt,
         )
         return StepOutcome(
-            False, StepState.FAILED, f"timeout after {timeout_seconds}s",
+            False,
+            StepState.FAILED,
+            f"timeout after {timeout_seconds}s",
             duration_ms=duration_ms,
         )
-    except Exception as error:  # noqa: BLE001 - recorded, then re-raised as a step failure
+    except Exception as error:  # noqa: BLE001 - recorded as a bounded failure receipt
         duration_ms = int((time.monotonic() - started) * 1000)
         await _record_tool_call(
-            db, owner_user_id=owner_user_id, workflow_id=workflow_id, step_id=step_id,
-            tool_key=tool_key, tool_version=contract.version,
-            risk_class=contract.risk_class.value, arguments=arguments,
-            outcome="FAILED", denial_reason=type(error).__name__, duration_ms=duration_ms,
+            db,
+            owner_user_id=owner_user_id,
+            workflow_id=workflow_id,
+            step_id=step_id,
+            tool_key=tool_key,
+            tool_version=contract.version,
+            risk_class=contract.risk_class.value,
+            arguments=arguments,
+            outcome="FAILED",
+            denial_reason=type(error).__name__,
+            duration_ms=duration_ms,
             trace_id=trace.trace_id,
             approval_id=approval.approval_id if approval else None,
+            capability_key=capability.value,
+            adapter_key=adapter.key if adapter else None,
+            adapter_version=adapter.version if adapter else None,
         )
         await record_event(
-            db, owner_user_id=owner_user_id, workflow_id=workflow_id, step_id=step_id,
+            db,
+            owner_user_id=owner_user_id,
+            workflow_id=workflow_id,
+            step_id=step_id,
             event_type="STEP_FAILED",
-            # The exception type, never its message: a message can carry the
-            # owner text the tool was handling.
             summary=f"{tool_key} raised {type(error).__name__}",
-            from_state=StepState.RUNNING.value, to_state=StepState.FAILED.value,
+            from_state=StepState.RUNNING.value,
+            to_state=StepState.FAILED.value,
             trace_id=trace.trace_id,
         )
         await transition_step(
-            db, owner_user_id=owner_user_id, step_id=step_id,
-            current=StepState.RUNNING, nxt=StepState.FAILED,
+            db,
+            owner_user_id=owner_user_id,
+            step_id=step_id,
+            current=StepState.RUNNING,
+            nxt=StepState.FAILED,
             execution_attempt=execution_attempt,
         )
-        return StepOutcome(False, StepState.FAILED, type(error).__name__, duration_ms=duration_ms)
+        return StepOutcome(
+            False, StepState.FAILED, type(error).__name__, duration_ms=duration_ms
+        )
 
-    # ── Record before verifying. Work that happened must appear in the ledger
-    #    even if a later stage fails. ──
-    await _record_tool_call(
-        db, owner_user_id=owner_user_id, workflow_id=workflow_id, step_id=step_id,
-        tool_key=tool_key, tool_version=contract.version,
-        risk_class=contract.risk_class.value, arguments=arguments,
-        outcome="SUCCEEDED", denial_reason=None, duration_ms=duration_ms,
+    receipt = _receipt_result_metadata(tool_key, result)
+    tool_call_id = await _record_tool_call(
+        db,
+        owner_user_id=owner_user_id,
+        workflow_id=workflow_id,
+        step_id=step_id,
+        tool_key=tool_key,
+        tool_version=contract.version,
+        risk_class=contract.risk_class.value,
+        arguments=arguments,
+        outcome="SUCCEEDED",
+        denial_reason=None,
+        duration_ms=duration_ms,
         trace_id=trace.trace_id,
         approval_id=approval.approval_id if approval else None,
-        # Charged here, on the one path where the handler actually ran.
         cost_cents=contract.estimated_cost_cents,
+        capability_key=capability.value,
+        adapter_key=broker_result.adapter_key,
+        adapter_version=broker_result.adapter_version,
+        result_digest=receipt["result_digest"],
+        external_effects=receipt["external_effects"],
+        artifact_refs=receipt["artifact_refs"],
+        rollback_ref=receipt["rollback_ref"],
     )
     # The workflow's own running total, so a budget question can be answered
     # about one workflow without re-summing the owner's whole ledger.
@@ -581,7 +659,68 @@ async def execute_step(
         current=StepState.RUNNING, nxt=StepState.VERIFYING,
         execution_attempt=execution_attempt,
     )
-    return StepOutcome(True, StepState.VERIFYING, "executed", result=result, duration_ms=duration_ms)
+    return StepOutcome(
+        True,
+        StepState.VERIFYING,
+        "executed",
+        result=result,
+        duration_ms=duration_ms,
+        tool_call_id=tool_call_id,
+    )
+
+
+def _receipt_result_metadata(tool_key: str, result: dict[str, Any] | None) -> dict[str, Any]:
+    """Build bounded, secret-redacted receipt metadata from a tool result.
+
+    Raw result content never enters the tool-call receipt. The digest is over a
+    recursively redacted structure, while effects and artifact refs come only
+    from the first-party ToolSpec contract rather than suffix guessing.
+    """
+    payload = redact_arguments(result or {})
+    declared = registry.spec(tool_key)
+    artifact_refs = [
+        value
+        for key in declared.artifact_ref_keys
+        if isinstance((value := payload.get(key)), str)
+    ] if isinstance(payload, dict) else []
+    rollback_ref = None
+    if isinstance(payload, dict) and declared.rollback_ref_key:
+        value = payload.get(declared.rollback_ref_key)
+        if isinstance(value, str):
+            rollback_ref = value
+    return {
+        "result_digest": argument_digest("__result__", "1", payload),
+        "external_effects": list(declared.writes),
+        "artifact_refs": artifact_refs,
+        "rollback_ref": rollback_ref,
+    }
+
+
+async def _finalize_tool_call_receipt(
+    db: AsyncSession,
+    *,
+    owner_user_id: uuid.UUID,
+    tool_call_id: uuid.UUID | None,
+    result_digest: str,
+    verification_verdict: str,
+) -> None:
+    if tool_call_id is None:
+        return
+    await db.execute(
+        text(
+            """
+            UPDATE agent_tool_calls
+               SET result_digest = :digest, verification_verdict = :verdict
+             WHERE id = :call AND owner_user_id = :owner
+            """
+        ),
+        {
+            "digest": result_digest,
+            "verdict": verification_verdict,
+            "call": tool_call_id,
+            "owner": owner_user_id,
+        },
+    )
 
 
 async def _persist_step_result(
@@ -607,16 +746,22 @@ async def _persist_step_result(
     """
     import json
 
-    from app.agentic.registry import UnknownToolError, spec as tool_spec
+    from app.agentic.registry import UnknownToolError
+    from app.agentic.registry import spec as tool_spec
 
     payload = redact_arguments(result or {})
-    digest = argument_digest("__result__", "1", payload)
+    receipt = _receipt_result_metadata(tool_key, result) if tool_key else None
+    digest = (
+        receipt["result_digest"]
+        if receipt is not None
+        else argument_digest("__result__", "1", payload)
+    )
 
     # Typed extraction from the tool's declared contract. Suffix matching on
     # "_id" previously classified every identifier as an artifact, so a plan id,
     # a research brief id and a genuine artifact id were indistinguishable in
     # the ledger — and only one of them was an artifact.
-    artifact_ids: list[str] = []
+    artifact_ids: list[str] = list(receipt["artifact_refs"]) if receipt is not None else []
     evidence_ids: list[str] = []
     entity_refs: list[dict[str, str]] = []
     try:
@@ -624,10 +769,6 @@ async def _persist_step_result(
     except UnknownToolError:
         declared = None
     if declared is not None and isinstance(payload, dict):
-        for key in declared.artifact_ref_keys:
-            value = payload.get(key)
-            if isinstance(value, str):
-                artifact_ids.append(value)
         for key in declared.evidence_ref_keys:
             value = payload.get(key)
             if isinstance(value, str):
@@ -709,10 +850,8 @@ async def run_step(
     transaction so the reclaimed-then-resumed worker cannot complete it.
     """
     from app.agentic.orchestrator import queue_ready_dependants, unlock_dependants
-    from app.agentic.verifier import Verdict, verify_step_result
-
     from app.agentic.policy_store import load_policy, load_step_approval
-
+    from app.agentic.verifier import Verdict, verify_step_result
     from app.db.rls import set_user_context
 
     # ── TRANSACTION 1: the durable claim, and nothing else. ──
@@ -817,10 +956,17 @@ async def run_step(
         verifier_error = type(error).__name__
 
     if verifier_error is not None:
-        await _persist_step_result(
+        digest = await _persist_step_result(
             db, owner_user_id=owner_user_id, step_id=step_id, result=outcome.result,
             verdict="VERIFIER_ERROR", duration_ms=outcome.duration_ms, trace_id=trace.trace_id,
             tool_key=step["tool_key"],
+        )
+        await _finalize_tool_call_receipt(
+            db,
+            owner_user_id=owner_user_id,
+            tool_call_id=outcome.tool_call_id,
+            result_digest=digest,
+            verification_verdict="VERIFIER_ERROR",
         )
         await record_event(
             db, owner_user_id=owner_user_id, workflow_id=workflow_id, step_id=step_id,
@@ -859,6 +1005,13 @@ async def run_step(
         db, owner_user_id=owner_user_id, step_id=step_id, result=outcome.result,
         verdict=verification.verdict.value, duration_ms=outcome.duration_ms,
         trace_id=trace.trace_id, tool_key=step["tool_key"],
+    )
+    await _finalize_tool_call_receipt(
+        db,
+        owner_user_id=owner_user_id,
+        tool_call_id=outcome.tool_call_id,
+        result_digest=digest,
+        verification_verdict=verification.verdict.value,
     )
     await record_event(
         db, owner_user_id=owner_user_id, workflow_id=workflow_id, step_id=step_id,

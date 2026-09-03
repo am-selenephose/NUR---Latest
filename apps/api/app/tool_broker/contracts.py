@@ -52,3 +52,5 @@ class CapabilityResult(BaseModel):
     ok: bool
     data: dict[str, Any] = Field(default_factory=dict)
     artifact_refs: list[str] = Field(default_factory=list)
+    external_effects: list[str] = Field(default_factory=list)
+    rollback_ref: str | None = None

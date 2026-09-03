@@ -53,6 +53,11 @@ def spec(key: str) -> ToolSpec:
         raise UnknownToolError(f"no contract registered for tool {key!r}") from exc
 
 
+
+def broker_capability(key: str):
+    """Donor-agnostic execution capability for an already Agency-authorized tool."""
+    return spec(key).broker_capability
+
 def contract(key: str) -> ToolContract:
     return spec(key).contract
 

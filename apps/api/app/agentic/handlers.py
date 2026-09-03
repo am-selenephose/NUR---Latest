@@ -18,6 +18,7 @@ returning an empty result a planner would treat as a completed step.
 
 from __future__ import annotations
 
+import inspect
 import uuid
 from typing import Any
 
@@ -25,6 +26,25 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agentic import registry
+
+
+async def invoke_bound_handler(
+    db: AsyncSession,
+    owner_user_id: uuid.UUID,
+    *,
+    tool_key: str,
+    arguments: dict[str, Any],
+    approval=None,
+) -> dict[str, Any]:
+    """Invoke one already-bound first-party handler after Agency/broker authorization."""
+    handler = registry.handler(tool_key)
+    kwargs = dict(arguments)
+    if approval is not None and "approval" in inspect.signature(handler).parameters:
+        kwargs["approval"] = approval
+    result = await handler(db, owner_user_id, **kwargs)
+    if not isinstance(result, dict):
+        raise TypeError(f"{tool_key} handler returned non-mapping result")
+    return result
 
 
 async def get_map_neighbourhood(

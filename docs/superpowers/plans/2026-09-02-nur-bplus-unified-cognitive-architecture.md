@@ -699,7 +699,7 @@ git commit -m "feat(nur): add audited capability broker boundary"
 - Evolves `AgentToolCall` into the canonical external-effect receipt.
 - Adds `capability_key`, `adapter_key`, `adapter_version`, `result_digest`, `external_effects`, `artifact_refs`, `verification_verdict`, `rollback_ref`.
 
-- [ ] **Step 1: Write failing receipt test**
+- [x] **Step 1: Write failing receipt test**
 
 ```python
 async def test_authorized_broker_call_writes_complete_receipt(client, app_engine):
@@ -712,16 +712,20 @@ async def test_authorized_broker_call_writes_complete_receipt(client, app_engine
     assert receipt.verification_verdict in {'PASS', 'WARN'}
 ```
 
-- [ ] **Step 2: Add migration/ORM fields with FORCE-RLS parity tests**
-- [ ] **Step 3: Route authorized AgentStep execution through broker resolution; unknown/unapproved capabilities fail closed**
-- [ ] **Step 4: Hash redacted inputs/results, record external effects/artifacts, and never persist secrets**
-- [ ] **Step 5: Run `pytest -q app/tests/test_bplus_execution_receipts.py app/tests/agentic/test_tool_call_approval_binding_db.py app/tests/agentic/test_real_broker_e2e_db.py app/tests/test_agency_bridge_strict.py`**
-- [ ] **Step 6: Commit**
+- [x] **Step 2: Add migration/ORM fields with FORCE-RLS parity tests**
+- [x] **Step 3: Route authorized AgentStep execution through broker resolution; unknown/unapproved capabilities fail closed**
+- [x] **Step 4: Hash redacted inputs/results, record external effects/artifacts, and never persist secrets**
+- [x] **Step 5: Run `pytest -q app/tests/test_bplus_execution_receipts.py app/tests/agentic/test_tool_call_approval_binding_db.py app/tests/agentic/test_real_broker_e2e_db.py app/tests/test_agency_bridge_strict.py`**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/api/alembic/versions/0065_nur_bplus_execution_receipts.py apps/api/app/models/agentic.py apps/api/app/agentic apps/api/app/tool_broker apps/api/app/tests/test_bplus_execution_receipts.py
 git commit -m "feat(nur): record brokered tool effects as Agency receipts"
 ```
+
+
+**Closure — 2026-09-03:** PASS. Agency remains the sole policy/approval authority; only after that gate succeeds does runtime resolution cross the audited capability broker. Existing first-party tools resolve through code-allowlisted `nur.first_party` using donor-agnostic `app.read` / `app.write` capabilities, while donor adapters remain non-executable. `AgentToolCall` is now the canonical broker receipt with nullable legacy-compatible capability/adapter identity plus redacted result digest, declared external effects/artifact refs, verifier verdict and explicitly-declared rollback ref. Arbitrary handler output cannot invent rollback authority. Timeout/failure attempts preserve bounded broker identity without claiming unverified external effects. FORCE-RLS and released-schema migration parity remain intact. Verification: focused Task-10 contract 5 passed; Agency/broker/schema closure suite 170 passed; full API suite 1135 passed.
+
 
 ---
 
