@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.brain.schemas import CognitiveTaskPacket, ScopeEnvelope
 from app.mind.identity import load_identity
+from app.mind.scope import ScopeResolutionError
 from app.mind.self_model import get_self_capabilities
 from app.mind.working_memory import build_context_manifest
 
@@ -34,32 +35,42 @@ async def load_semantic_hydration_inputs(
     review-plane output and are deliberately returned separately so the hydrator
     can record their exclusion rather than silently widening context.
     """
+    from app.models import OmegaClaim
     from app.models.cognition import ResearchDraft, SemanticClaim
     from app.models.memory import PersonalMemory
     from app.models.product import ResearchSourceNote
 
     bounded = max(1, min(int(limit), 100))
-    if scope_envelope is not None:
-        if scope_envelope.owner_user_id != owner_user_id:
-            raise PermissionError("ScopeEnvelope owner mismatch blocks semantic hydration.")
-        orbit_id = scope_envelope.orbit_id or orbit_id
+    if scope_envelope is None:
+        raise ScopeResolutionError("Semantic hydration requires an explicit ScopeEnvelope.")
+    if scope_envelope.owner_user_id != owner_user_id:
+        raise PermissionError("ScopeEnvelope owner mismatch blocks semantic hydration.")
+    orbit_id = scope_envelope.orbit_id or orbit_id
+    if any((scope_envelope.project_id, scope_envelope.capsule_id, scope_envelope.community_id)):
+        return {
+            "approved_memory": [], "memory_candidates": [], "beliefs": [],
+            "user_model_claims": [], "research_results": [], "semantic_context": [],
+        }
     memory_stmt = select(PersonalMemory).where(
         PersonalMemory.owner_user_id == owner_user_id,
         PersonalMemory.status == "APPROVED",
         PersonalMemory.deleted_at.is_(None),
     ).order_by(PersonalMemory.updated_at.desc()).limit(bounded)
     if orbit_id is not None:
-        memory_stmt = memory_stmt.where(
-            (PersonalMemory.orbit_id == orbit_id) | (PersonalMemory.orbit_id.is_(None))
-        )
+        memory_stmt = memory_stmt.where(PersonalMemory.orbit_id == orbit_id)
     memory_rows = (await db.execute(memory_stmt)).scalars().all()
 
-    claim_stmt = select(SemanticClaim).where(
-        SemanticClaim.owner_user_id == owner_user_id, SemanticClaim.status != "ARCHIVED"
-    ).order_by(SemanticClaim.created_at.desc()).limit(bounded)
-    if orbit_id is not None and hasattr(SemanticClaim, "orbit_id"):
-        claim_stmt = claim_stmt.where(SemanticClaim.orbit_id == orbit_id)
-    claims = (await db.execute(claim_stmt)).scalars().all()
+    claim_stmt = (select(SemanticClaim, OmegaClaim.orbit_id.label("canonical_orbit_id"))
+        .outerjoin(
+            OmegaClaim,
+            (OmegaClaim.id == SemanticClaim.canonical_omega_claim_id)
+            & (OmegaClaim.owner_user_id == owner_user_id),
+        )
+        .where(SemanticClaim.owner_user_id == owner_user_id, SemanticClaim.status != "ARCHIVED")
+        .order_by(SemanticClaim.created_at.desc()).limit(bounded))
+    if orbit_id is not None:
+        claim_stmt = claim_stmt.where(OmegaClaim.orbit_id == orbit_id)
+    claim_rows = (await db.execute(claim_stmt)).all()
     draft_stmt = select(ResearchDraft).where(ResearchDraft.owner_user_id == owner_user_id).order_by(ResearchDraft.created_at.desc()).limit(bounded)
     if orbit_id is not None and hasattr(ResearchDraft, "orbit_id"):
         draft_stmt = draft_stmt.where(ResearchDraft.orbit_id == orbit_id)
@@ -90,9 +101,9 @@ async def load_semantic_hydration_inputs(
             "confidence": row.confidence,
             "evidence_count": row.evidence_count,
             "counterevidence_count": row.counterevidence_count,
-            "orbit_id": str(row.orbit_id) if getattr(row, "orbit_id", None) else None,
+            "orbit_id": str(canonical_orbit_id) if canonical_orbit_id else None,
         }
-        for row in claims
+        for row, canonical_orbit_id in claim_rows
     ]
     research_rows = [
         {
@@ -101,6 +112,7 @@ async def load_semantic_hydration_inputs(
             "question": row.question,
             "notes": row.notes or "",
             "status": row.status,
+            "orbit_id": str(row.orbit_id) if row.orbit_id else None,
         }
         for row in drafts
     ] + [
@@ -110,6 +122,7 @@ async def load_semantic_hydration_inputs(
             "title": row.title,
             "note": row.note,
             "citation": row.url,
+            "orbit_id": str(row.orbit_id) if row.orbit_id else None,
         }
         for row in notes
     ]
@@ -120,7 +133,8 @@ async def load_semantic_hydration_inputs(
         "user_model_claims": belief_rows,
         "research_results": research_rows,
         "semantic_context": [
-            {"id": item["id"], "owner_user_id": str(owner_user_id), "kind": "semantic_claim"}
+            {"id": item["id"], "owner_user_id": str(owner_user_id),
+             "orbit_id": item.get("orbit_id"), "kind": "semantic_claim"}
             for item in belief_rows
         ],
     }

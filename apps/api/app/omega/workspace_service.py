@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.brain.schemas import ScopeEnvelope
+from app.mind.scope import ScopeResolutionError
 from app.models import (
     OmegaClaim,
     OmegaContradiction,
@@ -24,6 +25,12 @@ async def build_workspace_frame(
     orbit_id: uuid.UUID | None = None,
     trigger_event_id: uuid.UUID | None = None,
 ) -> OmegaWorkspaceFrame:
+    if (
+        orbit_id is not None
+        and scope_envelope.orbit_id is not None
+        and orbit_id != scope_envelope.orbit_id
+    ):
+        raise ScopeResolutionError("Workspace orbit_id disagrees with the resolved ScopeEnvelope.")
     selected = await retrieve_canonical_context(
         db,
         owner_user_id=owner_user_id,
@@ -72,24 +79,35 @@ async def talk_summary(
     *,
     owner_user_id: uuid.UUID,
     workspace_frame_id: uuid.UUID | None,
+    scope_envelope: ScopeEnvelope,
 ) -> OmegaTalkSummary:
+    if scope_envelope.owner_user_id != owner_user_id:
+        raise ScopeResolutionError("ScopeEnvelope owner mismatch blocks Omega talk summary.")
+    if any((scope_envelope.project_id, scope_envelope.capsule_id, scope_envelope.community_id)):
+        return OmegaTalkSummary(workspace_frame_id=workspace_frame_id)
+
+    claim_q = select(OmegaClaim).where(
+        OmegaClaim.owner_user_id == owner_user_id, OmegaClaim.support_count > 0
+    )
+    contradiction_q = select(OmegaContradiction).where(
+        OmegaContradiction.owner_user_id == owner_user_id, OmegaContradiction.status == "OPEN"
+    )
+    prediction_q = select(OmegaPrediction).where(
+        OmegaPrediction.owner_user_id == owner_user_id, OmegaPrediction.status == "OPEN"
+    )
+    if scope_envelope.orbit_id is not None:
+        claim_q = claim_q.where(OmegaClaim.orbit_id == scope_envelope.orbit_id)
+        contradiction_q = contradiction_q.where(OmegaContradiction.orbit_id == scope_envelope.orbit_id)
+        prediction_q = prediction_q.where(OmegaPrediction.orbit_id == scope_envelope.orbit_id)
+
     claims = (await db.execute(
-        select(OmegaClaim)
-        .where(OmegaClaim.owner_user_id == owner_user_id, OmegaClaim.support_count > 0)
-        .order_by(OmegaClaim.updated_at.desc())
-        .limit(1)
+        claim_q.order_by(OmegaClaim.updated_at.desc()).limit(1)
     )).scalars().all()
     contradictions = (await db.execute(
-        select(OmegaContradiction)
-        .where(OmegaContradiction.owner_user_id == owner_user_id, OmegaContradiction.status == "OPEN")
-        .order_by(OmegaContradiction.created_at.desc())
-        .limit(1)
+        contradiction_q.order_by(OmegaContradiction.created_at.desc()).limit(1)
     )).scalars().all()
     predictions = (await db.execute(
-        select(OmegaPrediction)
-        .where(OmegaPrediction.owner_user_id == owner_user_id, OmegaPrediction.status == "OPEN")
-        .order_by(OmegaPrediction.created_at.desc())
-        .limit(1)
+        prediction_q.order_by(OmegaPrediction.created_at.desc()).limit(1)
     )).scalars().all()
     return OmegaTalkSummary(
         workspace_frame_id=workspace_frame_id,

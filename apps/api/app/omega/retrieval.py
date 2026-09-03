@@ -58,17 +58,19 @@ def _authority(value: str | None) -> float:
     }.get((value or "").upper(), 0.4)
 
 
-def _in_scope(row: Any, scope: ScopeEnvelope) -> bool:
-    if scope.capsule_id is not None:
-        return str(getattr(row, "capsule_id", "")) == str(scope.capsule_id)
-    if (
-        scope.project_id is not None
-        and hasattr(row, "project_id")
-        and str(getattr(row, "project_id", "")) != str(scope.project_id)
+def row_matches_scope(row: Any, scope: ScopeEnvelope) -> bool:
+    """Require every explicit boundary to match; missing metadata fails closed."""
+    for key, expected in (
+        ("capsule_id", scope.capsule_id),
+        ("community_id", scope.community_id),
+        ("project_id", scope.project_id),
+        ("orbit_id", scope.orbit_id),
     ):
-        return False
-    if scope.orbit_id is not None:
-        return str(getattr(row, "orbit_id", "")) == str(scope.orbit_id)
+        if expected is None:
+            continue
+        actual = getattr(row, key, None)
+        if actual is None or str(actual) != str(expected):
+            return False
     return True
 
 
@@ -125,9 +127,9 @@ async def retrieve_canonical_context(
         )
     )).scalars().all()
 
-    claims = [row for row in claims if _in_scope(row, scope_envelope)]
-    experiences = [row for row in experiences if _in_scope(row, scope_envelope)]
-    contradictions = [row for row in contradictions if _in_scope(row, scope_envelope)]
+    claims = [row for row in claims if row_matches_scope(row, scope_envelope)]
+    experiences = [row for row in experiences if row_matches_scope(row, scope_envelope)]
+    contradictions = [row for row in contradictions if row_matches_scope(row, scope_envelope)]
     contradicted_ids = {
         claim_id
         for row in contradictions

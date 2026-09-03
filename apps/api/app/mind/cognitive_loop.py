@@ -504,7 +504,10 @@ async def run_mind_cognitive_loop(
         "raw_response_id": brain_trace.provider_response_id,
     }
 
-    omega = await talk_summary(db, owner_user_id=owner_user_id, workspace_frame_id=frame.id)
+    omega = await talk_summary(
+        db, owner_user_id=owner_user_id, workspace_frame_id=frame.id,
+        scope_envelope=scope_envelope,
+    )
     response_event = CognitiveEvent(
         owner_user_id=owner_user_id,
         orbit_id=orbit_id,
