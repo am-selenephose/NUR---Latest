@@ -27,7 +27,7 @@ from app.mind.capabilities.hydrator import ContextHydrator
 from app.mind.identity import load_identity
 from app.mind.self_model import get_self_capabilities
 from app.mind.working_memory import build_context_manifest
-from app.models import OmegaClaim, OmegaContradiction, Prediction
+from app.models import OmegaClaim, OmegaClaimVersion, OmegaContradiction, Prediction
 
 
 class UnifiedCognitiveState(BaseModel):
@@ -50,6 +50,7 @@ class UnifiedCognitiveState(BaseModel):
     world_refs: list[dict[str, Any]] = Field(default_factory=list)
     predictions: list[dict[str, Any]] = Field(default_factory=list)
     contradictions: list[dict[str, Any]] = Field(default_factory=list)
+    continuity_receipts: list[dict[str, Any]] = Field(default_factory=list)
     capabilities: list[dict[str, Any]] = Field(default_factory=list)
     evidence_refs: list[dict[str, Any]] = Field(default_factory=list)
 
@@ -124,6 +125,82 @@ def _prediction_projection(row: Prediction) -> dict[str, Any]:
         "status": row.status,
         "resolution": row.resolution,
     }
+
+
+async def _recent_continuity_receipts(
+    db: AsyncSession,
+    *,
+    owner_user_id: uuid.UUID,
+    scope: ScopeEnvelope,
+    limit: int = 3,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Return bounded persisted falsification receipts for the next scoped turn."""
+    if any((scope.project_id, scope.capsule_id, scope.community_id)):
+        return [], []
+    q = select(Prediction).where(
+        Prediction.owner_user_id == owner_user_id,
+        Prediction.status == "RESOLVED",
+        Prediction.resolution.is_not(None),
+        Prediction.resolved_outcome_id.is_not(None),
+        Prediction.omega_claim_id.is_not(None),
+    )
+    if scope.orbit_id is not None:
+        q = q.where(Prediction.orbit_id == scope.orbit_id)
+    rows = (await db.execute(
+        q.order_by(Prediction.resolved_at.desc()).limit(max(1, min(limit, 3)))
+    )).scalars().all()
+    receipts: list[dict[str, Any]] = []
+    refs: list[dict[str, Any]] = []
+    for prediction in rows:
+        claim = (await db.execute(select(OmegaClaim).where(
+            OmegaClaim.owner_user_id == owner_user_id,
+            OmegaClaim.id == prediction.omega_claim_id,
+        ))).scalar_one_or_none()
+        if claim is None:
+            continue
+        version = (await db.execute(select(OmegaClaimVersion).where(
+            OmegaClaimVersion.owner_user_id == owner_user_id,
+            OmegaClaimVersion.claim_id == claim.id,
+            OmegaClaimVersion.version == claim.current_version,
+        ))).scalar_one_or_none()
+        if version is None:
+            continue
+        claim_ref = f"OMEGA_CLAIM_VERSION:{version.id}"
+        prediction_ref = f"PREDICTION:{prediction.id}"
+        outcome_ref = f"OUTCOME:{prediction.resolved_outcome_id}"
+        receipts.append({
+            "claim_id": str(claim.id),
+            "claim_version": claim.current_version,
+            "claim_version_id": str(version.id),
+            "prediction_id": str(prediction.id),
+            "prediction_resolution": prediction.resolution,
+            "outcome_id": str(prediction.resolved_outcome_id),
+            "source_refs": [claim_ref, prediction_ref, outcome_ref],
+        })
+        refs.extend([
+            {
+                "kind": "OMEGA_CLAIM_VERSION",
+                "id": str(version.id),
+                "excerpt": (
+                    f"Canonical claim {claim.id} version {claim.current_version}: "
+                    f"epistemic={claim.epistemic_status}, authority={claim.authority_status}."
+                ),
+                "rank": 1.0,
+            },
+            {
+                "kind": "PREDICTION",
+                "id": str(prediction.id),
+                "excerpt": f"Persisted prediction resolution: {prediction.resolution}.",
+                "rank": 0.99,
+            },
+            {
+                "kind": "OUTCOME",
+                "id": str(prediction.resolved_outcome_id),
+                "excerpt": f"Observed outcome resolved prediction {prediction.id}.",
+                "rank": 0.98,
+            },
+        ])
+    return receipts, refs
 
 
 def _digest(state: UnifiedCognitiveState) -> str:
@@ -211,8 +288,11 @@ async def build_unified_cognitive_state(
         or scope_envelope.reason
         or "ScopeEnvelope-enforced owner context"
     )
+    continuity_receipts, continuity_refs = await _recent_continuity_receipts(
+        db, owner_user_id=owner_user_id, scope=scope_envelope
+    )
     manifest, filtered_evidence = build_context_manifest(
-        retrieved_refs=retrieved_refs or [],
+        retrieved_refs=[*continuity_refs, *(retrieved_refs or [])],
         withheld_items=withheld_items,
         scope_statement=scope_statement,
         token_budget=token_budget,
@@ -296,6 +376,7 @@ async def build_unified_cognitive_state(
         world_refs=list(world_refs if world_refs is not None else filtered_evidence),
         predictions=[_prediction_projection(row) for row in predictions],
         contradictions=[_contradiction_projection(row) for row in contradictions],
+        continuity_receipts=continuity_receipts,
         capabilities=[dict(capability_context)] if capability_context else [],
         evidence_refs=list(filtered_evidence),
         attention_items=attention,

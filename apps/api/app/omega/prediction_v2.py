@@ -179,6 +179,30 @@ async def resolve_prediction(
             strength=float(strength),
             note=f"Prediction {row.id} resolved as {evaluator_result}.",
         )
+        from app.omega.canonical_claim_service import (
+            version_canonical_claim_after_evidence_change,
+        )
+
+        evidence_ref = f"outcome:{outcome.id}"
+        await version_canonical_claim_after_evidence_change(
+            db,
+            owner_user_id=owner_user_id,
+            claim_id=row.omega_claim_id,
+            change_class=(
+                ChangeClass.CONTRADICTED
+                if evaluator_result == "CONTRADICTED"
+                else ChangeClass.UPDATED
+            ),
+            trigger=(
+                f"Prediction {row.id} resolved as {evaluator_result} from observed outcome {outcome.id}."
+            ),
+            supporting_evidence=([] if evaluator_result == "CONTRADICTED" else [evidence_ref]),
+            counter_evidence=([evidence_ref] if evaluator_result == "CONTRADICTED" else []),
+            affected_future_behavior=(
+                "Future scoped cognition must receive the resolved prediction and outcome "
+                "as a continuity receipt before making the same task-class recommendation."
+            ),
+        )
     await db.flush()
     return row
 

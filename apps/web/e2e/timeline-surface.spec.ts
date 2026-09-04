@@ -575,20 +575,17 @@ test("Review compares planned against actual and says it is deterministic", asyn
   const frame = await openTimeline(sharedPage);
   await frame.click('[data-timeline-mode="review"]');
   await expect.poll(
-    async () => frame.evaluate(
-      () => Boolean(document.querySelector("[data-timeline-review]")),
-    ),
+    async () => frame.evaluate(() => {
+      const panel = document.querySelector("[data-timeline-review]");
+      return Array.from(panel?.querySelectorAll(".nur-timeline-stat-label") ?? [])
+        .map((n) => n.textContent);
+    }),
     { timeout: 12_000 },
-  ).toBe(true);
+  ).toEqual(["Entries", "Completed", "Missed", "Rescheduled"]);
   const review = await frame.evaluate(() => {
     const panel = document.querySelector("[data-timeline-review]");
-    return {
-      labels: Array.from(panel?.querySelectorAll(".nur-timeline-stat-label") ?? [])
-        .map((n) => n.textContent),
-      text: panel?.textContent ?? "",
-    };
+    return { text: panel?.textContent ?? "" };
   });
-  expect(review.labels).toEqual(["Entries", "Completed", "Missed", "Rescheduled"]);
   // No model is consulted anywhere in this repository, and the surface says so
   // rather than implying analysis it did not do.
   expect(review.text).toContain("Deterministic");

@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.ai.audit import model_run_metadata, safe_error_metadata
 from app.ai.budget import assert_daily_ai_budget
 from app.ai.errors import AIOutputValidationError
-from app.ai.schemas import AIStreamSink
+from app.ai.schemas import AIStreamSink, EvidenceRef
 from app.brain.cognition import run_brain_step
 from app.brain.synthesizer import synthesize_talk_output
 from app.brain.tracing import BrainTrace
@@ -224,8 +224,6 @@ async def run_mind_cognitive_loop(
         )
         retrieval_dicts = [r.model_dump() for r in retrieval_refs]
 
-    evidence = build_evidence_packet(orbit_id=orbit_id, retrieval=retrieval_refs)
-
     # 6. Freeze exactly one owner-scoped cognitive state before any worker/provider
     # dispatch. Hydrator output wins over the raw semantic preload because it has
     # already applied the capability recipe and token budget.
@@ -280,6 +278,12 @@ async def run_mind_cognitive_loop(
         writing_preference=writing_preference,
         unified_state=unified_state,
     )
+    # Verification and provider citation availability must use the exact evidence
+    # projection the Brain receives, including bounded continuity receipts.
+    evidence = build_evidence_packet(
+        orbit_id=orbit_id,
+        retrieval=[EvidenceRef.model_validate(ref) for ref in packet.evidence_refs],
+    )
 
     # 7. Initialize ModelRun trace record
     s = get_settings()
@@ -323,7 +327,7 @@ async def run_mind_cognitive_loop(
     db.add(model_run)
     await db.flush()
 
-    for ref in retrieval_refs:
+    for ref in evidence.retrieval:
         db.add(
             ModelRunSource(
                 owner_user_id=owner_user_id,

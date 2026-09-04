@@ -803,7 +803,7 @@ it('keeps observation, inference, and owner authority visually distinguishable',
 **Interfaces:**
 - Gate runner executes B00-B15 and exits non-zero on any missing or failed proof.
 
-- [ ] **Step 1: Write the end-to-end persisted-state scenario**
+- [x] **Step 1: Write the end-to-end persisted-state scenario**
 
 ```python
 async def test_prediction_outcome_revision_changes_later_recommendation(client):
@@ -817,10 +817,12 @@ async def test_prediction_outcome_revision_changes_later_recommendation(client):
     assert 'chain' not in str(why).lower()
 ```
 
-- [ ] **Step 2: Require the later response to cite persisted claim version, prediction resolution, and outcome evidence IDs**
-- [ ] **Step 3: Prove owner confirmation cannot be forged, scope cannot leak, and learning cannot widen Agency permissions inside the same scenario**
-- [ ] **Step 4: Implement `nur-bplus-gate.sh` with named B00-B15 sections and exact commands**
-- [ ] **Step 5: Run the full API suite, relevant web unit tests, Playwright V197 suites, migration roundtrip/RLS suites, and the Jarvis continuity E2E**
-- [ ] **Step 6: Commit `test(nur): lock B+ Jarvis continuity acceptance gates`**
+- [x] **Step 2: Require the later response to cite persisted claim version, prediction resolution, and outcome evidence IDs**
+- [x] **Step 3: Prove owner confirmation cannot be forged, scope cannot leak, and learning cannot widen Agency permissions inside the same scenario**
+- [x] **Step 4: Implement `nur-bplus-gate.sh` with named B00-B15 sections and exact commands**
+- [x] **Step 5: Run the full API suite, relevant web unit tests, Playwright V197 suites, migration roundtrip/RLS suites, and the Jarvis continuity E2E**
+- [x] **Step 6: Commit `test(nur): lock B+ Jarvis continuity acceptance gates`**
+
+**Closure — 2026-09-04:** PASS. Persisted prediction resolution now versions the canonical Omega claim with WhyChanged lineage; bounded owner/orbit-scoped continuity receipts carry claim-version, prediction and outcome IDs into later scoped cognition without widening project/capsule/community scope or Agency authority. Task-13 API continuity: 3 passed; owner-visible Jarvis Chromium: 1 passed; migration/RLS/Hardness: 21 passed; full API: 1142 passed; web: 119 unit tests plus typecheck/build; V197 integrity hashes exact; secret scan clean; isolated live Chromium matrix: 43 passed. The fail-closed gate runner itself completed B00-B15 as one no-selector invocation: 16/16 passed, exit 0. Acceptance hardening also repaired the worktree dependency-realpath allowlist and a Timeline Review readiness race discovered by the gate.
 
 ---

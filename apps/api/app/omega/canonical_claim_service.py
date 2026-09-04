@@ -270,6 +270,59 @@ async def mutate_canonical_claim(
     return claim, why
 
 
+async def version_canonical_claim_after_evidence_change(
+    db: AsyncSession,
+    *,
+    owner_user_id: uuid.UUID,
+    claim_id: uuid.UUID,
+    change_class: ChangeClass,
+    trigger: str,
+    supporting_evidence: list[str] | None = None,
+    counter_evidence: list[str] | None = None,
+    affected_future_behavior: str = "",
+) -> tuple[OmegaClaim, WhyChangedRecord]:
+    """Version a claim after an evidence edge already changed its canonical state.
+
+    Evidence linkage updates counters/status in the same transaction. This helper
+    makes that mutation part of the canonical version ledger instead of leaving a
+    silent in-place change with no WhyChanged lineage.
+    """
+    claim = await _owned_claim_for_update(
+        db, owner_user_id=owner_user_id, claim_id=claim_id
+    )
+    previous_version = claim.current_version
+    claim.epistemic_status = epistemic_from_truth_status(claim.truth_status).value
+    claim.current_version = previous_version + 1
+    claim.updated_at = dt.datetime.now(dt.timezone.utc)
+    evidence_refs = [*(supporting_evidence or []), *(counter_evidence or [])]
+    why = await WhyChangedService.record_change(
+        db,
+        owner_user_id=owner_user_id,
+        entity_type=EntityType.OMEGA_CLAIM,
+        entity_id=str(claim.id),
+        change_class=change_class,
+        trigger=trigger,
+        previous_version=str(previous_version),
+        new_version=str(claim.current_version),
+        supporting_evidence=supporting_evidence or [],
+        counter_evidence=counter_evidence or [],
+        actor="system",
+        affected_future_behavior=affected_future_behavior,
+        rollback_target=f"omega_claim:{claim.id}:v{previous_version}",
+    )
+    await _persist_version(
+        db,
+        owner_user_id=owner_user_id,
+        claim=claim,
+        why=why,
+        change_class=change_class,
+        actor="system",
+        evidence_refs=evidence_refs,
+    )
+    await db.flush()
+    return claim, why
+
+
 async def confirm_claim_authority(
     db: AsyncSession,
     *,

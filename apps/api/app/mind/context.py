@@ -196,6 +196,7 @@ async def build_cognitive_task_packet(
                 "world_refs": unified_state.world_refs,
                 "predictions": unified_state.predictions,
                 "contradictions": unified_state.contradictions,
+                "continuity_receipts": unified_state.continuity_receipts,
                 "capabilities": unified_state.capabilities,
                 "semantic_families": unified_state.semantic_family_counts,
             },
