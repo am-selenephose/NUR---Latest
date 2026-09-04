@@ -35,19 +35,6 @@ web-and-security:
       - apps/web/playwright-report/
       - apps/web/test-results/
 
-api-openapi-drift:
-  stage: test
-  image: node:22-bookworm
-  cache:
-    key: "npm-drift-${CI_COMMIT_REF_SLUG}"
-    paths: [.npm/]
-  variables:
-    npm_config_cache: "$CI_PROJECT_DIR/.npm"
-  script:
-    - npm ci
-    - npm run api:openapi-drift:test
-    - npm run api:openapi-drift
-
 api:
   stage: test
   image: python:3.12-bookworm
@@ -76,5 +63,7 @@ api:
     - python -m pip install -r requirements-dev.lock
     - python -m pip install --no-deps -e .
   script:
+    - python ../../infra/scripts/test_check_openapi_drift.py -v
+    - python ../../infra/scripts/check_openapi_drift.py --json
     - python -m ruff check app
     - python -m pytest
