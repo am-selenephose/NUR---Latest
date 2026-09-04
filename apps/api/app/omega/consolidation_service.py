@@ -1,14 +1,28 @@
 import datetime as dt
 import uuid
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
-from app.models import CognitiveEvent, OmegaClaim, OmegaConsolidationRun, OmegaExperience, Outcome, UserCorrection
+from app.models import (
+    OmegaClaim,
+    OmegaConsolidationRun,
+    OmegaExperience,
+    Outcome,
+    UserCorrection,
+)
 from app.omega.claim_service import weaken_claim_for_correction
 from app.omega.contradiction_service import detect_claim_contradictions
 from app.omega.experience_service import ingest_from_cognitive_event
+from app.omega.ingestion_receipts import (
+    TERMINAL_STATUSES,
+    begin_attempt,
+    get_or_create_receipt,
+    mark_failure,
+    mark_processed,
+    next_unprocessed_sources,
+)
 from app.omega.learning_proposal_service import create_learning_proposal
 from app.omega.prediction_ledger import resolve_predictions_from_outcome
 from app.omega.schemas import OmegaLearningProposalIn
@@ -30,22 +44,50 @@ async def consolidate_owner(
     try:
         if max_recent < 0:
             raise ValueError("max_recent must be non-negative")
-        recent_events = await _recent_events(db, owner_user_id=owner_user_id, orbit_id=orbit_id, limit=max_recent)
+        recent_events = await next_unprocessed_sources(
+            db, owner_user_id=owner_user_id, orbit_id=orbit_id, limit=max_recent
+        )
         created_experiences = 0
         created_claims = 0
         queued_review_items = 0
+        source_failures = 0
+        quarantined_sources = 0
         for event in recent_events:
-            existing = (await db.execute(select(func.count()).select_from(OmegaExperience).where(
-                OmegaExperience.owner_user_id == owner_user_id,
-                OmegaExperience.source_kind == "COGNITIVE_EVENT",
-                OmegaExperience.source_id == event.id,
-            ))).scalar_one()
-            if not existing:
-                exp = await ingest_from_cognitive_event(db, owner_user_id=owner_user_id, event=event)
+            receipt = await get_or_create_receipt(
+                db, owner_user_id=owner_user_id, source_id=event.id
+            )
+            if receipt.status in TERMINAL_STATUSES:
+                continue
+            begin_attempt(receipt)
+            try:
+                existing = (
+                    await db.execute(
+                        select(OmegaExperience).where(
+                            OmegaExperience.owner_user_id == owner_user_id,
+                            OmegaExperience.source_kind == "COGNITIVE_EVENT",
+                            OmegaExperience.source_id == event.id,
+                        )
+                    )
+                ).scalar_one_or_none()
+                if existing is not None:
+                    mark_processed(receipt, experience_id=existing.id)
+                    continue
+                async with db.begin_nested():
+                    exp = await ingest_from_cognitive_event(
+                        db, owner_user_id=owner_user_id, event=event
+                    )
+                    next_claims, next_review = await extract_or_queue_claims(
+                        db, owner_user_id=owner_user_id, experience=exp
+                    )
                 created_experiences += 1
-                next_claims, next_review = await extract_or_queue_claims(db, owner_user_id=owner_user_id, experience=exp)
                 created_claims += next_claims
                 queued_review_items += next_review
+                mark_processed(receipt, experience_id=exp.id)
+            except Exception as exc:  # noqa: BLE001 -- every source failure must receive a receipt
+                source_failures += 1
+                mark_failure(receipt, exc)
+                if receipt.status == "QUARANTINED":
+                    quarantined_sources += 1
 
         predictions_resolved = 0
         outcomes = (await db.execute(select(Outcome).where(Outcome.owner_user_id == owner_user_id).order_by(Outcome.created_at.desc()).limit(20))).scalars()
@@ -69,8 +111,11 @@ async def consolidate_owner(
 
         run.input_counts = {
             "recent_events": len(recent_events),
+            "selected_sources": len(recent_events),
             "created_experiences": created_experiences,
             "queued_review_items": queued_review_items,
+            "source_failures": source_failures,
+            "quarantined_sources": quarantined_sources,
             "max_recent": max_recent,
             "summary": "Counts only; no raw private dump stored in consolidation metadata.",
         }
@@ -80,11 +125,11 @@ async def consolidate_owner(
         run.predictions_resolved = predictions_resolved
         run.proposals_created = proposals_created
         run.status = "COMPLETED"
-        run.completed_at = dt.datetime.now(dt.timezone.utc)
+        run.completed_at = dt.datetime.now(dt.UTC)
     except Exception as exc:
         run.status = "FAILED"
         run.error_class = exc.__class__.__name__
-        run.completed_at = dt.datetime.now(dt.timezone.utc)
+        run.completed_at = dt.datetime.now(dt.UTC)
         raise
     finally:
         await db.flush()
@@ -113,7 +158,7 @@ async def _ensure_no_active_run(
     orbit_id: uuid.UUID | None,
 ) -> None:
     interval = max(1, int(get_settings().omega_consolidation_interval_hours))
-    cutoff = dt.datetime.now(dt.timezone.utc) - dt.timedelta(hours=interval)
+    cutoff = dt.datetime.now(dt.UTC) - dt.timedelta(hours=interval)
     q = select(OmegaConsolidationRun.id).where(
         OmegaConsolidationRun.owner_user_id == owner_user_id,
         OmegaConsolidationRun.status == "STARTED",
@@ -124,24 +169,6 @@ async def _ensure_no_active_run(
     active = (await db.execute(q.limit(1))).scalar_one_or_none()
     if active:
         raise RuntimeError("Omega consolidation already running for this owner.")
-
-
-async def _recent_events(
-    db: AsyncSession,
-    *,
-    owner_user_id: uuid.UUID,
-    orbit_id: uuid.UUID | None,
-    limit: int,
-) -> list[CognitiveEvent]:
-    q = (
-        select(CognitiveEvent)
-        .where(CognitiveEvent.owner_user_id == owner_user_id)
-        .order_by(CognitiveEvent.created_at.desc())
-        .limit(limit)
-    )
-    if orbit_id:
-        q = q.where(CognitiveEvent.orbit_id == orbit_id)
-    return list((await db.execute(q)).scalars())
 
 
 def _claim_type(event_kind: str, summary: str) -> str | None:

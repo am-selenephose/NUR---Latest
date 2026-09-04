@@ -1,5 +1,10 @@
 import INSIGHTS_CSS from "../styles/v197-insights.css?raw";
 import type { V197BridgeSnapshot, V197Insights } from "./v197ApiClient";
+import {
+  buildV197CognitionState,
+  cognitionForRecord,
+  type V197CognitionState,
+} from "./v197Cognition";
 import { claimV197SurfaceHost, releaseV197SurfaceHost } from "./v197SurfaceHost";
 
 const ROOT_ID = "nur-insights-root";
@@ -79,6 +84,7 @@ export function renderV197Insights(
   document: Document,
   route: string,
   snapshot: V197BridgeSnapshot | null,
+  cognitionOverride: V197CognitionState | null = null,
 ): boolean {
   if (route !== INSIGHTS_ROUTE) {
     document.getElementById(ROOT_ID)?.remove();
@@ -94,6 +100,8 @@ export function renderV197Insights(
   }
 
   const insights = snapshot?.insights ?? null;
+  const cognition = cognitionOverride
+    ?? (snapshot?.cognition ? buildV197CognitionState(snapshot.cognition) : null);
   const claims = rows(insights);
   let selected = 0;
 
@@ -157,7 +165,8 @@ export function renderV197Insights(
       ));
       return;
     }
-    const confidence = number(row.confidence, -1);
+    const receipt = cognitionForRecord(row, cognition);
+    const confidence = receipt?.confidence ?? number(row.confidence, -1);
     const domains = Array.isArray(row.source_domains)
       ? row.source_domains.filter(value => typeof value === "string").join(" / ")
       : "Source domains not recorded";
@@ -184,6 +193,8 @@ export function renderV197Insights(
 
     const evidence = el(document, "div", "nur-insights-evidence");
     const evidenceRows = [
+      ["Epistemic status", receipt?.epistemicStatus ?? text(row, ["epistemic_state", "truth_status"], "Not recorded")],
+      ["Owner authority", receipt?.authorityStatus ?? "Not recorded"],
       ["Source domains", domains],
       ["Evidence records", String(Array.isArray(row.evidence) ? row.evidence.length : 0)],
       ["What NUR may be wrong about", text(
@@ -200,6 +211,13 @@ export function renderV197Insights(
       evidence.append(field);
     }
     detail.append(evidence);
+    if (receipt) {
+      const why = el(document, "button", "nur-insights-nav-item", "Why changed");
+      why.type = "button";
+      why.dataset.ownerRoute = receipt.whyChangedHref;
+      why.dataset.cognitionReceipt = receipt.claimId;
+      detail.append(why);
+    }
   };
 
   if (!claims.length) {

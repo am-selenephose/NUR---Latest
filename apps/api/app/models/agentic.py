@@ -397,6 +397,18 @@ class AgentToolCall(Base):
         Integer, nullable=False, default=0, server_default=text("0")
     )
     trace_id: Mapped[str | None] = mapped_column(String(64))
+    capability_key: Mapped[str | None] = mapped_column(String(80))
+    adapter_key: Mapped[str | None] = mapped_column(String(120))
+    adapter_version: Mapped[str | None] = mapped_column(String(80))
+    result_digest: Mapped[str | None] = mapped_column(String(71))
+    external_effects: Mapped[list] = mapped_column(
+        JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb")
+    )
+    artifact_refs: Mapped[list] = mapped_column(
+        JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb")
+    )
+    verification_verdict: Mapped[str | None] = mapped_column(String(24))
+    rollback_ref: Mapped[str | None] = mapped_column(String(240))
     created_at: Mapped[dt.datetime] = _created()
 
     __table_args__ = (

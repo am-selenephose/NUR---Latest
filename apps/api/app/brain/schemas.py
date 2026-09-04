@@ -130,6 +130,8 @@ class CognitiveTaskPacket(BaseModel):
     owner_user_id: uuid.UUID
     orbit_id: uuid.UUID | None = None
     scope_envelope_id: uuid.UUID | None = None  # lineage to the governing ScopeEnvelope
+    cognitive_state_version: str | None = None
+    cognitive_state_digest: str | None = None
     task_class: str  # "talk", "challenge", "reflect", "summarize", "plan", "research"
     user_input: str
     locale: str = "en"

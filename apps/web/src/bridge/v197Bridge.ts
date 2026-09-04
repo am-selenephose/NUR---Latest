@@ -4,6 +4,7 @@ import { ORBIT_ROUTE, renderV197Orbit } from "./v197Orbit";
 import { MAP_ROUTE, renderV197Map } from "./v197Map";
 import { TIMELINE_ROUTE, renderV197Timeline } from "./v197Timeline";
 import { INSIGHTS_ROUTE, renderV197Insights } from "./v197Insights";
+import { buildV197CognitionState } from "./v197Cognition";
 import { bindV197Actions, bindV197EntryAuth } from "./v197Bindings";
 import {
   emitBridgeEvent,
@@ -299,9 +300,12 @@ export class V197Bridge {
         this.markWorldFocus("orbits");
         return;
       }
+      const cognition = this.snapshot?.cognition
+        ? buildV197CognitionState(this.snapshot.cognition)
+        : null;
       // Map, likewise: it composes canonical Systems, goals, plans, decisions and
       // outcomes into a causal surface, and owns no life entity of its own.
-      const mapRendered = await renderV197Map(this.universeDocument, route, this.api);
+      const mapRendered = await renderV197Map(this.universeDocument, route, this.api, cognition);
       if (!stillCurrent()) return;
       if (mapRendered) {
         this.markWorldFocus("map");
@@ -310,14 +314,14 @@ export class V197Bridge {
       // Timeline, likewise: it composes canonical timeline_events and
       // scheduled_actions into a temporal surface and owns no life entity of
       // its own.
-      const timelineRendered = await renderV197Timeline(this.universeDocument, route, this.api);
+      const timelineRendered = await renderV197Timeline(this.universeDocument, route, this.api, cognition);
       if (!stillCurrent()) return;
       if (timelineRendered) {
         this.markWorldFocus("timeline");
         return;
       }
       if (!stillCurrent()) return;
-      const insightsRendered = renderV197Insights(this.universeDocument, route, this.snapshot);
+      const insightsRendered = renderV197Insights(this.universeDocument, route, this.snapshot, cognition);
       if (insightsRendered) {
         this.markWorldFocus("insights", false);
         return;

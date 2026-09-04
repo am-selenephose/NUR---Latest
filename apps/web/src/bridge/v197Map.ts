@@ -40,6 +40,7 @@ import {
 import { createV197StarSeal } from "./v197StarSeal";
 import { claimV197SurfaceHost, releaseV197SurfaceHost } from "./v197SurfaceHost";
 import type { V197ApiClient } from "./v197ApiClient";
+import { cognitionSummaryLines, type V197CognitionState } from "./v197Cognition";
 
 const ROOT_ID = "nur-map-root";
 const STYLE_ID = "nur-map-style";
@@ -398,7 +399,7 @@ function edgeWhy(edge: GraphEdge, labelOf: (id: string) => string): string {
 }
 
 export async function renderV197Map(
-  doc: Document, route: string, api: V197ApiClient,
+  doc: Document, route: string, api: V197ApiClient, cognition: V197CognitionState | null = null,
 ): Promise<boolean> {
   cancelV197SearchCommit(doc, SEARCH_KEY);
   if (route !== MAP_ROUTE) {
@@ -840,8 +841,16 @@ export async function renderV197Map(
       return pane;
     }
 
-    if (!nodes.some((row) => row.kind !== "MASTER_STAR" && row.kind !== "SYSTEM")) {
+    const hasConfirmedSemanticStructure = state.graph.edges.some(
+      (row) => row.semantic === true && row.user_confirmed === true && row.resolvable !== false,
+    );
+    if (
+      !nodes.some((row) => row.kind !== "MASTER_STAR" && row.kind !== "SYSTEM")
+      && !hasConfirmedSemanticStructure
+    ) {
       // §31: the empty Map is beautiful and useful, never "no data available".
+      // An owner-confirmed connection is structure even when no extra object node
+      // exists yet, so it must keep the real canvas visible.
       const empty = el(doc, "div", "nur-map-pane-scroll");
       empty.append(el(doc, "p", "nur-map-detail-kind", "Your Map"));
       empty.append(el(
@@ -1843,6 +1852,29 @@ export async function renderV197Map(
   }
 
   function nurViewTab(into: HTMLElement, node: GraphNode): void {
+    if (cognition) {
+      const receipt = el(doc, "div", "nur-map-doubt");
+      receipt.dataset.cognitionAmbient = "true";
+      receipt.append(el(doc, "p", "nur-map-doubt-label", "Governed cognition"));
+      const latest = cognition.claims[0];
+      if (latest) {
+        const confidence = latest.confidence === null ? "confidence not measured" : `${Math.round(latest.confidence * 100)}% confidence`;
+        receipt.append(el(
+          doc, "p", "nur-map-field-value",
+          `${latest.epistemicStatus} · ${latest.authorityStatus} · ${confidence}`,
+        ));
+        const why = capsule(doc, "Why changed");
+        why.classList.add("nur-map-capsule-sm");
+        why.dataset.ownerRoute = latest.whyChangedHref;
+        why.dataset.cognitionReceipt = latest.claimId;
+        receipt.append(why);
+      }
+      for (const line of cognitionSummaryLines(cognition)) {
+        receipt.append(el(doc, "p", "nur-map-row-meta", line));
+      }
+      into.append(receipt);
+    }
+
     const predictions = (state.predictions?.items as Record<string, unknown>[] | undefined) ?? [];
     if (predictions.length) {
       into.append(el(doc, "p", "nur-map-nav-label", "Predictions"));

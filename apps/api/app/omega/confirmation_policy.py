@@ -34,6 +34,14 @@ SENSITIVE_HINTS = {
 }
 
 
+def sensitivity_reason_for_text(*parts: object) -> str | None:
+    lowered = " ".join(str(part) for part in parts if part is not None).lower()
+    for hint in sorted(SENSITIVE_HINTS, key=len, reverse=True):
+        if hint in lowered:
+            return f"sensitive inferred domain: {hint}"
+    return None
+
+
 def confirmation_reason(experience: OmegaExperience, *, claim_text: str, truth_status: str) -> str | None:
     lowered = f"{experience.summary} {claim_text}".lower()
     if experience.sensitivity in {"SENSITIVE", "SECRET_EXCLUDED"}:
@@ -42,10 +50,7 @@ def confirmation_reason(experience: OmegaExperience, *, claim_text: str, truth_s
         return "semantic claim is inferred, not directly observed"
     if experience.provenance_label == "MODEL_GENERATED":
         return "model-generated content cannot become owner memory silently"
-    for hint in SENSITIVE_HINTS:
-        if hint in lowered:
-            return f"sensitive inferred domain: {hint}"
-    return None
+    return sensitivity_reason_for_text(lowered)
 
 
 def requires_confirmation(experience: OmegaExperience, *, claim_text: str, truth_status: str) -> bool:

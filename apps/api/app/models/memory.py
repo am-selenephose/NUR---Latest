@@ -2,7 +2,8 @@ import datetime as dt
 import uuid
 
 from sqlalchemy import Float, ForeignKey, Integer, String, text
-from sqlalchemy.dialects.postgresql import ENUM as PGEnum, JSONB, UUID
+from sqlalchemy.dialects.postgresql import ENUM as PGEnum
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import DateTime
 
@@ -19,6 +20,7 @@ class PersonalMemory(Base):
 
     id = uuid_pk()
     owner_user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    canonical_omega_claim_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     orbit_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("orbits.id", ondelete="SET NULL"))
     scope: Mapped[str] = mapped_column(PGEnum("EPHEMERAL", "PRIVATE_ORBIT", "SYSTEM_SHARED", "LEARNING_CANDIDATE", name="memory_scope", create_type=False), default="PRIVATE_ORBIT", server_default="PRIVATE_ORBIT")
     memory_type: Mapped[str] = mapped_column(String(32), default="SEMANTIC", server_default="SEMANTIC")

@@ -16,7 +16,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.brain.schemas import CognitiveTaskPacket, ScopeEnvelope
 from app.mind.identity import load_identity
+from app.mind.scope import ScopeResolutionError
 from app.mind.self_model import get_self_capabilities
+from app.mind.unified_state import UnifiedCognitiveState
 from app.mind.working_memory import build_context_manifest
 
 
@@ -25,6 +27,7 @@ async def load_semantic_hydration_inputs(
     *,
     owner_user_id: uuid.UUID,
     orbit_id: uuid.UUID | None = None,
+    scope_envelope: ScopeEnvelope | None = None,
     limit: int = 20,
 ) -> dict[str, list[dict[str, Any]]]:
     """Load only owner-scoped semantic families before Brain context assembly.
@@ -33,46 +36,50 @@ async def load_semantic_hydration_inputs(
     review-plane output and are deliberately returned separately so the hydrator
     can record their exclusion rather than silently widening context.
     """
+    from app.models import OmegaClaim
     from app.models.cognition import ResearchDraft, SemanticClaim
     from app.models.memory import PersonalMemory
     from app.models.product import ResearchSourceNote
 
     bounded = max(1, min(int(limit), 100))
+    if scope_envelope is None:
+        raise ScopeResolutionError("Semantic hydration requires an explicit ScopeEnvelope.")
+    if scope_envelope.owner_user_id != owner_user_id:
+        raise PermissionError("ScopeEnvelope owner mismatch blocks semantic hydration.")
+    orbit_id = scope_envelope.orbit_id or orbit_id
+    if any((scope_envelope.project_id, scope_envelope.capsule_id, scope_envelope.community_id)):
+        return {
+            "approved_memory": [], "memory_candidates": [], "beliefs": [],
+            "user_model_claims": [], "research_results": [], "semantic_context": [],
+        }
     memory_stmt = select(PersonalMemory).where(
         PersonalMemory.owner_user_id == owner_user_id,
         PersonalMemory.status == "APPROVED",
         PersonalMemory.deleted_at.is_(None),
     ).order_by(PersonalMemory.updated_at.desc()).limit(bounded)
     if orbit_id is not None:
-        memory_stmt = memory_stmt.where(
-            (PersonalMemory.orbit_id == orbit_id) | (PersonalMemory.orbit_id.is_(None))
-        )
+        memory_stmt = memory_stmt.where(PersonalMemory.orbit_id == orbit_id)
     memory_rows = (await db.execute(memory_stmt)).scalars().all()
 
-    claims = (
-        await db.execute(
-            select(SemanticClaim)
-            .where(SemanticClaim.owner_user_id == owner_user_id, SemanticClaim.status != "ARCHIVED")
-            .order_by(SemanticClaim.created_at.desc())
-            .limit(bounded)
+    claim_stmt = (select(SemanticClaim, OmegaClaim.orbit_id.label("canonical_orbit_id"))
+        .outerjoin(
+            OmegaClaim,
+            (OmegaClaim.id == SemanticClaim.canonical_omega_claim_id)
+            & (OmegaClaim.owner_user_id == owner_user_id),
         )
-    ).scalars().all()
-    drafts = (
-        await db.execute(
-            select(ResearchDraft)
-            .where(ResearchDraft.owner_user_id == owner_user_id)
-            .order_by(ResearchDraft.created_at.desc())
-            .limit(bounded)
-        )
-    ).scalars().all()
-    notes = (
-        await db.execute(
-            select(ResearchSourceNote)
-            .where(ResearchSourceNote.owner_user_id == owner_user_id)
-            .order_by(ResearchSourceNote.created_at.desc())
-            .limit(bounded)
-        )
-    ).scalars().all()
+        .where(SemanticClaim.owner_user_id == owner_user_id, SemanticClaim.status != "ARCHIVED")
+        .order_by(SemanticClaim.created_at.desc()).limit(bounded))
+    if orbit_id is not None:
+        claim_stmt = claim_stmt.where(OmegaClaim.orbit_id == orbit_id)
+    claim_rows = (await db.execute(claim_stmt)).all()
+    draft_stmt = select(ResearchDraft).where(ResearchDraft.owner_user_id == owner_user_id).order_by(ResearchDraft.created_at.desc()).limit(bounded)
+    if orbit_id is not None and hasattr(ResearchDraft, "orbit_id"):
+        draft_stmt = draft_stmt.where(ResearchDraft.orbit_id == orbit_id)
+    drafts = (await db.execute(draft_stmt)).scalars().all()
+    note_stmt = select(ResearchSourceNote).where(ResearchSourceNote.owner_user_id == owner_user_id).order_by(ResearchSourceNote.created_at.desc()).limit(bounded)
+    if orbit_id is not None and hasattr(ResearchSourceNote, "orbit_id"):
+        note_stmt = note_stmt.where(ResearchSourceNote.orbit_id == orbit_id)
+    notes = (await db.execute(note_stmt)).scalars().all()
 
     approved_memory = [
         {
@@ -82,6 +89,7 @@ async def load_semantic_hydration_inputs(
             "content": row.canonical_text,
             "provenance_label": row.provenance_label,
             "confidence": row.confidence,
+            "orbit_id": str(row.orbit_id) if row.orbit_id else None,
         }
         for row in memory_rows
     ]
@@ -94,8 +102,9 @@ async def load_semantic_hydration_inputs(
             "confidence": row.confidence,
             "evidence_count": row.evidence_count,
             "counterevidence_count": row.counterevidence_count,
+            "orbit_id": str(canonical_orbit_id) if canonical_orbit_id else None,
         }
-        for row in claims
+        for row, canonical_orbit_id in claim_rows
     ]
     research_rows = [
         {
@@ -104,6 +113,7 @@ async def load_semantic_hydration_inputs(
             "question": row.question,
             "notes": row.notes or "",
             "status": row.status,
+            "orbit_id": str(row.orbit_id) if row.orbit_id else None,
         }
         for row in drafts
     ] + [
@@ -113,6 +123,7 @@ async def load_semantic_hydration_inputs(
             "title": row.title,
             "note": row.note,
             "citation": row.url,
+            "orbit_id": str(row.orbit_id) if row.orbit_id else None,
         }
         for row in notes
     ]
@@ -123,7 +134,8 @@ async def load_semantic_hydration_inputs(
         "user_model_claims": belief_rows,
         "research_results": research_rows,
         "semantic_context": [
-            {"id": item["id"], "owner_user_id": str(owner_user_id), "kind": "semantic_claim"}
+            {"id": item["id"], "owner_user_id": str(owner_user_id),
+             "orbit_id": item.get("orbit_id"), "kind": "semantic_claim"}
             for item in belief_rows
         ],
     }
@@ -144,12 +156,56 @@ async def build_cognitive_task_packet(
     token_budget: int = 4096,
     scope_envelope: ScopeEnvelope | None = None,
     semantic_inputs: dict[str, list[dict[str, Any]]] | None = None,
+    unified_state: UnifiedCognitiveState | None = None,
 ) -> CognitiveTaskPacket:
     """Build a complete, frozen ``CognitiveTaskPacket`` for a Brain run.
 
     When a ``scope_envelope`` is provided, its ``scope_id`` is recorded in the
     packet for lineage tracing and its scope statement is used in the context manifest.
     """
+    if unified_state is not None:
+        if unified_state.owner_user_id != owner_user_id:
+            raise PermissionError("Unified cognitive state owner mismatch blocks Brain packet.")
+        if scope_envelope is not None and unified_state.scope_envelope.scope_id != scope_envelope.scope_id:
+            raise PermissionError("Unified cognitive state scope mismatch blocks Brain packet.")
+        effective_scope = unified_state.scope_envelope
+        if orbit_id is not None and effective_scope.orbit_id is not None and orbit_id != effective_scope.orbit_id:
+            raise PermissionError("Unified cognitive state orbit mismatch blocks Brain packet.")
+        return CognitiveTaskPacket(
+            task_id=uuid.uuid4(),
+            owner_user_id=owner_user_id,
+            orbit_id=effective_scope.orbit_id or orbit_id,
+            scope_envelope_id=effective_scope.scope_id,
+            cognitive_state_version=unified_state.contract_version,
+            cognitive_state_digest=unified_state.state_digest,
+            task_class=task_class,
+            user_input=user_input,
+            locale=locale,
+            writing_preference=writing_preference,
+            identity=unified_state.identity,
+            self_capabilities=unified_state.self_capabilities,
+            context_manifest=unified_state.context_manifest,
+            evidence_refs=unified_state.evidence_refs,
+            omega_context={
+                "workspace_frame_id": unified_state.workspace_frame_id,
+                "scope_statement": unified_state.context_manifest.scope_statement,
+                "attention_items": unified_state.attention_items,
+                "canonical_claims": unified_state.canonical_claims,
+                "approved_memories": unified_state.approved_memories,
+                "user_projections": unified_state.user_projections,
+                "world_refs": unified_state.world_refs,
+                "predictions": unified_state.predictions,
+                "contradictions": unified_state.contradictions,
+                "continuity_receipts": unified_state.continuity_receipts,
+                "capabilities": unified_state.capabilities,
+                "semantic_families": unified_state.semantic_family_counts,
+            },
+            active_beliefs=unified_state.active_beliefs,
+            active_hypotheses=unified_state.active_hypotheses,
+            risk_flags=unified_state.risk_flags,
+            max_turns=1,
+        )
+
     identity = load_identity()
     self_capabilities = await get_self_capabilities(db, owner_user_id)
 

@@ -20,7 +20,17 @@ import datetime as dt
 import decimal
 import uuid
 
-from sqlalchemy import Boolean, Float, ForeignKey, Index, Numeric, SmallInteger, String, Text, text
+from sqlalchemy import (
+    Boolean,
+    Float,
+    ForeignKey,
+    Index,
+    Numeric,
+    SmallInteger,
+    String,
+    Text,
+    text,
+)
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import DateTime
@@ -197,6 +207,7 @@ class OrbitContextLink(Base):
 
     id: Mapped[uuid.UUID] = uuid_pk()
     owner_user_id: Mapped[uuid.UUID] = _owner()
+    canonical_omega_claim_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     person_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("people.id", ondelete="CASCADE")
     )

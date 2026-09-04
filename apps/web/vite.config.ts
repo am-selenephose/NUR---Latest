@@ -1,11 +1,13 @@
-import { existsSync, readFileSync } from "node:fs";
-import { defineConfig, type Plugin, type PreviewServer, type ViteDevServer } from "vite";
+import { existsSync, readFileSync, realpathSync } from "node:fs";
+import { defineConfig, searchForWorkspaceRoot, type Plugin, type PreviewServer, type ViteDevServer } from "vite";
 import path from "node:path";
 
 import { buildV197PerformanceBootstrap } from "./src/bridge/v197PerformanceProfile";
 
 const omegaResearchFlag = process.env.VITE_NUR_ENABLE_OMEGA_RESEARCH ?? process.env.NUR_ENABLE_OMEGA_RESEARCH ?? "";
 const rootDirectory = __dirname;
+const workspaceRoot = searchForWorkspaceRoot(rootDirectory);
+const dependencyRoot = realpathSync(path.resolve(rootDirectory, "../../node_modules"));
 const publicV197Directory = path.resolve(rootDirectory, "public/v197");
 const canonicalV197Filename = "NUR_V197_CHECKBOX_TICK_RESTORED.html";
 const nativeV197Routes = new Set([
@@ -148,6 +150,9 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    fs: {
+      allow: [workspaceRoot, dependencyRoot],
+    },
     proxy: {
       "/api": { target: "http://localhost:8000", changeOrigin: true },
       "/healthz": { target: "http://localhost:8000", changeOrigin: true },

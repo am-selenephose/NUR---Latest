@@ -14,7 +14,6 @@ from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
-
 # ── Attention lifecycle ────────────────────────────────────────────────────
 
 class AttentionStatus(StrEnum):
@@ -98,8 +97,8 @@ class AttentionItem(BaseModel):
     related_goal_ids: list[str] = Field(default_factory=list)
 
     # Timing
-    created_at: dt.datetime = Field(default_factory=lambda: dt.datetime.now(dt.timezone.utc))
-    updated_at: dt.datetime = Field(default_factory=lambda: dt.datetime.now(dt.timezone.utc))
+    created_at: dt.datetime = Field(default_factory=lambda: dt.datetime.now(dt.UTC))
+    updated_at: dt.datetime = Field(default_factory=lambda: dt.datetime.now(dt.UTC))
     resolved_at: dt.datetime | None = None
 
     # Version
@@ -141,7 +140,7 @@ class AttentionService:
         """Promote to ACTIVE attention queue."""
         return item.model_copy(update={
             "status": AttentionStatus.ACTIVE,
-            "updated_at": dt.datetime.now(dt.timezone.utc),
+            "updated_at": dt.datetime.now(dt.UTC),
             "version": item.version + 1,
         })
 
@@ -155,7 +154,7 @@ class AttentionService:
         return item.model_copy(update={
             "status": AttentionStatus.SNOOZED,
             "snoozed_until": until,
-            "updated_at": dt.datetime.now(dt.timezone.utc),
+            "updated_at": dt.datetime.now(dt.UTC),
             "version": item.version + 1,
         })
 
@@ -164,7 +163,7 @@ class AttentionService:
         """Owner dismisses — MUST NOT resurface automatically."""
         return item.model_copy(update={
             "status": AttentionStatus.DISMISSED,
-            "updated_at": dt.datetime.now(dt.timezone.utc),
+            "updated_at": dt.datetime.now(dt.UTC),
             "version": item.version + 1,
         })
 
@@ -173,8 +172,8 @@ class AttentionService:
         """Mark as naturally resolved."""
         return item.model_copy(update={
             "status": AttentionStatus.RESOLVED,
-            "resolved_at": dt.datetime.now(dt.timezone.utc),
-            "updated_at": dt.datetime.now(dt.timezone.utc),
+            "resolved_at": dt.datetime.now(dt.UTC),
+            "updated_at": dt.datetime.now(dt.UTC),
             "version": item.version + 1,
         })
 
@@ -183,7 +182,7 @@ class AttentionService:
         """Time-based expiration."""
         return item.model_copy(update={
             "status": AttentionStatus.EXPIRED,
-            "updated_at": dt.datetime.now(dt.timezone.utc),
+            "updated_at": dt.datetime.now(dt.UTC),
             "version": item.version + 1,
         })
 
@@ -192,7 +191,7 @@ class AttentionService:
         """Replace with newer item."""
         return item.model_copy(update={
             "status": AttentionStatus.SUPERSEDED,
-            "updated_at": dt.datetime.now(dt.timezone.utc),
+            "updated_at": dt.datetime.now(dt.UTC),
             "version": item.version + 1,
         })
 
@@ -215,10 +214,40 @@ class AttentionService:
     @staticmethod
     def unsnooze_due(items: list[AttentionItem]) -> list[AttentionItem]:
         """Return snoozed items whose snooze window has expired."""
-        now = dt.datetime.now(dt.timezone.utc)
+        now = dt.datetime.now(dt.UTC)
         return [
             i for i in items
             if i.status == AttentionStatus.SNOOZED
             and i.snoozed_until is not None
             and i.snoozed_until <= now
         ]
+
+
+class AttentionScore(BaseModel):
+    """Auditable B+ retrieval score; scope mismatch is never rankable."""
+
+    query_relevance: float = 0.0
+    scope_match: float = 1.0
+    goal_relevance: float = 0.0
+    contradiction_urgency: float = 0.0
+    outcome_relevance: float = 0.0
+    authority_weight: float = 0.0
+    freshness: float = 0.0
+    evidence_quality: float = 0.0
+    owner_pin: float = 0.0
+    correction_relevance: float = 0.0
+
+    def total(self) -> float:
+        if self.scope_match <= 0.0:
+            return float("-inf")
+        return (
+            self.owner_pin * 100.0
+            + self.query_relevance * 14.0
+            + self.goal_relevance * 5.0
+            + self.contradiction_urgency * 6.0
+            + self.outcome_relevance * 4.0
+            + self.authority_weight * 3.0
+            + self.freshness * 1.5
+            + self.evidence_quality * 2.0
+            + self.correction_relevance * 5.0
+        )

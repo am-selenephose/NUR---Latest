@@ -72,8 +72,6 @@ async def process_learning_signal(
     else:
         signal_record = signal
 
-    if trainer is None:
-        trainer = DryRunTrainer()
     if evaluator is None:
         evaluator = TournamentEvaluator()
 
@@ -127,6 +125,7 @@ async def process_learning_signal(
         LearningIntervention.SFT,
         LearningIntervention.PREFERENCE_TRAINING,
         LearningIntervention.RL,
+        LearningIntervention.POLICY_REPLAY,
     ):
         why_record = await WhyChangedService.record_change(
             db,
@@ -157,12 +156,35 @@ async def process_learning_signal(
             why_changed_ref=f"why_changed:{why_record.id}",
         )
 
-    # Step 5: Plan falsifiable training experiment
-    if intervention == LearningIntervention.PREFERENCE_TRAINING:
+    # Step 5: Plan falsifiable training/replay experiment
+    trainer_type = TrainerType.DRY_RUN
+    if intervention == LearningIntervention.POLICY_REPLAY:
+        from app.learning.hardness.replay import build_replay_corpus
+        from app.learning.hardness.trainers.policy_replay import PolicyReplayTrainer
+
+        corpus = await build_replay_corpus(db, owner_user_id=owner_user_id)
+        if not corpus.cases:
+            raise ValueError("Policy replay evaluation requires at least one frozen replay case.")
+        baseline_policy = dict(payload.get("baseline_policy") or {})
+        candidate_policy = dict(payload.get("candidate_policy") or {})
+        if not candidate_policy:
+            raise ValueError("Policy replay evaluation requires a candidate_policy payload.")
+        if trainer is None:
+            trainer = PolicyReplayTrainer(
+                baseline_policy=baseline_policy,
+                candidate_policy=candidate_policy,
+                corpus=corpus,
+            )
+        trainer_type = TrainerType.POLICY_REPLAY
+        hypothesis = f"Policy replay on candidate {candidate.fingerprint[:8]} improves {capability_id} without widening authority"
+    elif intervention == LearningIntervention.PREFERENCE_TRAINING:
+        trainer = trainer or DryRunTrainer()
         hypothesis = f"Preference alignment (DPO/RLHF) on candidate {candidate.fingerprint[:8]} improves {capability_id}"
     elif intervention == LearningIntervention.RL:
+        trainer = trainer or DryRunTrainer()
         hypothesis = f"Reinforcement learning policy optimization on candidate {candidate.fingerprint[:8]} improves {capability_id}"
     else:
+        trainer = trainer or DryRunTrainer()
         hypothesis = f"Supervised fine-tuning on candidate {candidate.fingerprint[:8]} improves {capability_id}"
 
     experiment = await create_training_experiment(
@@ -171,10 +193,10 @@ async def process_learning_signal(
         base_checkpoint_id=base_checkpoint_id,
         curriculum=curriculum,
         hypothesis=hypothesis,
-        trainer_type=TrainerType.DRY_RUN,
+        trainer_type=trainer_type,
     )
 
-    # Step 6: Execute training
+    # Step 6: Execute bounded training/replay
     artifact = await trainer.execute_training(experiment, curriculum)
     await complete_experiment_with_artifact(db, experiment_id=experiment.id, artifact=artifact)
 

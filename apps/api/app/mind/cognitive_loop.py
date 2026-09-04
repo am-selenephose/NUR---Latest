@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.ai.audit import model_run_metadata, safe_error_metadata
 from app.ai.budget import assert_daily_ai_budget
 from app.ai.errors import AIOutputValidationError
-from app.ai.schemas import AIStreamSink
+from app.ai.schemas import AIStreamSink, EvidenceRef
 from app.brain.cognition import run_brain_step
 from app.brain.synthesizer import synthesize_talk_output
 from app.brain.tracing import BrainTrace
@@ -35,9 +35,36 @@ from app.mind.capabilities.resolver import CapabilityResolver, ResolutionFallbac
 from app.mind.context import build_cognitive_task_packet, load_semantic_hydration_inputs
 from app.mind.metacognition import run_metacognitive_review
 from app.mind.scope import ScopeResolutionError, resolve_scope
+from app.mind.unified_state import build_unified_cognitive_state
 from app.models import CognitiveEvent, ModelRun, ModelRunSource
-from app.omega.workspace_service import build_workspace_frame, mark_frame_used, talk_summary
+from app.omega.workspace_service import (
+    build_workspace_frame,
+    mark_frame_used,
+    talk_summary,
+)
 from app.services.glow_service import award_glow_if_eligible
+
+
+def _world_refs_from_hydrated(hydrated_ctx) -> list[dict[str, object]]:
+    """Return bounded world-state pointers, never raw hydrated owner prose."""
+    refs: list[dict[str, object]] = []
+    for kind, items in (
+        ("PLAN", hydrated_ctx.active_plans),
+        ("TIMELINE", hydrated_ctx.timeline_events),
+    ):
+        for item in items or []:
+            if not isinstance(item, dict):
+                continue
+            item_id = item.get("id")
+            if item_id is not None:
+                refs.append({"kind": kind, "id": str(item_id)})
+    if isinstance(hydrated_ctx.today_state, dict):
+        refs.append({"kind": "TODAY", "id": "current"})
+    if isinstance(hydrated_ctx.orbit_context, dict):
+        orbit_ref = hydrated_ctx.orbit_context.get("id") or hydrated_ctx.orbit_context.get("orbit_id")
+        if orbit_ref is not None:
+            refs.append({"kind": "ORBIT", "id": str(orbit_ref)})
+    return refs
 
 
 async def run_mind_cognitive_loop(
@@ -153,6 +180,7 @@ async def run_mind_cognitive_loop(
         db,
         owner_user_id=owner_user_id,
         orbit_id=orbit_id,
+        scope_envelope=scope_envelope,
     )
     if resolution.selected_capability is not None:
         hydrated_ctx = await ContextHydrator.hydrate(
@@ -170,6 +198,7 @@ async def run_mind_cognitive_loop(
             owner_user_id=owner_user_id,
             task_mode=task_class,
             active_question=user_line,
+            scope_envelope=scope_envelope,
             orbit_id=orbit_id,
             trigger_event_id=turn.id,
         )
@@ -182,6 +211,7 @@ async def run_mind_cognitive_loop(
             owner_user_id=owner_user_id,
             task_mode=task_class,
             active_question=user_line,
+            scope_envelope=scope_envelope,
             orbit_id=orbit_id,
             trigger_event_id=turn.id,
         )
@@ -194,9 +224,50 @@ async def run_mind_cognitive_loop(
         )
         retrieval_dicts = [r.model_dump() for r in retrieval_refs]
 
-    evidence = build_evidence_packet(orbit_id=orbit_id, retrieval=retrieval_refs)
+    # 6. Freeze exactly one owner-scoped cognitive state before any worker/provider
+    # dispatch. Hydrator output wins over the raw semantic preload because it has
+    # already applied the capability recipe and token budget.
+    if hydrated_ctx is not None:
+        semantic_projection = {
+            "approved_memory": hydrated_ctx.approved_memory,
+            "memory_candidates": hydrated_ctx.memory_candidates,
+            "beliefs": hydrated_ctx.beliefs,
+            "user_model_claims": hydrated_ctx.user_model_claims,
+            "research_results": hydrated_ctx.research_results,
+            "semantic_context": hydrated_ctx.semantic_context,
+        }
+        world_refs = _world_refs_from_hydrated(hydrated_ctx)
+    else:
+        semantic_projection = semantic_inputs
+        world_refs = []
 
-    # 6. Assemble CognitiveTaskPacket (Mind context) — with scope envelope
+    capability_context = None
+    if resolution.selected_capability is not None:
+        execution_mode = resolution.selected_capability.execution_mode
+        capability_context = {
+            "capability_id": resolution.selected_capability.capability_id,
+            "version": resolution.selected_capability.version,
+            "execution_mode": (
+                execution_mode.value if hasattr(execution_mode, "value") else str(execution_mode)
+            ),
+            "resolution_source": resolution.resolution_source.value,
+            "confidence_score": resolution.confidence_score,
+        }
+
+    unified_state = await build_unified_cognitive_state(
+        db,
+        owner_user_id=owner_user_id,
+        active_question=user_line,
+        scope_envelope=scope_envelope,
+        workspace_frame=frame,
+        semantic_projection=semantic_projection,
+        retrieved_refs=retrieval_dicts,
+        capability_context=capability_context,
+        world_refs=world_refs,
+    )
+
+    # CognitiveTaskPacket is now a curated projection of the unified state; no
+    # second semantic/workspace truth path crosses the Mind→Brain boundary.
     packet = await build_cognitive_task_packet(
         db,
         owner_user_id=owner_user_id,
@@ -205,10 +276,13 @@ async def run_mind_cognitive_loop(
         orbit_id=orbit_id,
         locale=locale,
         writing_preference=writing_preference,
-        retrieved_refs=retrieval_dicts,
-        workspace_frame=frame,
-        scope_envelope=scope_envelope,
-        semantic_inputs=semantic_inputs,
+        unified_state=unified_state,
+    )
+    # Verification and provider citation availability must use the exact evidence
+    # projection the Brain receives, including bounded continuity receipts.
+    evidence = build_evidence_packet(
+        orbit_id=orbit_id,
+        retrieval=[EvidenceRef.model_validate(ref) for ref in packet.evidence_refs],
     )
 
     # 7. Initialize ModelRun trace record
@@ -229,6 +303,8 @@ async def run_mind_cognitive_loop(
     run_metadata["identity_version"] = packet.identity.version
     run_metadata["evidence_digest"] = evidence_digest
     run_metadata["scope_envelope_id"] = str(scope_envelope.scope_id)
+    run_metadata["cognitive_state_version"] = unified_state.contract_version
+    run_metadata["cognitive_state_digest"] = unified_state.state_digest
     if resolution.selected_capability is not None:
         run_metadata["capability_id"] = resolution.selected_capability.capability_id
         run_metadata["capability_version"] = resolution.selected_capability.version
@@ -251,7 +327,7 @@ async def run_mind_cognitive_loop(
     db.add(model_run)
     await db.flush()
 
-    for ref in retrieval_refs:
+    for ref in evidence.retrieval:
         db.add(
             ModelRunSource(
                 owner_user_id=owner_user_id,
@@ -497,7 +573,10 @@ async def run_mind_cognitive_loop(
         "raw_response_id": brain_trace.provider_response_id,
     }
 
-    omega = await talk_summary(db, owner_user_id=owner_user_id, workspace_frame_id=frame.id)
+    omega = await talk_summary(
+        db, owner_user_id=owner_user_id, workspace_frame_id=frame.id,
+        scope_envelope=scope_envelope,
+    )
     response_event = CognitiveEvent(
         owner_user_id=owner_user_id,
         orbit_id=orbit_id,

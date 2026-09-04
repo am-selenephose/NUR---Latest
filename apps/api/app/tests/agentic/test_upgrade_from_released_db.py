@@ -29,10 +29,10 @@ import pytest
 from sqlalchemy import inspect
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from app.db.base import Base
 # Imported for its side effect: the mappers must be registered on Base.metadata
 # before the comparison below, or every table lookup is a KeyError.
 import app.models  # noqa: F401
+from app.db.base import Base
 from app.tests.conftest import ADMIN_PW, API_DIR, SUPER_DSN
 
 # Where a real database is likely to already be: past the agentic spine and its
@@ -63,6 +63,7 @@ def _alembic(*args: str) -> None:
         [sys.executable, "-m", "alembic.config", *args],
         cwd=API_DIR, capture_output=True, text=True,
         env={**os.environ, "ALEMBIC_DATABASE_URL": ADMIN_DSN},
+        check=False,
     )
     assert proc.returncode == 0, f"alembic {args} failed:\n{proc.stdout}\n{proc.stderr}"
 
@@ -127,8 +128,8 @@ async def test_the_approval_mapper_can_actually_select_after_an_upgrade(staged_d
     """The failure as the worker met it: `load_step_approval` selects the whole
     mapped row, so one absent column breaks every step execution. A column-set
     comparison is the diagnosis; this is the symptom."""
-    from sqlalchemy.ext.asyncio import async_sessionmaker
     from sqlalchemy import select
+    from sqlalchemy.ext.asyncio import async_sessionmaker
 
     from app.models.agentic import AgentApproval
 
@@ -164,14 +165,18 @@ async def test_head_is_reachable_from_every_recent_revision(staged_db):
     Walking one revision at a time also proves no step in the chain depends on a
     later one having already run."""
     _alembic("upgrade", STOPPING_POINT)
-    for _ in range(20):
-        current = subprocess.run(
+    seen: set[str] = set()
+    while True:
+        current = subprocess.run(  # noqa: ASYNC221 -- migration probe is intentionally process-based
             [sys.executable, "-m", "alembic.config", "current"],
             cwd=API_DIR, capture_output=True, text=True,
             env={**os.environ, "ALEMBIC_DATABASE_URL": ADMIN_DSN},
-        ).stdout
+            check=False,
+        ).stdout.strip()
         if "(head)" in current:
             break
+        assert current not in seen, (
+            "single-revision upgrade made no progress toward head: " + current
+        )
+        seen.add(current)
         _alembic("upgrade", "+1")
-    else:
-        raise AssertionError("head was not reached within single-revision steps")

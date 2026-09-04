@@ -62,7 +62,7 @@ from app.models.sharing import (  # noqa: F401
     CapsuleSource, CollaborationOutcome, ContextCapsule, OrbitSource,
 )
 from app.models.omega import (  # noqa: F401
-    OmegaClaim, OmegaConsolidationRun, OmegaContradiction, OmegaEvidenceEdge,
+    OmegaClaim, OmegaClaimVersion, OmegaConsolidationRun, OmegaContradiction, OmegaEvidenceEdge,
     OmegaExperience, OmegaLearningProposal, OmegaPrediction, OmegaReviewQueue,
     OmegaWorkspaceFrame,
 )

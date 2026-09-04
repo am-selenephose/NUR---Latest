@@ -35,6 +35,8 @@ export const mockClaim = {
   claim_text: "Outcome evidence should strengthen planning patterns only after persisted results.",
   claim_type: "PATTERN",
   truth_status: "OBSERVED",
+  epistemic_status: "INFERRED",
+  authority_status: "OWNER_CONFIRMED",
   confidence: 0.82,
   support_count: 2,
   contradiction_count: 0,
@@ -729,7 +731,8 @@ export async function installNurMocks(page: Page) {
     if (path === "/api/v1/universe/insights-summary") return json(route, {
       provenance_label: "omega_owner_ledger",
       counts: { claims: 1, open_contradictions: 1, predictions: 1, review_queue: 1, learning_proposals: 1 },
-      claims: [mockClaim],
+      claims: [{ ...mockClaim, record_kind: "OMEGA_CLAIM" }],
+      omega_claims: [{ ...mockClaim, record_kind: "OMEGA_CLAIM" }],
       contradictions: omegaDashboard().contradictions,
       predictions: omegaDashboard().predictions,
       review_queue: omegaDashboard().review_queue,
@@ -1188,7 +1191,7 @@ function omegaDashboard() {
       learning_proposals: "IMPLEMENTED",
       sentience_status: "UNRESOLVED_SENTIENCE_STATUS",
     },
-    claims: [mockClaim],
+    claims: [{ ...mockClaim, chain_of_thought: "RAW_PRIVATE_REASONING_SENTINEL" }],
     contradictions: [{
       id: "contradiction-1",
       orbit_id: mockOrbit.id,

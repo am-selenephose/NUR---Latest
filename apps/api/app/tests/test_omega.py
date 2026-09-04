@@ -11,6 +11,7 @@ SET_USER = "SELECT set_config('app.current_user_id', :uid, true)"
 OMEGA_TABLES = [
     "omega_experiences",
     "omega_claims",
+    "omega_claim_versions",
     "omega_evidence_edges",
     "omega_contradictions",
     "omega_workspace_frames",
@@ -294,7 +295,10 @@ async def test_sensitive_model_generated_claim_waits_for_owner_review_then_appro
     approved = (await client.post(f"/api/v1/omega/review-queue/{reviews[0]['id']}/approve", headers=H(client))).json()
     claims = (await client.get("/api/v1/omega/claims")).json()
     assert approved["status"] == "APPROVED"
-    assert any(c["id"] == approved["created_claim_id"] and c["truth_status"] == "INFERRED" for c in claims)
+    created = next(c for c in claims if c["id"] == approved["created_claim_id"])
+    assert created["truth_status"] == "INFERRED"
+    assert created["epistemic_status"] == "INFERRED"
+    assert created["authority_status"] == "OWNER_CONFIRMED"
 
 
 async def test_owner_omega_export_excludes_raw_capsule_and_chain_of_thought(client):
@@ -376,8 +380,12 @@ async def test_omega_stress_105_experiences_is_idempotent_and_count_only(client)
         })
     first = (await client.post("/api/v1/omega/consolidate", headers=H(client), json={"run_kind": "MANUAL"})).json()
     second = (await client.post("/api/v1/omega/consolidate", headers=H(client), json={"run_kind": "MANUAL"})).json()
+    third = (await client.post("/api/v1/omega/consolidate", headers=H(client), json={"run_kind": "MANUAL"})).json()
     assert first["input_counts"]["recent_events"] == 100
     assert first["input_counts"]["created_experiences"] == 100
     assert first["created_claims"] == 100
-    assert second["input_counts"]["created_experiences"] == 0
+    assert second["input_counts"]["recent_events"] == 5
+    assert second["input_counts"]["created_experiences"] == 5
+    assert second["created_claims"] == 5
+    assert third["input_counts"]["created_experiences"] == 0
     assert "stress marker" not in str(first["input_counts"])
