@@ -54,22 +54,24 @@ api:
   services:
     - name: pgvector/pgvector:pg16
       alias: postgres
+      command: ["postgres", "-c", "port=55432", "-c", "listen_addresses=127.0.0.1"]
     - name: redis:7
       alias: redis
+      command: ["redis-server", "--bind", "127.0.0.1", "--protected-mode", "yes", "--port", "56379"]
   variables:
     POSTGRES_USER: postgres
     POSTGRES_PASSWORD: postgres
     POSTGRES_DB: postgres
-    NUR_TEST_SUPERUSER_DSN: "postgresql://postgres:postgres@postgres:5432/postgres"
-    REDIS_URL: "redis://redis:6379/0"
+    NUR_TEST_SUPERUSER_DSN: "postgresql://postgres:postgres@127.0.0.1:55432/postgres"
+    REDIS_URL: "redis://127.0.0.1:56379/0"
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   cache:
     key: "pip-${CI_COMMIT_REF_SLUG}"
     paths: [.cache/pip/]
   before_script:
     - apt-get update && apt-get install -y --no-install-recommends postgresql-client redis-tools
-    - until pg_isready -h postgres -U postgres; do sleep 2; done
-    - until redis-cli -h redis ping | grep -q PONG; do sleep 2; done
+    - until pg_isready -h 127.0.0.1 -p 55432 -U postgres; do sleep 2; done
+    - until redis-cli -h 127.0.0.1 -p 56379 ping | grep -q PONG; do sleep 2; done
     - cd apps/api
     - python -m pip install -r requirements-dev.lock
     - python -m pip install --no-deps -e .
